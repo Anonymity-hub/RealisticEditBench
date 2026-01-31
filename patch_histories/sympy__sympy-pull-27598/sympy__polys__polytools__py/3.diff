@@ -1,0 +1,15 @@
+diff --git a/sympy/polys/polytools.py b/sympy/polys/polytools.py
+--- a/sympy/polys/polytools.py
++++ b/sympy/polys/polytools.py
+@@ -7779,6 +7779,11 @@
+ 
+         """
+         if isinstance(expr, Poly):
++
++            if expr.gens != self._options.gens:
++                raise ValueError("Polynomial generators don't match Groebner basis generators")
++            poly = expr.set_domain(self._options.domain)
++        else:
+         polys = [poly] + list(self._basis)
+ 
+         opt = self._options

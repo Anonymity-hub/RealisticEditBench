@@ -1,0 +1,102 @@
+diff --git a/django/db/backends/base/features.py b/django/db/backends/base/features.py
+--- a/django/db/backends/base/features.py
++++ b/django/db/backends/base/features.py
+@@ -385,6 +385,10 @@ class BaseDatabaseFeatures:
+     # Does the backend support native tuple lookups (=, >, <, IN)?
+     supports_tuple_lookups = True
+ 
++    # Does the backend support native tuple gt(e), lt(e) comparisons against
++    # subqueries?
++    supports_tuple_comparison_against_subquery = True
++
+     # Collation names for use by the Django test suite.
+     test_collations = {
+         "ci": None,  # Case-insensitive.
+diff --git a/django/db/backends/oracle/features.py b/django/db/backends/oracle/features.py
+--- a/django/db/backends/oracle/features.py
++++ b/django/db/backends/oracle/features.py
+@@ -21,6 +21,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
+     can_return_columns_from_insert = True
+     supports_subqueries_in_group_by = False
+     ignores_unnecessary_order_by_in_subqueries = False
++    supports_tuple_comparison_against_subquery = False
+     supports_transactions = True
+     supports_timezones = False
+     has_native_duration_field = True
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1781,6 +1781,7 @@ def __init__(self, queryset, output_field=None, **extra):
+         # Allow the usage of both QuerySet and sql.Query objects.
+         self.query = getattr(queryset, "query", queryset).clone()
+         self.query.subquery = True
++        self.template = extra.pop("template", self.template)
+         self.extra = extra
+         super().__init__(output_field)
+ 
+@@ -1793,6 +1794,21 @@ def set_source_expressions(self, exprs):
+     def _resolve_output_field(self):
+         return self.query.output_field
+ 
++    def resolve_expression(self, *args, **kwargs):
++        resolved = super().resolve_expression(*args, **kwargs)
++        if type(self) is Subquery and self.template == Subquery.template:
++            resolved.query.contains_subquery = True
++            # Subquery is an unnecessary shim for a resolved query as it
++            # complexifies the lookup's right-hand-side introspection.
++            try:
++                self.output_field
++            except AttributeError:
++                return resolved.query
++            if self.output_field and self.output_field != resolved.query.output_field:
++                return ExpressionWrapper(resolved.query, output_field=self.output_field)
++            return resolved.query
++        return resolved
++
+     def copy(self):
+         clone = super().copy()
+         clone.query = clone.query.clone()
+diff --git a/django/db/models/fields/tuple_lookups.py b/django/db/models/fields/tuple_lookups.py
+--- a/django/db/models/fields/tuple_lookups.py
++++ b/django/db/models/fields/tuple_lookups.py
+@@ -1,7 +1,7 @@
+ import itertools
+ 
+ from django.core.exceptions import EmptyResultSet
+-from django.db import models
++from django.db import NotSupportedError, models
+ from django.db.models.expressions import (
+     ColPairs,
+     Exists,
+@@ -129,6 +129,20 @@ def get_fallback_sql(self, compiler, connection):
+         )
+ 
+     def as_sql(self, compiler, connection):
++        if (
++            not connection.features.supports_tuple_comparison_against_subquery
++            and isinstance(self.rhs, Query)
++            and self.rhs.subquery
++            and isinstance(
++                self, (GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual)
++            )
++        ):
++            lookup = self.lookup_name
++            msg = (
++                f'"{lookup}" cannot be used to target composite fields '
++                "through subqueries on this backend"
++            )
++            raise NotSupportedError(msg)
+         if not connection.features.supports_tuple_lookups:
+             return self.get_fallback_sql(compiler, connection)
+         return super().as_sql(compiler, connection)
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -242,6 +242,7 @@ class Query(BaseExpression):
+ 
+     filter_is_sticky = False
+     subquery = False
++    contains_subquery = False
+ 
+     # SQL-related attributes.
+     # Select and related select clauses are expressions to use in the SELECT

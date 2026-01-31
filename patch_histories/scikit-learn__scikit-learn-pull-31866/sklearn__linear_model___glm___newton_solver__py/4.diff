@@ -1,0 +1,12 @@
+diff --git a/sklearn/linear_model/_glm/_newton_solver.py b/sklearn/linear_model/_glm/_newton_solver.py
+--- a/sklearn/linear_model/_glm/_newton_solver.py
++++ b/sklearn/linear_model/_glm/_newton_solver.py
+@@ -557,7 +557,7 @@
+         elif self.is_multinomial_with_intercept:
+             # Here, only intercepts are unpenalized. We again choose the last class and
+             # set its intercept to zero.
+-            self.coef[-1] = 0
++            # Note that coef was already dealt with in setup.
+             self.gradient[-1] = 0
+             self.hessian[-1, :] = 0
+             self.hessian[:, -1] = 0

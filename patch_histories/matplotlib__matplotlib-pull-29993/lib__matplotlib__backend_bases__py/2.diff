@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/backend_bases.py b/lib/matplotlib/backend_bases.py
+--- a/lib/matplotlib/backend_bases.py
++++ b/lib/matplotlib/backend_bases.py
+@@ -1422,6 +1422,8 @@
+         args and kwargs are mapped to `.MouseEvent.__init__` parameters,
+         starting with `button`.
+         """
++        x, y = ax.transData.transform(xy)
++        event = cls(name, ax.figure.canvas, x, y, *args, **kwargs)
+ 
+     def __str__(self):
+         return (f"{self.name}: "

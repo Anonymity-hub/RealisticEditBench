@@ -1,0 +1,12 @@
+diff --git a/sphinx/ext/intersphinx/_cli.py b/sphinx/ext/intersphinx/_cli.py
+--- a/sphinx/ext/intersphinx/_cli.py
++++ b/sphinx/ext/intersphinx/_cli.py
+@@ -28,7 +28,7 @@ def inspect_main(argv: list[str], /) -> int:
+     )
+ 
+     try:
+-        inv_data = _fetch_inventory(
++        inv = _fetch_inventory(
+             target_uri='',
+             inv_location=filename,
+             config=config,

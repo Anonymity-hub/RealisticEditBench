@@ -1,0 +1,14 @@
+diff --git a/sklearn/pipeline.py b/sklearn/pipeline.py
+--- a/sklearn/pipeline.py
++++ b/sklearn/pipeline.py
+@@ -2114,7 +2114,9 @@ def get_metadata_routing(self):
+         return router
+ 
+ 
+-def make_union(*transformers, n_jobs=None, verbose=False):
++def make_union(
++    *transformers, n_jobs=None, verbose=False, verbose_feature_names_out=True
++):
+     """Construct a :class:`FeatureUnion` from the given transformers.
+ 
+     This is a shorthand for the :class:`FeatureUnion` constructor; it does not

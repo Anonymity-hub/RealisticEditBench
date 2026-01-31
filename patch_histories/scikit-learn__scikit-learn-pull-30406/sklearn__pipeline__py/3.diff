@@ -1,0 +1,14 @@
+diff --git a/sklearn/pipeline.py b/sklearn/pipeline.py
+--- a/sklearn/pipeline.py
++++ b/sklearn/pipeline.py
+@@ -2165,4 +2165,9 @@
+      FeatureUnion(transformer_list=[('pca', PCA()),
+                                    ('truncatedsvd', TruncatedSVD())])
+     """
+-    return FeatureUnion(_name_estimators(transformers), n_jobs=n_jobs, verbose=verbose)
++    return FeatureUnion(
++        _name_estimators(transformers),
++        n_jobs=n_jobs,
++        verbose=verbose,
++        verbose_feature_names_out=verbose_feature_names_out,
++    )

@@ -1,0 +1,14 @@
+diff --git a/astropy/units/format/__init__.py b/astropy/units/format/__init__.py
+--- a/astropy/units/format/__init__.py
++++ b/astropy/units/format/__init__.py
+@@ -79,6 +79,10 @@
+     if format is None:
+         return Generic
+     if isinstance(format, str):
++        try:
++            return Base.registry[format.lower()]
++        except KeyError:
++            raise ValueError(f"Unknown format {format!r}.") from None
+     if isinstance(format, type) and issubclass(format, Base):
+         return format
+     raise TypeError(f"Expected a formatter name, not {format!r}.")

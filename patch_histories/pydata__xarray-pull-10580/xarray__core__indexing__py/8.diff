@@ -1,0 +1,33 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -457,7 +457,7 @@
+ 
+     __slots__ = ()
+ 
+-    def __init__(self, key: tuple[int | np.integer | slice, ...]):
++    def __init__(self, key: tuple[BasicIndexerType, ...]):
+         if not isinstance(key, tuple):
+             raise TypeError(f"key must be a tuple: {key!r}")
+ 
+@@ -489,9 +489,7 @@
+ 
+     def __init__(
+         self,
+-        key: tuple[
+-            int | np.integer | slice | np.ndarray[Any, np.dtype[np.generic]], ...
+-        ],
++        key: tuple[BasicIndexerType | np.ndarray[Any, np.dtype[np.generic]], ...],
+     ):
+         if not isinstance(key, tuple):
+             raise TypeError(f"key must be a tuple: {key!r}")
+@@ -697,7 +695,8 @@
+ 
+     def _updated_key(self, new_key: ExplicitIndexer) -> BasicIndexer | OuterIndexer:
+         iter_new_key = iter(expanded_indexer(new_key.tuple, self.ndim))
+-        full_key = []
++
++        full_key: list[OuterIndexerType] = []
+         for size, k in zip(self.array.shape, self.key.tuple, strict=True):
+             if isinstance(k, integer_types):
+                 full_key.append(k)

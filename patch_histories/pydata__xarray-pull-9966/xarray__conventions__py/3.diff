@@ -1,0 +1,76 @@
+diff --git a/xarray/conventions.py b/xarray/conventions.py
+--- a/xarray/conventions.py
++++ b/xarray/conventions.py
+@@ -1,14 +1,15 @@
+ from __future__ import annotations
+ 
+ import itertools
++import warnings
+ from collections import defaultdict
+ from collections.abc import Hashable, Iterable, Mapping, MutableMapping
+ from typing import TYPE_CHECKING, Any, Literal, TypeVar, Union
+ 
+ import numpy as np
+ 
+-from xarray.coders import CFDatetimeCoder
+-from xarray.coding import strings, times, variables
++from xarray.coders import CFDatetimeCoder, CFTimedeltaCoder
++from xarray.coding import strings, variables
+ from xarray.coding.variables import SerializationWarning, pop_to
+ from xarray.core import indexing
+ from xarray.core.common import (
+@@ -90,7 +91,7 @@ def encode_cf_variable(
+ 
+     for coder in [
+         CFDatetimeCoder(),
+-        times.CFTimedeltaCoder(),
++        CFTimedeltaCoder(),
+         variables.CFScaleOffsetCoder(),
+         variables.CFMaskCoder(),
+         variables.NativeEnumCoder(),
+@@ -114,7 +115,7 @@ def decode_cf_variable(
+     decode_endianness: bool = True,
+     stack_char_dim: bool = True,
+     use_cftime: bool | None = None,
+-    decode_timedelta: bool | None = None,
++    decode_timedelta: bool | CFTimedeltaCoder | None = None,
+ ) -> Variable:
+     """
+     Decodes a variable which may hold CF encoded information.
+@@ -158,6 +159,8 @@ def decode_cf_variable(
+ 
+         .. deprecated:: 2025.01.1
+            Please pass a :py:class:`coders.CFDatetimeCoder` instance initialized with ``use_cftime`` to the ``decode_times`` kwarg instead.
++    decode_timedelta : None, bool, or CFTimedeltaCoder
++        Decode cf timedeltas ("hours") to np.timedelta64.
+ 
+     Returns
+     -------
+@@ -170,8 +173,12 @@ def decode_cf_variable(
+ 
+     original_dtype = var.dtype
+ 
++    decode_timedelta_was_none = decode_timedelta is None
+     if decode_timedelta is None:
+-        decode_timedelta = True if decode_times else False
++        if isinstance(decode_times, CFDatetimeCoder):
++            decode_timedelta = CFTimedeltaCoder(time_unit=decode_times.time_unit)
++        else:
++            decode_timedelta = True if decode_times else False
+ 
+     if concat_characters:
+         if stack_char_dim:
+@@ -193,7 +200,12 @@ def decode_cf_variable(
+             var = coder.decode(var, name=name)
+ 
+     if decode_timedelta:
+-        var = times.CFTimedeltaCoder().decode(var, name=name)
++        if not isinstance(decode_timedelta, CFTimedeltaCoder):
++            decode_timedelta = CFTimedeltaCoder()
++        decode_timedelta._emit_decode_timedelta_future_warning = (
++            decode_timedelta_was_none
++        )
++        var = decode_timedelta.decode(var, name=name)
+     if decode_times:
+         # remove checks after end of deprecation cycle
+         if not isinstance(decode_times, CFDatetimeCoder):

@@ -1,0 +1,36 @@
+diff --git a/sklearn/metrics/_regression.py b/sklearn/metrics/_regression.py
+--- a/sklearn/metrics/_regression.py
++++ b/sklearn/metrics/_regression.py
+@@ -57,8 +57,10 @@
+ ]
+ 
+ 
+-def _check_reg_targets(y_true, y_pred, multioutput, dtype="numeric", xp=None):
+-    """Check that y_true and y_pred belong to the same regression task.
++def _check_reg_targets(
++    y_true, y_pred, sample_weight, multioutput, dtype="numeric", xp=None
++):
++    """Check that y_true, y_pred and sample_weight belong to the same regression task.
+ 
+     To reduce redundancy when calling `_find_matching_floating_dtype`,
+     please use `_check_reg_targets_with_floating_dtype` instead.
+@@ -71,6 +73,9 @@ def _check_reg_targets(y_true, y_pred, multioutput, dtype="numeric", xp=None):
+     y_pred : array-like of shape (n_samples,) or (n_samples, n_outputs)
+         Estimated target values.
+ 
++    sample_weight : array-like of shape (n_samples,) or None
++        Sample weights.
++
+     multioutput : array-like or string in ['raw_values', uniform_average',
+         'variance_weighted'] or None
+         None is accepted due to backward compatibility of r2_score().
+@@ -95,6 +100,9 @@ def _check_reg_targets(y_true, y_pred, multioutput, dtype="numeric", xp=None):
+     y_pred : array-like of shape (n_samples, n_outputs)
+         Estimated target values.
+ 
++    sample_weight : array-like of shape (n_samples,) or None
++        Sample weights.
++
+     multioutput : array-like of shape (n_outputs) or string in ['raw_values',
+         uniform_average', 'variance_weighted'] or None
+         Custom output weights if ``multioutput`` is array-like or

@@ -1,0 +1,24 @@
+diff --git a/sympy/assumptions/handlers/sets.py b/sympy/assumptions/handlers/sets.py
+--- a/sympy/assumptions/handlers/sets.py
++++ b/sympy/assumptions/handlers/sets.py
+@@ -18,7 +18,7 @@
+ 
+ from sympy.multipledispatch import MDNotImplementedError
+ 
+-from .common import test_closed_group
++from .common import test_closed_group, ask_all, ask_any
+ from ..predicates.sets import (IntegerPredicate, RationalPredicate,
+     IrrationalPredicate, RealPredicate, ExtendedRealPredicate,
+     HermitianPredicate, ComplexPredicate, ImaginaryPredicate,
+@@ -68,7 +68,10 @@
+ def _(expr,assumptions):
+     if expr.is_number:
+         return _IntegerPredicate_number(expr, assumptions)
+-    if ask_all(
++    if ask_all(~Q.zero(expr.base), Q.finite(expr.base), Q.zero(expr.exp), assumptions=assumptions):
++        return True
++    if ask_all(Q.integer(expr.base), Q.integer(expr.exp), assumptions=assumptions):
++
+ 
+ @IntegerPredicate.register(Mul)
+ def _(expr, assumptions):

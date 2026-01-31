@@ -1,0 +1,32 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -118,7 +118,27 @@ def python(self, options):
+         # Start the interactive interpreter.
+         code.interact(local=imported_objects)
+
+-    def get_and_report_namespace(self, **options):
++    def get_auto_imports(self):
++        """Return a sequence of import paths for objects to be auto-imported.
++
++        By default, import paths for models in INSTALLED_APPS are included,
++        with models from earlier apps taking precedence in case of a name
++        collision.
++
++        For example, for an unchanged INSTALLED_APPS, this method returns:
++
++        [
++            "django.contrib.sessions.models.Session",
++            "django.contrib.contenttypes.models.ContentType",
++            "django.contrib.auth.models.User",
++            "django.contrib.auth.models.Group",
++            "django.contrib.auth.models.Permission",
++            "django.contrib.admin.models.LogEntry",
++        ]
++
++        """
++
++    def get_namespace(self, **options):
+         if options and options.get("no_imports"):
+             return {}
+

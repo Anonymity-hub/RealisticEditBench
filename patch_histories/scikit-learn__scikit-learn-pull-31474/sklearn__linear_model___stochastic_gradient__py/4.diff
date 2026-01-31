@@ -1,0 +1,44 @@
+diff --git a/sklearn/linear_model/_stochastic_gradient.py b/sklearn/linear_model/_stochastic_gradient.py
+--- a/sklearn/linear_model/_stochastic_gradient.py
++++ b/sklearn/linear_model/_stochastic_gradient.py
+@@ -1901,7 +1901,11 @@
+ 
+     power_t : float, default=0.25
+         The exponent for inverse scaling learning rate.
+-        Values must be in the range `(-inf, inf)`.
++        Values must be in the range `[0.0, inf)`.
++
++        .. deprecated:: 1.8
++            Negative values for `power_t` are deprecated in version 1.8 and will raise
++            an error in 1.10. Use values in the range [0.0, inf) instead.
+ 
+     early_stopping : bool, default=False
+         Whether to use early stopping to terminate training when validation
+@@ -2139,7 +2143,11 @@
+ 
+     power_t : float, default=0.5
+         The exponent for inverse scaling learning rate.
+-        Values must be in the range `(-inf, inf)`.
++        Values must be in the range `[0.0, inf)`.
++
++        .. deprecated:: 1.8
++            Negative values for `power_t` are deprecated in version 1.8 and will raise
++            an error in 1.10. Use values in the range [0.0, inf) instead.
+ 
+     warm_start : bool, default=False
+         When set to True, reuse the solution of the previous call to fit as
+@@ -2511,6 +2519,14 @@
+                 ConvergenceWarning,
+             )
+ 
++        if self.power_t < 0:
++            warnings.warn(
++                "Negative values for `power_t` are deprecated in version 1.8 "
++                "and will raise an error in 1.10. "
++                "Use values in the range [0.0, inf) instead.",
++                FutureWarning,
++            )
++
+         return self
+ 
+     @_fit_context(prefer_skip_nested_validation=True)

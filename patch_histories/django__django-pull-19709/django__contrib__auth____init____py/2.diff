@@ -1,0 +1,15 @@
+diff --git a/django/contrib/auth/__init__.py b/django/contrib/auth/__init__.py
+--- a/django/contrib/auth/__init__.py
++++ b/django/contrib/auth/__init__.py
+@@ -235,6 +235,11 @@
+     await request.session.aset(BACKEND_SESSION_KEY, backend)
+     await request.session.aset(HASH_SESSION_KEY, session_auth_hash)
+     if hasattr(request, "auser"):
++
++        async def auser():
++            return user
++
++        request.auser = auser
+     rotate_token(request)
+     await user_logged_in.asend(sender=user.__class__, request=request, user=user)
+ 

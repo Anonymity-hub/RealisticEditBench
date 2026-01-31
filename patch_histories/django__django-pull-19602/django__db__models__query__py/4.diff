@@ -1,0 +1,12 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -725,7 +725,7 @@ def _check_bulk_create_options(
+                     "Unique fields that can trigger the upsert must be provided."
+                 )
+             # Updating primary keys and non-concrete fields is forbidden.
+-            if any(not f.concrete or f.many_to_many for f in update_fields):
++            if any(not f.concrete for f in update_fields):
+                 raise ValueError(
+                     "bulk_create() can only be used with concrete fields in "
+                     "update_fields."

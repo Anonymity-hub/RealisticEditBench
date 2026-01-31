@@ -1,0 +1,12 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -1377,7 +1377,7 @@
+                 )
+                 if len(value) == 1:
+                     value = value[0]
+-            elif
++            elif field.concrete:
+             value = getattr(self, field.attname)
+             if not value or not hasattr(value, "resolve_expression"):
+                 value = Value(value, field)

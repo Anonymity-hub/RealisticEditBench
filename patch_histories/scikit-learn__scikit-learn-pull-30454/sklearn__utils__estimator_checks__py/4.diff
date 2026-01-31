@@ -1,0 +1,17 @@
+diff --git a/sklearn/utils/estimator_checks.py b/sklearn/utils/estimator_checks.py
+--- a/sklearn/utils/estimator_checks.py
++++ b/sklearn/utils/estimator_checks.py
+@@ -1131,6 +1131,13 @@
+         # libraries.
+         numpy_asarray_works = False
+ 
++    if numpy_asarray_works:
++        # In this case, array_api_dispatch is disabled and we rely on np.asarray
++        # being called to convert the non-NumPy inputs to NumPy arrays when needed.
++        est_fitted_with_as_array = clone(est).fit(X_xp, y_xp)
++        # We only do a smoke test for now, in order to avoid complicating the
++        # test function even further.
++
+ 
+     for method_name in methods:
+         method = getattr(est, method_name, None)

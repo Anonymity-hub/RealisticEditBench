@@ -1,0 +1,21 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -1631,6 +1631,17 @@
+     _print_RandomSymbol = _print_Symbol
+ 
+     def _split_super_sub(self, name: str) -> tuple[str, list[str], list[str]]:
++        if name is None or '{' in name:
++            return (name, [], [])
++        elif self._settings["disable_split_super_sub"]:
++            name, supers, subs = (name.replace('_', '\\_').replace('^', '\\^'), [], [])
++        else:
++            name, supers, subs = split_super_sub(name)
++        name = translate(name)
++        supers = [translate(sup) for sup in supers]
++        subs = [translate(sub) for sub in subs]
++        return (name, supers, subs)
++
+     def _deal_with_super_sub(self, string: str, style='plain') -> str:
+         name, supers, subs = self._split_super_sub(string)
+ 

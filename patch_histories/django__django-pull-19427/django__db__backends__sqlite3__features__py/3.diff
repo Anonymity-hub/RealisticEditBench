@@ -1,0 +1,9 @@
+diff --git a/django/db/backends/sqlite3/features.py b/django/db/backends/sqlite3/features.py
+--- a/django/db/backends/sqlite3/features.py
++++ b/django/db/backends/sqlite3/features.py
+@@ -1,4 +1,5 @@
+ import operator
++import sqlite3
+ 
+ from django.db import transaction
+ from django.db.backends.base.features import BaseDatabaseFeatures

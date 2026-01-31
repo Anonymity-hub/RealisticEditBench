@@ -1,0 +1,23 @@
+diff --git a/django/dispatch/dispatcher.py b/django/dispatch/dispatcher.py
+--- a/django/dispatch/dispatcher.py
++++ b/django/dispatch/dispatcher.py
+@@ -464,15 +464,12 @@
+                         self.sender_receivers_cache[sender] = receivers
+         non_weak_sync_receivers = []
+         non_weak_async_receivers = []
+-        for receiver, is_async in receivers:
++        for receiver, sender_ref, is_async in receivers:
++            # Skip if the receiver/sender is a dead weakref
+             if isinstance(receiver, weakref.ReferenceType):
+-                # Dereference the weak reference.
+                 receiver = receiver()
+-                if receiver is not None:
+-                    if is_async:
+-                        non_weak_async_receivers.append(receiver)
+-                    else:
+-                        non_weak_sync_receivers.append(receiver)
++                if receiver is None:
++                    continue
+             else:
+                 if is_async:
+                     non_weak_async_receivers.append(receiver)

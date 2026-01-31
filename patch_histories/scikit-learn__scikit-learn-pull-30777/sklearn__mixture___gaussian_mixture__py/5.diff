@@ -1,0 +1,79 @@
+diff --git a/sklearn/mixture/_gaussian_mixture.py b/sklearn/mixture/_gaussian_mixture.py
+--- a/sklearn/mixture/_gaussian_mixture.py
++++ b/sklearn/mixture/_gaussian_mixture.py
+@@ -888,21 +888,23 @@
+             Logarithm of the posterior probabilities (or responsibilities) of
+             the point of each sample in X.
+         """
++        xp, _ = get_namespace(X, log_resp, xp=xp)
+         self.weights_, self.means_, self.covariances_ = _estimate_gaussian_parameters(
+-            X, np.exp(log_resp), self.reg_covar, self.covariance_type
+-        )
+-        self.weights_ /= self.weights_.sum()
++            X, xp.exp(log_resp), self.reg_covar, self.covariance_type, xp=xp
++        )
++        self.weights_ /= xp.sum(self.weights_)
+         self.precisions_cholesky_ = _compute_precision_cholesky(
+-            self.covariances_, self.covariance_type
+-        )
+-
+-    def _estimate_log_prob(self, X):
++            self.covariances_, self.covariance_type, xp=xp
++        )
++
++    def _estimate_log_prob(self, X, xp=None):
+         return _estimate_log_gaussian_prob(
+-            X, self.means_, self.precisions_cholesky_, self.covariance_type
+-        )
+-
+-    def _estimate_log_weights(self):
+-        return np.log(self.weights_)
++            X, self.means_, self.precisions_cholesky_, self.covariance_type, xp=xp
++        )
++
++    def _estimate_log_weights(self, xp=None):
++        xp, _ = get_namespace(self.weights_, xp=xp)
++        return xp.log(self.weights_)
+ 
+     def _compute_lower_bound(self, _, log_prob_norm):
+         return log_prob_norm
+@@ -915,7 +917,8 @@
+             self.precisions_cholesky_,
+         )
+ 
+-    def _set_parameters(self, params):
++    def _set_parameters(self, params, xp=None):
++        xp, _, device_ = get_namespace_and_device(params, xp=xp)
+         (
+             self.weights_,
+             self.means_,
+@@ -928,14 +931,14 @@
+ 
+         dtype = self.precisions_cholesky_.dtype
+         if self.covariance_type == "full":
+-            self.precisions_ = np.empty_like(self.precisions_cholesky_)
+-            for k, prec_chol in enumerate(self.precisions_cholesky_):
+-                self.precisions_[k] = np.dot(prec_chol, prec_chol.T)
++            self.precisions_ = xp.empty_like(self.precisions_cholesky_, device=device_)
++            for k in range(self.precisions_cholesky_.shape[0]):
++                prec_chol = self.precisions_cholesky_[k, :, :]
++                self.precisions_[k, :, :] = prec_chol @ prec_chol.T
+ 
+         elif self.covariance_type == "tied":
+-            self.precisions_ = np.dot(
+-                self.precisions_cholesky_, self.precisions_cholesky_.T
+-            )
++            self.precisions_ = self.precisions_cholesky_ @ self.precisions_cholesky_.T
++
+         else:
+             self.precisions_ = self.precisions_cholesky_**2
+ 
+@@ -972,7 +975,7 @@
+         bic : float
+             The lower the better.
+         """
+-        return -2 * self.score(X) * X.shape[0] + self._n_parameters() * np.log(
++        return -2 * self.score(X) * X.shape[0] + self._n_parameters() * math.log(
+             X.shape[0]
+         )
+ 

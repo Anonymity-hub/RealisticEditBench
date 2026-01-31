@@ -1,0 +1,63 @@
+diff --git a/xarray/structure/alignment.py b/xarray/structure/alignment.py
+--- a/xarray/structure/alignment.py
++++ b/xarray/structure/alignment.py
+@@ -94,10 +94,47 @@ def reindex_variables(
+     return new_variables
+ 
+ 
++def _normalize_indexes(
++    indexes: Mapping[Any, Any | T_DuckArray],
++) -> Indexes:
++    """Normalize the indexes/indexers given for re-indexing or alignment.
++
++    Wrap any arbitrary array or `pandas.Index` as an Xarray `PandasIndex`
++    associated with its corresponding dimension coordinate variable.
++
++    """
++    xr_indexes: dict[Hashable, Index] = {}
++    xr_variables: dict[Hashable, Variable]
++
++    if isinstance(indexes, Indexes):
++        xr_variables = dict(indexes.variables)
++    else:
++        xr_variables = {}
++
++    for k, idx in indexes.items():
++        if not isinstance(idx, Index):
++            if getattr(idx, "dims", (k,)) != (k,):
++                raise AlignmentError(
++                    f"Indexer has dimensions {idx.dims} that are different "
++                    f"from that to be indexed along '{k}'"
++                )
++            data: T_DuckArray = as_compatible_data(idx)
++            pd_idx = safe_cast_to_index(data)
++            pd_idx.name = k
++            if isinstance(pd_idx, pd.MultiIndex):
++                idx = PandasMultiIndex(pd_idx, k)
++            else:
++                idx = PandasIndex(pd_idx, k, coord_dtype=data.dtype)
++            xr_variables.update(idx.create_variables())
++        xr_indexes[k] = idx
++
++    return Indexes(xr_indexes, xr_variables)
++
++
+ CoordNamesAndDims = tuple[tuple[Hashable, tuple[Hashable, ...]], ...]
+ MatchingIndexKey = tuple[CoordNamesAndDims, type[Index]]
+-NormalizedIndexes = dict[MatchingIndexKey, Index]
+-NormalizedIndexVars = dict[MatchingIndexKey, dict[Hashable, Variable]]
++IndexesToAlign = dict[MatchingIndexKey, Index]
++IndexVarsToAlign = dict[MatchingIndexKey, dict[Hashable, Variable]]
+ 
+ 
+ class Aligner(Generic[T_Alignable]):
+@@ -116,6 +153,9 @@ class Aligner(Generic[T_Alignable]):
+     objects: tuple[T_Alignable, ...]
+     results: tuple[T_Alignable, ...]
+     objects_matching_indexes: tuple[dict[MatchingIndexKey, Index], ...]
++    objects_matching_index_vars: tuple[
++        dict[MatchingIndexKey, dict[Hashable, Variable]], ...
++    ]
+     join: str
+     exclude_dims: frozenset[Hashable]
+     exclude_vars: frozenset[Hashable]

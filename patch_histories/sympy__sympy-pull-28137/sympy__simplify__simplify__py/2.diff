@@ -1,0 +1,11 @@
+diff --git a/sympy/simplify/simplify.py b/sympy/simplify/simplify.py
+--- a/sympy/simplify/simplify.py
++++ b/sympy/simplify/simplify.py
+@@ -1826,6 +1826,7 @@
+                 l = len(subterm)
+                 # Only apply optimization if power base matches subterm pattern
+                 if (args[i-l:i] == subterm and
++                    args[i].args[0] == _Mul(*subterm)):
+                     # e.g. a*b in a*b*(a*b)**2 is not repeated
+                     # in args (= [a, b, (a*b)**2]) but it
+                     # can be matched here

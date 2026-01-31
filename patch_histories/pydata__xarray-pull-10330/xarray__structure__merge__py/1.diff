@@ -1,0 +1,13 @@
+diff --git a/xarray/structure/merge.py b/xarray/structure/merge.py
+--- a/xarray/structure/merge.py
++++ b/xarray/structure/merge.py
+@@ -283,8 +283,7 @@ def merge_collected(
+                                 "conflicting attribute values on combined "
+                                 f"variable {name!r}:\nfirst value: {variable.attrs!r}\nsecond value: {other_variable.attrs!r}"
+                             )
+-                merged_vars[name] = variable
+-                merged_vars[name].attrs = merge_attrs(
++                attrs = merge_attrs(
+                     [var.attrs for var, _ in indexed_elements],
+                     combine_attrs=combine_attrs,
+                 )

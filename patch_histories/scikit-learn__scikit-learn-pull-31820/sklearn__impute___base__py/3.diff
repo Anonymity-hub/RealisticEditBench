@@ -1,0 +1,20 @@
+diff --git a/sklearn/impute/_base.py b/sklearn/impute/_base.py
+--- a/sklearn/impute/_base.py
++++ b/sklearn/impute/_base.py
+@@ -64,10 +64,12 @@
+             counter = Counter(array)
+             most_frequent_count = counter.most_common(1)[0][1]
+             # tie breaking similarly to scipy.stats.mode
+-            most_frequent_value = min(
+-                value
+-                for value, count in counter.items()
+-                if count == most_frequent_count
++            most_frequent_value = _safe_min(
++                [
++                    value
++                    for value, count in counter.items()
++                    if count == most_frequent_count
++                ]
+             )
+         else:
+             mode = _mode(array)

@@ -1,0 +1,14 @@
+diff --git a/astropy/visualization/interval.py b/astropy/visualization/interval.py
+--- a/astropy/visualization/interval.py
++++ b/astropy/visualization/interval.py
+@@ -45,6 +45,9 @@
+             The mininium and maximum image value in the interval.
+         """
+         raise NotImplementedError("Needs to be implemented in a subclass.")
++
++    @staticmethod
++    def _process_values(values):
+ 
+     def __call__(self, values, clip=True, out=None):
+         """
+

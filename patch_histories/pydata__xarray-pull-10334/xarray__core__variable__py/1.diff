@@ -1,0 +1,15 @@
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -63,6 +63,11 @@
+ )
+ # https://github.com/python/mypy/issues/224
+ BASIC_INDEXING_TYPES = integer_types + (slice,)
++UNSUPPORTED_EXTENSION_ARRAY_TYPES = (
++    pd.arrays.DatetimeArray,
++    pd.arrays.TimedeltaArray,
++    pd.arrays.NumpyExtensionArray,  # type: ignore[attr-defined]
++)
+ 
+ if TYPE_CHECKING:
+     from xarray.core.types import (

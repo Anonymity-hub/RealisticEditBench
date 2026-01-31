@@ -1,0 +1,19 @@
+diff --git a/astropy/coordinates/matrix_utilities.py b/astropy/coordinates/matrix_utilities.py
+--- a/astropy/coordinates/matrix_utilities.py
++++ b/astropy/coordinates/matrix_utilities.py
+@@ -9,6 +9,7 @@
+ import numpy as np
+ 
+ from astropy import units as u
++from astropy.utils.compat import COPY_IF_NEEDED
+ from astropy.utils.decorators import deprecated
+ 
+ from .angles import Angle
+@@ -55,6 +56,7 @@
+     """
+     if not isinstance(angle, u.Quantity):
+         angle = Angle(angle, unit=unit or u.deg, copy=COPY_IF_NEEDED)
++    angle_in_rad = angle.to_value(u.rad)
+ 
+     s = np.sin(angle_in_rad)
+     c = np.cos(angle_in_rad)

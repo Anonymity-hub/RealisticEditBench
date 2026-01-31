@@ -1,0 +1,18 @@
+diff --git a/sphinx/ext/napoleon/__init__.py b/sphinx/ext/napoleon/__init__.py
+--- a/sphinx/ext/napoleon/__init__.py
++++ b/sphinx/ext/napoleon/__init__.py
+@@ -331,11 +331,9 @@
+     app.connect('autodoc-process-docstring', _process_docstring)
+     app.connect('autodoc-skip-member', _skip_member)
+ 
+-    for name, (default, rebuild) in Config._config_values.items():
+-        if isinstance(default, bool):
+-            app.add_config_value(name, default, rebuild, types=frozenset({bool}))
+-        else:
+-            app.add_config_value(name, default, rebuild, types=frozenset({NoneType}))
++    for name, default, rebuild, types in Config._config_values:
++        app.add_config_value(name, default, rebuild, types=types)
++
+     return {
+         'version': sphinx.__display_version__,
+         'parallel_read_safe': True,

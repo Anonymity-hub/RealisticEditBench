@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py
+--- a/lib/matplotlib/__init__.py
++++ b/lib/matplotlib/__init__.py
+@@ -743,6 +743,9 @@ def __setitem__(self, key, val):
+                 and val is rcsetup._auto_backend_sentinel
+                 and "backend" in self):
+             return
++        valid_key = _api.check_getitem(
++            self.validate, rcParam=key, _error_cls=KeyError
++        )
+         try:
+             cval = self.validate[key](val)
+         except KeyError as err:

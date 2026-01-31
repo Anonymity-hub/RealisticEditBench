@@ -1,0 +1,29 @@
+diff --git a/astropy/io/fits/file.py b/astropy/io/fits/file.py
+--- a/astropy/io/fits/file.py
++++ b/astropy/io/fits/file.py
+@@ -17,7 +17,7 @@
+ import numpy as np
+ 
+ # NOTE: Python can be built without bz2.
+-from astropy.utils.compat.optional_deps import HAS_BZ2
++from astropy.utils.compat.optional_deps import HAS_BZ2, HAS_LZMA
+ from astropy.utils.data import (
+     _is_url,
+     _requires_fsspec,
+@@ -44,6 +44,8 @@
+ if HAS_BZ2:
+     import bz2
+ 
++if HAS_LZMA:
++    import lzma
+ 
+ # Maps astropy.io.fits-specific file mode names to the appropriate file
+ # modes to use for the underlying raw files.
+@@ -107,6 +107,7 @@ def _is_bz2file(fileobj):
+         return False
+ 
+ 
++def _is_lzmafile(fileobj):
+ def _normalize_fits_mode(mode):
+     if mode is not None and mode not in IO_FITS_MODES:
+         if TEXT_RE.match(mode):

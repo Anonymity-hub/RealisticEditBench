@@ -1,0 +1,25 @@
+diff --git a/sphinx/parsers.py b/sphinx/parsers.py
+--- a/sphinx/parsers.py
++++ b/sphinx/parsers.py
+@@ -11,7 +11,7 @@
+ from docutils.transforms.universal import SmartQuotes
+ 
+ from sphinx.deprecation import _deprecation_warning
+-from sphinx.util.rst import append_epilog, prepend_prolog
++from sphinx.util.rst import _append_epilogue, _prepend_prologue
+ 
+ if TYPE_CHECKING:
+     from docutils import nodes
+@@ -100,9 +100,9 @@ def parse(self, inputstring: str | StringList, document: nodes.document) -> None
+         self.finish_parse()
+ 
+     def decorate(self, content: StringList) -> None:
+-        """Preprocess reST content before parsing."""
+-        prepend_prolog(content, self.config.rst_prolog)
+-        append_epilog(content, self.config.rst_epilog)
++        """Preprocess reStructuredText content before parsing."""
++        _prepend_prologue(content, self._config.rst_prolog)
++        _append_epilogue(content, self._config.rst_epilog)
+ 
+ 
+ def setup(app: Sphinx) -> ExtensionMetadata:

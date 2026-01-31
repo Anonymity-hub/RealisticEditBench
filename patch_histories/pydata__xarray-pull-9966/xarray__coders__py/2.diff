@@ -1,0 +1,14 @@
+diff --git a/xarray/coders.py b/xarray/coders.py
+--- a/xarray/coders.py
++++ b/xarray/coders.py
+@@ -3,8 +3,6 @@
+ "encoding/decoding" process.
+ """
+ 
+-from xarray.coding.times import CFDatetimeCoder
++from xarray.coding.times import CFDatetimeCoder, CFTimedeltaCoder
+ 
+-__all__ = [
+-    "CFDatetimeCoder",
+-]
++__all__ = ["CFDatetimeCoder", "CFTimedeltaCoder"]

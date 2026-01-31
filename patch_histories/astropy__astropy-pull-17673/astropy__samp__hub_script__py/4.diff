@@ -1,0 +1,13 @@
+diff --git a/astropy/samp/hub_script.py b/astropy/samp/hub_script.py
+--- a/astropy/samp/hub_script.py
++++ b/astropy/samp/hub_script.py
+@@ -175,8 +175,7 @@
+     options = parser.parse_args()
+ 
+     try:
+-        if options.loglevel in ("OFF", "ERROR", "WARNING", "DEBUG", "INFO"):
+-            log.setLevel(options.loglevel)
++        log.setLevel(options.loglevel)
+ 
+         if options.logout != "":
+             context = log.log_to_file(options.logout)

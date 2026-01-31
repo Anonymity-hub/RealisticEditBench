@@ -1,0 +1,16 @@
+diff --git a/pylint/lint/report_functions.py b/pylint/lint/report_functions.py
+--- a/pylint/lint/report_functions.py
++++ b/pylint/lint/report_functions.py
+@@ -30,12 +30,6 @@
+ ) -> None:
+     """Make messages type report."""
+     by_msg_stats = stats.by_msg
+-    in_order = sorted(
+-        (value, msg_id)
+-        for msg_id, value in by_msg_stats.items()
+-        if not msg_id.startswith("I")
+-    )
+-    in_order.reverse()
+     lines = ["message id", "occurrences"]
+     for value, msg_id in in_order:
+         lines += [msg_id, str(value)]

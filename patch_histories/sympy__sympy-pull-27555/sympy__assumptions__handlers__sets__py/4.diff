@@ -1,0 +1,18 @@
+diff --git a/sympy/assumptions/handlers/sets.py b/sympy/assumptions/handlers/sets.py
+--- a/sympy/assumptions/handlers/sets.py
++++ b/sympy/assumptions/handlers/sets.py
+@@ -157,9 +157,12 @@
+                 return True
+             if is_base_zero and ask(Q.positive(expr.exp)):
+                 return True
++        if ask(Q.algebraic(expr.base),assumptions) is False:
++            return ask(Q.zero(expr.exp), assumptions)
++        if ask(Q.irrational(expr.base),assumptions) and ask(Q.eq(expr.exp,-1)):
++            return False
++        return
+     elif ask(Q.rational(expr.exp), assumptions):
+-        if ask(Q.prime(expr.base), assumptions):
+-            return False
+ 
+ @RationalPredicate.register_many(asin, atan, cos, sin, tan)
+ def _(expr, assumptions):

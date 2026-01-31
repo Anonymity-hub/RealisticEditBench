@@ -1,0 +1,34 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -925,7 +925,7 @@
+         # where the attribute documentation would actually be found in.
+         # This is used for situations where you have a module that collects the
+         # functions and classes of internal submodules.
+-        guess_modname = self.get_real_modname()
++        guess_modname = self.props._obj___module__ or self.props.module_name
+         self.real_modname: str = real_modname or guess_modname
+ 
+         # try to also get a source code analyzer for attribute docs
+@@ -1764,7 +1764,9 @@
+             if self.props.doc_as_attr:
+                 analyzer = ModuleAnalyzer.for_module(self.modname)
+             else:
+-                analyzer = ModuleAnalyzer.for_module(self.get_real_modname())
++                analyzer = ModuleAnalyzer.for_module(
++                    self.props._obj___module__ or self.props.module_name
++                )
+             analyzer.analyze()
+             return list(analyzer.attr_docs.get(key, []))
+         except PycodeError:
+@@ -1795,7 +1797,9 @@
+             more_content = StringList(
+                 [_('alias of TypeVar(%s)') % ', '.join(attrs), ''], source=''
+             )
+-        if self.props.doc_as_attr and self.modname != self.get_real_modname():
++        if self.props.doc_as_attr and self.modname != (
++            self.props._obj___module__ or self.props.module_name
++        ):
+             try:
+                 # override analyzer to obtain doccomment around its definition.
+                 self.analyzer = ModuleAnalyzer.for_module(self.modname)

@@ -1,0 +1,38 @@
+diff --git a/sklearn/compose/_column_transformer.py b/sklearn/compose/_column_transformer.py
+--- a/sklearn/compose/_column_transformer.py
++++ b/sklearn/compose/_column_transformer.py
+@@ -296,7 +296,7 @@
+         "transformer_weights": [dict, None],
+         "verbose": ["verbose"],
+         "verbose_feature_names_out": ["boolean", str, callable],
+-        "force_int_remainder_cols": ["boolean"],
++        "force_int_remainder_cols": ["boolean", Hidden(StrOptions({"deprecated"}))],
+     }
+ 
+     def __init__(
+@@ -309,7 +309,7 @@
+         transformer_weights=None,
+         verbose=False,
+         verbose_feature_names_out=True,
+-        force_int_remainder_cols=True,
++        force_int_remainder_cols="deprecated",
+     ):
+         self.transformers = transformers
+         self.remainder = remainder
+@@ -970,6 +970,14 @@
+         """
+         _raise_for_params(params, self, "fit_transform")
+         _check_feature_names(self, X, reset=True)
++
++        if self.force_int_remainder_cols != "deprecated":
++            warnings.warn(
++                "The parameter `force_int_remainder_cols` is deprecated and will be "
++                "removed in 1.9. It has no effect. Leave it to its default value to "
++                "avoid this warning.",
++                FutureWarning,
++            )
+ 
+         X = _check_X(X)
+         # set n_features_in_ attribute
+
+ 

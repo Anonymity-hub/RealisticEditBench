@@ -1,0 +1,17 @@
+diff --git a/sympy/printing/repr.py b/sympy/printing/repr.py
+--- a/sympy/printing/repr.py
++++ b/sympy/printing/repr.py
+@@ -193,12 +193,7 @@ def _print_NaN(self, expr):
+         return "nan"
+
+     def _print_Mul(self, expr, order=None):
+-        if self.order not in ('old', 'none'):
+-            args = expr.as_ordered_factors()
+-        else:
+-            # use make_args in case expr was something like -x -> x
+-            args = Mul.make_args(expr)
+-
++        args = Mul.make_args(expr)
+         args = map(self._print, args)
+         clsname = type(expr).__name__
+         return clsname + "(%s)" % ", ".join(args)

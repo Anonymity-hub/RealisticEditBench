@@ -1,0 +1,23 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -716,6 +716,19 @@
+             related_object_name = rel_objs.name
+             if related_object_name in manager_names:
+                 field_name = f"{self.model._meta.object_name}.{self.name}"
++                errors.append(
++                    checks.Error(
++                        f"Related name '{related_object_name}' for '{field_name}' "
++                        "clashes with the name of a model manager.",
++                        hint=(
++                            "Rename the model manager or change the related_name "
++                            f"argument in the definition for field '{field_name}'."
++                        ),
++                        obj=self,
++                        id="fields.E348",
++                    )
++                )
++        return errors
+ 
+     def deconstruct(self):
+         name, path, args, kwargs = super().deconstruct()

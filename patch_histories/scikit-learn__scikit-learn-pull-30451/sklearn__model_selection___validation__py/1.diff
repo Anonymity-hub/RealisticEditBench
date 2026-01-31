@@ -1,0 +1,12 @@
+diff --git a/sklearn/model_selection/_validation.py b/sklearn/model_selection/_validation.py
+--- a/sklearn/model_selection/_validation.py
++++ b/sklearn/model_selection/_validation.py
+@@ -343,7 +343,7 @@ def cross_validate(
+     _check_groups_routing_disabled(groups)
+ 
+     X, y = indexable(X, y)
+-
++    params = {} if params is None else params
+     cv = check_cv(cv, y, classifier=is_classifier(estimator))
+ 
+     scorers = check_scoring(

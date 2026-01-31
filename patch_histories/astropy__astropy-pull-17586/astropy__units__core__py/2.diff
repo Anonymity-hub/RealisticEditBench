@@ -1,0 +1,14 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -786,6 +786,10 @@
+                 ) from None
+             return CompositeUnit(1, [self], [sanitize_power(p)], _error_check=False)
+ 
++    @staticmethod
++    def _warn_about_operation_with_deprecated_type(op: str, other: bytes | str) -> None:
++        warnings.warn(
++            AstropyDeprecationWarning(
+ 
+     def __truediv__(self, m):
+         if isinstance(m, UnitBase):

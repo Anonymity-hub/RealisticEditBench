@@ -1,0 +1,178 @@
+diff --git a/xarray/core/datatree.py b/xarray/core/datatree.py
+--- a/xarray/core/datatree.py
++++ b/xarray/core/datatree.py
+@@ -441,6 +441,9 @@ def map(  # type: ignore[override]
+         return Dataset(variables, attrs=attrs)
+ 
+ 
++FromDictDataValue: TypeAlias = "CoercibleValue | Dataset | DataTree | None"
++
++
+ class DataTree(
+     NamedNode,
+     DataTreeAggregations,
+@@ -1154,44 +1157,149 @@ def drop_nodes(
+         result._replace_node(children=children_to_keep)
+         return result
+ 
++    @overload
++    @classmethod
++    def from_dict(
++        cls,
++        data: Mapping[str, FromDictDataValue] | None = ...,
++        coords: Mapping[str, CoercibleValue] | None = ...,
++        *,
++        name: str | None = ...,
++        nested: Literal[False] = ...,
++    ) -> Self: ...
++
++    @overload
++    @classmethod
++    def from_dict(
++        cls,
++        data: (
++            Mapping[str, FromDictDataValue | NestedDict[FromDictDataValue]] | None
++        ) = ...,
++        coords: Mapping[str, CoercibleValue | NestedDict[CoercibleValue]] | None = ...,
++        *,
++        name: str | None = ...,
++        nested: Literal[True] = ...,
++    ) -> Self: ...
++
+     @classmethod
+     def from_dict(
+         cls,
+-        d: Mapping[str, Dataset | DataTree | None],
+-        /,
++        data: (
++            Mapping[str, FromDictDataValue | NestedDict[FromDictDataValue]] | None
++        ) = None,
++        coords: Mapping[str, CoercibleValue | NestedDict[CoercibleValue]] | None = None,
++        *,
+         name: str | None = None,
++        nested: bool = False,
+     ) -> Self:
+         """
+         Create a datatree from a dictionary of data objects, organised by paths into the tree.
+ 
+         Parameters
+         ----------
+-        d : dict-like
+-            A mapping from path names to xarray.Dataset or DataTree objects.
++        data : dict-like, optional
++            A mapping from path names to ``None`` (indicating an empty node),
++            ``DataTree``, ``Dataset``, objects coercible into a ``DataArray`` or
++            a nested dictionary of any of the above types.
+ 
+-            Path names are to be given as unix-like path. If path names
+-            containing more than one part are given, new tree nodes will be
+-            constructed as necessary.
++            Path names should be given as unix-like paths, either absolute
++            (/path/to/item) or relative to the root node (path/to/item). If path
++            names containing more than one part are given, new tree nodes will
++            be constructed automatically as necessary.
+ 
+             To assign data to the root node of the tree use "", ".", "/" or "./"
+             as the path.
++        coords : dict-like, optional
++            A mapping from path names to objects coercible into a DataArray, or
++            nested dictionaries of coercible objects.
+         name : Hashable | None, optional
+             Name for the root node of the tree. Default is None.
++        nested : bool, optional
++            If true, nested dictionaries in ``data`` and ``coords`` are
++            automatically flattened.
+ 
+         Returns
+         -------
+         DataTree
+ 
++        See also
++        --------
++        Dataset
++
+         Notes
+         -----
+-        If your dictionary is nested you will need to flatten it before using this method.
+-        """
+-        # Find any values corresponding to the root
+-        d_cast = dict(d)
+-        root_data = None
+-        for key in ("", ".", "/", "./"):
+-            if key in d_cast:
+-                if root_data is not None:
++        ``DataTree.from_dict`` serves a conceptually different purpose from
++        ``Dataset.from_dict`` and ``DataArray.from_dict``. It converts a
++        hierarchy of Xarray objects into a DataTree, rather than converting pure
++        Python data structures.
++
++        Examples
++        --------
++
++        Construct a tree from a dict of Dataset objects:
++
++        >>> dt = DataTree.from_dict(
++        ...     {
++        ...         "/": Dataset(coords={"time": [1, 2, 3]}),
++        ...         "/ocean": Dataset(
++        ...             {
++        ...                 "temperature": ("time", [4, 5, 6]),
++        ...                 "salinity": ("time", [7, 8, 9]),
++        ...             }
++        ...         ),
++        ...         "/atmosphere": Dataset(
++        ...             {
++        ...                 "temperature": ("time", [2, 3, 4]),
++        ...                 "humidity": ("time", [3, 4, 5]),
++        ...             }
++        ...         ),
++        ...     }
++        ... )
++        >>> dt
++        <xarray.DataTree>
++        Group: /
++        │   Dimensions:  (time: 3)
++        │   Coordinates:
++        │     * time     (time) int64 24B 1 2 3
++        ├── Group: /ocean
++        │       Dimensions:      (time: 3)
++        │       Data variables:
++        │           temperature  (time) int64 24B 4 5 6
++        │           salinity     (time) int64 24B 7 8 9
++        └── Group: /atmosphere
++                Dimensions:      (time: 3)
++                Data variables:
++                    temperature  (time) int64 24B 2 3 4
++                    humidity     (time) int64 24B 3 4 5
++
++        Or equivalently, use a dict of values that can be converted into
++        `DataArray` objects, with syntax similar to the Dataset constructor:
++
++        >>> dt2 = DataTree.from_dict(
++        ...     data={
++        ...         "/ocean/temperature": ("time", [4, 5, 6]),
++        ...         "/ocean/salinity": ("time", [7, 8, 9]),
++        ...         "/atmosphere/temperature": ("time", [2, 3, 4]),
++        ...         "/atmosphere/humidity": ("time", [3, 4, 5]),
++        ...     },
++        ...     coords={"/time": [1, 2, 3]},
++        ... )
++        >>> assert dt.identical(dt2)
++
++        Nested dictionaries are automatically flattened if ``nested=True``:
++
++        >>> DataTree.from_dict({"a": {"b": {"c": {"x": 1, "y": 2}}}}, nested=True)
++        <xarray.DataTree>
++        Group: /
++        └── Group: /a
++            └── Group: /a/b
++                └── Group: /a/b/c
++                        Dimensions:  ()
++                        Data variables:
++                            x        int64 8B 1
++                            y        int64 8B 2
++
++        """
+                     raise ValueError(
+                         "multiple entries found corresponding to the root node"
+                     )

@@ -1,0 +1,16 @@
+diff --git a/django/db/models/query_utils.py b/django/db/models/query_utils.py
+--- a/django/db/models/query_utils.py
++++ b/django/db/models/query_utils.py
+@@ -122,6 +122,12 @@
+                     if lookup is None:
+                         lookup = "exact"
+                     if (lookup_class := field_replacement.get_lookup(lookup)) is None:
++                        if (
++                            transform_class := field_replacement.get_transform(lookup)
++                        ) is not None:
++                            field_replacement = transform_class(field_replacement)
++                            lookup = "exact"
++                            lookup_class = field_replacement.get_lookup(lookup)
+     def flatten(self):
+         """
+         Recursively yield this Q object and all subexpressions, in depth-first

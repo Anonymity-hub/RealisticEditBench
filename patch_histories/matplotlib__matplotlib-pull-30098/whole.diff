@@ -1,0 +1,63 @@
+diff --git a/lib/matplotlib/axes/_base.py b/lib/matplotlib/axes/_base.py
+--- a/lib/matplotlib/axes/_base.py
++++ b/lib/matplotlib/axes/_base.py
+@@ -4749,14 +4749,25 @@ def label_outer(self, remove_inner_ticks=False):
+         self._label_outer_yaxis(skip_non_rectangular_axes=False,
+                                 remove_inner_ticks=remove_inner_ticks)
+ 
++    def _get_subplotspec_with_optional_colorbar(self):
++        """
++        Return the subplotspec for this Axes, except that if this Axes has been
++        moved to a subgridspec to make room for a colorbar, then return the
++        subplotspec that encloses both this Axes and the colorbar Axes.
++        """
++        ss = self.get_subplotspec()
++        if any(cax.get_subplotspec() for cax in self._colorbars):
++            ss = ss.get_gridspec()._subplot_spec
++        return ss
++
+     def _label_outer_xaxis(self, *, skip_non_rectangular_axes,
+                            remove_inner_ticks=False):
+         # see documentation in label_outer.
+         if skip_non_rectangular_axes and not isinstance(self.patch,
+                                                         mpl.patches.Rectangle):
+             return
+-        ss = self.get_subplotspec()
+-        if not ss:
++        ss = self._get_subplotspec_with_optional_colorbar()
++        if ss is None:
+             return
+         label_position = self.xaxis.get_label_position()
+         if not ss.is_first_row():  # Remove top label/ticklabels/offsettext.
+@@ -4782,8 +4793,8 @@ def _label_outer_yaxis(self, *, skip_non_rectangular_axes,
+         if skip_non_rectangular_axes and not isinstance(self.patch,
+                                                         mpl.patches.Rectangle):
+             return
+-        ss = self.get_subplotspec()
+-        if not ss:
++        ss = self._get_subplotspec_with_optional_colorbar()
++        if ss is None:
+             return
+         label_position = self.yaxis.get_label_position()
+         if not ss.is_first_col():  # Remove left label/ticklabels/offsettext.
+diff --git a/lib/matplotlib/colorbar.py b/lib/matplotlib/colorbar.py
+--- a/lib/matplotlib/colorbar.py
++++ b/lib/matplotlib/colorbar.py
+@@ -1455,8 +1455,7 @@ def make_axes(parents, location=None, orientation=None, fraction=0.15,
+ 
+     cax = fig.add_axes(pbcb, label="<colorbar>")
+     for a in parents:
+-        # tell the parent it has a colorbar
+-        a._colorbars += [cax]
++        a._colorbars.append(cax)  # tell the parent it has a colorbar
+     cax._colorbar_info = dict(
+         parents=parents,
+         location=location,
+@@ -1549,6 +1548,7 @@ def make_axes_gridspec(parent, *, location=None, orientation=None,
+ 
+     fig = parent.get_figure()
+     cax = fig.add_subplot(ss_cb, label="<colorbar>")
++    parent._colorbars.append(cax)  # tell the parent it has a colorbar
+     cax.set_anchor(anchor)
+     cax.set_box_aspect(aspect)
+     cax.set_aspect('auto')

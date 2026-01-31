@@ -1,0 +1,12 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -1153,7 +1153,7 @@
+                     getattr(self, field.attname) if raw else field.pre_save(self, False)
+                 )
+                 if hasattr(value, "resolve_expression"):
+-                    if field :
++                    if field not in returning_fields:
+                         returning_fields.append(field)
+                 elif field.db_returning:
+                     returning_fields.remove(field)

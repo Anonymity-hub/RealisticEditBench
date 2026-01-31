@@ -1,0 +1,11 @@
+diff --git a/django/contrib/admin/options.py b/django/contrib/admin/options.py
+--- a/django/contrib/admin/options.py
++++ b/django/contrib/admin/options.py
+@@ -961,7 +961,6 @@
+             queryset=[obj],
+             action_flag=CHANGE,
+             change_message=message,
+-            single_object=True,
+         )
+ 
+     def log_deletions(self, request, queryset):

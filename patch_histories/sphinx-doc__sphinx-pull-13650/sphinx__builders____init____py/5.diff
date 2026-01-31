@@ -1,0 +1,30 @@
+diff --git a/sphinx/builders/__init__.py b/sphinx/builders/__init__.py
+--- a/sphinx/builders/__init__.py
++++ b/sphinx/builders/__init__.py
+@@ -604,7 +604,7 @@
+             __('reading sources... '),
+             'purple',
+             len(chunks),
+-            self._app.verbosity,
++            self.config.verbosity,
+         )
+ 
+         # clear all outdated docs at once
+@@ -776,7 +776,7 @@
+                 __('writing output... '),
+                 'darkgreen',
+                 len(docnames),
+-                self._app.verbosity,
++                self.config.verbosity,
+             ):
+                 _write_docname(docname, env=self.env, builder=self, tags=self.tags)
+ 
+@@ -800,7 +800,7 @@
+             __('writing output... '),
+             'darkgreen',
+             len(chunks),
+-            self._app.verbosity,
++            self.config.verbosity,
+         )
+ 
+         def on_chunk_done(args: list[tuple[str, nodes.document]], result: None) -> None:

@@ -1,0 +1,25 @@
+diff --git a/lib/matplotlib/path.py b/lib/matplotlib/path.py
+--- a/lib/matplotlib/path.py
++++ b/lib/matplotlib/path.py
+@@ -667,9 +667,19 @@ def intersects_bbox(self, bbox, filled=True):
+ 
+     def interpolated(self, steps):
+         """
+-        Return a new path resampled to length N x *steps*.
++        Return a new path with each segment divided into *steps* parts.
+ 
+-        Codes other than `LINETO` are not handled correctly.
++        Codes other than `LINETO`, `MOVETO`, and `CLOSEPOLY` are not handled correctly.
++
++        Parameters
++        ----------
++        steps : int
++            The number of segments in the new path for each in the original.
++
++        Returns
++        -------
++        Path
++            The interpolated path.
+         """
+         if steps == 1:
+             return self

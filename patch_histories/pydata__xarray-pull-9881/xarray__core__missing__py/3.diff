@@ -1,0 +1,74 @@
+diff --git a/xarray/core/missing.py b/xarray/core/missing.py
+--- a/xarray/core/missing.py
++++ b/xarray/core/missing.py
+@@ -602,7 +602,12 @@ def _floatize_x(x, new_x):
+     return x, new_x
+ 
+ 
+-def interp(var, indexes_coords, method: InterpOptions, **kwargs):
++def interp(
++    var: Variable,
++    indexes_coords: SourceDest,
++    method: InterpOptions,
++    **kwargs,
++) -> Variable:
+     """Make an interpolation of Variable
+ 
+     Parameters
+@@ -635,28 +640,26 @@ def interp(var, indexes_coords, method: InterpOptions, **kwargs):
+ 
+     if method in ["linear", "nearest", "slinear"]:
+         # decompose the interpolation into a succession of independent interpolation.
+-        indexes_coords = decompose_interp(indexes_coords)
++        iter_indexes_coords = decompose_interp(indexes_coords)
+     else:
+-        indexes_coords = [indexes_coords]
++        iter_indexes_coords = (_ for _ in [indexes_coords])
+ 
+-    for indep_indexes_coords in indexes_coords:
++    for indep_indexes_coords in iter_indexes_coords:
+         var = result
+ 
+         # target dimensions
+         dims = list(indep_indexes_coords)
+-        x, new_x = zip(*[indep_indexes_coords[d] for d in dims], strict=True)
+-        destination = broadcast_variables(*new_x)
+ 
+         # transpose to make the interpolated axis to the last position
+         broadcast_dims = [d for d in var.dims if d not in dims]
+         original_dims = broadcast_dims + dims
+-        new_dims = broadcast_dims + list(destination[0].dims)
+-        interped = interp_func(
+-            var.transpose(*original_dims).data, x, destination, method, kwargs
++        result = interpolate_variable(
++            var.transpose(*original_dims),
++            {k: indep_indexes_coords[k] for k in dims},
++            method=method,
++            kwargs=kwargs,
+         )
+ 
+-        result = Variable(new_dims, interped, attrs=var.attrs, fastpath=True)
+-
+         # dimension of the output array
+         out_dims: OrderedSet = OrderedSet()
+         for d in var.dims:
+@@ -834,15 +837,15 @@ def interp(var, indexes_coords, method: InterpOptions, **kwargs):
+     return _interpnd(var, x, new_x, interp_func, interp_kwargs)
+ 
+ 
+-def decompose_interp(indexes_coords):
++def decompose_interp(indexes_coords: SourceDest) -> Generator[SourceDest, None]:
+     """Decompose the interpolation into a succession of independent interpolation keeping the order"""
+ 
+     dest_dims = [
+-        dest[1].dims if dest[1].ndim > 0 else [dim]
++        dest[1].dims if dest[1].ndim > 0 else (dim,)
+         for dim, dest in indexes_coords.items()
+     ]
+-    partial_dest_dims = []
+-    partial_indexes_coords = {}
++    partial_dest_dims: list[tuple[Hashable, ...]] = []
++    partial_indexes_coords: SourceDest = {}
+     for i, index_coords in enumerate(indexes_coords.items()):
+         partial_indexes_coords.update([index_coords])
+ 

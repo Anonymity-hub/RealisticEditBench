@@ -1,0 +1,12 @@
+diff --git a/examples/manifold/plot_compare_methods.py b/examples/manifold/plot_compare_methods.py
+--- a/examples/manifold/plot_compare_methods.py
++++ b/examples/manifold/plot_compare_methods.py
+@@ -166,7 +166,7 @@ def add_2d_scatter(ax, points, points_color, title=None):
+ md_scaling = manifold.MDS(
+     n_components=n_components,
+     max_iter=50,
+-    n_init=4,
++    n_init=1,
+     random_state=0,
+     normalized_stress=False,
+ )

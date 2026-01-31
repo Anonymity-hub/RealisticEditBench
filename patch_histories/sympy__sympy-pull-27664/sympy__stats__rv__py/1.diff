@@ -1,0 +1,12 @@
+diff --git a/sympy/stats/rv.py b/sympy/stats/rv.py
+--- a/sympy/stats/rv.py
++++ b/sympy/stats/rv.py
+@@ -1639,7 +1639,7 @@ def sample(self, size=(), library='scipy', seed=None):
+                 import pymc3 as pymc
+ 
+             with pymc.Model():
+-                if do_sample_pymc(self):
++                if do_sample_pymc(self) is not None:
+                     samps = pymc.sample(draws=prod(size), chains=1, compute_convergence_checks=False,
+                             progressbar=False, random_seed=seed, return_inferencedata=False)[:]['X']
+                     samps = samps.reshape(size)

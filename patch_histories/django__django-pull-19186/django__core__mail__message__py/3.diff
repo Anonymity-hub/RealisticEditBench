@@ -1,0 +1,28 @@
+diff --git a/django/core/mail/message.py b/django/core/mail/message.py
+--- a/django/core/mail/message.py
++++ b/django/core/mail/message.py
+@@ -202,12 +202,24 @@ class EmailMessage:
+     mixed_subtype = "mixed"
+     encoding = None  # None => use settings default
+ 
++    @deprecate_posargs(
++        RemovedInDjango70Warning,
++        [
++            "bcc",
++            "connection",
++            "attachments",
++            "headers",
++            "cc",
++            "reply_to",
++        ],
++    )
+     def __init__(
+         self,
+         subject="",
+         body="",
+         from_email=None,
+         to=None,
++        *,
+         bcc=None,
+         connection=None,
+         attachments=None,

@@ -1,0 +1,12 @@
+diff --git a/django/contrib/auth/management/__init__.py b/django/contrib/auth/management/__init__.py
+--- a/django/contrib/auth/management/__init__.py
++++ b/django/contrib/auth/management/__init__.py
+@@ -126,7 +126,7 @@ def _rename(self, apps, schema_editor, old_model, new_model):
+         from django.contrib.auth.models import Permission
+ 
+         db = schema_editor.connection.alias
+-        ctypes = ContentType.objects.filter(
++        ctypes = ContentType.objects.using(db).filter(
+             app_label=self.app_label, model__icontains=old_model.lower()
+         )
+         for permission in Permission.objects.filter(

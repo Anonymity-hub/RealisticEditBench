@@ -1,0 +1,17 @@
+diff --git a/sympy/physics/continuum_mechanics/beam.py b/sympy/physics/continuum_mechanics/beam.py
+--- a/sympy/physics/continuum_mechanics/beam.py
++++ b/sympy/physics/continuum_mechanics/beam.py
+@@ -471,6 +471,13 @@ def join(self, beam, via="fixed"):
+         else:
+             new_second_moment = self.second_moment
+ 
++        if via== "fixed" or via=="hinge":
++            pass
++        else:
++            raise ValueError(
++                "Invalid joining method. Choose from 'fixed' or 'hinge'."
++            )
++
+         if via == "fixed":
+             new_beam = Beam(new_length, E, new_second_moment, x)
+             new_beam._joined_beam = True

@@ -1,0 +1,19 @@
+diff --git a/astropy/__init__.py b/astropy/__init__.py
+--- a/astropy/__init__.py
++++ b/astropy/__init__.py
+@@ -48,6 +48,15 @@
+ 
+ 
+ def __getattr__(attr):
++    if attr in __all__:
++        from importlib import import_module
++
++        return import_module("astropy." + attr)
++
++    raise AttributeError(f"module 'astropy' has no attribute {attr!r}")
++
++
++def __dir__():
+ from .version import version as __version__
+ 
+ # The location of the online documentation for astropy

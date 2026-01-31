@@ -1,0 +1,19 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -944,6 +944,15 @@
+                         unique_together=None,
+                     ),
+                 )
++            if indexes := model_state.options.pop("indexes", None):
++                for index in indexes:
++                    self.add_operation(
++                        app_label,
++                        operations.RemoveIndex(
++                            model_name=model_name,
++                            name=index.name,
++                        ),
++                    )
+             # Then remove each related field
+             for name in sorted(related_fields):
+                 self.add_operation(

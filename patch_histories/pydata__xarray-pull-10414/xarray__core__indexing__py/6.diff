@@ -1,0 +1,12 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -777,7 +777,7 @@
+         return np.array(array)
+     elif hasattr(array, "dtype"):
+         return array
+-    elif np.ndim(array) == 0:
++    elif ndim == 0:
+         return np.array(array)
+     else:
+         return array

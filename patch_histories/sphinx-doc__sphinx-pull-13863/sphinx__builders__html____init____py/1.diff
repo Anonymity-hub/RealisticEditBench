@@ -1,0 +1,14 @@
+diff --git a/sphinx/builders/html/__init__.py b/sphinx/builders/html/__init__.py
+--- a/sphinx/builders/html/__init__.py
++++ b/sphinx/builders/html/__init__.py
+@@ -1292,6 +1292,10 @@ def dump_search_index(self) -> None:
+             Path(search_index_tmp).replace(search_index_path)
+ 
+ 
++def _has_wildcard(pattern: str, /) -> bool:
++    return any(char in pattern for char in '*?[')
++
++
+ def convert_html_css_files(app: Sphinx, config: Config) -> None:
+     """Convert string styled html_css_files to tuple styled one."""
+     html_css_files: list[tuple[str, dict[str, str]]] = []

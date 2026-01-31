@@ -1,0 +1,12 @@
+diff --git a/django/db/migrations/writer.py b/django/db/migrations/writer.py
+--- a/django/db/migrations/writer.py
++++ b/django/db/migrations/writer.py
+@@ -131,6 +131,8 @@ def as_string(self):
+         items = {
+             "replaces_str": "",
+             "initial_str": "",
++            "run_before_str": "",
++            "atomic_str": "",
+         }
+ 
+         imports = set()

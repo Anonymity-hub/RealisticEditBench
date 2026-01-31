@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py
+--- a/lib/matplotlib/legend.py
++++ b/lib/matplotlib/legend.py
+@@ -934,7 +934,7 @@ def _init_legend_box(self, handles, labels, markerfirst=True):
+         self.texts = text_list
+         self.legend_handles = handle_list
+ 
+-    def _auto_legend_data(self):
++    def _auto_legend_data(self, renderer):
+         """
+         Return display coordinates for hit testing for "best" positioning.
+ 

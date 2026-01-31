@@ -1,0 +1,52 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -223,33 +223,32 @@
+     """Here we check that if `num` is a smooth number or not. If `a` is a smooth
+     number then it returns a vector of prime exponents modulo 2. For example
+     if a = 2 * 5**2 * 7**3 and the factor base contains {2, 3, 5, 7} then
+-    `a` is a smooth number and this function returns ([1, 0, 0, 1], True). If
+-    `a` is a partial relation which means that `a` a has one prime factor
++    `a` is a smooth number and this function returns (18, True) (18 = [1, 0, 0, 1, 0]).
++    If `a` is a partial relation which means that `a` a has one prime factor
+     greater than the `factor_base` then it returns `(a, False)` which denotes `a`
+     is a partial relation.
+ 
+     Parameters
+     ==========
+ 
+-    a : integer whose smootheness is to be checked
++    num : integer whose smootheness is to be checked
+     factor_base : factor_base primes
+     """
+-    vec = []
+     if num < 0:
+-        vec.append(1)
+         num *= -1
++        vec = 1
+     else:
+-        vec.append(0)
+-     #-1 is not included in factor_base add -1 in vector
+-    for factor in factor_base:
+-        if num % factor.prime != 0:
+-            vec.append(0)
+-            continue
+-        factor_exp = 0
+-        while num % factor.prime == 0:
+-            factor_exp += 1
+-            num //= factor.prime
+-        vec.append(factor_exp % 2)
++        vec = 0
++    for i, fb in enumerate(factor_base, 1):
++        if num % fb.prime:
++            continue
++        e = 1
++        num //= fb.prime
++        while num % fb.prime == 0:
++            e += 1
++            num //= fb.prime
++        if e % 2:
++            vec += 1 << i
+     if num == 1:
+         return vec, True
+     if isprime(num):

@@ -1,0 +1,12 @@
+diff --git a/xarray/core/datatree.py b/xarray/core/datatree.py
+--- a/xarray/core/datatree.py
++++ b/xarray/core/datatree.py
+@@ -433,7 +433,7 @@
+                 v._copy_attrs_from(self.data_vars[k])
+         attrs = self.attrs if keep_attrs else None
+         # return type(self)(variables, attrs=attrs)
+-        return Dataset(variables)
++        return Dataset(variables, attrs=attrs)
+ 
+ 
+ class DataTree(

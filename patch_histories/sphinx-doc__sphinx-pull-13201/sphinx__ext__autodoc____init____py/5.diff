@@ -1,0 +1,18 @@
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -926,10 +926,10 @@
+             member_documenters.append((documenter, isattr))
+ 
+         member_order = self.options.member_order or self.config.autodoc_member_order
+-        memberdocumenters = self.sort_members(memberdocumenters, member_order)
+-
+-        for documenter, isattr in memberdocumenters:
+-            documenter.generate(
++        # We now try to import all objects before ordering them. This is to
++        # avoid possible circular imports if we were to import objects after
++        # their associated documenters have been sorted.
++        member_documenters = [
+                 all_members=True,
+                 real_modname=self.real_modname,
+                 check_module=members_check_module and not isattr,

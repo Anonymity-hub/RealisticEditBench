@@ -1,0 +1,20 @@
+diff --git a/sphinx/ext/intersphinx/_load.py b/sphinx/ext/intersphinx/_load.py
+--- a/sphinx/ext/intersphinx/_load.py
++++ b/sphinx/ext/intersphinx/_load.py
+@@ -170,6 +170,7 @@
+             # This happens when the URI in `intersphinx_mapping` is changed.
+             del intersphinx_cache[uri]
+ 
++    inv_config = _InvConfig.from_config(app.config)
+     with concurrent.futures.ThreadPoolExecutor() as pool:
+         futures = [
+             pool.submit(
+@@ -177,7 +178,7 @@
+                 project=project,
+                 cache=intersphinx_cache,
+                 now=now,
+-                config=app.config,
++                config=inv_config,
+                 srcdir=app.srcdir,
+             )
+             for project in projects

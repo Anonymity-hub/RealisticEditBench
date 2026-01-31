@@ -1,0 +1,16 @@
+diff --git a/django/forms/boundfield.py b/django/forms/boundfield.py
+--- a/django/forms/boundfield.py
++++ b/django/forms/boundfield.py
+@@ -297,6 +297,12 @@
+         return attrs
+ 
+     @property
++    def aria_describedby(self):
++        # Preserve aria-describedby set on the widget.
++        if self.field.widget.attrs.get("aria-describedby"):
++            return None
++
++    @property
+     def widget_type(self):
+         return re.sub(
+             r"widget$|input$", "", self.field.widget.__class__.__name__.lower()

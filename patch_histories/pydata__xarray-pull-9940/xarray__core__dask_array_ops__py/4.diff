@@ -1,0 +1,43 @@
+diff --git a/xarray/core/dask_array_ops.py b/xarray/core/dask_array_ops.py
+--- a/xarray/core/dask_array_ops.py
++++ b/xarray/core/dask_array_ops.py
+@@ -1,7 +1,6 @@
+ from __future__ import annotations
+ 
+ import math
+-from functools import partial
+ 
+ from xarray.core import dtypes, nputils
+ 
+@@ -92,31 +91,6 @@
+     return _push(a, axis=axis)
+ 
+ 
+-def _reset_cumsum(a, axis, dtype=None):
+-    import numpy as np
+-
+-    cumsum = np.cumsum(a, axis=axis)
+-    reset_points = np.maximum.accumulate(np.where(a == 0, cumsum, 0), axis=axis)
+-    return cumsum - reset_points
+-
+-
+-def _last_reset_cumsum(a, axis, keepdims=None):
+-    import numpy as np
+-
+-    # Take the last cumulative sum taking into account the reset
+-    # This is useful for blelloch method
+-    return np.take(_reset_cumsum(a, axis=axis), axis=axis, indices=[-1])
+-
+-
+-def _combine_reset_cumsum(a, b, axis):
+-    import numpy as np
+-
+-    # It is going to sum the previous result until the first
+-    # non nan value
+-    bitmask = np.cumprod(b != 0, axis=axis)
+-    return np.where(bitmask, b + a, b)
+-
+-
+ def push(array, n, axis, method="blelloch"):
+     """
+     Dask-aware bottleneck.push

@@ -1,0 +1,12 @@
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -1355,7 +1355,7 @@ def set_dims(self, dim, shape=None):
+             dim = [dim]
+ 
+         if shape is None and is_dict_like(dim):
+-            shape = dim.values()
++            shape = tuple(dim.values())
+ 
+         missing_dims = set(self.dims) - set(dim)
+         if missing_dims:

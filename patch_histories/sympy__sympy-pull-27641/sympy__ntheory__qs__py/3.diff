@@ -1,0 +1,15 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -26,7 +26,10 @@
+         self.b2 = b**2 - N
+ 
+     def eval_u(self, x):
+-        return
++        return self.a*x + self.b
++
++    def eval_v(self, x):
++        return (self.a2*x + self.ab)*x + self.b2
+ 
+ 
+ class FactorBaseElem:

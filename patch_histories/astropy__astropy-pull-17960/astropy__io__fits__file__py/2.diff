@@ -1,0 +1,33 @@
+diff --git a/astropy/io/fits/file.py b/astropy/io/fits/file.py
+--- a/astropy/io/fits/file.py
++++ b/astropy/io/fits/file.py
+@@ -17,7 +17,7 @@
+ import numpy as np
+ 
+ # NOTE: Python can be built without bz2.
+-from astropy.utils.compat.optional_deps import HAS_BZ2, HAS_LZMA
++from astropy.utils.compat.optional_deps import HAS_BZ2, HAS_LZMA, HAS_UNCOMPRESSPY
+ from astropy.utils.data import (
+     _is_url,
+     _requires_fsspec,
+@@ -47,6 +46,10 @@
+ if HAS_LZMA:
+     import lzma
+ 
++if HAS_UNCOMPRESSPY:
++    import uncompresspy
++
++
+ # Maps astropy.io.fits-specific file mode names to the appropriate file
+ # modes to use for the underlying raw files.
+ IO_FITS_MODES = {
+@@ -240,6 +244,9 @@ def __init__(
+             self.compression = "bzip2"
+         elif _is_lzmafile(fileobj):
+             self.compression = "lzma"
++        elif _is_lzwfile(fileobj):
++            self.compression = "lzw"
++
+         if (
+             self.compression is not None
+             and decompress_in_memory

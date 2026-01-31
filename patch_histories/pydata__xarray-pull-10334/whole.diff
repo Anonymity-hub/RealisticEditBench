@@ -1,0 +1,95 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -99,6 +99,7 @@
+     parse_dims_as_set,
+ )
+ from xarray.core.variable import (
++    UNSUPPORTED_EXTENSION_ARRAY_TYPES,
+     IndexVariable,
+     Variable,
+     as_variable,
+@@ -7281,7 +7282,7 @@ def from_dataframe(cls, dataframe: pd.DataFrame, sparse: bool = False) -> Self:
+         extension_arrays = []
+         for k, v in dataframe.items():
+             if not is_extension_array_dtype(v) or isinstance(
+-                v.array, pd.arrays.DatetimeArray | pd.arrays.TimedeltaArray
++                v.array, UNSUPPORTED_EXTENSION_ARRAY_TYPES
+             ):
+                 arrays.append((k, np.asarray(v)))
+             else:
+diff --git a/xarray/core/extension_array.py b/xarray/core/extension_array.py
+--- a/xarray/core/extension_array.py
++++ b/xarray/core/extension_array.py
+@@ -93,6 +93,13 @@ class PandasExtensionArray(Generic[T_ExtensionArray], NDArrayMixin):
+     def __post_init__(self):
+         if not isinstance(self.array, pd.api.extensions.ExtensionArray):
+             raise TypeError(f"{self.array} is not an pandas ExtensionArray.")
++        # This does not use the UNSUPPORTED_EXTENSION_ARRAY_TYPES whitelist because
++        # we do support extension arrays from datetime, for example, that need
++        # duck array support internally via this class.
++        if isinstance(self.array, pd.arrays.NumpyExtensionArray):
++            raise TypeError(
++                "`NumpyExtensionArray` should be converted to a numpy array in `xarray` internally."
++            )
+ 
+     def __array_function__(self, func, types, args, kwargs):
+         def replace_duck_with_extension_array(args) -> list:
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -1802,8 +1802,12 @@ def __array__(
+ 
+     def get_duck_array(self) -> np.ndarray | PandasExtensionArray:
+         # We return an PandasExtensionArray wrapper type that satisfies
+-        # duck array protocols. This is what's needed for tests to pass.
+-        if pd.api.types.is_extension_array_dtype(self.array):
++        # duck array protocols.
++        # `NumpyExtensionArray` is excluded
++        if pd.api.types.is_extension_array_dtype(self.array) and not isinstance(
++            self.array.array,
++            pd.arrays.NumpyExtensionArray,  # type: ignore[attr-defined]
++        ):
+             from xarray.core.extension_array import PandasExtensionArray
+ 
+             return PandasExtensionArray(self.array.array)
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -63,6 +63,11 @@
+ )
+ # https://github.com/python/mypy/issues/224
+ BASIC_INDEXING_TYPES = integer_types + (slice,)
++UNSUPPORTED_EXTENSION_ARRAY_TYPES = (
++    pd.arrays.DatetimeArray,
++    pd.arrays.TimedeltaArray,
++    pd.arrays.NumpyExtensionArray,  # type: ignore[attr-defined]
++)
+ 
+ if TYPE_CHECKING:
+     from xarray.core.types import (
+@@ -190,6 +195,8 @@ def _maybe_wrap_data(data):
+     """
+     if isinstance(data, pd.Index):
+         return PandasIndexingAdapter(data)
++    if isinstance(data, UNSUPPORTED_EXTENSION_ARRAY_TYPES):
++        return data.to_numpy()
+     if isinstance(data, pd.api.extensions.ExtensionArray):
+         return PandasExtensionArray(data)
+     return data
+@@ -251,7 +258,14 @@ def convert_non_numpy_type(data):
+ 
+     # we don't want nested self-described arrays
+     if isinstance(data, pd.Series | pd.DataFrame):
+-        pandas_data = data.values
++        if (
++            isinstance(data, pd.Series)
++            and pd.api.types.is_extension_array_dtype(data)
++            and not isinstance(data.array, UNSUPPORTED_EXTENSION_ARRAY_TYPES)
++        ):
++            pandas_data = data.array
++        else:
++            pandas_data = data.values  # type: ignore[assignment]
+         if isinstance(pandas_data, NON_NUMPY_SUPPORTED_ARRAY_TYPES):
+             return convert_non_numpy_type(pandas_data)
+         else:

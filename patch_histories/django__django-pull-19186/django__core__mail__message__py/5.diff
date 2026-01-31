@@ -1,0 +1,22 @@
+diff --git a/django/core/mail/message.py b/django/core/mail/message.py
+--- a/django/core/mail/message.py
++++ b/django/core/mail/message.py
+@@ -503,12 +503,12 @@
+             body,
+             from_email,
+             to,
+-            bcc,
+-            connection,
+-            attachments,
+-            headers,
+-            cc,
+-            reply_to,
++            bcc=bcc,
++            connection=connection,
++            attachments=attachments,
++            headers=headers,
++            cc=cc,
++            reply_to=reply_to,
+         )
+         self.alternatives = [
+             EmailAlternative(*alternative) for alternative in (alternatives or [])

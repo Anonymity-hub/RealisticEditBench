@@ -1,0 +1,38 @@
+diff --git a/sphinx/environment/__init__.py b/sphinx/environment/__init__.py
+--- a/sphinx/environment/__init__.py
++++ b/sphinx/environment/__init__.py
+@@ -11,6 +11,7 @@
+ from typing import TYPE_CHECKING
+ 
+ from sphinx import addnodes
++from sphinx.deprecation import _deprecation_warning
+ from sphinx.domains._domains_container import _DomainsContainer
+ from sphinx.environment.adapters import toctree as toctree_adapters
+ from sphinx.errors import (
+@@ -107,7 +108,7 @@ class BuildEnvironment:
+     doctreedir = _StrPathProperty()
+ 
+     def __init__(self, app: Sphinx) -> None:
+-        self.app: Sphinx = app
++        self._app: Sphinx = app
+         self.doctreedir = app.doctreedir
+         self.srcdir = app.srcdir
+         self.config: Config = None  # type: ignore[assignment]
+@@ -237,7 +238,7 @@ def __getstate__(self) -> dict[str, Any]:
+         """Obtains serializable data for pickling."""
+         __dict__ = self.__dict__.copy()
+         # clear unpickleable attributes
+-        __dict__.update(app=None, domains=None, events=None)
++        __dict__.update(_app=None, domains=None, events=None)
+         # clear in-memory doctree caches, to reduce memory consumption and
+         # ensure that, upon restoring the state, the most recent pickled files
+         # on the disk are used instead of those from a possibly outdated state
+@@ -257,7 +258,7 @@ def setup(self, app: Sphinx) -> None:
+         if self.project:
+             app.project.restore(self.project)
+ 
+-        self.app = app
++        self._app = app
+         self.doctreedir = app.doctreedir
+         self.events = app.events
+         self.srcdir = app.srcdir

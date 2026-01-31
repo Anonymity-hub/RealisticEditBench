@@ -1,0 +1,20 @@
+diff --git a/sklearn/linear_model/_ridge.py b/sklearn/linear_model/_ridge.py
+--- a/sklearn/linear_model/_ridge.py
++++ b/sklearn/linear_model/_ridge.py
+@@ -30,7 +30,7 @@
+     _rescale_data,
+ )
+ from sklearn.linear_model._sag import sag_solver
+-from sklearn.metrics import check_scoring, get_scorer_names
++from sklearn.metrics import check_scoring, get_scorer, get_scorer_names
+ from sklearn.model_selection import GridSearchCV
+ from sklearn.preprocessing import LabelBinarizer
+ from sklearn.utils import (
+@@ -1363,6 +1363,7 @@
+         """Return a scorer which corresponds to what's defined in ClassiferMixin
+         parent class. This is used for routing `sample_weight`.
+         """
++        return get_scorer("accuracy")
+ 
+ 
+ class RidgeClassifier(_RidgeClassifierMixin, _BaseRidge):

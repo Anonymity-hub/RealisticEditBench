@@ -1,0 +1,33 @@
+diff --git a/django/http/request.py b/django/http/request.py
+--- a/django/http/request.py
++++ b/django/http/request.py
+@@ -712,18 +712,20 @@
+         return params
+ 
+     def match(self, other):
+-        if self.is_all_types:
+-            return True
+-        other = MediaType(other)
+-        return self.main_type == other.main_type and self.sub_type in {
+-            "*",
+-            other.sub_type,
+-        }
++        if not other:
++            return False
++
++        if not isinstance(other, MediaType):
++            other = MediaType(other)
++
++        main_types = [self.main_type, other.main_type]
++        sub_types = [self.sub_type, other.sub_type]
++
+ 
+     @cached_property
+     def quality(self):
+         try:
+-            quality = float(self.params.get("q", 1))
++            quality = float(self._params.get("q", 1))
+         except ValueError:
+             # Discard invalid values.
+             return 1
+ 

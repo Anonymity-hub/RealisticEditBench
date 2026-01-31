@@ -1,0 +1,138 @@
+diff --git a/sklearn/mixture/_gaussian_mixture.py b/sklearn/mixture/_gaussian_mixture.py
+--- a/sklearn/mixture/_gaussian_mixture.py
++++ b/sklearn/mixture/_gaussian_mixture.py
+@@ -2,11 +2,19 @@
+ 
+ # Authors: The scikit-learn developers
+ # SPDX-License-Identifier: BSD-3-Clause
++import math
+ 
+ import numpy as np
+-from scipy import linalg
+ 
++from .._config import get_config
++from ..externals import array_api_extra as xpx
+ from ..utils import check_array
++from ..utils._array_api import (
++    _cholesky,
++    _linalg_solve,
++    get_namespace,
++    get_namespace_and_device,
++)
+ from ..utils._param_validation import StrOptions
+ from ..utils.extmath import row_norms
+ from ._base import BaseMixture, _check_shape
+@@ -15,7 +23,7 @@
+ # Gaussian mixture shape checkers used by the GaussianMixture class
+ 
+ 
+-def _check_weights(weights, n_components):
++def _check_weights(weights, n_components, xp=None):
+     """Check the user provided 'weights'.
+ 
+     Parameters
+@@ -30,28 +38,28 @@ def _check_weights(weights, n_components):
+     -------
+     weights : array, shape (n_components,)
+     """
+-    weights = check_array(weights, dtype=[np.float64, np.float32], ensure_2d=False)
++    weights = check_array(weights, dtype=[xp.float64, xp.float32], ensure_2d=False)
+     _check_shape(weights, (n_components,), "weights")
+ 
+     # check range
+-    if any(np.less(weights, 0.0)) or any(np.greater(weights, 1.0)):
++    if any(xp.less(weights, 0.0)) or any(xp.greater(weights, 1.0)):
+         raise ValueError(
+             "The parameter 'weights' should be in the range "
+             "[0, 1], but got max value %.5f, min value %.5f"
+-            % (np.min(weights), np.max(weights))
++            % (xp.min(weights), xp.max(weights))
+         )
+ 
+     # check normalization
+-    atol = 1e-6 if weights.dtype == np.float32 else 1e-8
+-    if not np.allclose(np.abs(1.0 - np.sum(weights)), 0.0, atol=atol):
++    atol = 1e-6 if weights.dtype == xp.float32 else 1e-8
++    if not np.allclose(float(xp.abs(1.0 - xp.sum(weights))), 0.0, atol=atol):
+         raise ValueError(
+             "The parameter 'weights' should be normalized, but got sum(weights) = %.5f"
+-            % np.sum(weights)
++            % xp.sum(weights)
+         )
+     return weights
+ 
+ 
+-def _check_means(means, n_components, n_features):
++def _check_means(means, n_components, n_features, xp=None):
+     """Validate the provided 'means'.
+ 
+     Parameters
+@@ -69,34 +77,39 @@ def _check_means(means, n_components, n_features):
+     -------
+     means : array, (n_components, n_features)
+     """
+-    means = check_array(means, dtype=[np.float64, np.float32], ensure_2d=False)
++    xp, _ = get_namespace(means, xp=xp)
++    means = check_array(means, dtype=[xp.float64, xp.float32], ensure_2d=False)
+     _check_shape(means, (n_components, n_features), "means")
+     return means
+ 
+ 
+-def _check_precision_positivity(precision, covariance_type):
++def _check_precision_positivity(precision, covariance_type, xp=None):
+     """Check a precision vector is positive-definite."""
+-    if np.any(np.less_equal(precision, 0.0)):
++    xp, _ = get_namespace(precision, xp=xp)
++    if xp.any(xp.less_equal(precision, 0.0)):
+         raise ValueError("'%s precision' should be positive" % covariance_type)
+ 
+ 
+-def _check_precision_matrix(precision, covariance_type):
++def _check_precision_matrix(precision, covariance_type, xp=None):
+     """Check a precision matrix is symmetric and positive-definite."""
++    xp, _ = get_namespace(precision, xp=xp)
+     if not (
+-        np.allclose(precision, precision.T) and np.all(linalg.eigvalsh(precision) > 0.0)
++        xp.all(xpx.isclose(precision, precision.T))
++        and xp.all(xp.linalg.eigvalsh(precision) > 0.0)
+     ):
+         raise ValueError(
+             "'%s precision' should be symmetric, positive-definite" % covariance_type
+         )
+ 
+ 
+-def _check_precisions_full(precisions, covariance_type):
++def _check_precisions_full(precisions, covariance_type, xp=None):
+     """Check the precision matrices are symmetric and positive-definite."""
+-    for prec in precisions:
+-        _check_precision_matrix(prec, covariance_type)
++    xp, _ = get_namespace(precisions, xp=xp)
++    for i in range(precisions.shape[0]):
++        _check_precision_matrix(precisions[i, :, :], covariance_type, xp=xp)
+ 
+ 
+-def _check_precisions(precisions, covariance_type, n_components, n_features):
++def _check_precisions(precisions, covariance_type, n_components, n_features, xp=None):
+     """Validate user provided precisions.
+ 
+     Parameters
+@@ -119,9 +132,10 @@ def _check_precisions(precisions, covariance_type, n_components, n_features):
+     -------
+     precisions : array
+     """
++    xp, _ = get_namespace(precisions, xp=xp)
+     precisions = check_array(
+         precisions,
+-        dtype=[np.float64, np.float32],
++        dtype=[xp.float64, xp.float32],
+         ensure_2d=False,
+         allow_nd=covariance_type == "full",
+     )
+@@ -142,7 +156,7 @@ def _check_precisions(precisions, covariance_type, n_components, n_features):
+         "diag": _check_precision_positivity,
+         "spherical": _check_precision_positivity,
+     }
+-    _check_precisions[covariance_type](precisions, covariance_type)
++    _check_precisions[covariance_type](precisions, covariance_type, xp=xp)
+     return precisions
+ 

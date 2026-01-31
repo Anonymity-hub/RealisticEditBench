@@ -1,0 +1,21 @@
+diff --git a/sphinx/config.py b/sphinx/config.py
+--- a/sphinx/config.py
++++ b/sphinx/config.py
+@@ -384,9 +384,15 @@
+             if True in valid_types._candidates and value == '1':
+                 return True
+             return value
++        elif type(default) is bool or (bool in valid_types):
++            if value == '0':
++                return False
++            if value == '1':
++                return True
++            if len(valid_types) > 1:
+                 return value
+-            # given falsy string from a command line option
+-            return value not in {'0', ''}
++            msg = __("'%s' must be '0' or '1', got '%s'") % (name, value)
++            raise ConfigError(msg)
+         if isinstance(default, dict):
+             raise ValueError(  # NoQA: TRY004
+                 __(

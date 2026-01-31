@@ -1,0 +1,28 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -781,6 +781,24 @@
+             return dict(self.zarr_group.members())
+         else:
+             return dict(self.zarr_group.items())
++
++    def array_keys(self) -> tuple[str, ...]:
++        from zarr import Array as ZarrArray
++
++        return tuple(
++            key for (key, node) in self.members.items() if isinstance(node, ZarrArray)
++        )
++
++    def arrays(self) -> tuple[tuple[str, ZarrArray], ...]:
++        from zarr import Array as ZarrArray
++
++        return tuple(
++            (key, node)
++            for (key, node) in self.members.items()
++            if isinstance(node, ZarrArray)
++        )
++
++    @property
+     def ds(self):
+         # TODO: consider deprecating this in favor of zarr_group
+         return self.zarr_group

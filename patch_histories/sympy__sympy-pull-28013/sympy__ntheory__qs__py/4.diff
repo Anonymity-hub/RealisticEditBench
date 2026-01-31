@@ -1,0 +1,12 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -426,7 +426,7 @@
+     idx_1000, idx_5000, factor_base = _generate_factor_base(prime_bound, N)
+     threshold = len(factor_base) * 105//100
+     for g in _generate_polynomial(N, M, factor_base, idx_1000, idx_5000, randint):
+-        sieve_array = _gen_sieve_array(M, factor_base)
++        sieve_array = _gen_sieve_array(M, factor_base, g)
+         s_rel, p_f = _trial_division_stage(N, M, factor_base, sieve_array, g, partial_relations, ERROR_TERM)
+         smooth_relations += s_rel
+         for p in p_f:

@@ -1,0 +1,17 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -6027,8 +6027,11 @@ def _pcolorargs(self, funcname, *args, shading='auto', **kwargs):
+                 # grid is specified at the center, so define corners
+                 # at the midpoints between the grid centers and then use the
+                 # flat algorithm.
+-                def _interp_grid(X):
+-                    # helper for below
++                def _interp_grid(X, require_monotonicity=False):
++                    # helper for below. To ensure the cell edges are calculated
++                    # correctly, when expanding columns, the monotonicity of
++                    # X coords needs to be checked. When expanding rows, the
++                    # monotonicity of Y coords needs to be checked.
+                     if np.shape(X)[1] > 1:
+                         dX = np.diff(X, axis=1) * 0.5
+                         if not (np.all(dX >= 0) or np.all(dX <= 0)):

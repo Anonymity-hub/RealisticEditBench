@@ -1,0 +1,13 @@
+diff --git a/django/core/mail/__init__.py b/django/core/mail/__init__.py
+--- a/django/core/mail/__init__.py
++++ b/django/core/mail/__init__.py
+@@ -49,7 +49,8 @@
+ ]
+
+
+-def get_connection(backend=None, fail_silently=False, **kwds):
++@deprecate_posargs(RemovedInDjango70Warning, ["fail_silently"])
++def get_connection(backend=None, *, fail_silently=False, **kwds):
+     """Load an email backend and return an instance of it.
+
+     If backend is None (default), use settings.EMAIL_BACKEND.

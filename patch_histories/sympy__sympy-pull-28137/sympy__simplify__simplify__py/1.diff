@@ -1,0 +1,13 @@
+diff --git a/sympy/simplify/simplify.py b/sympy/simplify/simplify.py
+--- a/sympy/simplify/simplify.py
++++ b/sympy/simplify/simplify.py
+@@ -1824,7 +1824,8 @@ def compare(s, alt_s):
+                             not isinstance(args[i].args[0], _Symbol)):
+                 subterm = args[i].args[0].args
+                 l = len(subterm)
+-                if args[i-l:i] == subterm:
++                # Only apply optimization if power base matches subterm pattern
++                if (args[i-l:i] == subterm and
+                     # e.g. a*b in a*b*(a*b)**2 is not repeated
+                     # in args (= [a, b, (a*b)**2]) but it
+                     # can be matched here

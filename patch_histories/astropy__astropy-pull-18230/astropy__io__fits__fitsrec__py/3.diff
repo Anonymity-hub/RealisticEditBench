@@ -1,0 +1,11 @@
+diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py
+--- a/astropy/io/fits/fitsrec.py
++++ b/astropy/io/fits/fitsrec.py
+@@ -1383,6 +1383,7 @@
+     if out is not None:
+         out = out.view(out_dtype)
+     if inarray.size == 0:
++        return out
+ 
+     op_dtypes = [inarray.dtype, out_dtype]
+     op_flags = [["readonly"], ["writeonly", "allocate"]]

@@ -1,0 +1,11 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -1771,6 +1771,7 @@
+     if _zarr_v3():
+         # zarr 3.0.8 and earlier did not support this property - it was effectively assumed true
+         if not getattr(store, "supports_consolidated_metadata", True):
++            consolidated = consolidate_on_close = False
+ 
+     if consolidated in [None, True]:
+         # open the root of the store, in case there is metadata consolidated there

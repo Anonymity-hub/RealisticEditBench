@@ -1,0 +1,14 @@
+diff --git a/xarray/core/duck_array_ops.py b/xarray/core/duck_array_ops.py
+--- a/xarray/core/duck_array_ops.py
++++ b/xarray/core/duck_array_ops.py
+@@ -721,8 +721,8 @@
+ 
+     array = asarray(array)
+     if dtypes.is_datetime_like(array.dtype):
+-        offset = _datetime_nanmin(array)
+-
++        dmin = _datetime_nanreduce(array, min).astype("datetime64[Y]").astype(int)
++        dmax = _datetime_nanreduce(array, max).astype("datetime64[Y]").astype(int)
+         # From version 2025.01.2 xarray uses np.datetime64[unit], where unit
+         # is one of "s", "ms", "us", "ns".
+         # To not have to worry about the resolution, we just convert the output

@@ -1,0 +1,12 @@
+diff --git a/lib/mpl_toolkits/axes_grid1/parasite_axes.py b/lib/mpl_toolkits/axes_grid1/parasite_axes.py
+--- a/lib/mpl_toolkits/axes_grid1/parasite_axes.py
++++ b/lib/mpl_toolkits/axes_grid1/parasite_axes.py
+@@ -25,6 +25,8 @@ def clear(self):
+         self._parent_axes.callbacks._connect_picklable(
+             "ylim_changed", self._sync_lims)
+ 
++    def get_axes_locator(self):
++
+     def pick(self, mouseevent):
+         # This most likely goes to Artist.pick (depending on axes_class given
+         # to the factory), which only handles pick events registered on the

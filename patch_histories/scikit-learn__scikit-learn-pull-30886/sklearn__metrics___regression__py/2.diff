@@ -1,0 +1,25 @@
+diff --git a/sklearn/metrics/_regression.py b/sklearn/metrics/_regression.py
+--- a/sklearn/metrics/_regression.py
++++ b/sklearn/metrics/_regression.py
+@@ -111,9 +111,11 @@
+     """
+     xp, _ = get_namespace(y_true, y_pred, multioutput, xp=xp)
+ 
+-    check_consistent_length(y_true, y_pred)
++    check_consistent_length(y_true, y_pred, sample_weight)
+     y_true = check_array(y_true, ensure_2d=False, dtype=dtype)
+     y_pred = check_array(y_pred, ensure_2d=False, dtype=dtype)
++    if sample_weight is not None:
++        sample_weight = _check_sample_weight(sample_weight, y_true, dtype=dtype)
+ 
+     if y_true.ndim == 1:
+         y_true = xp.reshape(y_true, (-1, 1))
+@@ -149,7 +151,7 @@
+             )
+     y_type = "continuous" if n_outputs == 1 else "continuous-multioutput"
+ 
+-    return y_type, y_true, y_pred, multioutput
++    return y_type, y_true, y_pred, sample_weight, multioutput
+ 
+ 
+ def _check_reg_targets_with_floating_dtype(

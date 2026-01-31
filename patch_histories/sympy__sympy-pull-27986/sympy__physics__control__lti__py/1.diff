@@ -1,0 +1,24 @@
+diff --git a/sympy/physics/control/lti.py b/sympy/physics/control/lti.py
+--- a/sympy/physics/control/lti.py
++++ b/sympy/physics/control/lti.py
+@@ -4973,6 +4973,20 @@ def append(self, other):
+         D[self.num_outputs:, self.num_inputs:] = other._D
+         return StateSpace(A, B, C, D)
+ 
++    def _calc_orthogonal_complement(self, M, dim):
++        """
++        Returns a basis of the orthogonal complement of a subspace
++        represented by the matrix M.
++        The orthogonal complement is computed as the null space of the
++        transpose of M.
++
++        """
++        if M.shape[0] == 0:
++            return eye(dim).columnspace()
++
++        return M.T.nullspace()
++
++    def apply_similarity_transform(self, transform_matrix):
+     def observability_matrix(self):
+         """
+         Returns the observability matrix of the state space model:

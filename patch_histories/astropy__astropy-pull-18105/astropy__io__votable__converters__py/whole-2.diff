@@ -1,0 +1,37 @@
+diff --git a/astropy/io/votable/converters.py b/astropy/io/votable/converters.py
+--- a/astropy/io/votable/converters.py
++++ b/astropy/io/votable/converters.py
+@@ -325,7 +325,6 @@ def __init__(self, field, config=None, pos=None):
+         else:
+             # Check if this is a bounded variable-length field
+             is_variable = field.arraysize.endswith("*")
+-
+             numeric_part = field.arraysize.removesuffix("*")
+             try:
+                 self.arraysize = int(numeric_part)
+@@ -444,9 +443,8 @@ def __init__(self, field, config=None, pos=None):
+             self.binoutput = self._binoutput_var
+             self.arraysize = "*"
+         else:
++            # Check if this is a bounded variable-length field
+             is_variable = field.arraysize.endswith("*")
+-
+-            # Get numeric part without modifying field.arraysize
+             numeric_part = field.arraysize.removesuffix("*")
+             try:
+                 self.arraysize = int(numeric_part)
+@@ -494,12 +492,11 @@ def _binoutput_var(self, value, mask):
+         if mask or value is None or value == "":
+             return _zero_int
+ 
+-        encoded = value.encode("utf_16_be")
+-
+         if self.arraysize != "*" and len(value) > self.arraysize:
+             vo_warn(W46, ("unicodeChar", self.arraysize), None, None)
+             value = value[: self.arraysize]
+-            encoded = value.encode("utf_16_be")
++
++        encoded = value.encode("utf_16_be")
+ 
+         return self._write_length(len(encoded) // 2) + encoded
+ 

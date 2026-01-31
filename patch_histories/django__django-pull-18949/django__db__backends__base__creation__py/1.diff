@@ -1,0 +1,15 @@
+diff --git a/django/db/backends/base/creation.py b/django/db/backends/base/creation.py
+--- a/django/db/backends/base/creation.py
++++ b/django/db/backends/base/creation.py
+@@ -29,8 +29,10 @@ def _nodb_cursor(self):
+     def log(self, msg):
+         sys.stderr.write(msg + os.linesep)
+ 
++    # RemovedInDjango70Warning: When the deprecation ends, replace with:
++    # def create_test_db(self, verbosity=1, autoclobber=False, keepdb=False):
+     def create_test_db(
+-        self, verbosity=1, autoclobber=False, serialize=True, keepdb=False
++        self, verbosity=1, autoclobber=False, serialize=None, keepdb=False
+     ):
+         """
+         Create a test database, prompting the user for confirmation if the

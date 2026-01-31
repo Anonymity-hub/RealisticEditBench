@@ -1,0 +1,24 @@
+diff --git a/astropy/utils/data.py b/astropy/utils/data.py
+--- a/astropy/utils/data.py
++++ b/astropy/utils/data.py
+@@ -213,7 +213,7 @@
+     """Yield a readable, seekable file-like object from a file or URL.
+ 
+     This supports passing filenames, URLs, and readable file-like objects,
+-    any of which can be compressed in gzip, bzip2 or lzma (xz) if the
++    any of which can be compressed in gzip, bzip2, lzma (xz) or lzw (Z) if the
+     appropriate compression libraries are provided by the Python installation.
+ 
+     Notes
+@@ -447,9 +447,6 @@
+         else:
+             fileobj_new.seek(0)
+             fileobj = fileobj_new
+-
+-    # By this point, we have a file, io.FileIO, gzip.GzipFile, bz2.BZ2File
+-    # or lzma.LZMAFile instance opened in binary mode (that is, read
+-    # returns bytes).  Now we need to, if requested, wrap it in a
++    elif signature
+     # io.TextIOWrapper so read will return unicode based on the
+     # encoding parameter.
+ 

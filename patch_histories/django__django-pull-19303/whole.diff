@@ -1,0 +1,46 @@
+diff --git a/django/db/migrations/writer.py b/django/db/migrations/writer.py
+--- a/django/db/migrations/writer.py
++++ b/django/db/migrations/writer.py
+@@ -131,6 +131,8 @@ def as_string(self):
+         items = {
+             "replaces_str": "",
+             "initial_str": "",
++            "run_before_str": "",
++            "atomic_str": "",
+         }
+ 
+         imports = set()
+@@ -189,11 +191,14 @@ def as_string(self):
+                 "then update the\n# RunPython operations to refer to the local "
+                 "versions:\n# %s"
+             ) % "\n# ".join(sorted(migration_imports))
+-        # If there's a replaces, make a string for it
+         if self.migration.replaces:
+             items["replaces_str"] = (
+                 "\n    replaces = %s\n" % self.serialize(self.migration.replaces)[0]
+             )
++        if self.migration.run_before:
++            items["run_before_str"] = (
++                "\n    run_before = %s\n" % self.serialize(self.migration.run_before)[0]
++            )
+         # Hinting that goes into comment
+         if self.include_header:
+             items["migration_header"] = MIGRATION_HEADER_TEMPLATE % {
+@@ -205,6 +210,8 @@ def as_string(self):
+ 
+         if self.migration.initial:
+             items["initial_str"] = "\n    initial = True\n"
++        if not self.migration.atomic:
++            items["atomic_str"] = "\n    atomic = False\n"
+ 
+         return MIGRATION_TEMPLATE % items
+ 
+@@ -305,7 +312,7 @@ def unregister_serializer(cls, type_):
+ %(migration_header)s%(imports)s
+ 
+ class Migration(migrations.Migration):
+-%(replaces_str)s%(initial_str)s
++%(replaces_str)s%(initial_str)s%(atomic_str)s%(run_before_str)s
+     dependencies = [
+ %(dependencies)s\
+     ]

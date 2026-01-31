@@ -1,0 +1,277 @@
+diff --git a/sphinx/ext/intersphinx/_cli.py b/sphinx/ext/intersphinx/_cli.py
+--- a/sphinx/ext/intersphinx/_cli.py
++++ b/sphinx/ext/intersphinx/_cli.py
+@@ -28,15 +28,15 @@ def inspect_main(argv: list[str], /) -> int:
+     )
+ 
+     try:
+-        inv_data = _fetch_inventory(
++        inv = _fetch_inventory(
+             target_uri='',
+             inv_location=filename,
+             config=config,
+             srcdir=Path(),
+         )
+-        for key in sorted(inv_data or {}):
++        for key in sorted(inv.data):
+             print(key)
+-            inv_entries = sorted(inv_data[key].items())
++            inv_entries = sorted(inv.data[key].items())
+             for entry, inv_item in inv_entries:
+                 display_name = inv_item.display_name
+                 display_name = display_name * (display_name != '-')
+diff --git a/sphinx/ext/intersphinx/_load.py b/sphinx/ext/intersphinx/_load.py
+--- a/sphinx/ext/intersphinx/_load.py
++++ b/sphinx/ext/intersphinx/_load.py
+@@ -30,7 +30,7 @@
+         InventoryName,
+         InventoryURI,
+     )
+-    from sphinx.util.typing import Inventory
++    from sphinx.util.typing import Inventory, _Inventory
+ 
+ 
+ def validate_intersphinx_mapping(app: Sphinx, config: Config) -> None:
+@@ -245,36 +245,36 @@ def _fetch_inventory_group(
+     for location in project.locations:
+         # location is either None or a non-empty string
+         if location is None:
+-            inv = posixpath.join(project.target_uri, INVENTORY_FILENAME)
++            inv_location = posixpath.join(project.target_uri, INVENTORY_FILENAME)
+         else:
+-            inv = location
++            inv_location = location
+ 
+         # decide whether the inventory must be read: always read local
+         # files; remote ones only if the cache time is expired
+         if (
+-            '://' not in inv
++            '://' not in inv_location
+             or project.target_uri not in cache
+             or cache[project.target_uri][1] < cache_time
+         ):
+             LOGGER.info(
+                 __("loading intersphinx inventory '%s' from %s ..."),
+                 project.name,
+-                _get_safe_url(inv),
++                _get_safe_url(inv_location),
+             )
+ 
+             try:
+-                invdata = _fetch_inventory(
++                inv = _fetch_inventory(
+                     target_uri=project.target_uri,
+-                    inv_location=inv,
++                    inv_location=inv_location,
+                     config=config,
+                     srcdir=srcdir,
+                 )
+             except Exception as err:
+                 failures.append(err.args)
+                 continue
+ 
+-            if invdata:
+-                cache[project.target_uri] = project.name, now, invdata
++            if inv:
++                cache[project.target_uri] = project.name, now, inv.data
+                 updated = True
+                 break
+ 
+@@ -306,12 +306,12 @@ def fetch_inventory(app: Sphinx, uri: InventoryURI, inv: str) -> Inventory:
+         inv_location=inv,
+         config=_InvConfig.from_config(app.config),
+         srcdir=app.srcdir,
+-    )
++    ).data
+ 
+ 
+ def _fetch_inventory(
+     *, target_uri: InventoryURI, inv_location: str, config: _InvConfig, srcdir: Path
+-) -> Inventory:
++) -> _Inventory:
+     """Fetch, parse and return an intersphinx inventory file."""
+     # both *target_uri* (base URI of the links to generate)
+     # and *inv_location* (actual location of the inventory file)
+@@ -327,11 +327,11 @@ def _fetch_inventory(
+         raw_data = _fetch_inventory_file(inv_location=inv_location, srcdir=srcdir)
+ 
+     try:
+-        invdata = InventoryFile.loads(raw_data, uri=target_uri)
++        inv = InventoryFile.loads(raw_data, uri=target_uri)
+     except ValueError as exc:
+         msg = f'unknown or unsupported inventory version: {exc!r}'
+         raise ValueError(msg) from exc
+-    return invdata
++    return inv
+ 
+ 
+ def _fetch_inventory_url(
+diff --git a/sphinx/ext/intersphinx/_resolve.py b/sphinx/ext/intersphinx/_resolve.py
+--- a/sphinx/ext/intersphinx/_resolve.py
++++ b/sphinx/ext/intersphinx/_resolve.py
+@@ -31,7 +31,7 @@
+     from sphinx.environment import BuildEnvironment
+     from sphinx.ext.intersphinx._shared import InventoryName
+     from sphinx.util.inventory import _InventoryItem
+-    from sphinx.util.typing import Inventory, RoleFunction
++    from sphinx.util.typing import RoleFunction, _Inventory
+ 
+ 
+ def _create_element_from_result(
+@@ -75,7 +75,7 @@ def _create_element_from_result(
+ 
+ def _resolve_reference_in_domain_by_target(
+     inv_name: InventoryName | None,
+-    inventory: Inventory,
++    inventory: _Inventory,
+     domain_name: str,
+     objtypes: Iterable[str],
+     target: str,
+@@ -139,7 +139,7 @@ def _resolve_reference_in_domain_by_target(
+ 
+ def _resolve_reference_in_domain(
+     inv_name: InventoryName | None,
+-    inventory: Inventory,
++    inventory: _Inventory,
+     honor_disabled_refs: bool,
+     disabled_reftypes: Set[str],
+     domain: Domain,
+@@ -190,7 +190,7 @@ def _resolve_reference_in_domain(
+ def _resolve_reference(
+     inv_name: InventoryName | None,
+     domains: _DomainsContainer,
+-    inventory: Inventory,
++    inventory: _Inventory,
+     honor_disabled_refs: bool,
+     disabled_reftypes: Set[str],
+     node: pending_xref,
+diff --git a/sphinx/util/inventory.py b/sphinx/util/inventory.py
+--- a/sphinx/util/inventory.py
++++ b/sphinx/util/inventory.py
+@@ -47,7 +47,7 @@ def loads(
+         content: bytes,
+         *,
+         uri: str,
+-    ) -> Inventory:
++    ) -> _Inventory:
+         format_line, _, content = content.partition(b'\n')
+         format_line = format_line.rstrip()  # remove trailing \r or spaces
+         if format_line == b'# Sphinx inventory version 2':
+@@ -64,14 +64,14 @@ def loads(
+ 
+     @classmethod
+     def load(cls, stream: _SupportsRead, uri: str, joinfunc: _JoinFunc) -> Inventory:
+-        return cls.loads(stream.read(), uri=uri)
++        return cls.loads(stream.read(), uri=uri).data
+ 
+     @classmethod
+-    def _loads_v1(cls, lines: Sequence[str], *, uri: str) -> Inventory:
++    def _loads_v1(cls, lines: Sequence[str], *, uri: str) -> _Inventory:
+         if len(lines) < 2:
+             msg = 'invalid inventory header: missing project name or version'
+             raise ValueError(msg)
+-        invdata: Inventory = {}
++        inv = _Inventory({})
+         projname = lines[0].rstrip()[11:]  # Project name
+         version = lines[1].rstrip()[11:]  # Project version
+         for line in lines[2:]:
+@@ -84,25 +84,25 @@ def _loads_v1(cls, lines: Sequence[str], *, uri: str) -> Inventory:
+             else:
+                 item_type = f'py:{item_type}'
+                 location += f'#{name}'
+-            invdata.setdefault(item_type, {})[name] = _InventoryItem(
++            inv[item_type, name] = _InventoryItem(
+                 project_name=projname,
+                 project_version=version,
+                 uri=location,
+                 display_name='-',
+             )
+-        return invdata
++        return inv
+ 
+     @classmethod
+-    def _loads_v2(cls, inv_data: bytes, *, uri: str) -> Inventory:
++    def _loads_v2(cls, inv_data: bytes, *, uri: str) -> _Inventory:
+         try:
+             line_1, line_2, check_line, compressed = inv_data.split(b'\n', maxsplit=3)
+         except ValueError:
+             msg = 'invalid inventory header: missing project name or version'
+             raise ValueError(msg) from None
+-        invdata: Inventory = {}
++        inv = _Inventory({})
+         projname = line_1.rstrip()[11:].decode()  # Project name
+         version = line_2.rstrip()[11:].decode()  # Project version
+-        # definition -> priority, location, display name
++        # definition -> (priority, location, display name)
+         potential_ambiguities: dict[str, tuple[str, str, str]] = {}
+         actual_ambiguities = set()
+         if b'zlib' not in check_line:  # '... compressed using zlib'
+@@ -125,7 +125,7 @@ def _loads_v2(cls, inv_data: bytes, *, uri: str) -> Inventory:
+                 #
+                 # Note: To avoid the regex DoS, this is implemented in python (refs: #8175)
+                 continue
+-            if type == 'py:module' and type in invdata and name in invdata[type]:
++            if type == 'py:module' and (type, name) in inv:
+                 # due to a bug in 1.1 and below,
+                 # two inventory entries are created
+                 # for Python modules, and the first
+@@ -154,7 +154,7 @@ def _loads_v2(cls, inv_data: bytes, *, uri: str) -> Inventory:
+             if location.endswith('$'):
+                 location = location[:-1] + name
+             location = posixpath.join(uri, location)
+-            invdata.setdefault(type, {})[name] = _InventoryItem(
++            inv[type, name] = _InventoryItem(
+                 project_name=projname,
+                 project_version=version,
+                 uri=location,
+@@ -168,7 +168,7 @@ def _loads_v2(cls, inv_data: bytes, *, uri: str) -> Inventory:
+                 type='intersphinx',
+                 subtype='external',
+             )
+-        return invdata
++        return inv
+ 
+     @classmethod
+     def dump(
+@@ -206,6 +206,41 @@ def escape(string: str) -> str:
+             f.write(compressor.flush())
+ 
+ 
++class _Inventory:
++    """Inventory data in memory."""
++
++    __slots__ = ('data',)
++
++    data: dict[str, dict[str, _InventoryItem]]
++
++    def __init__(self, data: dict[str, dict[str, _InventoryItem]], /) -> None:
++        # type -> name -> _InventoryItem
++        self.data: dict[str, dict[str, _InventoryItem]] = data
++
++    def __repr__(self) -> str:
++        return f'_Inventory({self.data!r})'
++
++    def __eq__(self, other: object) -> bool:
++        if not isinstance(other, _Inventory):
++            return NotImplemented
++        return self.data == other.data
++
++    def __hash__(self) -> int:
++        return hash(self.data)
++
++    def __getitem__(self, item: tuple[str, str]) -> _InventoryItem:
++        obj_type, name = item
++        return self.data.setdefault(obj_type, {})[name]
++
++    def __setitem__(self, item: tuple[str, str], value: _InventoryItem) -> None:
++        obj_type, name = item
++        self.data.setdefault(obj_type, {})[name] = value
++
++    def __contains__(self, item: tuple[str, str]) -> bool:
++        obj_type, name = item
++        return obj_type in self.data and name in self.data[obj_type]
++
++
+ class _InventoryItem:
+     __slots__ = 'project_name', 'project_version', 'uri', 'display_name'
+ 

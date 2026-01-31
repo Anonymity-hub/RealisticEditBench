@@ -1,0 +1,12 @@
+diff --git a/lib/mpl_toolkits/mplot3d/axes3d.py b/lib/mpl_toolkits/mplot3d/axes3d.py
+--- a/lib/mpl_toolkits/mplot3d/axes3d.py
++++ b/lib/mpl_toolkits/mplot3d/axes3d.py
+@@ -283,6 +283,8 @@
+         --------
+         mpl_toolkits.mplot3d.axes3d.Axes3D.set_box_aspect
+         """
++        if adjustable is None:
++            adjustable = 'box'
+         _api.check_in_list(('auto', 'equal', 'equalxy', 'equalyz', 'equalxz'),
+                            aspect=aspect)
+         self._aspect = aspect

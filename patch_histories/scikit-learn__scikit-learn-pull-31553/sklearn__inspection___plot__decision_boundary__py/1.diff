@@ -1,0 +1,24 @@
+diff --git a/sklearn/inspection/_plot/decision_boundary.py b/sklearn/inspection/_plot/decision_boundary.py
+--- a/sklearn/inspection/_plot/decision_boundary.py
++++ b/sklearn/inspection/_plot/decision_boundary.py
+@@ -221,9 +221,17 @@ def plot(self, plot_method="contourf", ax=None, xlabel=None, ylabel=None, **kwar
+             self.surface_ = plot_func(self.xx0, self.xx1, self.response, **kwargs)
+         else:  # self.response.ndim == 3
+             n_responses = self.response.shape[-1]
+-            if (
+-                isinstance(self.multiclass_colors, str)
+-                or self.multiclass_colors is None
++            for kwarg in ("cmap", "colors"):
++                if kwarg in kwargs:
++                    warnings.warn(
++                        f"'{kwarg}' is ignored in favor of 'multiclass_colors' "
++                        "in the multiclass case when the response method is "
++                        "'decision_function' or 'predict_proba'."
++                    )
++                    del kwargs[kwarg]
++
++            if self.multiclass_colors is None or isinstance(
++                self.multiclass_colors, str
+             ):
+                 if isinstance(self.multiclass_colors, str):
+                     cmap = self.multiclass_colors

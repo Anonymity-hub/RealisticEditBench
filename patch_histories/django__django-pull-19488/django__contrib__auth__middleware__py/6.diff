@@ -1,0 +1,12 @@
+diff --git a/django/contrib/auth/middleware.py b/django/contrib/auth/middleware.py
+--- a/django/contrib/auth/middleware.py
++++ b/django/contrib/auth/middleware.py
+@@ -216,7 +216,7 @@
+         # persisted in the session and we don't need to continue.
+         if user.is_authenticated:
+             if user.get_username() == self.clean_username(username, request):
+-                return await self.get_response(request)
++                return
+             else:
+                 # An authenticated user is associated with the request, but
+                 # it does not match the authorized user in the header.

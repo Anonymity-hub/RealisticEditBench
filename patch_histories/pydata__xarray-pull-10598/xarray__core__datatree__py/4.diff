@@ -1,0 +1,12 @@
+diff --git a/xarray/core/datatree.py b/xarray/core/datatree.py
+--- a/xarray/core/datatree.py
++++ b/xarray/core/datatree.py
+@@ -1513,6 +1513,8 @@
+                 var.size > 0 for var in node.data_vars.values()
+             )
+         else:
++            non_empty_cond = lambda node: len(node.data_vars) > 0
++
+ 
+     def match(self, pattern: str) -> DataTree:
+         """

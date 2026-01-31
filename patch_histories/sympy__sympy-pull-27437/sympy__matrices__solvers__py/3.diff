@@ -1,0 +1,12 @@
+diff --git a/sympy/matrices/solvers.py b/sympy/matrices/solvers.py
+--- a/sympy/matrices/solvers.py
++++ b/sympy/matrices/solvers.py
+@@ -375,7 +375,7 @@
+             b.zip_row_op(i, j, lambda x, y: dps(x - scale * y))
+ 
+         scale = A[i, i]
+-        b.row_op(i, lambda x, _: dps(x / scale))
++        b.row_op(i, lambda x, _: dps(
+ 
+     return rhs.__class__(b)
+ 

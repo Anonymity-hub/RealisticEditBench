@@ -1,0 +1,14 @@
+diff --git a/xarray/backends/api.py b/xarray/backends/api.py
+--- a/xarray/backends/api.py
++++ b/xarray/backends/api.py
+@@ -133,6 +133,10 @@
+         if importlib.util.find_spec(module_name) is not None:
+             return cast(Literal["netcdf4", "h5netcdf", "scipy"], engine)
+ 
++    raise ValueError(
++        "cannot read or write NetCDF files because none of "
++        "'netCDF4-python', 'h5netcdf', or 'scipy' are installed"
++    )
+ 
+ 
+ def _get_default_engine(path: str, allow_remote: bool = False) -> T_NetcdfEngine:

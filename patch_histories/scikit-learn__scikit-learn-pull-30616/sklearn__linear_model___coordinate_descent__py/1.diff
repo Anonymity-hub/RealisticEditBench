@@ -1,0 +1,32 @@
+diff --git a/sklearn/linear_model/_coordinate_descent.py b/sklearn/linear_model/_coordinate_descent.py
+--- a/sklearn/linear_model/_coordinate_descent.py
++++ b/sklearn/linear_model/_coordinate_descent.py
+@@ -23,7 +23,7 @@
+     _raise_for_params,
+     get_routing_for_object,
+ )
+-from ..utils._param_validation import Interval, StrOptions, validate_params
++from ..utils._param_validation import Hidden, Interval, StrOptions, validate_params
+ from ..utils.extmath import safe_sparse_dot
+ from ..utils.metadata_routing import (
+     _routing_enabled,
+@@ -1493,8 +1493,17 @@ class LinearModelCV(MultiOutputMixin, LinearModel, ABC):
+ 
+     _parameter_constraints: dict = {
+         "eps": [Interval(Real, 0, None, closed="neither")],
+-        "n_alphas": [Interval(Integral, 1, None, closed="left")],
+-        "alphas": ["array-like", None],
++        "n_alphas": [
++            Interval(Integral, 1, None, closed="left"),
++            Hidden(StrOptions({"deprecated"})),
++        ],
++        # TODO(1.9): remove "warn" and None options.
++        "alphas": [
++            Interval(Integral, 1, None, closed="left"),
++            "array-like",
++            None,
++            Hidden(StrOptions({"warn"})),
++        ],
+         "fit_intercept": ["boolean"],
+         "precompute": [StrOptions({"auto"}), "array-like", "boolean"],
+         "max_iter": [Interval(Integral, 1, None, closed="left")],

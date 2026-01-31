@@ -1,0 +1,14 @@
+diff --git a/sphinx/io.py b/sphinx/io.py
+--- a/sphinx/io.py
++++ b/sphinx/io.py
+@@ -70,8 +70,8 @@ def new_document(self) -> nodes.document:
+ class SphinxStandaloneReader(SphinxBaseReader):
+     """A basic document reader for Sphinx."""
+ 
+-    def _setup_transforms(self, *, registry: SphinxComponentRegistry) -> None:
+-        self.transforms = self.transforms + registry.get_transforms()
++    def _setup_transforms(self, transforms: list[type[Transform]], /) -> None:
++        self.transforms = self.transforms + transforms
+ 
+     def read(self, source: Input, parser: Parser, settings: Values) -> nodes.document:  # type: ignore[type-arg]
+         self.source = source

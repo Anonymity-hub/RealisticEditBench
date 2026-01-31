@@ -1,0 +1,14 @@
+diff --git a/xarray/core/treenode.py b/xarray/core/treenode.py
+--- a/xarray/core/treenode.py
++++ b/xarray/core/treenode.py
+@@ -42,6 +42,10 @@ def __init__(self, *pathsegments):
+             )
+         # TODO should we also forbid suffixes to avoid node names with dots in them?
+ 
++    def absolute(self) -> Self:
++        """Convert into an absolute path."""
++        return type(self)("/", *self.parts)
++
+ 
+ class TreeNode:
+     """

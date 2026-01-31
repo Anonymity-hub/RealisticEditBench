@@ -1,0 +1,85 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -524,7 +524,7 @@
+             self.get_attr,
+             self.config.autodoc_inherit_docstrings,
+             self.parent,
+-            self.object_name,
++            self.props.object_name,
+         )
+         if docstring:
+             tab_width = self.directive.state.document.settings.tab_width
+@@ -574,8 +574,8 @@
+         sourcename = self.get_sourcename()
+         if self.analyzer:
+             attr_docs = self.analyzer.find_attr_docs()
+-            if self.objpath:
+-                key = ('.'.join(self.objpath[:-1]), self.objpath[-1])
++            if self.props.parts:
++                key = ('.'.join(self.props.parts[:-1]), self.props.parts[-1])
+                 if key in attr_docs:
+                     docstring = False
+                     # make a copy of docstring for attributes to avoid cache
+@@ -661,7 +661,7 @@
+         ret = []
+ 
+         # search for members in source code too
+-        namespace = '.'.join(self.objpath)  # will be empty for modules
++        namespace = self.props.dotted_parts  # will be empty for modules
+ 
+         if self.analyzer:
+             attr_docs = self.analyzer.find_attr_docs()
+@@ -808,9 +808,9 @@
+         *self.options.members*.
+         """
+         # set current namespace for finding members
+-        self._current_document.autodoc_module = self.modname
+-        if self.objpath:
+-            self._current_document.autodoc_class = self.objpath[0]
++        self._current_document.autodoc_module = self.props.module_name
++        if self.props.parts:
++            self._current_document.autodoc_class = self.props.parts[0]
+ 
+         want_all = bool(
+             all_members or self.options.inherited_members or self.options.members is ALL
+@@ -833,7 +833,8 @@
+             classes.sort(key=lambda cls: cls.priority)
+             # give explicitly separated module name, so that members
+             # of inner classes can be documented
+-            full_mname = f'{self.modname}::' + '.'.join((*self.objpath, mname))
++            module_prefix = f'{self.props.module_name}::'
++            full_mname = module_prefix + '.'.join((*self.props.parts, mname))
+             documenter = classes[-1](self.directive, full_mname, self.indent)
+             member_documenters.append((documenter, isattr))
+
+@@ -1241,7 +1242,7 @@
+         sigs = []
+         if (
+             self.analyzer
+-            and '.'.join(self.objpath) in self.analyzer.overloads
++            and self.props.dotted_parts in self.analyzer.overloads
+             and self.config.autodoc_typehints != 'none'
+         ):
+             # Use signatures for overloaded functions instead of the implementation function.
+@@ -1619,7 +1620,7 @@
+         if isinstance(self.object, NewType | TypeVar):
+             return
+ 
+-        if self.analyzer and '.'.join(self.objpath) in self.analyzer.finals:
++        if self.analyzer and self.props.dotted_parts in self.analyzer.finals:
+             self.add_line('   :final:', sourcename)
+ 
+         canonical_fullname = self.get_canonical_fullname()
+@@ -1752,9 +1753,9 @@
+ 
+     def get_variable_comment(self) -> list[str] | None:
+         try:
+-            key = ('', '.'.join(self.objpath))
++            key = ('', self.props.dotted_parts)
+             if self.props.doc_as_attr:
+-                analyzer = ModuleAnalyzer.for_module(self.modname)
++                analyzer = ModuleAnalyzer.for_module(self.props.module_name)
+             else:
+                 analyzer = ModuleAnalyzer.for_module(
+                     self.props._obj___module__ or self.props.module_name

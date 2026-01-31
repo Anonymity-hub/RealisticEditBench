@@ -1,0 +1,14 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -1061,9 +1061,7 @@
+         words = _words_group(value, value_length, first_value_length)
+         output = []
+         for idx, word in enumerate(words):
+-            if idx == 0:
+-                headstr = "{:{len}}= ".format(self.keyword, len=KEYWORD_LENGTH)
+-            else:
++            if idx > 0:
+                 headstr = "CONTINUE  "
+ 
+             # If this is the final CONTINUE remove the '&'

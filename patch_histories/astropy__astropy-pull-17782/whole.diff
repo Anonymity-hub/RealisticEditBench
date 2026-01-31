@@ -1,0 +1,79 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -428,14 +428,13 @@ def rawvalue(self):
+     @property
+     def comment(self):
+         """Get the comment attribute from the card image if not already set."""
+-        if self._comment is not None:
+-            return self._comment
+-        elif self._image:
+-            self._comment = self._parse_comment()
+-            return self._comment
++        if self._comment is None:
++            self._comment = self._parse_comment() if self._image else ""
++
++        if conf.strip_header_whitespace and isinstance(self._comment, str):
++            return self._comment.rstrip()
+         else:
+-            self._comment = ""
+-            return ""
++            return self._comment
+ 
+     @comment.setter
+     def comment(self, comment):
+@@ -1029,7 +1028,9 @@ def _format_image(self):
+             # longstring case (CONTINUE card)
+             # try not to use CONTINUE if the string value can fit in one line.
+             # Instead, just truncate the comment
+-            if isinstance(self.value, str) and len(value) > (self.length - 10):
++            if isinstance(self.value, str) and len(value) > (
++                self.length - len(keyword) - 2
++            ):
+                 output = self._format_long_image()
+             else:
+                 warnings.warn(
+@@ -1054,7 +1055,7 @@ def _format_long_image(self):
+         # We have to be careful that the first line may be able to hold less
+         # of the value, if it is a HIERARCH keyword.
+         headstr = self._format_keyword() + VALUE_INDICATOR
+-        first_value_length = value_length + KEYWORD_LENGTH + 1 - len(headstr)
++        first_value_length = value_length + KEYWORD_LENGTH + 2 - len(headstr)
+ 
+         # do the value string
+         value = self._value.replace("'", "''")
+diff --git a/astropy/io/fits/util.py b/astropy/io/fits/util.py
+--- a/astropy/io/fits/util.py
++++ b/astropy/io/fits/util.py
+@@ -728,12 +728,13 @@ def _words_group(s, width, first_width=None):
+ 
+     # locations of the blanks
+     blank_loc = np.nonzero(arr == b" ")[0]
+-    offset = 0 if first_width is None else first_width - width
++    current_width = width if first_width is None else first_width
++    offset = 0
+     xoffset = 0
+ 
+     while True:
+         try:
+-            loc = np.nonzero(blank_loc >= width + offset)[0][0]
++            loc = np.nonzero(blank_loc >= current_width + offset)[0][0]
+         except IndexError:
+             loc = len(blank_loc)
+ 
+@@ -744,13 +745,14 @@ def _words_group(s, width, first_width=None):
+ 
+         # check for one word longer than strlen, break in the middle
+         if offset <= xoffset:
+-            offset = min(xoffset + width, slen)
++            offset = min(xoffset + current_width, slen)
+ 
+         # collect the pieces in a list
+         words.append(s[xoffset:offset])
+         if offset >= slen:
+             break
+         xoffset = offset
++        current_width = width
+ 
+     return words
+ 

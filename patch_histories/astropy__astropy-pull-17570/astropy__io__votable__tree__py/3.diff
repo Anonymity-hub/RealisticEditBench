@@ -1,0 +1,15 @@
+diff --git a/astropy/io/votable/tree.py b/astropy/io/votable/tree.py
+--- a/astropy/io/votable/tree.py
++++ b/astropy/io/votable/tree.py
+@@ -1678,6 +1678,11 @@
+             format = _get_unit_format(self._config)
+             try:
+                 attrib["unit"] = self.unit.to_string(format)
++            except ValueError as e:
++                # Allow non-standard units with a warning, see
++                # https://github.com/astropy/astropy/issues/17497#issuecomment-2520472495
++                attrib["unit"] = self.unit.to_string()
++                warn_or_raise(W50, W50, (attrib["unit"],), self._config, self._pos)
+         with w.tag(self._element_name, attrib=attrib):
+             if self.description is not None:
+                 w.element("DESCRIPTION", self.description, wrap=True)

@@ -1,0 +1,21 @@
+diff --git a/lib/matplotlib/backend_bases.py b/lib/matplotlib/backend_bases.py
+--- a/lib/matplotlib/backend_bases.py
++++ b/lib/matplotlib/backend_bases.py
+@@ -1519,6 +1519,17 @@
+     def __init__(self, name, canvas, key, x=0, y=0, guiEvent=None):
+         super().__init__(name, canvas, x, y, guiEvent=guiEvent)
+         self.key = key
++
++    @classmethod
++    def _from_ax_coords(cls, name, ax, xy, key, *args, **kwargs):
++        """
++        Generate a synthetic event at a given axes coordinate.
++
++        This method is intended for creating events during testing.  The event
++        can be emitted by calling its ``_process()`` method.
++        """
++        # Separate from MouseEvent._from_ax_coords instead of being defined in the base
++        # class, due to different parameter order in the constructor signature.
+ 
+ 
+ # Default callback for key events.

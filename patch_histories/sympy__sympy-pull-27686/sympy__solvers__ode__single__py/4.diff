@@ -1,0 +1,12 @@
+diff --git a/sympy/solvers/ode/single.py b/sympy/solvers/ode/single.py
+--- a/sympy/solvers/ode/single.py
++++ b/sympy/solvers/ode/single.py
+@@ -893,7 +893,7 @@
+ 
+         if sols == []:
+             raise NotImplementedError("The given ODE " + str(eq) + " cannot be solved by"
+-                + " the factorable group method")
++                + " the factorable method")
+         return sols
+ 
+ 

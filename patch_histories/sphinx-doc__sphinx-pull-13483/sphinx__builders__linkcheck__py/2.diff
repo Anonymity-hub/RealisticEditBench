@@ -1,0 +1,12 @@
+diff --git a/sphinx/builders/linkcheck.py b/sphinx/builders/linkcheck.py
+--- a/sphinx/builders/linkcheck.py
++++ b/sphinx/builders/linkcheck.py
+@@ -188,7 +188,7 @@
+                         text = 'with unknown code'
+                 linkstat['text'] = text
+                 redirection = f'{text} to {result.message}'
+-                if self.config.linkcheck_allowed_redirects is not None:
++                if self.config.linkcheck_allowed_redirects is not _SENTINEL_LAR:
+                     msg = f'redirect  {res_uri} - {redirection}'
+                     logger.warning(msg, location=(result.docname, result.lineno))
+                 else:

@@ -1,0 +1,27 @@
+diff --git a/astropy/io/votable/converters.py b/astropy/io/votable/converters.py
+--- a/astropy/io/votable/converters.py
++++ b/astropy/io/votable/converters.py
+@@ -335,6 +335,12 @@
+ 
+             # For bounded variable-length fields use the variable methods
+             if is_variable:
++                self.binparse = self._binparse_var
++                self.binoutput = self._binoutput_var
++            else:
++                self.binparse = self._binparse_fixed
++                self.binoutput = self._binoutput_fixed
++
+             self._struct_format = f">{self.arraysize:d}s"
+ 
+     def supports_empty_values(self, config):
+@@ -375,6 +381,10 @@
+ 
+     def _binparse_var(self, read):
+         length = self._parse_length(read)
++
++        if self.arraysize != "*" and length > self.arraysize:
++            vo_warn(W46, ("char", self.arraysize), None, None)
++
+         return read(length).decode("ascii"), False
+ 
+     def _binparse_fixed(self, read):

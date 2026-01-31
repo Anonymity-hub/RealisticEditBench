@@ -1,0 +1,16 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -1717,11 +1717,7 @@
+ 
+ 
+ def _apply_vectorized_indexer_dask_wrapper(indices, coord):
+-    from xarray.core.indexing import (
+-        VectorizedIndexer,
+-        apply_indexer,
+-        as_indexable,
+-    )
++    from xarray.core.indexing import VectorizedIndexer, apply_indexer, as_indexable
+ 
+     return apply_indexer(
+         as_indexable(coord), VectorizedIndexer((indices.squeeze(axis=-1),))

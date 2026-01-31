@@ -1,0 +1,33 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -6,25 +6,19 @@
+ 
+ 
+ class SievePolynomial:
+-    def __init__(self, modified_coeff=(), a=None, b=None):
++    def __init__(self, a, b, N):
+         """This class denotes the seive polynomial.
+-        If ``g(x) = (a*x + b)**2 - N``. `g(x)` can be expanded
+-        to ``a*x**2 + 2*a*b*x + b**2 - N``, so the coefficient
+-        is stored in the form `[a**2, 2*a*b, b**2 - N]`. This
+-        ensures faster `eval` method because we dont have to
+-        perform `a**2, 2*a*b, b**2` every time we call the
+-        `eval` method. As multiplication is more expensive
+-        than addition, by using modified_coefficient we get
+-        a faster seiving process.
++        Provide methods to compute `(a*x + b)**2 - N` and
++        `a*x + b` when given `x`.
+ 
+         Parameters
+         ==========
+ 
+-        modified_coeff : modified_coefficient of sieve polynomial
+         a : parameter of the sieve polynomial
+         b : parameter of the sieve polynomial
++        N : number to be factored
++
+         """
+-        self.modified_coeff = modified_coeff
+         self.a = a
+         self.b = b

@@ -1,0 +1,30 @@
+diff --git a/sympy/logic/boolalg.py b/sympy/logic/boolalg.py
+--- a/sympy/logic/boolalg.py
++++ b/sympy/logic/boolalg.py
+@@ -16,7 +16,7 @@
+ from sympy.core.function import Application, Derivative
+ from sympy.core.kind import BooleanKind, NumberKind
+ from sympy.core.numbers import Number
+-from sympy.core.operations import LatticeOp
++from sympy.core.operations import AssocOp, LatticeOp
+ from sympy.core.singleton import Singleton, S
+ from sympy.core.sorting import ordered
+ from sympy.core.sympify import _sympy_converter, _sympify, sympify
+@@ -774,12 +774,16 @@
+ 
+     if TYPE_CHECKING:
+ 
+-        def __new__(cls, *args: Boolean | bool) -> Boolean: # type: ignore
++        def __new__(cls, *args: Boolean | bool, evaluate: bool | None = None) -> Boolean: # type: ignore
+             ...
+ 
+         @property
+         def args(self) -> tuple[Boolean, ...]:
+             ...
++
++    @classmethod
++    def _from_args(cls, args, is_commutative=None):
++        return super(AssocOp, cls).__new__(cls, *args)
+ 
+     @classmethod
+     def _new_args_filter(cls, args):

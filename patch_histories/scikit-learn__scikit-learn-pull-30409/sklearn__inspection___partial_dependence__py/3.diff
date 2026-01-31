@@ -1,0 +1,13 @@
+diff --git a/sklearn/inspection/_partial_dependence.py b/sklearn/inspection/_partial_dependence.py
+--- a/sklearn/inspection/_partial_dependence.py
++++ b/sklearn/inspection/_partial_dependence.py
+@@ -701,6 +701,9 @@
+         features = [features]
+ 
+     for feature_idx, feature, is_cat in zip(features_indices, features, is_categorical):
++        if is_cat:
++            continue
++
+ 
+     X_subset = _safe_indexing(X, features_indices, axis=1)
+ 

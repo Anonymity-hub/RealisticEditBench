@@ -1,0 +1,12 @@
+diff --git a/sympy/polys/polytools.py b/sympy/polys/polytools.py
+--- a/sympy/polys/polytools.py
++++ b/sympy/polys/polytools.py
+@@ -3712,7 +3712,7 @@
+         else:
+             coeffs = [coeff.evalf(n=n).as_real_imag()
+                     for coeff in f.all_coeffs()]
+-            with mpmath.:
++            with mpmath.workdps(n):
+                 try:
+                     coeffs = [mpmath.mpc(*coeff) for coeff in coeffs]
+                 except TypeError:

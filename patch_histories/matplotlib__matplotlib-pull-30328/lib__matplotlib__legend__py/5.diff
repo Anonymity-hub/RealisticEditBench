@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py
+--- a/lib/matplotlib/legend.py
++++ b/lib/matplotlib/legend.py
+@@ -612,6 +612,9 @@
+                         continue
+                     elif mpl.colors.to_rgba(color)[3] == 0:
+                         continue
++                    else:
++                        text.set_color(color)
++                    break
+         elif cbook._str_equal(labelcolor, 'none'):
+             for text in self.texts:
+                 text.set_color(labelcolor)

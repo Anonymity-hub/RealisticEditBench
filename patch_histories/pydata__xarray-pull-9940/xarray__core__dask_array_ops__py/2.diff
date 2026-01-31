@@ -1,0 +1,14 @@
+diff --git a/xarray/core/dask_array_ops.py b/xarray/core/dask_array_ops.py
+--- a/xarray/core/dask_array_ops.py
++++ b/xarray/core/dask_array_ops.py
+@@ -149,5 +149,10 @@
+         # created from the isnan method, but every time a False is found the sum
+         # must be restarted, and the final result indicates the amount of contiguous
+         # nan values found in the original array on every position
++        nan_bitmask = da.isnan(array, dtype=int)
++        cumsum_nan = nan_bitmask.cumsum(axis=axis, method=method)
++        valid_positions = da.where(nan_bitmask == 0, cumsum_nan, np.nan)
++        valid_positions = push(valid_positions, None, axis, method=method)
++        # All the NaNs at the beginning are converted to 0
+ 
+     return pushed_array

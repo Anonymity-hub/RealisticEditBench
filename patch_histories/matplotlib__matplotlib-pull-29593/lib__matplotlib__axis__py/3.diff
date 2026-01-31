@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -163,7 +163,8 @@
+         self.label2 = mtext.Text(
+             np.nan, np.nan,
+             fontsize=labelsize, color=labelcolor, visible=label2On,
+-            fontfamily=labelfontfamily, rotation=self._labelrotation[1])
++            fontfamily=labelfontfamily, rotation=self._labelrotation[1],
++            rotation_mode=labelrotation_mode)
+ 
+         self._apply_tickdir(tickdir)
+ 

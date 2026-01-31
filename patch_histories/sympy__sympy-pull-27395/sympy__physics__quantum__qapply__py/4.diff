@@ -1,0 +1,18 @@
+diff --git a/sympy/physics/quantum/qapply.py b/sympy/physics/quantum/qapply.py
+--- a/sympy/physics/quantum/qapply.py
++++ b/sympy/physics/quantum/qapply.py
+@@ -205,6 +205,13 @@
+             if sum_doit:
+                 result = result.doit()
+             return qapply_Mul(e.func(*args)*result, **options)
++
++    if isinstance(lhs, Sum):
++        result = Sum(qapply(lhs.function*rhs, **options), lhs.limits)
++        if sum_doit:
++            result = result.doit()
++        return qapply_Mul(e.func(*args)*result, **options)
++
+     # Now try to actually apply the operator and build an inner product.
+     try:
+         result = lhs._apply_operator(rhs, **options)
+

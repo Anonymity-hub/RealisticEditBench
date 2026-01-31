@@ -1,0 +1,11 @@
+diff --git a/sphinx/builders/linkcheck.py b/sphinx/builders/linkcheck.py
+--- a/sphinx/builders/linkcheck.py
++++ b/sphinx/builders/linkcheck.py
+@@ -25,6 +25,7 @@
+ 
+ from sphinx._cli.util.colour import darkgray, darkgreen, purple, red, turquoise
+ from sphinx.builders.dummy import DummyBuilder
++from sphinx.errors import ConfigError
+ from sphinx.locale import __
+ from sphinx.transforms.post_transforms import SphinxPostTransform
+ from sphinx.util import logging, requests

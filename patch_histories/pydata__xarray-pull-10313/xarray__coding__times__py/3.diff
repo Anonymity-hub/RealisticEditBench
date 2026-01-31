@@ -1,0 +1,14 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -678,7 +678,9 @@
+     else:
+         empirical_unit = pd_timedeltas.unit
+ 
+-    if np.timedelta64(1, time_unit) > np.timedelta64(1, empirical_unit):
++    if is_empty_array or np.timedelta64(1, time_unit) > np.timedelta64(
++        1, empirical_unit
++    ):
+         time_unit = empirical_unit
+ 
+     if time_unit not in {"s", "ms", "us", "ns"}:

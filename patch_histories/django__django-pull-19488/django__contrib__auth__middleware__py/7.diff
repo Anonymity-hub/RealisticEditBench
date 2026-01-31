@@ -1,0 +1,12 @@
+diff --git a/django/contrib/auth/middleware.py b/django/contrib/auth/middleware.py
+--- a/django/contrib/auth/middleware.py
++++ b/django/contrib/auth/middleware.py
+@@ -231,8 +231,6 @@
+             request.user = user
+             await auth.alogin(request, user)
+ 
+-        return await self.get_response(request)
+-
+     def clean_username(self, username, request):
+         """
+         Allow the backend to clean the username, if the backend defines a

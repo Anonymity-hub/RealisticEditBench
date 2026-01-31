@@ -1,0 +1,17 @@
+diff --git a/sklearn/calibration.py b/sklearn/calibration.py
+--- a/sklearn/calibration.py
++++ b/sklearn/calibration.py
+@@ -462,6 +462,13 @@
+                         )
+                     predictions = predictions.reshape(-1, 1)
+ 
++                if sample_weight is not None:
++                    # Check that the sample_weight dtype is consistent with the
++                    # predictions to avoid unintentional upcasts.
++                    sample_weight = _check_sample_weight(
++                        sample_weight, predictions, dtype=predictions.dtype
++                    )
++
+                 this_estimator.fit(X, y, **routed_params.estimator.fit)
+                 # Note: Here we don't pass on fit_params because the supported
+                 # calibrators don't support fit_params anyway

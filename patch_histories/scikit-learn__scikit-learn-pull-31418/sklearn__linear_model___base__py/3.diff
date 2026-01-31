@@ -1,0 +1,64 @@
+diff --git a/sklearn/linear_model/_base.py b/sklearn/linear_model/_base.py
+--- a/sklearn/linear_model/_base.py
++++ b/sklearn/linear_model/_base.py
+@@ -700,7 +700,7 @@
+ 
+         if y.ndim == 1:
+             self.coef_ = np.ravel(self.coef_)
+-        self._set_intercept(X_offset, y_offset, X_scale)
++        self._set_intercept(X_offset, y_offset)
+         return self
+ 
+     def __sklearn_tags__(self):
+@@ -787,35 +787,30 @@
+ 
+     This function applies _preprocess_data and additionally computes the gram matrix
+     `precompute` as needed as well as `Xy`.
++
++    Returns
++    -------
++    X
++    y
++    X_offset
++    y_offset
++    X_scale
++    precompute
++    Xy
+     """
+     n_samples, n_features = X.shape
+ 
+     if sparse.issparse(X):
+         # copy is not needed here as X is not modified inplace when X is sparse
++        copy = False
+         precompute = False
+-        X, y, X_offset, y_offset, X_scale = _preprocess_data(
+-            X,
+-            y,
+-            fit_intercept=fit_intercept,
+-            copy=False,
+-            check_input=check_input,
+-            sample_weight=sample_weight,
+-        )
++        # Rescale X and y only in dense case. Sparse cd solver directly deals with
++        # sample_weight.
++        rescale_with_sw = False
+     else:
+         # copy was done in fit if necessary
+-        X, y, X_offset, y_offset, X_scale = _preprocess_data(
+-            X,
+-            y,
+-            fit_intercept=fit_intercept,
+-            copy=copy,
+-            check_input=check_input,
+-            sample_weight=sample_weight,
+-        )
+-        # Rescale only in dense case. Sparse cd solver directly deals with
+-        # sample_weight.
+-        if sample_weight is not None:
+-            # This triggers copies anyway.
+-            X, y, _ = _rescale_data(X, y, sample_weight=sample_weight)
++        rescale_with_sw = True
++
+ 
+     if hasattr(precompute, "__array__"):
+         if fit_intercept and not np.allclose(X_offset, np.zeros(n_features)):

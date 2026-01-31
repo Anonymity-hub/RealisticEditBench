@@ -1,0 +1,34 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -1221,9 +1221,9 @@ def _generate_removed_field(self, app_label, model_name, field_name):
+                 model_name=model_name,
+                 name=field_name,
+             ),
+-            # We might need to depend on the removal of an
+-            # order_with_respect_to or index/constraint/unique_together
+-            # operation; this is safely ignored if there isn't one
++            # Include dependencies such as order_with_respect_to, constraints,
++            # and any generated fields that may depend on this field. These
++            # are safely ignored if not present.
+             dependencies=[
+                 OperationDependency(
+                     app_label,
+@@ -1243,6 +1243,9 @@ def _generate_removed_field(self, app_label, model_name, field_name):
+                     field_name,
+                     OperationDependency.Type.REMOVE_INDEX_OR_CONSTRAINT,
+                 ),
++                *self._get_generated_field_dependencies_for_removed_field(
++                    app_label, model_name, field_name
++                ),
+             ],
+         )
+ 
+@@ -1698,6 +1701,7 @@ def _get_dependencies_for_generated_field(self, field):
+                 )
+         return dependencies
+ 
++    def _get_generated_field_dependencies_for_removed_field(
+     def _get_dependencies_for_model(self, app_label, model_name):
+         """Return foreign key dependencies of the given model."""
+         dependencies = []

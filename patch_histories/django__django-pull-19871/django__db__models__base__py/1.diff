@@ -1,0 +1,18 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -1142,12 +1142,13 @@ def _save_table(
+                         ),
+                     )["_order__max"]
+                 )
+-            fields = [
++            insert_fields = [
+                 f
+                 for f in meta.local_concrete_fields
+                 if not f.generated and (pk_set or f is not meta.auto_field)
+             ]
+             returning_fields = list(meta.db_returning_fields)
++            can_return_columns_from_insert =
+             for field in fields:
+                 value = (
+                     getattr(self, field.attname) if raw else field.pre_save(self, False)

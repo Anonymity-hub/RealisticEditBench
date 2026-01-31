@@ -1,0 +1,103 @@
+diff --git a/sklearn/mixture/_gaussian_mixture.py b/sklearn/mixture/_gaussian_mixture.py
+--- a/sklearn/mixture/_gaussian_mixture.py
++++ b/sklearn/mixture/_gaussian_mixture.py
+@@ -794,16 +794,18 @@
+         self.means_init = means_init
+         self.precisions_init = precisions_init
+ 
+-    def _check_parameters(self, X):
++    def _check_parameters(self, X, xp=None):
+         """Check the Gaussian mixture parameters are well defined."""
+         _, n_features = X.shape
+ 
+         if self.weights_init is not None:
+-            self.weights_init = _check_weights(self.weights_init, self.n_components)
++            self.weights_init = _check_weights(
++                self.weights_init, self.n_components, xp=xp
++            )
+ 
+         if self.means_init is not None:
+             self.means_init = _check_means(
+-                self.means_init, self.n_components, n_features
++                self.means_init, self.n_components, n_features, xp=xp
+             )
+ 
+         if self.precisions_init is not None:
+@@ -812,9 +814,23 @@
+                 self.covariance_type,
+                 self.n_components,
+                 n_features,
++                xp=xp,
+             )
+ 
+-    def _initialize_parameters(self, X, random_state):
++        allowed_init_params = ["random", "random_from_data"]
++        if (
++            get_config()["array_api_dispatch"]
++            and self.init_params not in allowed_init_params
++        ):
++            raise NotImplementedError(
++                f"Allowed `init_params` are {allowed_init_params} if "
++                f"'array_api_dispatch' is enabled. You passed "
++                f"init_params={self.init_params!r}, which are not implemented to work "
++                "with 'array_api_dispatch' enabled. Please disable "
++                f"'array_api_dispatch' to use init_params={self.init_params!r}."
++            )
++
++    def _initialize_parameters(self, X, random_state, xp=None):
+         # If all the initial parameters are all provided, then there is no need to run
+         # the initialization.
+         compute_resp = (
+@@ -823,11 +839,11 @@
+             or self.precisions_init is None
+         )
+         if compute_resp:
+-            super()._initialize_parameters(X, random_state)
++            super()._initialize_parameters(X, random_state, xp=xp)
+         else:
+-            self._initialize(X, None)
+-
+-    def _initialize(self, X, resp):
++            self._initialize(X, None, xp=xp)
++
++    def _initialize(self, X, resp, xp=None):
+         """Initialization of the Gaussian mixture parameters.
+ 
+         Parameters
+@@ -836,29 +852,32 @@
+ 
+         resp : array-like of shape (n_samples, n_components)
+         """
++        xp, _, device_ = get_namespace_and_device(X, xp=xp)
+         n_samples, _ = X.shape
+         weights, means, covariances = None, None, None
+         if resp is not None:
+             weights, means, covariances = _estimate_gaussian_parameters(
+-                X, resp, self.reg_covar, self.covariance_type
++                X, resp, self.reg_covar, self.covariance_type, xp=xp
+             )
+             if self.weights_init is None:
+                 weights /= n_samples
+ 
+         self.weights_ = weights if self.weights_init is None else self.weights_init
++        self.weights_ = xp.asarray(self.weights_, device=device_)
++
+         self.means_ = means if self.means_init is None else self.means_init
+ 
+         if self.precisions_init is None:
+             self.covariances_ = covariances
+             self.precisions_cholesky_ = _compute_precision_cholesky(
+-                covariances, self.covariance_type
++                covariances, self.covariance_type, xp=xp
+             )
+         else:
+             self.precisions_cholesky_ = _compute_precision_cholesky_from_precisions(
+-                self.precisions_init, self.covariance_type
++                self.precisions_init, self.covariance_type, xp=xp
+             )
+ 
+-    def _m_step(self, X, log_resp):
++    def _m_step(self, X, log_resp, xp=None):
+         """M step.
+ 
+         Parameters

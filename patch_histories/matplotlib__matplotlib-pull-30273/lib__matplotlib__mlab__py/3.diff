@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/mlab.py b/lib/matplotlib/mlab.py
+--- a/lib/matplotlib/mlab.py
++++ b/lib/matplotlib/mlab.py
+@@ -249,7 +249,7 @@
+     if NFFT is None:
+         NFFT = 256
+ 
+-    if noverlap >= NFFT:
++    if not (0 <= noverlap < NFFT):
+         raise ValueError('noverlap must be less than NFFT')
+ 
+     if mode is None or mode == 'default':

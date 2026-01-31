@@ -1,0 +1,18 @@
+diff --git a/sklearn/calibration.py b/sklearn/calibration.py
+--- a/sklearn/calibration.py
++++ b/sklearn/calibration.py
+@@ -634,7 +634,13 @@
+         # Reshape binary output from `(n_samples,)` to `(n_samples, 1)`
+         predictions = predictions.reshape(-1, 1)
+ 
+-    sw_test = None if sample_weight is None else _safe_indexing(sample_weight, test)
++    if sample_weight is not None:
++        # Check that the sample_weight dtype is consistent with the predictions
++        # to avoid unintentional upcasts.
++        sample_weight = _check_sample_weight(sample_weight, X, dtype=predictions.dtype)
++        sw_test = _safe_indexing(sample_weight, test)
++    else:
++        sw_test = None
+     calibrated_classifier = _fit_calibrator(
+         estimator, predictions, y_test, classes, method, sample_weight=sw_test
+     )

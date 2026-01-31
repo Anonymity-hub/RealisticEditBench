@@ -1,0 +1,26 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1824,6 +1824,21 @@
+                 field_values = [
+                     field_prepare(field_pre_save(obj)) for obj in self.query.objs
+                 ]
++
++                if not field.has_db_default():
++                    value_cols.append(field_values)
++                    continue
++
++                # If all values are DEFAULT don't include the field and its
++                # values in the query as they are redundant and could prevent
++                # optimizations. This cannot be done if we're dealing with the
++                # last field as INSERT statements require at least one.
++                if len(fields) > 1 and all(
++                    isinstance(value, DatabaseDefault) for value in field_values
++                ):
++                    fields.remove(field)
++                    continue
++
+         else:
+             # An empty object.
+             value_rows = [
+

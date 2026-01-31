@@ -1,0 +1,21 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -1842,7 +1842,17 @@
+         for name in self._names:
+             nfkc_name = unicodedata.normalize("NFKC", name)
+             if nfkc_name in namespace and self != (obj := namespace[nfkc_name]):
++                msg = (
++                    f"the namespace already uses the name {name!r} for {obj!r}"
++                    if name == nfkc_name
++                    else (
++                        "the namespace already uses the NFKC normalized name "
++                        f"{nfkc_name!r} for {obj!r}\n\nSee "
++                        "https://docs.python.org/3/reference/lexical_analysis.html#identifiers "
++                        "for more information."
++                    )
+                 )
++                raise ValueError(msg)
+ 
+         for name in self._names:
+             namespace[name] = self

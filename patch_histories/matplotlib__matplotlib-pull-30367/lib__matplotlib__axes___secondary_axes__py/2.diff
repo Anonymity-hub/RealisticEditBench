@@ -1,0 +1,24 @@
+diff --git a/lib/matplotlib/axes/_secondary_axes.py b/lib/matplotlib/axes/_secondary_axes.py
+--- a/lib/matplotlib/axes/_secondary_axes.py
++++ b/lib/matplotlib/axes/_secondary_axes.py
+@@ -1,3 +1,4 @@
++import functools
+ import numbers
+ 
+ import numpy as np
+@@ -145,11 +146,14 @@
+         self._set_lims()
+         super().apply_aspect(position)
+ 
+-
+     @functools.wraps(_AxesBase.set_xticks)
+     def set_xticks(self, *args, **kwargs):
+         if self._orientation == "y":
+             raise TypeError("Cannot set xticks on a secondary y-axis")
++        ret = super().set_xticks(*args, **kwargs)
++        self._ticks_set = True
++        return ret
++
+
+     @_docstring.copy(Axis.set_ticks)
+     def set_ticks(self, ticks, labels=None, *, minor=False, **kwargs):

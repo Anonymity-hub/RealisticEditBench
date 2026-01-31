@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/backend_bases.py b/lib/matplotlib/backend_bases.py
+--- a/lib/matplotlib/backend_bases.py
++++ b/lib/matplotlib/backend_bases.py
+@@ -79,6 +79,7 @@
+ }
+ _default_backends = {
+     'eps': 'matplotlib.backends.backend_ps',
++    'gif': 'matplotlib.backends.backend_agg',
+     'jpg': 'matplotlib.backends.backend_agg',
+     'jpeg': 'matplotlib.backends.backend_agg',
+     'pdf': 'matplotlib.backends.backend_pdf',

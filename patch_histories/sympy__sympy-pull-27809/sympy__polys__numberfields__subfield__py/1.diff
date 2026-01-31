@@ -1,0 +1,11 @@
+diff --git a/sympy/polys/numberfields/subfield.py b/sympy/polys/numberfields/subfield.py
+--- a/sympy/polys/numberfields/subfield.py
++++ b/sympy/polys/numberfields/subfield.py
+@@ -360,6 +360,7 @@ def primitive_element(extension, x=None, *, ex=False, polys=False):
+             gen += s*ext
+             coeffs.append(s)
+ 
++        g = _canonicalize(g)
+         if not polys:
+             return g.as_expr(), coeffs
+         else:

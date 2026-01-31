@@ -1,0 +1,89 @@
+diff --git a/xarray/coding/variables.py b/xarray/coding/variables.py
+--- a/xarray/coding/variables.py
++++ b/xarray/coding/variables.py
+@@ -520,9 +520,9 @@ def decode(self, variable: Variable, name: T_Name = None) -> Variable:
+ 
+             scale_factor = pop_to(attrs, encoding, "scale_factor", name=name)
+             add_offset = pop_to(attrs, encoding, "add_offset", name=name)
+-            if np.ndim(scale_factor) > 0:
++            if duck_array_ops.ndim(scale_factor) > 0:
+                 scale_factor = np.asarray(scale_factor).item()
+-            if np.ndim(add_offset) > 0:
++            if duck_array_ops.ndim(add_offset) > 0:
+                 add_offset = np.asarray(add_offset).item()
+             # if we have a _FillValue/masked_value in encoding we already have the wanted
+             # floating point dtype here (via CFMaskCoder), so no check is necessary
+diff --git a/xarray/core/duck_array_ops.py b/xarray/core/duck_array_ops.py
+--- a/xarray/core/duck_array_ops.py
++++ b/xarray/core/duck_array_ops.py
+@@ -796,6 +796,12 @@ def _nd_cum_func(cum_func, array, axis, **kwargs):
+     return out
+ 
+ 
++def ndim(array) -> int:
++    # Required part of the duck array and the array-api, but we fall back in case
++    # https://docs.xarray.dev/en/latest/internals/duck-arrays-integration.html#duck-array-requirements
++    return array.ndim if hasattr(array, "ndim") else np.ndim(array)
++
++
+ def cumprod(array, axis=None, **kwargs):
+     """N-dimensional version of cumprod."""
+     return _nd_cum_func(cumprod_1d, array, axis, **kwargs)
+diff --git a/xarray/core/extension_array.py b/xarray/core/extension_array.py
+--- a/xarray/core/extension_array.py
++++ b/xarray/core/extension_array.py
+@@ -66,6 +66,11 @@ def __extension_duck_array__where(
+     return cast(T_ExtensionArray, pd.Series(x).where(condition, pd.Series(y)).array)
+ 
+ 
++@implements(np.ndim)
++def __extension_duck_array__ndim(x: PandasExtensionArray) -> int:
++    return x.ndim
++
++
+ @implements(np.reshape)
+ def __extension_duck_array__reshape(
+     arr: T_ExtensionArray, shape: tuple
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -769,14 +769,15 @@ def __repr__(self) -> str:
+ 
+ def _wrap_numpy_scalars(array):
+     """Wrap NumPy scalars in 0d arrays."""
+-    if np.ndim(array) == 0 and (
++    ndim = duck_array_ops.ndim(array)
++    if ndim == 0 and (
+         isinstance(array, np.generic)
+         or not (is_duck_array(array) or isinstance(array, NDArrayMixin))
+     ):
+         return np.array(array)
+     elif hasattr(array, "dtype"):
+         return array
+-    elif np.ndim(array) == 0:
++    elif ndim == 0:
+         return np.array(array)
+     else:
+         return array
+diff --git a/xarray/indexes/range_index.py b/xarray/indexes/range_index.py
+--- a/xarray/indexes/range_index.py
++++ b/xarray/indexes/range_index.py
+@@ -5,6 +5,7 @@
+ import numpy as np
+ import pandas as pd
+ 
++from xarray.core import duck_array_ops
+ from xarray.core.coordinate_transform import CoordinateTransform
+ from xarray.core.dataarray import DataArray
+ from xarray.core.indexes import CoordinateTransformIndex, Index, PandasIndex
+@@ -320,7 +321,9 @@ def isel(
+ 
+         if isinstance(idxer, slice):
+             return RangeIndex(self.transform.slice(idxer))
+-        elif (isinstance(idxer, Variable) and idxer.ndim > 1) or np.ndim(idxer) == 0:
++        elif (isinstance(idxer, Variable) and idxer.ndim > 1) or duck_array_ops.ndim(
++            idxer
++        ) == 0:
+             return None
+         else:
+             values = self.transform.forward({self.dim: np.asarray(idxer)})[

@@ -1,0 +1,13 @@
+diff --git a/pylint/lint/report_functions.py b/pylint/lint/report_functions.py
+--- a/pylint/lint/report_functions.py
++++ b/pylint/lint/report_functions.py
+@@ -33,7 +33,9 @@
+     lines = ["message id", "occurrences"]
+     for value, msg_id in sorted(
+         (
++            (value, msg_id)
+             for msg_id, value in by_msg_stats.items()
++            if not msg_id.startswith("I")
+         ),
+         reverse=True,
+     ):

@@ -1,0 +1,127 @@
+diff --git a/sklearn/metrics/_plot/roc_curve.py b/sklearn/metrics/_plot/roc_curve.py
+--- a/sklearn/metrics/_plot/roc_curve.py
++++ b/sklearn/metrics/_plot/roc_curve.py
+@@ -169,6 +169,7 @@
+         ax=None,
+         *,
+         name=None,
++        curve_kwargs=None,
+         plot_chance_level=False,
+         chance_level_kw=None,
+         despine=False,
+@@ -176,17 +177,36 @@
+     ):
+         """Plot visualization.
+ 
+-        Extra keyword arguments will be passed to matplotlib's ``plot``.
+-
+         Parameters
+         ----------
+         ax : matplotlib axes, default=None
+             Axes object to plot on. If `None`, a new figure and axes is
+             created.
+ 
+-        name : str, default=None
+-            Name of ROC Curve for labeling. If `None`, use `estimator_name` if
+-            not `None`, otherwise no labeling is shown.
++        name : str or list of str, default=None
++            Name for labeling legend entries. The number of legend entries
++            is determined by `curve_kwargs`.
++            To label each curve, provide a list of strings. To avoid labeling
++            individual curves that have the same appearance, this cannot be used in
++            conjunction with `curve_kwargs` being a dictionary or None. If a
++            string is provided, it will be used to either label the single legend entry
++            or if there are multiple legend entries, label each individual curve with
++            the same name. If `None`, set to `name` provided at `RocCurveDisplay`
++            initialization. If still `None`, no name is shown in the legend.
++
++            .. versionadded:: 1.7
++
++        curve_kwargs : dict or list of dict, default=None
++            Keywords arguments to be passed to matplotlib's `plot` function
++            to draw individual ROC curves. For single curve plotting, should be
++            a dictionary. For multi-curve plotting, if a list is provided the
++            parameters are applied to the ROC curves of each CV fold
++            sequentially and a legend entry is added for each curve.
++            If a single dictionary is provided, the same parameters are applied
++            to all ROC curves and a single legend entry for all curves is added,
++            labeled with the mean ROC AUC score.
++
++            .. versionadded:: 1.7
+ 
+         plot_chance_level : bool, default=False
+             Whether to plot the chance level.
+@@ -206,23 +226,35 @@
+ 
+         **kwargs : dict
+             Keyword arguments to be passed to matplotlib's `plot`.
++
++            .. deprecated:: 1.7
++                kwargs is deprecated and will be removed in 1.9. Pass matplotlib
++                arguments to `curve_kwargs` as a dictionary instead.
+ 
+         Returns
+         -------
+         display : :class:`~sklearn.metrics.RocCurveDisplay`
+             Object that stores computed values.
+         """
+-        self.ax_, self.figure_, name = self._validate_plot_params(ax=ax, name=name)
+-
+-        default_line_kwargs = {}
+-        if self.roc_auc is not None and name is not None:
+-            default_line_kwargs["label"] = f"{name} (AUC = {self.roc_auc:0.2f})"
+-        elif self.roc_auc is not None:
+-            default_line_kwargs["label"] = f"AUC = {self.roc_auc:0.2f}"
+-        elif name is not None:
+-            default_line_kwargs["label"] = name
+-
+-        line_kwargs = _validate_style_kwargs(default_line_kwargs, kwargs)
++        fpr, tpr, roc_auc, name = self._validate_plot_params(ax=ax, name=name)
++        n_curves = len(fpr)
++        if not isinstance(curve_kwargs, list) and n_curves > 1:
++            if roc_auc:
++                legend_metric = {"mean": np.mean(roc_auc), "std": np.std(roc_auc)}
++            else:
++                legend_metric = {"mean": None, "std": None}
++        else:
++            roc_auc = roc_auc if roc_auc is not None else [None] * n_curves
++            legend_metric = {"metric": roc_auc}
++
++        curve_kwargs = self._validate_curve_kwargs(
++            n_curves,
++            name,
++            legend_metric,
++            "AUC",
++            curve_kwargs=curve_kwargs,
++            **kwargs,
++        )
+ 
+         default_chance_level_line_kw = {
+             "label": "Chance level (AUC = 0.5)",
+@@ -237,7 +269,13 @@
+             default_chance_level_line_kw, chance_level_kw
+         )
+ 
+-        (self.line_,) = self.ax_.plot(self.fpr, self.tpr, **line_kwargs)
++        self.line_ = []
++        for fpr, tpr, line_kw in zip(fpr, tpr, curve_kwargs):
++            self.line_.extend(self.ax_.plot(fpr, tpr, **line_kw))
++        # Return single artist if only one curve is plotted
++        if len(self.line_) == 1:
++            self.line_ = self.line_[0]
++
+         info_pos_label = (
+             f" (Positive label: {self.pos_label})" if self.pos_label is not None else ""
+         )
+@@ -260,9 +298,8 @@
+         if despine:
+             _despine(self.ax_)
+ 
+-        if (
+-            line_kwargs.get("label") is not None
+-            or chance_level_kw.get("label") is not None
++        if curve_kwargs[0].get("label") is not None or (
++            plot_chance_level and chance_level_kw.get("label") is not None
+         ):
+             self.ax_.legend(loc="lower right")
+ 

@@ -1,0 +1,26 @@
+diff --git a/lib/matplotlib/projections/polar.py b/lib/matplotlib/projections/polar.py
+--- a/lib/matplotlib/projections/polar.py
++++ b/lib/matplotlib/projections/polar.py
+@@ -679,20 +679,13 @@ def __init__(self, *args, **kwargs):
+         super().__init__(*args, **kwargs)
+         self.sticky_edges.y.append(0)
+ 
+-    def _wrap_locator_formatter(self):
+-        self.set_major_locator(RadialLocator(self.get_major_locator(),
+-                                             self.axes))
+-        self.isDefault_majloc = True
++    def set_major_locator(self, locator):
++        if not isinstance(locator, RadialLocator):
+ 
+     def clear(self):
+         # docstring inherited
+         super().clear()
+         self.set_ticks_position('none')
+-        self._wrap_locator_formatter()
+-
+-    def _set_scale(self, value, **kwargs):
+-        super()._set_scale(value, **kwargs)
+-        self._wrap_locator_formatter()
+ 
+ 
+ def _is_full_circle_deg(thetamin, thetamax):

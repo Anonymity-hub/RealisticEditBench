@@ -1,0 +1,19 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -426,6 +426,7 @@ def extract_zarr_variable_encoding(
+     raise_on_invalid=False,
+     name=None,
+     *,
++    zarr_format: ZarrFormat,
+     safe_chunks=True,
+     region=None,
+     mode=None,
+@@ -443,6 +444,7 @@ def extract_zarr_variable_encoding(
+     region: tuple[slice, ...], optional
+     mode: str, optional
+     shape: tuple[int, ...], optional
++    zarr_format: Literal[2,3]
+     Returns
+     -------
+     encoding : dict

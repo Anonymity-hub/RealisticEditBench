@@ -1,0 +1,12 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -1616,7 +1616,7 @@ def build_filter(
+     def add_filter(self, filter_lhs, filter_rhs):
+         self.add_q(Q((filter_lhs, filter_rhs)))
+ 
+-    def add_q(self, q_object):
++    def add_q(self, q_object, reuse_all=False):
+         """
+         A preprocessor for the internal _add_q(). Responsible for doing final
+         join promotion.

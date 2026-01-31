@@ -1,0 +1,11 @@
+diff --git a/django/core/validators.py b/django/core/validators.py
+--- a/django/core/validators.py
++++ b/django/core/validators.py
+@@ -83,6 +83,7 @@
+         r"|xn--[a-z0-9]{1,59})"  # or punycode label
+         r"(?<!-)"  # can't end with a dash
+     )
++    tld_re = tld_no_fqdn_re + r"\.?"
+     ascii_only_hostname_re = r"[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+     ascii_only_domain_re = r"(?:\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*"
+     ascii_only_tld_re = (

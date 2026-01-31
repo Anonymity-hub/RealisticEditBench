@@ -1,0 +1,39 @@
+diff --git a/astropy/timeseries/downsample.py b/astropy/timeseries/downsample.py
+--- a/astropy/timeseries/downsample.py
++++ b/astropy/timeseries/downsample.py
+@@ -54,9 +54,17 @@
+     It will check if the input function has a reduceat and call that if it does.
+     """
+     if len(indices) == 0:
++        return np.zeros_like(array, shape=(0,))
+     elif function is nanmean_reduceat:
++        return function(array, indices)
+     elif hasattr(function, "reduceat"):
++        return function.reduceat(array, indices)
+     else:
++        result = [
++            function(array[start:stop] if start < stop else array[start])
++            for start, stop in pairwise(list(indices) + [len(array)])
++        ]
++        return np.block(result)
+
+
+ def _to_relative_longdouble(time: Time, rel_base: Time) -> np.longdouble:
+@@ -287,15 +287,11 @@
+             )
+             continue
+
++        # TODO: This was written before MaskedQuantity were possible.
++        # Should we return that by default, instead of using np.nan?
+         if isinstance(values, u.Quantity):
+-            data = u.Quantity(np.repeat(np.nan, n_bins), unit=values.unit)
+-            data[unique_indices] = u.Quantity(
+-                reduceat(values.value, groups, aggregate_func), values.unit, copy=False
+-            )
+         else:
+             data = np.ma.zeros(n_bins, dtype=values.dtype)
+-            data.mask = 1
+             data[unique_indices] = reduceat(values, groups, aggregate_func)
+-            data.mask[unique_indices] = 0
+
+         binned[colname] = data

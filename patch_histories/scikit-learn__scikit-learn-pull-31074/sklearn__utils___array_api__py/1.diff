@@ -1,0 +1,15 @@
+diff --git a/sklearn/utils/_array_api.py b/sklearn/utils/_array_api.py
+--- a/sklearn/utils/_array_api.py
++++ b/sklearn/utils/_array_api.py
+@@ -105,6 +105,11 @@ def yield_namespace_device_dtype_combinations(include_numpy_namespaces=True):
+             yield array_namespace, None, None
+ 
+ 
++def _get_namespace_device_dtype_ids(param):
++    """Get pytest parametrization IDs for `yield_namespace_device_dtype_combinations`"""
++    # Gives clearer IDs for array-api-strict devices, see #31042 for details
++
++
+ def _check_array_api_dispatch(array_api_dispatch):
+     """Check that array_api_compat is installed and NumPy version is compatible.
+ 

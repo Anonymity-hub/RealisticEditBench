@@ -1,0 +1,24 @@
+diff --git a/sphinx/ext/autodoc/_property_types.py b/sphinx/ext/autodoc/_property_types.py
+--- a/sphinx/ext/autodoc/_property_types.py
++++ b/sphinx/ext/autodoc/_property_types.py
+@@ -72,9 +72,17 @@
+     file_path: Path | None
+     all: Sequence[str] | None
+ 
+-    # @property
+-    # def name(self) -> str:
+-    #     return self.module_name.rpartition('.')[2]
++    @property
++    def name(self) -> str:
++        return self.module_name.rpartition('.')[2]
++
++    @property
++    def object_name(self) -> str:
++        return ''
++
++    @property
++    def full_name(self) -> str:
++        return self.module_name
+ 
+     @property
+     def parent_names(self) -> tuple[str, ...]:

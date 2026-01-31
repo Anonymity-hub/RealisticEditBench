@@ -1,0 +1,39 @@
+diff --git a/astropy/coordinates/representation/base.py b/astropy/coordinates/representation/base.py
+--- a/astropy/coordinates/representation/base.py
++++ b/astropy/coordinates/representation/base.py
+@@ -13,6 +13,7 @@
+ from astropy.coordinates.angles import Angle
+ from astropy.utils import classproperty
+ from astropy.utils.data_info import MixinInfo
++from astropy.utils.decorators import deprecated
+ from astropy.utils.exceptions import DuplicateRepresentationWarning
+ from astropy.utils.masked import MaskableShapedLikeNDArray, Masked, combine_masks
+ 
+@@ -266,23 +267,14 @@
+         if any(hasattr(attr, "mask") for attr in attrs):
+             self._ensure_masked()
+ 
++    @deprecated("v7.1", alternative="name")
+     @classmethod
+     def get_name(cls):
+         """Name of the representation or differential.
+ 
+-        In lower case, with any trailing 'representation' or 'differential'
+-        removed. (E.g., 'spherical' for
+-        `~astropy.coordinates.SphericalRepresentation` or
+-        `~astropy.coordinates.SphericalDifferential`.)
+-        """
+-        name = cls.__name__.lower()
+-
+-        if name.endswith("representation"):
+-            name = name[:-14]
+-        elif name.endswith("differential"):
+-            name = name[:-12]
+-
+-        return name
++        Returns the ``.name`` attribute.
++        """
++        return cls.name
+ 
+     # The two methods that any subclass has to define.
+     @classmethod

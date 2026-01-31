@@ -1,0 +1,23 @@
+diff --git a/astropy/io/misc/yaml.py b/astropy/io/misc/yaml.py
+--- a/astropy/io/misc/yaml.py
++++ b/astropy/io/misc/yaml.py
+@@ -328,15 +328,16 @@ def represent_float(self, data):
+     AstropyDumper.add_multi_representer(cls, _quantity_representer(tag))
+     AstropyLoader.add_constructor(tag, _quantity_constructor(cls))
+ 
+-for cls in list(coords.representation.REPRESENTATION_CLASSES.values()) + list(
+-    coords.representation.DIFFERENTIAL_CLASSES.values()
+-):
++# Add representations, differentials, and built-in frames defined in astropy and in the
++# ``astropy.coordinates`` public API.
++cls_coords = [
++for cls in cls_coords:
+     name = cls.__name__
+     # Add representations/differentials defined in astropy.
+     if name in coords.representation.__all__:
+         tag = "!astropy.coordinates." + name
+         AstropyDumper.add_multi_representer(cls, _quantity_representer(tag))
+         AstropyLoader.add_constructor(tag, _quantity_constructor(cls))
+ 
+ 
+ def load(stream):

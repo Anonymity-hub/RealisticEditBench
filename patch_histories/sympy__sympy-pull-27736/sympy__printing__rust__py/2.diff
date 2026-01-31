@@ -1,0 +1,11 @@
+diff --git a/sympy/printing/rust.py b/sympy/printing/rust.py
+--- a/sympy/printing/rust.py
++++ b/sympy/printing/rust.py
+@@ -562,6 +562,7 @@
+             rhs_code = self._print(rhs)
+             return self._get_statement("%s = %s" % (lhs_code, rhs_code))
+ 
++    def _print_sign(self, expr):
+     def _cast_to_float(self, expr):
+         if not expr.is_number:
+             return TypeCast(expr, real)

@@ -1,0 +1,24 @@
+diff --git a/xarray/core/resample_cftime.py b/xarray/core/resample_cftime.py
+--- a/xarray/core/resample_cftime.py
++++ b/xarray/core/resample_cftime.py
+@@ -87,6 +87,20 @@
+         self.origin = origin
+ 
+         if not isinstance(self.freq, CFTIME_TICKS):
++            if offset is not None:
++                message = (
++                    "The 'offset' keyword does not take effect when "
++                    "resampling with a 'freq' that is not Tick-like (h, m, s, "
++                    "ms, us)"
++                )
++                emit_user_level_warning(message, category=RuntimeWarning)
++            if origin != "start_day":
++                message = (
++                    "The 'origin' keyword does not take effect when "
++                    "resampling with a 'freq' that is not Tick-like (h, m, s, "
++                    "ms, us)"
++                )
++                emit_user_level_warning(message, category=RuntimeWarning)
+ 
+         if isinstance(self.freq, MonthEnd | QuarterEnd | YearEnd) or self.origin in [
+             "end",

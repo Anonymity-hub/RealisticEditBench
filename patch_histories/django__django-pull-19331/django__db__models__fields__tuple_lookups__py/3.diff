@@ -1,0 +1,14 @@
+diff --git a/django/db/models/fields/tuple_lookups.py b/django/db/models/fields/tuple_lookups.py
+--- a/django/db/models/fields/tuple_lookups.py
++++ b/django/db/models/fields/tuple_lookups.py
+@@ -357,6 +360,10 @@
+         lhs = self.lhs
+ 
+         for vals in rhs:
++            # Remove any tuple containing None from the list as NULL is never
++            # equal to anything.
++            if any(val is None for val in vals):
++                continue
+             lookups = [Exact(col, val) for col, val in zip(lhs, vals)]
+             root.children.append(WhereNode(lookups, connector=AND))
+

@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py
+--- a/lib/matplotlib/legend.py
++++ b/lib/matplotlib/legend.py
+@@ -1150,7 +1150,7 @@
+ 
+         start_time = time.perf_counter()
+ 
+-        bboxes, lines, offsets = self._auto_legend_data()
++        bboxes, lines, offsets = self._auto_legend_data(renderer)
+ 
+         bbox = Bbox.from_bounds(0, 0, width, height)
+ 

@@ -1,0 +1,11 @@
+diff --git a/django/contrib/staticfiles/storage.py b/django/contrib/staticfiles/storage.py
+--- a/django/contrib/staticfiles/storage.py
++++ b/django/contrib/staticfiles/storage.py
+@@ -81,6 +81,7 @@
+             "*.css",
+             (
+                 r"""(?P<matched>url\((?P<quote>['"]{0,1})"""
++                r"""\s*(?P<url>.*?)(?P=quote)\))""",
+                 (
+                     r"""(?P<matched>@import\s*["']\s*(?P<url>.*?)["'])""",
+                     """@import url("%(url)s")""",

@@ -1,0 +1,20 @@
+diff --git a/astropy/utils/data.py b/astropy/utils/data.py
+--- a/astropy/utils/data.py
++++ b/astropy/utils/data.py
+@@ -447,6 +447,14 @@
+         else:
+             fileobj_new.seek(0)
+             fileobj = fileobj_new
+-    elif signature
++    elif signature[:2] == b"\x1f\x9d":  # LZW
++        if not HAS_UNCOMPRESSPY:
++            for fd in close_fds:
++                fd.close()
++            raise ModuleNotFoundError(
++                "The optional package uncompresspy is necessary for reading LZW"
++                " compressed files (.Z extension)."
++            )
++        import uncompresspy
+     # io.TextIOWrapper so read will return unicode based on the
+     # encoding parameter.
+ 

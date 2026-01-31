@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/transforms.py b/lib/matplotlib/transforms.py
+--- a/lib/matplotlib/transforms.py
++++ b/lib/matplotlib/transforms.py
+@@ -139,7 +139,9 @@ def __setstate__(self, data_dict):
+             for k, v in self._parents.items() if v is not None}
+ 
+     def __copy__(self):
+-        other = copy.copy(super())
++        cls = type(self)
++        other = cls.__new__(cls)
++        other.__dict__.update(self.__dict__)
+         # If `c = a + b; a1 = copy(a)`, then modifications to `a1` do not
+         # propagate back to `c`, i.e. we need to clear the parents of `a1`.
+         other._parents = {}

@@ -1,0 +1,17 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -1357,12 +1357,7 @@
+         """
+         return ops.where_method(self, cond, other)
+ 
+-    def _first_or_last(
+-        self,
+-        op: Literal["first" | "last"],
+-        skipna: bool | None,
+-        keep_attrs: bool | None,
+-    ):
++    def _first_or_last(self, op, skipna, keep_attrs):
+         if all(
+             isinstance(maybe_slice, slice)
+             and (maybe_slice.stop == maybe_slice.start + 1)

@@ -1,0 +1,15 @@
+diff --git a/pylint/checkers/typecheck.py b/pylint/checkers/typecheck.py
+--- a/pylint/checkers/typecheck.py
++++ b/pylint/checkers/typecheck.py
+@@ -151,6 +151,11 @@
+
+
+ def _string_distance(seq1: str, seq2: str, seq1_length: int, seq2_length: int) -> int:
++    if not seq1_length:
++        return seq2_length
++
++    if not seq2_length:
++        return seq1_length
+
+     row = [*list(range(1, seq2_length + 1)), 0]
+     for seq1_index, seq1_char in enumerate(seq1):

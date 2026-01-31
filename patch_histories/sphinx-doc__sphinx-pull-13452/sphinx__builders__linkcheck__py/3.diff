@@ -1,0 +1,14 @@
+diff --git a/sphinx/builders/linkcheck.py b/sphinx/builders/linkcheck.py
+--- a/sphinx/builders/linkcheck.py
++++ b/sphinx/builders/linkcheck.py
+@@ -778,7 +778,9 @@
+     app.add_config_value(
+         'linkcheck_exclude_documents', [], '', types=frozenset({list, tuple})
+     )
+-    app.add_config_value('linkcheck_allowed_redirects', {}, '', types=frozenset({dict}))
++    app.add_config_value(
++        'linkcheck_allowed_redirects', _sentinel_lar, '', types=frozenset({dict})
++    )
+     app.add_config_value('linkcheck_auth', [], '', types=frozenset({list, tuple}))
+     app.add_config_value('linkcheck_request_headers', {}, '', types=frozenset({dict}))
+     app.add_config_value('linkcheck_retries', 1, '', types=frozenset({int}))

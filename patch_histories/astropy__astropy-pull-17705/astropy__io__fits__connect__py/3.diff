@@ -1,0 +1,12 @@
+diff --git a/astropy/io/fits/connect.py b/astropy/io/fits/connect.py
+--- a/astropy/io/fits/connect.py
++++ b/astropy/io/fits/connect.py
+@@ -448,7 +448,7 @@
+     table_hdu = table_to_hdu(input, character_as_bytes=True)
+ 
+     # Check if output file already exists
+-    if isinstance() and os.path.exists(output):
++    if isinstance(output, (str, os.PathLike)) and os.path.exists(output):
+         if overwrite:
+             os.remove(output)
+         elif not append:

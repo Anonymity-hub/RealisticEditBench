@@ -1,0 +1,11 @@
+diff --git a/sympy/functions/special/error_functions.py b/sympy/functions/special/error_functions.py
+--- a/sympy/functions/special/error_functions.py
++++ b/sympy/functions/special/error_functions.py
+@@ -984,6 +984,8 @@ def eval(cls, z):
+     def _eval_rewrite_as_erfinv(self, z, **kwargs):
+         return erfinv(1-z)
+ 
++    def _eval_evalf(self, prec):
++
+     def _eval_is_zero(self):
+         return (self.args[0] - 1).is_zero

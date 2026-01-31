@@ -1,0 +1,183 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -1953,7 +1953,7 @@
+ 
+     def get_module_comment(self, attrname: str) -> list[str] | None:
+         try:
+-            analyzer = ModuleAnalyzer.for_module(self.modname)
++            analyzer = ModuleAnalyzer.for_module(self.props.module_name)
+             analyzer.analyze()
+             key = ('', attrname)
+             if key in analyzer.attr_docs:
+@@ -1965,7 +1965,7 @@
+ 
+     def get_doc(self) -> list[list[str]] | None:
+         # Check the variable has a docstring-comment
+-        comment = self.get_module_comment(self.objpath[-1])
++        comment = self.get_module_comment(self.props.name)
+         if comment:
+             return [comment]
+         else:
+@@ -2022,7 +2022,7 @@
+                 args = '()'
+             else:
+                 if inspect.isstaticmethod(
+-                    self.object, cls=self.parent, name=self.object_name
++                    self.object, cls=self.parent, name=self.props.object_name
+                 ):
+                     self._events.emit(
+                         'autodoc-before-process-signature', self.object, False
+@@ -2043,9 +2043,8 @@
+                     )
+                 args = stringify_signature(sig, **kwargs)
+         except TypeError as exc:
+-            logger.warning(
+-                __('Failed to get a method signature for %s: %s'), self.fullname, exc
+-            )
++            msg = __('Failed to get a method signature for %s: %s')
++            logger.warning(msg, self.props.full_name, exc)
+             return ''
+         except ValueError:
+             args = ''
+@@ -2059,7 +2058,7 @@
+         super().add_directive_header(sig)
+ 
+         sourcename = self.get_sourcename()
+-        obj = self.parent.__dict__.get(self.object_name, self.object)
++        obj = self.parent.__dict__.get(self.props.object_name, self.object)
+         if inspect.isabstractmethod(obj):
+             self.add_line('   :abstractmethod:', sourcename)
+         if inspect.iscoroutinefunction(obj) or inspect.isasyncgenfunction(obj):
+@@ -2070,9 +2069,9 @@
+             and inspect.is_classmethod_like(obj.func)
+         ):
+             self.add_line('   :classmethod:', sourcename)
+-        if inspect.isstaticmethod(obj, cls=self.parent, name=self.object_name):
++        if inspect.isstaticmethod(obj, cls=self.parent, name=self.props.object_name):
+             self.add_line('   :staticmethod:', sourcename)
+-        if self.analyzer and '.'.join(self.objpath) in self.analyzer.finals:
++        if self.analyzer and self.props.dotted_parts in self.analyzer.finals:
+             self.add_line('   :final:', sourcename)
+ 
+     def document_members(self, all_members: bool = False) -> None:
+@@ -2087,7 +2086,7 @@
+         sigs = []
+         if (
+             self.analyzer
+-            and '.'.join(self.objpath) in self.analyzer.overloads
++            and self.props.dotted_parts in self.analyzer.overloads
+             and self.config.autodoc_typehints != 'none'
+         ):
+             # Use signatures for overloaded methods instead of the implementation method.
+@@ -2097,8 +2096,10 @@
+             sig = super().format_signature(**kwargs)
+             sigs.append(sig)
+ 
+-        meth = self.parent.__dict__.get(self.objpath[-1])
++        meth = self.parent.__dict__.get(self.props.name)
+         if inspect.is_singledispatch_method(meth):
++            from sphinx.ext.autodoc._property_types import _FunctionDefProperties
++
+             # append signature of singledispatch'ed functions
+             for typ, func in meth.dispatcher.registry.items():
+                 if typ is object:
+@@ -2109,13 +2110,21 @@
+                     dispatchmeth = self.annotate_to_first_argument(func, typ)
+                     if dispatchmeth:
+                         documenter = MethodDocumenter(self.directive, '')
++                        documenter.props = _FunctionDefProperties(
++                            obj_type='method',
++                            module_name='',
++                            parts=('',),
++                            docstring_lines=(),
++                            _obj=dispatchmeth,
++                            _obj___module__=None,
++                            properties=frozenset(),
++                        )
+                         documenter.parent = self.parent
+                         documenter.object = dispatchmeth
+-                        documenter.objpath = ['']
+                         sigs.append(documenter.format_signature())
+         if overloaded and self.analyzer is not None:
+             if inspect.isstaticmethod(
+-                self.object, cls=self.parent, name=self.object_name
++                self.object, cls=self.parent, name=self.props.object_name
+             ):
+                 actual = inspect.signature(
+                     self.object,
+@@ -2130,14 +2139,14 @@
+                 )
+ 
+             __globals__ = safe_getattr(self.object, '__globals__', {})
+-            for overload in self.analyzer.overloads['.'.join(self.objpath)]:
++            for overload in self.analyzer.overloads[self.props.dotted_parts]:
+                 overload = self.merge_default_value(actual, overload)
+                 overload = evaluate_signature(
+                     overload, __globals__, self.config.autodoc_type_aliases
+                 )
+ 
+                 if not inspect.isstaticmethod(
+-                    self.object, cls=self.parent, name=self.object_name
++                    self.object, cls=self.parent, name=self.props.object_name
+                 ):
+                     parameters = list(overload.parameters.values())
+                     overload = overload.replace(parameters=parameters[1:])
+@@ -2163,9 +2172,8 @@
+         try:
+             sig = inspect.signature(func, type_aliases=self.config.autodoc_type_aliases)
+         except TypeError as exc:
+-            logger.warning(
+-                __('Failed to get a method signature for %s: %s'), self.fullname, exc
+-            )
++            msg = __('Failed to get a method signature for %s: %s')
++            logger.warning(msg, self.props.full_name, exc)
+             return None
+         except ValueError:
+             return None
+@@ -2196,13 +2204,13 @@
+             # ``__docstring_signature__ = True``. Just return the
+             # previously-computed result, so that we don't loose the processing.
+             return self._new_docstrings
+-        if self.objpath[-1] == '__init__':
++        if self.props.name == '__init__':
+             docstring = getdoc(
+                 self.object,
+                 self.get_attr,
+                 self.config.autodoc_inherit_docstrings,
+                 self.parent,
+-                self.object_name,
++                self.props.object_name,
+             )
+             if docstring is not None and (
+                 docstring == object.__init__.__doc__  # for pypy
+@@ -2214,13 +2222,13 @@
+                 return [prepare_docstring(docstring, tabsize=tab_width)]
+             else:
+                 return []
+-        elif self.objpath[-1] == '__new__':
++        elif self.props.name == '__new__':
+             docstring = getdoc(
+                 self.object,
+                 self.get_attr,
+                 self.config.autodoc_inherit_docstrings,
+                 self.parent,
+-                self.object_name,
++                self.props.object_name,
+             )
+             if docstring is not None and (
+                 docstring == object.__new__.__doc__  # for pypy
+@@ -2336,11 +2344,11 @@
+                     self.config.autodoc_type_aliases,
+                     include_extras=True,
+                 )
+-                if self.objpath[-1] in annotations:
++                if self.props.name in annotations:
+                     mode = _get_render_mode(self.config.autodoc_typehints_format)
+                     short_literals = self.config.python_display_short_literal_types
+                     objrepr = stringify_annotation(
+-                        annotations.get(self.objpath[-1]),
++                        annotations.get(self.props.name),
+                         mode,
+                         short_literals=short_literals,
+                     )

@@ -1,0 +1,25 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -1533,8 +1533,19 @@
+                         "'CFTimedeltaCoder' instance.",
+                         FutureWarning,
+                     )
+-                dtype = np.dtype(f"timedelta64[{self.time_unit}]")
+-                time_unit = self.time_unit
++                if self.time_unit is None:
++                    time_unit = cast(PDDatetimeUnitOptions, "ns")
++                else:
++                    time_unit = self.time_unit
++
++                # Handle edge case that decode_via_dtype=False and
++                # decode_via_units=True, and timedeltas were encoded with a
++                # dtype attribute. We need to remove the dtype attribute
++                # to prevent an error during round tripping.
++                if has_timedelta_dtype:
++                    attrs.pop("dtype")
++
++            dtype = np.dtype(f"timedelta64[{time_unit}]")
+             transform = partial(decode_cf_timedelta, units=units, time_unit=time_unit)
+             data = lazy_elemwise_func(data, transform, dtype=dtype)
+             return Variable(dims, data, attrs, encoding, fastpath=True)

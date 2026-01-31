@@ -1,0 +1,12 @@
+diff --git a/xarray/core/datatree.py b/xarray/core/datatree.py
+--- a/xarray/core/datatree.py
++++ b/xarray/core/datatree.py
+@@ -1463,7 +1463,7 @@
+         """
+         # TODO this signature means that func has no way to know which node it is being called upon - change?
+         # TODO fix this typing error
+-        return map_over_datasets(func, self, *args)
++        return map_over_datasets(func, self, *args, kwargs=kwargs)
+ 
+     def pipe(
+         self, func: Callable | tuple[Callable, str], *args: Any, **kwargs: Any

@@ -1,0 +1,22 @@
+diff --git a/sphinx/domains/python/_annotations.py b/sphinx/domains/python/_annotations.py
+--- a/sphinx/domains/python/_annotations.py
++++ b/sphinx/domains/python/_annotations.py
+@@ -595,6 +595,18 @@
+                     node += addnodes.desc_sig_space()
+                     node += addnodes.desc_sig_name('', '', *children)  # type: ignore[arg-type]
+                 if default_value:
++                    if annotation:
++                        node += addnodes.desc_sig_space()
++                    node += addnodes.desc_sig_operator('', '=')
++                    if annotation:
++                        node += addnodes.desc_sig_space()
++                    node += nodes.inline(
++                        '',
++                        default_value.strip(),
++                        classes=['default_value'],
++                        support_smartquotes=False,
++                    )
++                stack[-1] += node
+             while ends_open:
+                 stack.append(addnodes.desc_optional())
+                 stack[-2] += stack[-1]

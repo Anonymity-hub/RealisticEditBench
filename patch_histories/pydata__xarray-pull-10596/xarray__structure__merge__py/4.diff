@@ -1,0 +1,13 @@
+diff --git a/xarray/structure/merge.py b/xarray/structure/merge.py
+--- a/xarray/structure/merge.py
++++ b/xarray/structure/merge.py
+@@ -341,6 +341,9 @@
+                         [var.attrs for var in variables], combine_attrs=combine_attrs
+                     )
+ 
++            if name in merged_vars and (merged_vars[name].attrs or attrs):
++                # Ensure that assigning attrs does not affect the original input variable.
++
+     return merged_vars, merged_indexes
+ 
+ 

@@ -1,0 +1,101 @@
+diff --git a/xarray/backends/common.py b/xarray/backends/common.py
+--- a/xarray/backends/common.py
++++ b/xarray/backends/common.py
+@@ -256,6 +256,20 @@ def find_root_and_group(ds):
+     return ds, group
+ 
+ 
++def collect_ancestor_dimensions(group) -> dict[str, int]:
++    """Returns dimensions defined in parent groups.
++
++    If dimensions are defined in multiple ancestors, use the size of the closest
++    ancestor.
++    """
++    dims = {}
++    while (group := group.parent) is not None:
++        for k, v in group.dimensions.items():
++            if k not in dims:
++                dims[k] = len(v)
++    return dims
++
++
+ def datatree_from_dict_with_io_cleanup(groups_dict: Mapping[str, Dataset]) -> DataTree:
+     """DataTree.from_dict with file clean-up."""
+     try:
+@@ -308,6 +322,9 @@ class AbstractDataStore:
+     def get_dimensions(self):  # pragma: no cover
+         raise NotImplementedError()
+ 
++    def get_parent_dimensions(self):  # pragma: no cover
++        return {}
++
+     def get_attrs(self):  # pragma: no cover
+         raise NotImplementedError()
+ 
+@@ -563,21 +580,22 @@ def set_dimensions(self, variables, unlimited_dims=None):
+         if unlimited_dims is None:
+             unlimited_dims = set()
+ 
++        parent_dims = self.get_parent_dimensions()
+         existing_dims = self.get_dimensions()
+ 
+         dims = {}
+         for v in unlimited_dims:  # put unlimited_dims first
+             dims[v] = None
+         for v in variables.values():
+-            dims.update(dict(zip(v.dims, v.shape, strict=True)))
++            dims |= v.sizes
+ 
+         for dim, length in dims.items():
+             if dim in existing_dims and length != existing_dims[dim]:
+                 raise ValueError(
+                     "Unable to update size for existing dimension"
+                     f"{dim!r} ({length} != {existing_dims[dim]})"
+                 )
+-            elif dim not in existing_dims:
++            elif dim not in existing_dims and length != parent_dims.get(dim):
+                 is_unlimited = dim in unlimited_dims
+                 self.set_dimension(dim, length, is_unlimited)
+ 
+diff --git a/xarray/backends/h5netcdf_.py b/xarray/backends/h5netcdf_.py
+--- a/xarray/backends/h5netcdf_.py
++++ b/xarray/backends/h5netcdf_.py
+@@ -16,6 +16,7 @@
+     WritableCFDataStore,
+     _normalize_path,
+     _open_remote_file,
++    collect_ancestor_dimensions,
+     datatree_from_dict_with_io_cleanup,
+     find_root_and_group,
+ )
+@@ -287,6 +288,9 @@ def get_attrs(self):
+     def get_dimensions(self):
+         return FrozenDict((k, len(v)) for k, v in self.ds.dimensions.items())
+ 
++    def get_parent_dimensions(self):
++        return FrozenDict(collect_ancestor_dimensions(self.ds))
++
+     def get_encoding(self):
+         return {
+             "unlimited_dims": {
+diff --git a/xarray/backends/netCDF4_.py b/xarray/backends/netCDF4_.py
+--- a/xarray/backends/netCDF4_.py
++++ b/xarray/backends/netCDF4_.py
+@@ -16,6 +16,7 @@
+     T_PathFileOrDataStore,
+     WritableCFDataStore,
+     _normalize_path,
++    collect_ancestor_dimensions,
+     datatree_from_dict_with_io_cleanup,
+     find_root_and_group,
+     robust_getitem,
+@@ -518,6 +519,9 @@ def get_attrs(self):
+     def get_dimensions(self):
+         return FrozenDict((k, len(v)) for k, v in self.ds.dimensions.items())
+ 
++    def get_parent_dimensions(self):
++        return FrozenDict(collect_ancestor_dimensions(self.ds))
++
+     def get_encoding(self):
+         return {
+             "unlimited_dims": {

@@ -1,0 +1,11 @@
+diff --git a/sympy/physics/control/lti.py b/sympy/physics/control/lti.py
+--- a/sympy/physics/control/lti.py
++++ b/sympy/physics/control/lti.py
+@@ -2507,7 +2507,6 @@ def doit(self, **hints):
+                     arg = arg.doit()
+                 arg = arg.doit()
+                 res = arg * res
+-                return res
+ 
+         _num_arg = (arg.doit().num for arg in self.args)
+         _den_arg = (arg.doit().den for arg in self.args)

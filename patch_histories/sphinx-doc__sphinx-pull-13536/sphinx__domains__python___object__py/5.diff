@@ -1,0 +1,27 @@
+diff --git a/sphinx/domains/python/_object.py b/sphinx/domains/python/_object.py
+--- a/sphinx/domains/python/_object.py
++++ b/sphinx/domains/python/_object.py
+@@ -363,8 +363,9 @@ def handle_signature(self, sig: str, signode: desc_signature) -> tuple[str, str]
+                 _pseudo_parse_arglist(
+                     signode,
+                     arglist,
+-                    multi_line_parameter_list,
+-                    trailing_comma,
++                    multi_line_parameter_list=multi_line_parameter_list,
++                    trailing_comma=trailing_comma,
++                    env=self.env,
+                 )
+             except (NotImplementedError, ValueError) as exc:
+                 # duplicated parameter names raise ValueError and not a SyntaxError
+@@ -374,8 +375,9 @@ def handle_signature(self, sig: str, signode: desc_signature) -> tuple[str, str]
+                 _pseudo_parse_arglist(
+                     signode,
+                     arglist,
+-                    multi_line_parameter_list,
+-                    trailing_comma,
++                    multi_line_parameter_list=multi_line_parameter_list,
++                    trailing_comma=trailing_comma,
++                    env=self.env,
+                 )
+         else:
+             if self.needs_arglist():

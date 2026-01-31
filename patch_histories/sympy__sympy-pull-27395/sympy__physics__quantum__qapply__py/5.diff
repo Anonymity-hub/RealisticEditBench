@@ -1,0 +1,20 @@
+diff --git a/sympy/physics/quantum/qapply.py b/sympy/physics/quantum/qapply.py
+--- a/sympy/physics/quantum/qapply.py
++++ b/sympy/physics/quantum/qapply.py
+@@ -213,9 +213,13 @@
+         return qapply_Mul(e.func(*args)*result, **options)
+ 
+     # Now try to actually apply the operator and build an inner product.
+-    try:
+-        result = lhs._apply_operator(rhs, **options)
+-    except NotImplementedError:
++    _apply = getattr(lhs, '_apply_operator', None)
++    if _apply is not None:
++        try:
++            result = _apply(rhs, **options)
++        except NotImplementedError:
++            result = None
++    else:
+         result = None
+ 
+     if result is None:

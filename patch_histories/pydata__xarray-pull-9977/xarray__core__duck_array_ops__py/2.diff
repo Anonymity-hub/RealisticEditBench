@@ -1,0 +1,18 @@
+diff --git a/xarray/core/duck_array_ops.py b/xarray/core/duck_array_ops.py
+--- a/xarray/core/duck_array_ops.py
++++ b/xarray/core/duck_array_ops.py
+@@ -662,13 +662,7 @@
+ 
+ 
+ def np_timedelta64_to_float(array, datetime_unit):
+-    """Convert numpy.timedelta64 to float.
+-
+-    Notes
+-    -----
+-    The array is first converted to microseconds, which is less likely to
+-    cause overflow errors.
+-    """
++    """Convert numpy.timedelta64 to float, possibly at a loss of resolution."""
+     array = array.astype("timedelta64[ns]").astype(np.float64)
+     conversion_factor = np.timedelta64(1, "ns") / np.timedelta64(1, datetime_unit)
+     return conversion_factor * array

@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/path.py b/lib/matplotlib/path.py
+--- a/lib/matplotlib/path.py
++++ b/lib/matplotlib/path.py
+@@ -695,7 +695,7 @@
+         else:
+             vertices = self.vertices
+ 
+-        vertices = simple_linear_interpolation(self.vertices, steps)
++        vertices = simple_linear_interpolation(vertices, steps)
+         codes = self.codes
+         if codes is not None:
+             new_codes = np.full((len(codes) - 1) * steps + 1, Path.LINETO,

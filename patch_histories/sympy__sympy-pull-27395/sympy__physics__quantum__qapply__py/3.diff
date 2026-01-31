@@ -1,0 +1,26 @@
+diff --git a/sympy/physics/quantum/qapply.py b/sympy/physics/quantum/qapply.py
+--- a/sympy/physics/quantum/qapply.py
++++ b/sympy/physics/quantum/qapply.py
+@@ -190,6 +190,21 @@
+         result = TensorProduct(*[qapply(lhs.args[n]*rhs.args[n], **options) for n in range(len(lhs.args))]).expand(tensorproduct=True)
+         return qapply_Mul(e.func(*args), **options)*result
+ 
++    # For Sums, move the Sum to the right.
++    if isinstance(rhs, Sum):
++        if isinstance(lhs, Sum):
++            if set(lhs.variables).intersection(set(rhs.variables)):
++                raise ValueError('Duplicated dummy indices in separate sums in qapply.')
++            limits = lhs.limits + rhs.limits
++            result = Sum(qapply(lhs.function*rhs.function, **options), *limits)
++            if sum_doit:
++                result = result.doit()
++            return qapply_Mul(e.func(*args)*result, **options)
++        else:
++            result = Sum(qapply(lhs*rhs.function, **options), rhs.limits)
++            if sum_doit:
++                result = result.doit()
++            return qapply_Mul(e.func(*args)*result, **options)
+     # Now try to actually apply the operator and build an inner product.
+     try:
+         result = lhs._apply_operator(rhs, **options)
+

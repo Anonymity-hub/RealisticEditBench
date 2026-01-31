@@ -1,0 +1,448 @@
+diff --git a/sphinx/builders/__init__.py b/sphinx/builders/__init__.py
+--- a/sphinx/builders/__init__.py
++++ b/sphinx/builders/__init__.py
+@@ -14,6 +14,7 @@
+ from docutils.utils import DependencyList
+ 
+ from sphinx._cli.util.colour import bold
++from sphinx.deprecation import _deprecation_warning
+ from sphinx.environment import (
+     CONFIG_CHANGED_REASON,
+     CONFIG_OK,
+@@ -114,7 +115,7 @@ def __init__(self, app: Sphinx, env: BuildEnvironment) -> None:
+         self.doctreedir = app.doctreedir
+         ensuredir(self.doctreedir)
+ 
+-        self.app: Sphinx = app
++        self._app: Sphinx = app
+         self.env: BuildEnvironment = env
+         self.env.set_versioning_method(self.versioning_method, self.versioning_compare)
+         self.events: EventManager = app.events
+@@ -136,9 +137,15 @@ def __init__(self, app: Sphinx, env: BuildEnvironment) -> None:
+         self.parallel_ok = False
+         self.finish_tasks: Any = None
+ 
++    @property
++    def app(self) -> Sphinx:
++        cls_name = self.__class__.__qualname__
++        _deprecation_warning(__name__, f'{cls_name}.app', remove=(10, 0))
++        return self._app
++
+     @property
+     def _translator(self) -> NullTranslations | None:
+-        return self.app.translator
++        return self._app.translator
+ 
+     def get_translator_class(self, *args: Any) -> type[nodes.NodeVisitor]:
+         """Return a class of translator."""
+@@ -258,7 +265,7 @@ def cat2relpath(cat: CatalogInfo, srcdir: Path = self.srcdir) -> str:
+             __('writing output... '),
+             'darkgreen',
+             len(catalogs),
+-            self.app.verbosity,
++            self._app.verbosity,
+             stringify_func=cat2relpath,
+         ):
+             catalog.write_mo(
+@@ -397,14 +404,14 @@ def build(
+         # while reading, collect all warnings from docutils
+         with (
+             nullcontext()
+-            if self.app._exception_on_warning
++            if self._app._exception_on_warning
+             else logging.pending_warnings()
+         ):
+             updated_docnames = set(self.read())
+ 
+         doccount = len(updated_docnames)
+         logger.info(bold(__('looking for now-outdated files... ')), nonl=True)
+-        updated_docnames.update(self.env.check_dependents(self.app, updated_docnames))
++        updated_docnames.update(self.env.check_dependents(self._app, updated_docnames))
+         outdated = len(updated_docnames) - doccount
+         if outdated:
+             logger.info(__('%d found'), outdated)
+@@ -422,14 +429,14 @@ def build(
+                 pickle.dump(self.env, f, pickle.HIGHEST_PROTOCOL)
+ 
+             # global actions
+-            self.app.phase = BuildPhase.CONSISTENCY_CHECK
++            self._app.phase = BuildPhase.CONSISTENCY_CHECK
+             with progress_message(__('checking consistency')):
+                 self.env.check_consistency()
+         else:
+             if method == 'update' and not docnames:
+                 logger.info(bold(__('no targets are out of date.')))
+ 
+-        self.app.phase = BuildPhase.RESOLVING
++        self._app.phase = BuildPhase.RESOLVING
+ 
+         # filter "docnames" (list of outdated files) by the updated
+         # found_docs of the environment; this will remove docs that
+@@ -438,14 +445,14 @@ def build(
+             docnames = set(docnames) & self.env.found_docs
+ 
+         # determine if we can write in parallel
+-        if parallel_available and self.app.parallel > 1 and self.allow_parallel:
+-            self.parallel_ok = self.app.is_parallel_allowed('write')
++        if parallel_available and self._app.parallel > 1 and self.allow_parallel:
++            self.parallel_ok = self._app.is_parallel_allowed('write')
+         else:
+             self.parallel_ok = False
+ 
+         #  create a task executor to use for misc. "finish-up" tasks
+         # if self.parallel_ok:
+-        #     self.finish_tasks = ParallelTasks(self.app.parallel)
++        #     self.finish_tasks = ParallelTasks(self._app.parallel)
+         # else:
+         # for now, just execute them serially
+         self.finish_tasks = SerialTasks()
+@@ -508,13 +515,13 @@ def read(self) -> list[str]:
+         self.events.emit('env-before-read-docs', self.env, docnames)
+ 
+         # check if we should do parallel or serial read
+-        if parallel_available and self.app.parallel > 1:
+-            par_ok = self.app.is_parallel_allowed('read')
++        if parallel_available and self._app.parallel > 1:
++            par_ok = self._app.is_parallel_allowed('read')
+         else:
+             par_ok = False
+ 
+         if par_ok:
+-            self._read_parallel(docnames, nproc=self.app.parallel)
++            self._read_parallel(docnames, nproc=self._app.parallel)
+         else:
+             self._read_serial(docnames)
+ 
+@@ -576,7 +583,7 @@ def _read_serial(self, docnames: list[str]) -> None:
+             __('reading sources... '),
+             'purple',
+             len(docnames),
+-            self.app.verbosity,
++            self._app.verbosity,
+         ):
+             # remove all inventory entries for that file
+             self.events.emit('env-purge-doc', self.env, docname)
+@@ -589,7 +596,11 @@ def _read_parallel(self, docnames: list[str], nproc: int) -> None:
+         # create a status_iterator to step progressbar after reading a document
+         # (see: ``merge()`` function)
+         progress = status_iterator(
+-            chunks, __('reading sources... '), 'purple', len(chunks), self.app.verbosity
++            chunks,
++            __('reading sources... '),
++            'purple',
++            len(chunks),
++            self._app.verbosity,
+         )
+ 
+         # clear all outdated docs at once
+@@ -598,15 +609,15 @@ def _read_parallel(self, docnames: list[str], nproc: int) -> None:
+             self.env.clear_doc(docname)
+ 
+         def read_process(docs: list[str]) -> bytes:
+-            self.env.app = self.app
++            self.env._app = self._app
+             for docname in docs:
+                 self.read_doc(docname, _cache=False)
+             # allow pickling self to send it back
+             return pickle.dumps(self.env, pickle.HIGHEST_PROTOCOL)
+ 
+         def merge(docs: list[str], otherenv: bytes) -> None:
+             env = pickle.loads(otherenv)
+-            self.env.merge_info_from(docs, env, self.app)
++            self.env.merge_info_from(docs, env, self._app)
+ 
+             next(progress)
+ 
+@@ -630,8 +641,8 @@ def read_doc(self, docname: str, *, _cache: bool = True) -> None:
+             env.note_dependency(docutils_conf)
+ 
+         filename = str(env.doc2path(docname))
+-        filetype = get_filetype(self.app.config.source_suffix, filename)
+-        publisher = self.env._registry.get_publisher(self.app, filetype)
++        filetype = get_filetype(self._app.config.source_suffix, filename)
++        publisher = self.env._registry.get_publisher(self._app, filetype)
+         self.env.current_document._parser = publisher.parser
+         # record_dependencies is mutable even though it is in settings,
+         # explicitly re-initialise for each document
+@@ -744,34 +755,34 @@ def write_documents(self, docnames: Set[str]) -> None:
+         if self.parallel_ok:
+             # number of subprocesses is parallel-1 because the main process
+             # is busy loading doctrees and doing write_doc_serialized()
+-            self._write_parallel(sorted_docnames, nproc=self.app.parallel - 1)
++            self._write_parallel(sorted_docnames, nproc=self._app.parallel - 1)
+         else:
+             self._write_serial(sorted_docnames)
+ 
+     def _write_serial(self, docnames: Sequence[str]) -> None:
+         with (
+             nullcontext()
+-            if self.app._exception_on_warning
++            if self._app._exception_on_warning
+             else logging.pending_warnings()
+         ):
+             for docname in status_iterator(
+                 docnames,
+                 __('writing output... '),
+                 'darkgreen',
+                 len(docnames),
+-                self.app.verbosity,
++                self._app.verbosity,
+             ):
+-                _write_docname(docname, app=self.app, env=self.env, builder=self)
++                _write_docname(docname, app=self._app, env=self.env, builder=self)
+ 
+     def _write_parallel(self, docnames: Sequence[str], nproc: int) -> None:
+         def write_process(docs: list[tuple[str, nodes.document]]) -> None:
+-            self.app.phase = BuildPhase.WRITING
++            self._app.phase = BuildPhase.WRITING
+             for docname, doctree in docs:
+                 self.write_doc(docname, doctree)
+ 
+         # warm up caches/compile templates using the first document
+         firstname, docnames = docnames[0], docnames[1:]
+-        _write_docname(firstname, app=self.app, env=self.env, builder=self)
++        _write_docname(firstname, app=self._app, env=self.env, builder=self)
+ 
+         tasks = ParallelTasks(nproc)
+         chunks = make_chunks(docnames, nproc)
+@@ -783,13 +794,13 @@ def write_process(docs: list[tuple[str, nodes.document]]) -> None:
+             __('writing output... '),
+             'darkgreen',
+             len(chunks),
+-            self.app.verbosity,
++            self._app.verbosity,
+         )
+ 
+         def on_chunk_done(args: list[tuple[str, nodes.document]], result: None) -> None:
+             next(progress)
+ 
+-        self.app.phase = BuildPhase.RESOLVING
++        self._app.phase = BuildPhase.RESOLVING
+         for chunk in chunks:
+             arg = []
+             for docname in chunk:
+diff --git a/sphinx/environment/__init__.py b/sphinx/environment/__init__.py
+--- a/sphinx/environment/__init__.py
++++ b/sphinx/environment/__init__.py
+@@ -11,6 +11,7 @@
+ from typing import TYPE_CHECKING
+ 
+ from sphinx import addnodes
++from sphinx.deprecation import _deprecation_warning
+ from sphinx.domains._domains_container import _DomainsContainer
+ from sphinx.environment.adapters import toctree as toctree_adapters
+ from sphinx.errors import (
+@@ -107,7 +108,7 @@ class BuildEnvironment:
+     doctreedir = _StrPathProperty()
+ 
+     def __init__(self, app: Sphinx) -> None:
+-        self.app: Sphinx = app
++        self._app: Sphinx = app
+         self.doctreedir = app.doctreedir
+         self.srcdir = app.srcdir
+         self.config: Config = None  # type: ignore[assignment]
+@@ -237,7 +238,7 @@ def __getstate__(self) -> dict[str, Any]:
+         """Obtains serializable data for pickling."""
+         __dict__ = self.__dict__.copy()
+         # clear unpickleable attributes
+-        __dict__.update(app=None, domains=None, events=None)
++        __dict__.update(_app=None, domains=None, events=None)
+         # clear in-memory doctree caches, to reduce memory consumption and
+         # ensure that, upon restoring the state, the most recent pickled files
+         # on the disk are used instead of those from a possibly outdated state
+@@ -257,7 +258,7 @@ def setup(self, app: Sphinx) -> None:
+         if self.project:
+             app.project.restore(self.project)
+ 
+-        self.app = app
++        self._app = app
+         self.doctreedir = app.doctreedir
+         self.events = app.events
+         self.srcdir = app.srcdir
+@@ -284,13 +285,28 @@ def setup(self, app: Sphinx) -> None:
+         # initialize settings
+         self._update_settings(app.config)
+ 
++    @property
++    def app(self) -> Sphinx:
++        _deprecation_warning(__name__, 'BuildEnvironment.app', remove=(10, 0))
++        return self._app
++
++    @app.setter
++    def app(self, app: Sphinx) -> None:
++        _deprecation_warning(__name__, 'BuildEnvironment.app', remove=(10, 0))
++        self._app = app
++
++    @app.deleter
++    def app(self) -> None:
++        _deprecation_warning(__name__, 'BuildEnvironment.app', remove=(10, 0))
++        del self._app
++
+     @property
+     def _registry(self) -> SphinxComponentRegistry:
+-        return self.app.registry
++        return self._app.registry
+ 
+     @property
+     def _tags(self) -> Tags:
+-        return self.app.tags
++        return self._app.tags
+ 
+     @staticmethod
+     def _config_status(
+diff --git a/sphinx/events.py b/sphinx/events.py
+--- a/sphinx/events.py
++++ b/sphinx/events.py
+@@ -9,6 +9,7 @@
+ from operator import attrgetter
+ from typing import TYPE_CHECKING, NamedTuple, overload
+ 
++from sphinx.deprecation import _deprecation_warning
+ from sphinx.errors import ExtensionError, SphinxError
+ from sphinx.locale import __
+ from sphinx.util import logging
+@@ -66,17 +67,25 @@ class EventManager:
+     """Event manager for Sphinx."""
+ 
+     def __init__(self, app: Sphinx) -> None:
+-        self.app = app
++        self._app = app
+         self.events = core_events.copy()
+         self.listeners: dict[str, list[EventListener]] = defaultdict(list)
+         self.next_listener_id = 0
+ 
++        # pass through errors for debugging.
++        self._reraise_errors: bool = app.pdb
++
+     def add(self, name: str) -> None:
+         """Register a custom Sphinx event."""
+         if name in self.events:
+             raise ExtensionError(__('Event %r already present') % name)
+         self.events[name] = ''
+ 
++    @property
++    def app(self) -> Sphinx:
++        _deprecation_warning(__name__, 'EventManager.app', remove=(10, 0))
++        return self._app
++
+     # ---- Core events -------------------------------------------------------
+ 
+     @overload
+@@ -401,15 +410,14 @@ def emit(
+         listeners = sorted(self.listeners[name], key=attrgetter('priority'))
+         for listener in listeners:
+             try:
+-                results.append(listener.handler(self.app, *args))
++                results.append(listener.handler(self._app, *args))
+             except allowed_exceptions:
+                 # pass through the errors specified as *allowed_exceptions*
+                 raise
+             except SphinxError:
+                 raise
+             except Exception as exc:
+-                if self.app.pdb:
+-                    # Just pass through the error, so that it can be debugged.
++                if self._reraise_errors:
+                     raise
+                 modname = safe_getattr(listener.handler, '__module__', None)
+                 raise ExtensionError(
+diff --git a/sphinx/transforms/__init__.py b/sphinx/transforms/__init__.py
+--- a/sphinx/transforms/__init__.py
++++ b/sphinx/transforms/__init__.py
+@@ -15,6 +15,7 @@
+ from docutils.utils.smartquotes import smartchars
+ 
+ from sphinx import addnodes
++from sphinx.deprecation import _deprecation_warning
+ from sphinx.locale import _, __
+ from sphinx.util import logging
+ from sphinx.util.docutils import new_document
+@@ -62,6 +63,8 @@ class SphinxTransform(Transform):
+     @property
+     def app(self) -> Sphinx:
+         """Reference to the :class:`.Sphinx` object."""
++        cls_name = self.__class__.__qualname__
++        _deprecation_warning(__name__, f'{cls_name}.app', remove=(10, 0))
+         return self.env.app
+ 
+     @property
+diff --git a/sphinx/util/logging.py b/sphinx/util/logging.py
+--- a/sphinx/util/logging.py
++++ b/sphinx/util/logging.py
+@@ -430,23 +430,23 @@ class WarningSuppressor(logging.Filter):
+     """Filter logs by `suppress_warnings`."""
+ 
+     def __init__(self, app: Sphinx) -> None:
+-        self.app = app
++        self._app = app
+         super().__init__()
+ 
+     def filter(self, record: logging.LogRecord) -> bool:
+         type = getattr(record, 'type', '')
+         subtype = getattr(record, 'subtype', '')
+ 
+         try:
+-            suppress_warnings = self.app.config.suppress_warnings
++            suppress_warnings = self._app.config.suppress_warnings
+         except AttributeError:
+             # config is not initialized yet (ex. in conf.py)
+             suppress_warnings = ()
+ 
+         if is_suppressed_warning(type, subtype, suppress_warnings):
+             return False
+         else:
+-            self.app._warncount += 1
++            self._app._warncount += 1
+             return True
+ 
+ 
+@@ -496,7 +496,7 @@ class SphinxLogRecordTranslator(logging.Filter):
+     LogRecordClass: type[logging.LogRecord]
+ 
+     def __init__(self, app: Sphinx) -> None:
+-        self.app = app
++        self._app = app
+         super().__init__()
+ 
+     def filter(self, record: SphinxWarningLogRecord) -> bool:  # type: ignore[override]
+@@ -509,15 +509,15 @@ def filter(self, record: SphinxWarningLogRecord) -> bool:  # type: ignore[overri
+             docname, lineno = location
+             if docname:
+                 if lineno:
+-                    record.location = f'{self.app.env.doc2path(docname)}:{lineno}'
++                    record.location = f'{self._app.env.doc2path(docname)}:{lineno}'
+                 else:
+-                    record.location = f'{self.app.env.doc2path(docname)}'
++                    record.location = f'{self._app.env.doc2path(docname)}'
+             else:
+                 record.location = None
+         elif isinstance(location, nodes.Node):
+             record.location = get_node_location(location)
+         elif location and ':' not in location:
+-            record.location = f'{self.app.env.doc2path(location)}'
++            record.location = f'{self._app.env.doc2path(location)}'
+ 
+         return True
+ 
+@@ -537,7 +537,7 @@ def filter(self, record: SphinxWarningLogRecord) -> bool:  # type: ignore[overri
+         ret = super().filter(record)
+ 
+         try:
+-            show_warning_types = self.app.config.show_warning_types
++            show_warning_types = self._app.config.show_warning_types
+         except AttributeError:
+             # config is not initialized yet (ex. in conf.py)
+             show_warning_types = False
+@@ -602,10 +602,10 @@ class LastMessagesWriter:
+     """Stream writer storing last 10 messages in memory to save trackback"""
+ 
+     def __init__(self, app: Sphinx, stream: IO[str]) -> None:
+-        self.app = app
++        self._app = app
+ 
+     def write(self, data: str) -> None:
+-        self.app.messagelog.append(data)
++        self._app.messagelog.append(data)
+ 
+ 
+ def setup(app: Sphinx, status: IO[str], warning: IO[str]) -> None:

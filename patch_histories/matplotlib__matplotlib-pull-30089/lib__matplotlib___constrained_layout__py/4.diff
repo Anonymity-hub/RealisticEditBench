@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/_constrained_layout.py b/lib/matplotlib/_constrained_layout.py
+--- a/lib/matplotlib/_constrained_layout.py
++++ b/lib/matplotlib/_constrained_layout.py
+@@ -594,6 +594,8 @@
+             for i in ss1.rowspan[:-1]:
+                 lg1.edit_margin_min('bottom', maxsubb, cell=i)
+ 
++    return
++
+ 
+ def get_cb_parent_spans(cbax):
+     """

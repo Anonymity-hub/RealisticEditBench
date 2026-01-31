@@ -1,0 +1,17 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -54,12 +54,7 @@
+     def ipython(self, options):
+         from IPython import start_ipython
+ 
+-        start_ipython(
+-            argv=[],
+-            user_ns=self.get_and_report_namespace(
+-                options["verbosity"], options["no_imports"]
+-            ),
+-        )
++        start_ipython(argv=[], user_ns=self.get_and_report_namespace(**options))
+ 
+     def bpython(self, options):
+         import bpython

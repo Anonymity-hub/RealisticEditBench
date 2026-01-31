@@ -1,0 +1,23 @@
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -195,6 +195,8 @@
+     """
+     if isinstance(data, pd.Index):
+         return PandasIndexingAdapter(data)
++    if isinstance(data, UNSUPPORTED_EXTENSION_ARRAY_TYPES):
++        return data.to_numpy()
+     if isinstance(data, pd.api.extensions.ExtensionArray):
+         return PandasExtensionArray(data)
+     return data
+@@ -256,7 +258,9 @@
+ 
+     # we don't want nested self-described arrays
+     if isinstance(data, pd.Series | pd.DataFrame):
+-        pandas_data = data.values
++        if (
++        ):
++            pandas_data = data.array
+         if isinstance(pandas_data, NON_NUMPY_SUPPORTED_ARRAY_TYPES):
+             return convert_non_numpy_type(pandas_data)
+         else:

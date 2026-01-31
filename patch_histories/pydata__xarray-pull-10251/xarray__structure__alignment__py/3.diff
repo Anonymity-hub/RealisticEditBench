@@ -1,0 +1,79 @@
+diff --git a/xarray/structure/alignment.py b/xarray/structure/alignment.py
+--- a/xarray/structure/alignment.py
++++ b/xarray/structure/alignment.py
+@@ -387,11 +387,33 @@
+     def align_indexes(self) -> None:
+         """Compute all aligned indexes and their corresponding coordinate variables."""
+ 
+-        aligned_indexes = {}
+-        aligned_index_vars = {}
+-        reindex = {}
+-        new_indexes = {}
+-        new_index_vars = {}
++        aligned_indexes: dict[MatchingIndexKey, Index] = {}
++        aligned_index_vars: dict[MatchingIndexKey, dict[Hashable, Variable]] = {}
++        reindex: dict[MatchingIndexKey, bool] = {}
++        new_indexes: dict[Hashable, Index] = {}
++        new_index_vars: dict[Hashable, Variable] = {}
++
++        def update_dicts(
++            key: MatchingIndexKey,
++            idx: Index,
++            idx_vars: dict[Hashable, Variable],
++            need_reindex: bool,
++        ):
++            reindex[key] = need_reindex
++            aligned_indexes[key] = idx
++            aligned_index_vars[key] = idx_vars
++
++            for name, var in idx_vars.items():
++                if name in new_indexes:
++                    other_idx = new_indexes[name]
++                    other_var = new_index_vars[name]
++                    raise AlignmentError(
++                        f"cannot align objects on coordinate {name!r} because of conflicting indexes\n"
++                        f"first index: {idx!r}\nsecond index: {other_idx!r}\n"
++                        f"first variable: {var!r}\nsecond variable: {other_var!r}\n"
++                    )
++                new_indexes[name] = idx
++                new_index_vars[name] = var
+ 
+         for key, matching_indexes in self.all_indexes.items():
+             matching_index_vars = self.all_index_vars[key]
+@@ -423,7 +445,7 @@
+                     need_reindex = False
+                 if need_reindex:
+                     if self.join == "exact":
+-                        raise ValueError(
++                        raise AlignmentError(
+                             "cannot align objects with join='exact' where "
+                             "index/labels/sizes are not equal along "
+                             "these coordinates (dimensions): "
+@@ -441,25 +463,14 @@
+                     joined_index = matching_indexes[0]
+                     joined_index_vars = matching_index_vars[0]
+ 
+-            reindex[key] = need_reindex
+-            aligned_indexes[key] = joined_index
+-            aligned_index_vars[key] = joined_index_vars
+-
+-            for name, var in joined_index_vars.items():
+-                new_indexes[name] = joined_index
+-                new_index_vars[name] = var
++            update_dicts(key, joined_index, joined_index_vars, need_reindex)
+ 
+         # Explicitly provided indexes that are not found in objects to align
+         # may relate to unindexed dimensions so we add them too
+         for key, idx in self.indexes.items():
+             if key not in aligned_indexes:
+                 index_vars = self.index_vars[key]
+-                reindex[key] = False
+-                aligned_indexes[key] = idx
+-                aligned_index_vars[key] = index_vars
+-                for name, var in index_vars.items():
+-                    new_indexes[name] = idx
+-                    new_index_vars[name] = var
++                update_dicts(key, idx, index_vars, False)
+ 
+         self.aligned_indexes = aligned_indexes
+         self.aligned_index_vars = aligned_index_vars

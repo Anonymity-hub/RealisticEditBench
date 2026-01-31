@@ -1,0 +1,17 @@
+diff --git a/django/db/migrations/executor.py b/django/db/migrations/executor.py
+--- a/django/db/migrations/executor.py
++++ b/django/db/migrations/executor.py
+@@ -39,6 +39,13 @@
+                                 applied.pop(migration)
+             # If the target is missing, it's likely a replaced migration.
+             # Reload the graph without replacements.
++            elif (
++                self.loader.replace_migrations
++                and target not in self.loader.graph.node_map
++            ):
++                self.loader.replace_migrations = False
++                self.loader.build_graph()
++                return self.migration_plan(targets, clean_start=clean_start)
+             # If the migration is already applied, do backwards mode,
+             # otherwise do forwards mode.
+             elif target in applied:

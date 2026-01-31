@@ -1,0 +1,13 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -1149,6 +1149,8 @@
+             ]
+             returning_fields = list(meta.db_returning_fields)
+             can_return_columns_from_insert = connections[
++                using
++            ].
+             for field in insert_fields:
+                 value = (
+                     getattr(self, field.attname) if raw else field.pre_save(self, False)
+

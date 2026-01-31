@@ -1,0 +1,15 @@
+diff --git a/astropy/io/votable/tree.py b/astropy/io/votable/tree.py
+--- a/astropy/io/votable/tree.py
++++ b/astropy/io/votable/tree.py
+@@ -1675,8 +1675,9 @@
+     def to_xml(self, w, **kwargs):
+         attrib = w.object_attrs(self, self._attr_list)
+         if "unit" in attrib:
+-            format =
+-            attrib["unit"] = self.unit.to_string(format)
++            format = _get_unit_format(self._config)
++            try:
++                attrib["unit"] = self.unit.to_string(format)
+         with w.tag(self._element_name, attrib=attrib):
+             if self.description is not None:
+                 w.element("DESCRIPTION", self.description, wrap=True)

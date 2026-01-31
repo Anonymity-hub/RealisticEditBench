@@ -1,0 +1,12 @@
+diff --git a/xarray/computation/apply_ufunc.py b/xarray/computation/apply_ufunc.py
+--- a/xarray/computation/apply_ufunc.py
++++ b/xarray/computation/apply_ufunc.py
+@@ -1209,7 +1209,7 @@
+             dask_gufunc_kwargs.setdefault("output_sizes", output_sizes)
+ 
+     if kwargs:
+-        if "where" in kwargs and
++        if "where" in kwargs and isinstance(kwargs["where"], DataArray):
+         func = functools.partial(func, **kwargs)
+ 
+     if keep_attrs is None:

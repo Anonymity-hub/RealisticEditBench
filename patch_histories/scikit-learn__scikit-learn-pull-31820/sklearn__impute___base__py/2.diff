@@ -1,0 +1,16 @@
+diff --git a/sklearn/impute/_base.py b/sklearn/impute/_base.py
+--- a/sklearn/impute/_base.py
++++ b/sklearn/impute/_base.py
+@@ -44,6 +44,12 @@
+     If values cannot be directly compared due to type incompatibility, the object with
+     the lowest string representation is returned.
+     """
++    try:
++        return min(items)
++    except TypeError as e:
++        if "'<' not supported between" in str(e):
++            return min(items, key=lambda x: (str(type(x)), str(x)))
++        raise  # pragma: no cover
+ 
+ 
+ def _most_frequent(array, extra_value, n_repeat):

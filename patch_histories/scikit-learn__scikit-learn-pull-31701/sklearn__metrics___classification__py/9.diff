@@ -1,0 +1,12 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -3454,6 +3454,8 @@
+     assert_all_finite(y_prob)
+ 
+     check_consistent_length(y_prob, y_true, sample_weight)
++    if sample_weight is not None:
++        _check_sample_weight(sample_weight, y_true, force_float_dtype=False)
+ 
+     y_type = type_of_target(y_true, input_name="y_true")
+     if y_type != "binary":

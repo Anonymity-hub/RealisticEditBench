@@ -1,0 +1,12 @@
+diff --git a/sympy/assumptions/handlers/sets.py b/sympy/assumptions/handlers/sets.py
+--- a/sympy/assumptions/handlers/sets.py
++++ b/sympy/assumptions/handlers/sets.py
+@@ -753,6 +753,8 @@
+         # Check based on the Gelfond-Schneider theorem:
+         # If the base is algebraic and not equal to 0 or 1, and the exponent
+         # is irrational,then the result is transcendental.
++        if ask(Q.ne(expr.base,0) & Q.ne(expr.base,1)) and exp_rational is False:
++            return False
+ 
+ @AlgebraicPredicate.register(Rational) # type:ignore
+ def _(expr, assumptions):

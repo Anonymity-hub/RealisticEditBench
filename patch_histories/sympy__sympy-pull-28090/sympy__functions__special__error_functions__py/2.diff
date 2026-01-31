@@ -1,0 +1,12 @@
+diff --git a/sympy/functions/special/error_functions.py b/sympy/functions/special/error_functions.py
+--- a/sympy/functions/special/error_functions.py
++++ b/sympy/functions/special/error_functions.py
+@@ -985,6 +985,7 @@
+         return erfinv(1-z)
+ 
+     def _eval_evalf(self, prec):
++        return self.rewrite(erfinv)._eval_evalf(prec)
+ 
+     def _eval_is_zero(self):
+         return (self.args[0] - 1).is_zero
+

@@ -1,0 +1,12 @@
+diff --git a/sphinx/ext/autodoc/_property_types.py b/sphinx/ext/autodoc/_property_types.py
+--- a/sphinx/ext/autodoc/_property_types.py
++++ b/sphinx/ext/autodoc/_property_types.py
+@@ -2,6 +2,8 @@
+ 
+ import dataclasses
+ 
++from sphinx.ext.autodoc._sentinels import RUNTIME_INSTANCE_ATTRIBUTE, UNINITIALIZED_ATTR
++
+ TYPE_CHECKING = False
+ if TYPE_CHECKING:
+     from collections.abc import Sequence

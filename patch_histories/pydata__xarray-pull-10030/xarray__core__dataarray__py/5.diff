@@ -1,0 +1,12 @@
+diff --git a/xarray/core/dataarray.py b/xarray/core/dataarray.py
+--- a/xarray/core/dataarray.py
++++ b/xarray/core/dataarray.py
+@@ -7582,6 +7582,8 @@
+         -------
+         DataArray
+         """
++        if not deep:
++
+         return (
+             self._to_temp_dataset().drop_attrs(deep=deep).pipe(self._from_temp_dataset)
+         )

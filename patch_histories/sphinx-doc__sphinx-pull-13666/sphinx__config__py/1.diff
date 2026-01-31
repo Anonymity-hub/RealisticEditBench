@@ -1,0 +1,11 @@
+diff --git a/sphinx/config.py b/sphinx/config.py
+--- a/sphinx/config.py
++++ b/sphinx/config.py
+@@ -896,6 +896,7 @@ def check_master_doc(
+ 
+
+ def setup(app: Sphinx) -> ExtensionMetadata:
++    app.connect('config-inited', deprecate_source_encoding, priority=790)
+     app.connect('config-inited', convert_source_suffix, priority=800)
+     app.connect('config-inited', convert_highlight_options, priority=800)
+     app.connect('config-inited', init_numfig_format, priority=800)

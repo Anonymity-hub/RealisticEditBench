@@ -1,0 +1,23 @@
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -2558,6 +2558,19 @@
+         # docstring inherited
+         return self.vmin is not None and self.vmax is not None
+ 
++    @property
++    def n_components(self):
++        """
++        The number of distinct components supported (1).
++
++        This is the number of elements of the parameter to ``__call__`` and of
++        *vmin*, *vmax*.
++
++        This class support only a single component, as opposed to `MultiNorm`
++        which supports multiple components.
++        """
++        return 1
++
+ 
+ class TwoSlopeNorm(Normalize):
+     def __init__(self, vcenter, vmin=None, vmax=None):

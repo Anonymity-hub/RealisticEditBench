@@ -1,0 +1,16 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -1841,11 +1841,8 @@
+         # are new, then add them all as a single "transaction" below.
+         for name in self._names:
+             nfkc_name = unicodedata.normalize("NFKC", name)
+-            if nfkc_name in namespace and self != namespace[name]:
++            if nfkc_name in namespace and self != (obj := namespace[nfkc_name]):
+-                raise ValueError(
+-                    f"Object with NFKC normalized name {name!r} already exists in "
+-                    f"given namespace ({namespace[name]!r})."
+                 )
+ 
+         for name in self._names:
+             namespace[name] = self

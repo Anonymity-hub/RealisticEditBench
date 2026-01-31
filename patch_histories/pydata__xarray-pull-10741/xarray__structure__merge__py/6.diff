@@ -1,0 +1,27 @@
+diff --git a/xarray/structure/merge.py b/xarray/structure/merge.py
+--- a/xarray/structure/merge.py
++++ b/xarray/structure/merge.py
+@@ -652,20 +652,10 @@
+     elif combine_attrs == "drop_conflicts":
+         result = {}
+         dropped_keys = set()
++
+         for attrs in variable_attrs:
+-            result.update(
+-                {
+-                    key: value
+-                    for key, value in attrs.items()
+-                    if key not in result and key not in dropped_keys
+-                }
+-            )
+-            result = {
+-                key: value
+-                for key, value in result.items()
+-                if key not in attrs or equivalent(attrs[key], value)
+-            }
+-            dropped_keys |= {key for key in attrs if key not in result}
++            for key, value in attrs.items():
++
+         return result
+     elif combine_attrs == "identical":
+         result = dict(variable_attrs[0])

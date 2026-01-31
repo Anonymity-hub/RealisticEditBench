@@ -1,0 +1,14 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -185,8 +185,8 @@ def get_namespace(self, **options):
+             else:
+                 module = None
+                 name = path
+-
+-            auto_imports[module].append((name, obj))
++            if :
++                auto_imports[module].append((name, obj))
+ 
+         namespace = {
+             name: obj for items in auto_imports.values() for name, obj in items

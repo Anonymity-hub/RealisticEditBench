@@ -1,0 +1,78 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -580,6 +580,7 @@ def check(self, **kwargs):
+         return [
+             *super().check(**kwargs),
+             *self._check_to_fields_exist(),
++            *self._check_to_fields_composite_pk(),
+             *self._check_unique_target(),
+         ]
+ 
+@@ -605,6 +606,36 @@ def _check_to_fields_exist(self):
+                     )
+         return errors
+ 
++    def _check_to_fields_composite_pk(self):
++        from django.db.models.fields.composite import CompositePrimaryKey
++
++        # Skip nonexistent models.
++        if isinstance(self.remote_field.model, str):
++            return []
++
++        errors = []
++        for to_field in self.to_fields:
++            try:
++                field = (
++                    self.remote_field.model._meta.pk
++                    if to_field is None
++                    else self.remote_field.model._meta.get_field(to_field)
++                )
++            except exceptions.FieldDoesNotExist:
++                pass
++            else:
++                if isinstance(field, CompositePrimaryKey):
++                    errors.append(
++                        checks.Error(
++                            "Field defines a relation to the CompositePrimaryKey of "
++                            f"model {self.remote_field.model._meta.object_name!r} "
++                            "which is not supported.",
++                            obj=self,
++                            id="fields.E347",
++                        )
++                    )
++        return errors
++
+     def _check_unique_target(self):
+         rel_is_string = isinstance(self.remote_field.model, str)
+         if rel_is_string or not self.requires_unique_target:
+@@ -1470,6 +1501,8 @@ def _check_ignored_options(self, **kwargs):
+         return warnings
+ 
+     def _check_relationship_model(self, from_model=None, **kwargs):
++        from django.db.models.fields.composite import CompositePrimaryKey
++
+         if hasattr(self.remote_field.through, "_meta"):
+             qualified_model_name = "%s.%s" % (
+                 self.remote_field.through._meta.app_label,
+@@ -1506,6 +1539,20 @@ def _check_relationship_model(self, from_model=None, **kwargs):
+                 to_model_name = to_model
+             else:
+                 to_model_name = to_model._meta.object_name
++            if (
++                self.remote_field.through_fields is None
++                and not isinstance(to_model, str)
++                and isinstance(to_model._meta.pk, CompositePrimaryKey)
++            ):
++                errors.append(
++                    checks.Error(
++                        "Field defines a relation to the CompositePrimaryKey of model "
++                        f"{self.remote_field.model._meta.object_name!r} which is not "
++                        "supported.",
++                        obj=self,
++                        id="fields.E347",
++                    )
++                )
+             relationship_model_name = self.remote_field.through._meta.object_name
+             self_referential = from_model == to_model
+             # Count foreign keys in intermediate model

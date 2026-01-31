@@ -1,0 +1,26 @@
+diff --git a/lib/matplotlib/figure.py b/lib/matplotlib/figure.py
+--- a/lib/matplotlib/figure.py
++++ b/lib/matplotlib/figure.py
+@@ -3713,3 +3713,22 @@ def figaspect(arg):
+     # the min/max dimensions (we don't want figures 10 feet tall!)
+     newsize = np.clip(newsize, figsize_min, figsize_max)
+     return newsize
++
++
++def _parse_figsize(figsize, dpi):
++    """
++    Convert a figsize expression to (width, height) in inches.
++
++    Parameters
++    ----------
++    figsize : (float, float) or (float, float, str)
++        This can be
++
++        - a tuple ``(width, height, unit)``, where *unit* is one of "in" (inch),
++          "cm" (centimenter), "px" (pixel).
++        - a tuple ``(width, height)``, which is interpreted in inches, i.e. as
++          ``(width, height, "in")``.
++
++    dpi : float
++        The dots-per-inch; used for converting 'px' to 'in'.
++    """

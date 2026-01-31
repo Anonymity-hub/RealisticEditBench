@@ -1,0 +1,13 @@
+diff --git a/sphinx/builders/html/__init__.py b/sphinx/builders/html/__init__.py
+--- a/sphinx/builders/html/__init__.py
++++ b/sphinx/builders/html/__init__.py
+@@ -1053,7 +1053,7 @@
+             if patmatch(pagename, pattern):
+                 if matched and _has_wildcard(pattern):
+                     # warn if both patterns contain wildcards
+-                    if has_wildcard(matched):
++                    if _has_wildcard(matched):
+                         logger.warning(msg, pagename, matched, pattern)
+                     # else the already matched pattern is more specific
+                     # than the present one, because it contains no wildcard
+

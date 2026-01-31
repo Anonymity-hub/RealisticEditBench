@@ -1,0 +1,19 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -127,11 +118,12 @@ def python(self, options):
+         # Start the interactive interpreter.
+         code.interact(local=imported_objects)
+ 
+-    def get_and_report_namespace(self, verbosity, no_imports=False):
+-        if no_imports:
++    def get_and_report_namespace(self, **options):
++        if options and options.get("no_imports"):
+             return {}
+ 
+         namespace = self.get_namespace()
+ 
++        verbosity = options["verbosity"] if options else 0
+         if verbosity < 1:
+             return namespace
+

@@ -1,0 +1,14 @@
+diff --git a/astropy/timeseries/downsample.py b/astropy/timeseries/downsample.py
+--- a/astropy/timeseries/downsample.py
++++ b/astropy/timeseries/downsample.py
+@@ -14,6 +14,10 @@
+ 
+ 
+ def nanmean_reduceat(data, indices):
++    mask = np.isnan(data)
++
++    if mask.any():  # If there are NaNs
++        # Create a writeable copy and mask NaNs
+ def reduceat(array, indices, function):
+     """
+     Manual reduceat functionality for cases where Numpy functions don't have a reduceat.

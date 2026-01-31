@@ -1,0 +1,13 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -479,7 +479,8 @@
+     ith_poly = 0
+     partial_relations = {}
+     if N % 2 == 0:
+-
++        proper_factor.add(2)
++        N//=2
+     idx_1000, idx_5000, factor_base = _generate_factor_base(prime_bound, N)
+     threshold = 5*len(factor_base) // 100
+     while True:

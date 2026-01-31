@@ -1,0 +1,235 @@
+diff --git a/astropy/coordinates/baseframe.py b/astropy/coordinates/baseframe.py
+--- a/astropy/coordinates/baseframe.py
++++ b/astropy/coordinates/baseframe.py
+@@ -106,7 +106,7 @@ class for the representation of the base coordinates.  If a string,
+     for name, differential_type in differentials.items():
+         if differential_type == "base":
+             # We don't want to fail for this case.
+-            differential_type = r.DIFFERENTIAL_CLASSES.get(base.get_name(), None)
++            differential_type = r.DIFFERENTIAL_CLASSES.get(base.name, None)
+ 
+         elif differential_type in r.DIFFERENTIAL_CLASSES:
+             differential_type = r.DIFFERENTIAL_CLASSES[differential_type]
+@@ -223,9 +223,9 @@ def _represent_as_dict(self):
+ 
+         out = super()._represent_as_dict(attrs)
+ 
+-        out["representation_type"] = representation_type.get_name()
++        out["representation_type"] = representation_type.name
+         if differential_type is not None:
+-            out["differential_type"] = differential_type.get_name()
++            out["differential_type"] = differential_type.name
+ 
+         # Note that coord.info.unit is a fake composite unit (e.g. 'deg,deg,None'
+         # or None,None,m) and is not stored. The individual attributes have
+diff --git a/astropy/coordinates/builtin_frames/icrs_cirs_transforms.py b/astropy/coordinates/builtin_frames/icrs_cirs_transforms.py
+--- a/astropy/coordinates/builtin_frames/icrs_cirs_transforms.py
++++ b/astropy/coordinates/builtin_frames/icrs_cirs_transforms.py
+@@ -34,7 +34,7 @@ def icrs_to_cirs(icrs_coo, cirs_frame):
+     astrom = erfa_astrom.get().apco(cirs_frame)
+ 
+     if (
+-        icrs_coo.data.get_name() == "unitspherical"
++        icrs_coo.data.name == "unitspherical"
+         or icrs_coo.data.to_cartesian().x.unit == u.one
+     ):
+         # if no distance, just do the infinite-distance/no parallax calculation
+@@ -77,7 +77,7 @@ def cirs_to_icrs(cirs_coo, icrs_frame):
+     i_ra, i_dec = aticq(srepr.without_differentials(), astrom)
+ 
+     if (
+-        cirs_coo.data.get_name() == "unitspherical"
++        cirs_coo.data.name == "unitspherical"
+         or cirs_coo.data.to_cartesian().x.unit == u.one
+     ):
+         # if no distance, just use the coordinate direction to yield the
+@@ -117,7 +117,7 @@ def icrs_to_gcrs(icrs_coo, gcrs_frame):
+     astrom = erfa_astrom.get().apcs(gcrs_frame)
+ 
+     if (
+-        icrs_coo.data.get_name() == "unitspherical"
++        icrs_coo.data.name == "unitspherical"
+         or icrs_coo.data.to_cartesian().x.unit == u.one
+     ):
+         # if no distance, just do the infinite-distance/no parallax calculation
+@@ -162,7 +162,7 @@ def gcrs_to_icrs(gcrs_coo, icrs_frame):
+     i_ra, i_dec = aticq(srepr.without_differentials(), astrom)
+ 
+     if (
+-        gcrs_coo.data.get_name() == "unitspherical"
++        gcrs_coo.data.name == "unitspherical"
+         or gcrs_coo.data.to_cartesian().x.unit == u.one
+     ):
+         # if no distance, just use the coordinate direction to yield the
+@@ -212,7 +212,7 @@ def gcrs_to_hcrs(gcrs_coo, hcrs_frame):
+     i_ra = u.Quantity(i_ra, u.radian, copy=COPY_IF_NEEDED)
+     i_dec = u.Quantity(i_dec, u.radian, copy=COPY_IF_NEEDED)
+     if (
+-        gcrs_coo.data.get_name() == "unitspherical"
++        gcrs_coo.data.name == "unitspherical"
+         or gcrs_coo.data.to_cartesian().x.unit == u.one
+     ):
+         # if no distance, just use the coordinate direction to yield the
+diff --git a/astropy/coordinates/representation/base.py b/astropy/coordinates/representation/base.py
+--- a/astropy/coordinates/representation/base.py
++++ b/astropy/coordinates/representation/base.py
+@@ -5,13 +5,15 @@
+ import functools
+ import operator
+ import warnings
++from typing import ClassVar, Final
+ 
+ import numpy as np
+ 
+ import astropy.units as u
+ from astropy.coordinates.angles import Angle
+ from astropy.utils import classproperty
+ from astropy.utils.data_info import MixinInfo
++from astropy.utils.decorators import deprecated
+ from astropy.utils.exceptions import DuplicateRepresentationWarning
+ from astropy.utils.masked import MaskableShapedLikeNDArray, Masked, combine_masks
+ 
+@@ -143,10 +145,31 @@ class BaseRepresentationOrDifferential(MaskableShapedLikeNDArray):
+ 
+     # Ensure multiplication/division with ndarray or Quantity doesn't lead to
+     # object arrays.
+-    __array_priority__ = 50000
++    __array_priority__: Final = 50000
++
++    # Have to define this default b/c init_subclass is not called for the base class.
++    name: ClassVar[str] = "base"
++    """Name of the representation or differential.
++
++    When a subclass is defined, by default, the name is the lower-cased name of the
++    class with with any trailing 'representation' or 'differential' removed. (E.g.,
++    'spherical' for `~astropy.coordinates.SphericalRepresentation` or
++    `~astropy.coordinates.SphericalDifferential`.)
++
++    This can be customized when defining a subclass by setting the class attribute.
++    """
+ 
+     info = BaseRepresentationOrDifferentialInfo()
+ 
++    def __init_subclass__(cls) -> None:
++        # Name of the representation or differential
++        if "name" not in cls.__dict__:
++            cls.name = (
++                cls.__name__.lower()
++                .removesuffix("representation")
++                .removesuffix("differential")
++            )
++
+     def __init__(self, *args, **kwargs):
+         # make argument a list, so we can pop them off.
+         args = list(args)
+@@ -244,23 +267,14 @@ def __init__(self, *args, **kwargs):
+         if any(hasattr(attr, "mask") for attr in attrs):
+             self._ensure_masked()
+ 
++    @deprecated("v7.1", alternative="name")
+     @classmethod
+     def get_name(cls):
+         """Name of the representation or differential.
+ 
+-        In lower case, with any trailing 'representation' or 'differential'
+-        removed. (E.g., 'spherical' for
+-        `~astropy.coordinates.SphericalRepresentation` or
+-        `~astropy.coordinates.SphericalDifferential`.)
++        Returns the ``.name`` attribute.
+         """
+-        name = cls.__name__.lower()
+-
+-        if name.endswith("representation"):
+-            name = name[:-14]
+-        elif name.endswith("differential"):
+-            name = name[:-12]
+-
+-        return name
++        return cls.name
+ 
+     # The two methods that any subclass has to define.
+     @classmethod
+@@ -643,6 +657,8 @@ class BaseRepresentation(BaseRepresentationOrDifferential):
+     _differentials = {}
+ 
+     def __init_subclass__(cls, **kwargs):
++        super().__init_subclass__(**kwargs)  # sets `cls.name`
++
+         # Register representation name (except for bases on which other
+         # representations are built, but which cannot themselves be used).
+         if cls.__name__.startswith("Base"):
+@@ -653,7 +669,7 @@ def __init_subclass__(cls, **kwargs):
+                 'Representations must have an "attr_classes" class attribute.'
+             )
+ 
+-        repr_name = cls.get_name()
++        repr_name = cls.name
+         # first time a duplicate is added
+         # remove first entry and add both using their qualnames
+         if repr_name in REPRESENTATION_CLASSES:
+@@ -703,8 +719,6 @@ def __init_subclass__(cls, **kwargs):
+                     ),
+                 )
+ 
+-        super().__init_subclass__(**kwargs)
+-
+     def __init__(self, *args, differentials=None, **kwargs):
+         # Handle any differentials passed in.
+         super().__init__(*args, **kwargs)
+@@ -801,7 +815,7 @@ def _raise_if_has_differentials(self, op_name):
+ 
+     @classproperty
+     def _compatible_differentials(cls):
+-        return [DIFFERENTIAL_CLASSES[cls.get_name()]]
++        return [DIFFERENTIAL_CLASSES[cls.name]]
+ 
+     @property
+     def differentials(self):
+@@ -1323,6 +1337,8 @@ def __init_subclass__(cls, **kwargs):
+         For these, the components are those of the base representation prefixed
+         by 'd_', and the class is `~astropy.units.Quantity`.
+         """
++        super().__init_subclass__(**kwargs)  # sets `cls.name`
++
+         # Don't do anything for base helper classes.
+         if cls.__name__ in (
+             "BaseDifferential",
+@@ -1342,7 +1358,7 @@ def __init_subclass__(cls, **kwargs):
+             base_attr_classes = cls.base_representation.attr_classes
+             cls.attr_classes = {"d_" + c: u.Quantity for c in base_attr_classes}
+ 
+-        repr_name = cls.get_name()
++        repr_name = cls.name
+         if repr_name in DIFFERENTIAL_CLASSES:
+             raise ValueError(f"Differential class {repr_name} already defined")
+ 
+@@ -1361,8 +1377,6 @@ def __init_subclass__(cls, **kwargs):
+                     ),
+                 )
+ 
+-        super().__init_subclass__(**kwargs)
+-
+     @classmethod
+     def _check_base(cls, base):
+         if cls not in base._compatible_differentials:
+diff --git a/astropy/coordinates/sky_coordinate_parsers.py b/astropy/coordinates/sky_coordinate_parsers.py
+--- a/astropy/coordinates/sky_coordinate_parsers.py
++++ b/astropy/coordinates/sky_coordinate_parsers.py
+@@ -398,7 +398,7 @@ def _parse_coordinate_arg(coords, frame, units):
+                 if (
+                     reprname == "d_distance"
+                     and not hasattr(orig_vel, reprname)
+-                    and "unit" in orig_vel.get_name()
++                    and "unit" in orig_vel.name
+                 ):
+                     continue
+                 values.append(getattr(vel, reprname))
+@@ -507,7 +507,7 @@ def _parse_coordinate_arg(coords, frame, units):
+             if n_coords > n_attr_names:
+                 raise ValueError(
+                     f"Input coordinates have {n_coords} values but representation"
+-                    f" {frame.representation_type.get_name()} only accepts"
++                    f" {frame.representation_type.name} only accepts"
+                     f" {n_attr_names}"
+                 )
+ 

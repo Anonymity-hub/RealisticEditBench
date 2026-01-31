@@ -1,0 +1,33 @@
+diff --git a/astropy/io/fits/hdu/table.py b/astropy/io/fits/hdu/table.py
+--- a/astropy/io/fits/hdu/table.py
++++ b/astropy/io/fits/hdu/table.py
+@@ -931,25 +914,10 @@ def _writedata_internal(self, fileobj):
+ 
+             nbytes = data._gap
+ 
+-            if not self._manages_own_heap:
+-                # Write the heap data one column at a time, in the order
+-                # that the data pointers appear in the column (regardless
+-                # if that data pointer has a different, previous heap
+-                # offset listed)
+-                for idx in range(data._nfields):
+-                    if not isinstance(data.columns._recformats[idx], _FormatP):
+-                        continue
+-
+-                    field = self.data.field(idx)
+-                    for row in field:
+-                        if len(row) > 0:
+-                            nbytes += row.nbytes
+-                            fileobj.writearray(row)
+-            else:
+-                heap_data = data._get_heap_data()
+-                if len(heap_data) > 0:
+-                    nbytes += len(heap_data)
+-                    fileobj.writearray(heap_data)
++            heap_data = data._get_heap_data()
++            if len(heap_data) > 0:
++                nbytes += len(heap_data)
++                fileobj.writearray(heap_data)
+ 
+             data._heapsize = nbytes - data._gap
+             size += nbytes

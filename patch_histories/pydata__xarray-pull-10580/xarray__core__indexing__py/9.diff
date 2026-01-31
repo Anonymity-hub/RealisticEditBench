@@ -1,0 +1,12 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -705,7 +705,7 @@
+         full_key_tuple = tuple(full_key)
+ 
+         if all(isinstance(k, integer_types + (slice,)) for k in full_key_tuple):
+-            return BasicIndexer(full_key_tuple)
++            return BasicIndexer(cast(tuple[BasicIndexerType, ...], full_key_tuple))
+         return OuterIndexer(full_key_tuple)
+ 
+     @property

@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -158,7 +158,8 @@
+         self.label1 = mtext.Text(
+             np.nan, np.nan,
+             fontsize=labelsize, color=labelcolor, visible=label1On,
+-            fontfamily=labelfontfamily, rotation=self._labelrotation[1])
++            fontfamily=labelfontfamily, rotation=self._labelrotation[1],
++            rotation_mode=labelrotation_mode)
+         self.label2 = mtext.Text(
+             np.nan, np.nan,
+             fontsize=labelsize, color=labelcolor, visible=label2On,
+

@@ -1,0 +1,63 @@
+diff --git a/sklearn/metrics/_regression.py b/sklearn/metrics/_regression.py
+--- a/sklearn/metrics/_regression.py
++++ b/sklearn/metrics/_regression.py
+@@ -752,8 +752,10 @@
+     """
+     xp, _ = get_namespace(y_true, y_pred)
+ 
+-    _, y_true, y_pred, _, _ = _check_reg_targets_with_floating_dtype(
+-        y_true, y_pred, sample_weight, multioutput, xp=xp
++    _, y_true, y_pred, sample_weight, multioutput = (
++        _check_reg_targets_with_floating_dtype(
++            y_true, y_pred, sample_weight, multioutput, xp=xp
++        )
+     )
+ 
+     if xp.any(y_true <= -1) or xp.any(y_pred <= -1):
+@@ -828,8 +830,10 @@
+     """
+     xp, _ = get_namespace(y_true, y_pred)
+ 
+-    _, y_true, y_pred, _, _ = _check_reg_targets_with_floating_dtype(
+-        y_true, y_pred, sample_weight, multioutput, xp=xp
++    _, y_true, y_pred, sample_weight, multioutput = (
++        _check_reg_targets_with_floating_dtype(
++            y_true, y_pred, sample_weight, multioutput, xp=xp
++        )
+     )
+ 
+     if xp.any(y_true <= -1) or xp.any(y_pred <= -1):
+@@ -911,13 +915,12 @@
+     >>> median_absolute_error(y_true, y_pred, multioutput=[0.3, 0.7])
+     0.85
+     """
+-    y_type, y_true, y_pred, multioutput = _check_reg_targets(
+-        y_true, y_pred, multioutput
++    _, y_true, y_pred, sample_weight, multioutput = _check_reg_targets(
++        y_true, y_pred, sample_weight, multioutput
+     )
+     if sample_weight is None:
+         output_errors = np.median(np.abs(y_pred - y_true), axis=0)
+     else:
+-        sample_weight = _check_sample_weight(sample_weight, y_pred)
+         output_errors = _weighted_percentile(
+             np.abs(y_pred - y_true), sample_weight=sample_weight
+         )
+@@ -1104,8 +1107,6 @@
+             y_true, y_pred, sample_weight, multioutput, xp=xp
+         )
+     )
+-
+-    check_consistent_length(y_true, y_pred, sample_weight)
+ 
+     y_diff_avg = _average(y_true - y_pred, weights=sample_weight, axis=0)
+     numerator = _average(
+@@ -1277,8 +1278,6 @@
+         )
+     )
+ 
+-    check_consistent_length(y_true, y_pred, sample_weight)
+-
+     if _num_samples(y_pred) < 2:
+         msg = "R^2 score is not well-defined with less than two samples."
+         warnings.warn(msg, UndefinedMetricWarning)

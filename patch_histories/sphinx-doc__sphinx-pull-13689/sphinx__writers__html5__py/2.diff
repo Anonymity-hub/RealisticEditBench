@@ -1,0 +1,12 @@
+diff --git a/sphinx/writers/html5.py b/sphinx/writers/html5.py
+--- a/sphinx/writers/html5.py
++++ b/sphinx/writers/html5.py
+@@ -308,7 +308,7 @@
+         self.body.append(self.starttag(node, 'span', '', CLASS='property'))
+ 
+     def depart_desc_annotation(self, node: Element) -> None:
+-        self.body.append('</em>')
++        self.body.append('</span>')
+ 
+     ##############################################
+ 

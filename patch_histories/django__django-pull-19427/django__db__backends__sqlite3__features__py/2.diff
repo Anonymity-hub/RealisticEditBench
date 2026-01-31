@@ -1,0 +1,12 @@
+diff --git a/django/db/backends/sqlite3/features.py b/django/db/backends/sqlite3/features.py
+--- a/django/db/backends/sqlite3/features.py
++++ b/django/db/backends/sqlite3/features.py
+@@ -147,6 +147,8 @@
+         999 in versions < 3.32.0 or 32766 in newer versions) or lowered per
+         connection at run-time with setlimit(SQLITE_LIMIT_VARIABLE_NUMBER, N).
+         """
++        return self.connection.connection.getlimit(sqlite3.SQLITE_LIMIT_VARIABLE_NUMBER)
++
+     @cached_property
+     def supports_json_field(self):
+         with self.connection.cursor() as cursor:

@@ -1,0 +1,41 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -476,7 +476,9 @@
+     (0, 2, 1, 1)
+     """
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
++    y_type, y_true, y_pred, sample_weight = _check_targets(
++        y_true, y_pred, sample_weight
++    )
+     if y_type not in ("binary", "multiclass"):
+         raise ValueError("%s is not supported" % y_type)
+ 
+@@ -494,10 +496,6 @@
+ 
+     if sample_weight is None:
+         sample_weight = np.ones(y_true.shape[0], dtype=np.int64)
+-    else:
+-        sample_weight = np.asarray(sample_weight)
+-
+-    check_consistent_length(y_true, y_pred, sample_weight)
+ 
+     n_labels = labels.size
+     # If labels are not consecutive integers starting from zero, then
+@@ -666,11 +664,10 @@
+             [1, 2]]])
+     """
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    xp, _, device_ = get_namespace_and_device(y_true, y_pred)
+-    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+-    if sample_weight is not None:
+-        sample_weight = column_or_1d(sample_weight, device=device_)
+-    check_consistent_length(y_true, y_pred, sample_weight)
++    xp, _, device_ = get_namespace_and_device(y_true, y_pred, sample_weight)
++    y_type, y_true, y_pred, sample_weight = _check_targets(
++        y_true, y_pred, sample_weight
++    )
+ 
+     if y_type not in ("binary", "multiclass", "multilabel-indicator"):
+         raise ValueError("%s is not supported" % y_type)

@@ -1,0 +1,17 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -447,10 +447,11 @@
+ 
+     safe_to_drop = {"source", "original_shape", "preferred_chunks"}
+     valid_encodings = {
+-        "codecs",
+         "chunks",
+-        "compressor",
++        "compressor",  # TODO: delete when min zarr >=3
++        "compressors",
+         "filters",
++        "serializer",
+         "cache_metadata",
+         "write_empty_chunks",
+     }

@@ -1,0 +1,12 @@
+diff --git a/sympy/physics/quantum/tensorproduct.py b/sympy/physics/quantum/tensorproduct.py
+--- a/sympy/physics/quantum/tensorproduct.py
++++ b/sympy/physics/quantum/tensorproduct.py
+@@ -245,7 +245,7 @@
+             s = s + '{' + printer._print(self.args[i], *args) + '}'
+             if isinstance(self.args[i], (Add, Mul)):
+                 s = s + '\\right)'
+-            if i != length - 1:
++            if i != length - 1 and not isinstance(self.args[i], (KetBase, BraBase)):
+                 s = s + '\\otimes '
+         return s
+ 

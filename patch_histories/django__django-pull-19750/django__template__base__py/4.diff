@@ -1,0 +1,39 @@
+diff --git a/django/template/base.py b/django/template/base.py
+--- a/django/template/base.py
++++ b/django/template/base.py
+@@ -53,6 +53,7 @@
+ import inspect
+ import logging
+ import re
++import warnings
+ from enum import Enum
+ 
+ from django.template.context import BaseContext
+@@ -87,11 +88,6 @@
+ # entire tag, including start/end delimiters. Using re.compile() is faster
+ # than instantiating SimpleLazyObject with _lazy_re_compile().
+ tag_re = re.compile(r"({%.*?%}|{{.*?}}|{#.*?#})")
+-
+-combined_partial_re = re.compile(
+-    r"{%\s*partialdef\s+(?P<name>[\w-]+)(?:\s+inline)?\s*%}"
+-    r"|{%\s*endpartialdef(?:\s+[\w-]+)?\s*%}"
+-)
+ 
+ logger = logging.getLogger("django.template")
+ 
+@@ -326,7 +322,14 @@
+     @property
+     def source(self):
+         template = self.origin.loader.get_template(self.origin.template_name)
+-        return self.find_partial_source(template.source, self.name)
++        if not template.engine.debug:
++            warnings.warn(
++                "PartialTemplate.source is only available when template "
++                "debugging is enabled.",
++                RuntimeWarning,
++                stacklevel=2,
++            )
++        return self.find_partial_source(template.source)
+ 
+     def _render(self, context):
+         return self.nodelist.render(context)

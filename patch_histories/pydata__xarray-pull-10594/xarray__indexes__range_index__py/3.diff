@@ -1,0 +1,11 @@
+diff --git a/xarray/indexes/range_index.py b/xarray/indexes/range_index.py
+--- a/xarray/indexes/range_index.py
++++ b/xarray/indexes/range_index.py
+@@ -40,6 +40,7 @@
+ 
+         self.start = start
+         self.stop = stop
++        self._step = None  # Will be calculated by property
+ 
+     @property
+     def coord_name(self) -> Hashable:

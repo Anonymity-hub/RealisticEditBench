@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/image.py b/lib/matplotlib/image.py
+--- a/lib/matplotlib/image.py
++++ b/lib/matplotlib/image.py
+@@ -522,6 +522,7 @@
+                 # Resample in premultiplied alpha space.  (TODO: Consider
+                 # implementing premultiplied-space resampling in
+                 # span_image_resample_rgba_affine::generate?)
++                if float_rgba_in and
+                 A[..., :3] *= A[..., 3:]
+                 res = _resample(self, A, out_shape, t)
+                 np.divide(res[..., :3], res[..., 3:], out=res[..., :3],

@@ -1,0 +1,12 @@
+diff --git a/astropy/coordinates/representation/cylindrical.py b/astropy/coordinates/representation/cylindrical.py
+--- a/astropy/coordinates/representation/cylindrical.py
++++ b/astropy/coordinates/representation/cylindrical.py
+@@ -144,7 +144,7 @@
+                 r = np.hypot(self.rho, self.z)
+                 return other_class(
+                     r=r,
+-                    theta=np.arctan2(),
++                    theta=np.arctan2(self.rho, self.z),
+                     phi=self.phi,
+                     differentials=diffs,
+                 )

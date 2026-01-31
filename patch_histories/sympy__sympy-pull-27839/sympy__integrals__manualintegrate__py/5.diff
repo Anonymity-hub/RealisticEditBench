@@ -1,0 +1,14 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -989,6 +989,10 @@
+         return
+ 
+     simplified = powsimp(integrand, combine='exp')
++
++    if simplified != integrand:
++        steps = integral_steps(simplified, symbol)
++        return RewriteRule(integrand, symbol, simplified, steps)
+ 
+ 
+ def orthogonal_poly_rule(integral):

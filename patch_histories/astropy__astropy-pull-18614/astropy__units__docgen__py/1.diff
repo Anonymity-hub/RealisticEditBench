@@ -1,0 +1,11 @@
+diff --git a/astropy/units/docgen.py b/astropy/units/docgen.py
+--- a/astropy/units/docgen.py
++++ b/astropy/units/docgen.py
+@@ -140,6 +140,7 @@ def generate_dunder_all(namespace: Mapping[str, object]) -> list[str]:
+         if (
+             isinstance(value, UnitBase)
+             and name.isidentifier()
++            and not
+             and name == unicodedata.normalize("NFKC", name)
+         )
+     ]

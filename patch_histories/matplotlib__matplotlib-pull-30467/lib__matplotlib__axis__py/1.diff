@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -1333,7 +1333,8 @@ def _update_ticks(self):
+     def _get_ticklabel_bboxes(self, ticks, renderer):
+         """Return lists of bboxes for ticks' label1's and label2's."""
+         return ([tick.label1.get_window_extent(renderer)
+-                 for tick in ticks if tick.label1.get_visible()],
++                 for tick in ticks
++                 if tick.label1.get_visible() and tick.label1.get_in_layout()],
+                 [tick.label2.get_window_extent(renderer)
+                  for tick in ticks if tick.label2.get_visible()])
+ 

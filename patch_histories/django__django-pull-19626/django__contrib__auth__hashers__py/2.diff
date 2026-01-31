@@ -1,0 +1,43 @@
+diff --git a/django/contrib/auth/hashers.py b/django/contrib/auth/hashers.py
+--- a/django/contrib/auth/hashers.py
++++ b/django/contrib/auth/hashers.py
+@@ -16,6 +16,7 @@
+     get_random_string,
+     pbkdf2,
+ )
++from django.utils.encoding import force_str
+ from django.utils.module_loading import import_string
+ from django.utils.translation import gettext_noop as _
+ 
+@@ -324,6 +325,8 @@
+     def encode(self, password, salt, iterations=None):
+         self._check_encode_args(password, salt)
+         iterations = iterations or self.iterations
++        password = force_str(password)
++        salt = force_str(salt)
+         hash = pbkdf2(password, salt, iterations, digest=self.digest)
+         hash = base64.b64encode(hash).decode("ascii").strip()
+         return "%s$%d$%s$%s" % (self.algorithm, iterations, salt, hash)
+@@ -396,8 +399,8 @@
+         argon2 = self._load_library()
+         params = self.params()
+         data = argon2.low_level.hash_secret(
+-            password.encode(),
+-            salt.encode(),
++            force_bytes(password),
++            force_bytes(salt),
+             time_cost=params.time_cost,
+             memory_cost=params.memory_cost,
+             parallelism=params.parallelism,
+@@ -499,7 +502,8 @@
+ 
+     def encode(self, password, salt):
+         bcrypt = self._load_library()
+-        password = password.encode()
++        password = force_bytes(password)
++        salt = force_bytes(salt)
+         # Hash the password prior to using bcrypt to prevent password
+         # truncation as described in #20138.
+         if self.digest is not None:
+
+

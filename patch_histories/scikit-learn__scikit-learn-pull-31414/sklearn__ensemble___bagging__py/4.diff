@@ -1,0 +1,47 @@
+diff --git a/sklearn/ensemble/_bagging.py b/sklearn/ensemble/_bagging.py
+--- a/sklearn/ensemble/_bagging.py
++++ b/sklearn/ensemble/_bagging.py
+@@ -466,11 +466,26 @@
+         # Validate max_samples
+         if max_samples is None:
+             max_samples = self.max_samples
+-        elif not isinstance(max_samples, numbers.Integral):
+-            max_samples = int(max_samples * X.shape[0])
+-
+-        if max_samples > X.shape[0]:
+-            raise ValueError("max_samples must be <= n_samples")
++
++        if not isinstance(max_samples, numbers.Integral):
++            if sample_weight is None:
++                max_samples = max(int(max_samples * X.shape[0]), 1)
++            else:
++                sw_sum = np.sum(sample_weight)
++                if sw_sum <= 1:
++                    raise ValueError(
++                        f"The total sum of sample weights is {sw_sum}, which prevents "
++                        "resampling with a fractional value for max_samples="
++                        f"{max_samples}. Either pass max_samples as an integer or "
++                        "use a larger sample_weight."
++                    )
++                max_samples = max(int(max_samples * sw_sum), 1)
++
++        if not self.bootstrap and max_samples > X.shape[0]:
++            raise ValueError(
++                f"Effective max_samples={max_samples} must be <= n_samples="
++                f"{X.shape[0]} to be able to sample without replacement."
++            )
+ 
+         # Store validated integer row sampling value
+         self._max_samples = max_samples
+@@ -488,6 +503,11 @@
+ 
+         # Store validated integer feature sampling value
+         self._max_features = max_features
++
++        # Store sample_weight (needed in _get_estimators_indices). Note that
++        # we intentionally do not materialize `sample_weight=None` as an array
++        # of ones to avoid unnecessarily cluttering trained estimator pickles.
++        self._sample_weight = sample_weight
+ 
+         # Other checks
+         if not self.bootstrap and self.oob_score:

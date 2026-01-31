@@ -1,0 +1,12 @@
+diff --git a/sympy/assumptions/handlers/calculus.py b/sympy/assumptions/handlers/calculus.py
+--- a/sympy/assumptions/handlers/calculus.py
++++ b/sympy/assumptions/handlers/calculus.py
+@@ -197,6 +197,8 @@
+     if base_bounded and exp_bounded:
+         is_base_zero = ask(Q.zero(expr.base),assumptions)
+         is_exp_negative = ask(Q.negative(expr.exp),assumptions)
++        if is_base_zero is True and is_exp_negative is True:
++            return False
+         return True
+     if (abs(expr.base) <= 1) == True and ask(Q.extended_positive(expr.exp), assumptions):
+         return True

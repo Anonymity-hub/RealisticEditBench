@@ -1,0 +1,12 @@
+diff --git a/astropy/table/index.py b/astropy/table/index.py
+--- a/astropy/table/index.py
++++ b/astropy/table/index.py
+@@ -826,7 +826,7 @@ def __init__(self, table):
+         self.table = table
+         self.indices = table.indices
+ 
+-    def _get_rows(self, item):
++    def _get_row_idxs_as_list(self, key, item):
+         """
+         Retrieve Table rows indexes by value slice.
+         """

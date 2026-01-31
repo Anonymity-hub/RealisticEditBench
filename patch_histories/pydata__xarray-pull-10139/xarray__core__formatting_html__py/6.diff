@@ -1,0 +1,61 @@
+diff --git a/xarray/core/formatting_html.py b/xarray/core/formatting_html.py
+--- a/xarray/core/formatting_html.py
++++ b/xarray/core/formatting_html.py
+@@ -6,7 +6,8 @@
+ from functools import lru_cache, partial
+ from html import escape
+ from importlib.resources import files
+-from typing import TYPE_CHECKING
++from math import ceil
++from typing import TYPE_CHECKING, Literal
+ 
+ from xarray.core.formatting import (
+     inherited_vars,
+@@ -14,7 +15,7 @@
+     inline_variable_array_repr,
+     short_data_repr,
+ )
+-from xarray.core.options import _get_boolean_with_default
++from xarray.core.options import OPTIONS, _get_boolean_with_default
+ 
+ STATIC_FILES = (
+     ("xarray.static.html", "icons-svg-inline.html"),
+@@ -192,7 +193,13 @@
+ 
+ 
+ def _mapping_section(
+-    mapping, name, details_func, max_items_collapse, expand_option_name, enabled=True
++    mapping,
++    name,
++    details_func,
++    max_items_collapse,
++    expand_option_name,
++    enabled=True,
++    max_option_name: Literal["display_max_children"] | None = None,
+ ) -> str:
+     n_items = len(mapping)
+     expanded = _get_boolean_with_default(
+@@ -200,8 +207,15 @@
+     )
+     collapsed = not expanded
+ 
++    inline_details = ""
++    if max_option_name and max_option_name in OPTIONS:
++        max_items = int(OPTIONS[max_option_name])
++        if n_items > max_items:
++            inline_details = f"({max_items}/{n_items})"
++
+     return collapsible_section(
+         name,
++        inline_details=inline_details,
+         details=details_func(mapping),
+         n_items=n_items,
+         enabled=enabled,
+@@ -375,6 +389,7 @@
+     name="Groups",
+     details_func=summarize_datatree_children,
+     max_items_collapse=1,
++    max_option_name="display_max_children",
+     expand_option_name="display_expand_groups",
+ )
+ 

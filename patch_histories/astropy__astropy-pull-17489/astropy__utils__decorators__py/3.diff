@@ -1,0 +1,27 @@
+diff --git a/astropy/utils/decorators.py b/astropy/utils/decorators.py
+--- a/astropy/utils/decorators.py
++++ b/astropy/utils/decorators.py
+@@ -697,7 +697,22 @@
+ 
+         @wraps(raw_function)
+         def decorated_function(*args, **kwargs):
+-        ...
++            if len(args) > idx_min:
++                flagged_positions = range(idx_min, len(args))
++                flagged_names = [params_names[pos] for pos in flagged_positions]
++                depr_versions = [future_kwo_to_since[n] for n in flagged_names]
++                if len(set(depr_versions)) == 1:
++                    since_details = depr_versions[0]
++                else:
++                    since_details = ", ".join(depr_versions) + ", respectively"
++                msg = (
++                    "The following arguments were received positionally, which "
++                    f"will be disallowed in a future release: {', '.join(flagged_names)}\n"
++                    "Pass them as keywords to suppress this warning. "
++                    f"(deprecated since {since_details})"
++                )
++                warnings.warn(msg, AstropyDeprecationWarning, stacklevel=2)
++            return raw_function(*args, **kwargs)
+ 
+         return decorated_function
+ 

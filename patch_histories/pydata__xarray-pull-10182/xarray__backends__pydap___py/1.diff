@@ -1,0 +1,73 @@
+diff --git a/xarray/backends/pydap_.py b/xarray/backends/pydap_.py
+--- a/xarray/backends/pydap_.py
++++ b/xarray/backends/pydap_.py
+@@ -49,36 +49,26 @@ def __getitem__(self, key):
+         )
+ 
+     def _getitem(self, key):
+-        # pull the data from the array attribute if possible, to avoid
+-        # downloading coordinate data twice
+-        array = getattr(self.array, "array", self.array)
+-        result = robust_getitem(array, key, catch=ValueError)
+-        result = np.asarray(result)
++        result = robust_getitem(self.array, key, catch=ValueError)
+         # in some cases, pydap doesn't squeeze axes automatically like numpy
++        result = np.asarray(result)
+         axis = tuple(n for n, k in enumerate(key) if isinstance(k, integer_types))
+-        if result.ndim + len(axis) != array.ndim and axis:
++        if result.ndim + len(axis) != self.array.ndim and axis:
+             result = np.squeeze(result, axis)
+ 
+         return result
+ 
+ 
+-def _fix_attributes(attributes):
+-    attributes = dict(attributes)
+-    for k in list(attributes):
+-        if k.lower() == "global" or k.lower().endswith("_global"):
+-            # move global attributes to the top level, like the netcdf-C
+-            # DAP client
+-            attributes.update(attributes.pop(k))
+-        elif is_dict_like(attributes[k]):
+-            # Make Hierarchical attributes to a single level with a
+-            # dot-separated key
+-            attributes.update(
+-                {
+-                    f"{k}.{k_child}": v_child
+-                    for k_child, v_child in attributes.pop(k).items()
+-                }
+-            )
+-    return attributes
++def get_group(ds, group):
++    if group in {None, "", "/"}:
++        # use the root group
++        return ds
++    else:
++        try:
++            return ds[group]
++        except KeyError as e:
++            # wrap error to provide slightly more helpful message
++            raise KeyError(f"group not found: {group}", e) from e
+ 
+ 
+ class PydapDataStore(AbstractDataStore):
+@@ -139,7 +139,18 @@ class PydapDataStore(AbstractDataStore):
+         )
+ 
+     def get_attrs(self):
+-        return Frozen(_fix_attributes(self.ds.attributes))
++        """Remove any opendap specific attributes"""
++        opendap_attrs = (
++            "configuration",
++            "build_dmrpp",
++            "bes",
++            "libdap",
++            "invocation",
++            "dimensions",
++        )
++        attrs = self.ds.attributes
++        list(map(attrs.pop, opendap_attrs, [None] * 6))
++        return Frozen(attrs)
+ 
+     def get_dimensions(self):
+         return Frozen(self.ds.dimensions)

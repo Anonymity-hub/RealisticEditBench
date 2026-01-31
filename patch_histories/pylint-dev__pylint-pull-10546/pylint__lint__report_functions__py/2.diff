@@ -1,0 +1,13 @@
+diff --git a/pylint/lint/report_functions.py b/pylint/lint/report_functions.py
+--- a/pylint/lint/report_functions.py
++++ b/pylint/lint/report_functions.py
+@@ -70,8 +70,7 @@ def report_messages_by_module_stats(
+                 module,
+             )
+         )
+-    sorted_result.sort()
+-    sorted_result.reverse()
++    sorted_result.sort(reverse=True)
+     lines = ["module", "error", "warning", "refactor", "convention"]
+     for line in sorted_result:
+         # Don't report clean modules.

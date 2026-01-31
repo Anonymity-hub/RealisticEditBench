@@ -1,0 +1,65 @@
+diff --git a/lib/matplotlib/_afm.py b/lib/matplotlib/_afm.py
+--- a/lib/matplotlib/_afm.py
++++ b/lib/matplotlib/_afm.py
+@@ -176,8 +176,8 @@
+     return d
+ 
+ 
+-CharMetrics = namedtuple('CharMetrics', 'width, name, bbox')
+-CharMetrics.__doc__ = """
++class CharMetrics(NamedTuple):
++    """
+     Represents the character metrics of a single character.
+ 
+     Notes
+@@ -185,13 +185,20 @@
+     The fields do currently only describe a subset of character metrics
+     information defined in the AFM standard.
+     """
++
++    width: float
++    name: str
++    bbox: tuple[int, int, int, int]
++
++
+ CharMetrics.width.__doc__ = """The character width (WX)."""
+ CharMetrics.name.__doc__ = """The character name (N)."""
+ CharMetrics.bbox.__doc__ = """
+     The bbox of the character (B) as a tuple (*llx*, *lly*, *urx*, *ury*)."""
+ 
+ 
+-def _parse_char_metrics(fh):
++def _parse_char_metrics(fh: BinaryIO) -> tuple[dict[int, CharMetrics],
++                                               dict[str, CharMetrics]]:
+     """
+     Parse the given filehandle for character metrics information.
+ 
+@@ -211,12 +218,12 @@
+     """
+     required_keys = {'C', 'WX', 'N', 'B'}
+ 
+-    ascii_d = {}
+-    name_d = {}
+-    for line in fh:
++    ascii_d: dict[int, CharMetrics] = {}
++    name_d: dict[str, CharMetrics] = {}
++    for bline in fh:
+         # We are defensively letting values be utf8. The spec requires
+         # ascii, but there are non-compliant fonts in circulation
+-        line = _to_str(line.rstrip())  # Convert from byte-literal
++        line = _to_str(bline.rstrip())
+         if line.startswith('EndCharMetrics'):
+             return ascii_d, name_d
+         # Split the metric line into a dictionary, keyed by metric identifiers
+@@ -227,8 +234,9 @@
+         num = _to_int(vals['C'])
+         wx = _to_float(vals['WX'])
+         name = vals['N']
+-        bbox = _to_list_of_floats(vals['B'])
+-        bbox = list(map(int, bbox))
++        bbox = tuple(map(int, _to_list_of_floats(vals['B'])))
++        if len(bbox) != 4:
++            raise RuntimeError(f'Bad parse: bbox has {len(bbox)} elements, should be 4')
+         metrics = CharMetrics(wx, name, bbox)
+         # Workaround: If the character name is 'Euro', give it the
+         # corresponding character code, according to WinAnsiEncoding (see PDF

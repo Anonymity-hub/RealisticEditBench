@@ -1,0 +1,12 @@
+diff --git a/django/core/management/commands/inspectdb.py b/django/core/management/commands/inspectdb.py
+--- a/django/core/management/commands/inspectdb.py
++++ b/django/core/management/commands/inspectdb.py
+@@ -133,6 +133,8 @@
+                 known_models.append(model_name)
+ 
+                 if len(primary_key_columns) > 1:
++                    fields = ", ".join([f"'{col}'" for col in primary_key_columns])
++                    yield f"    pk = models.CompositePrimaryKey({fields})"
+ 
+                 used_column_names = []  # Holds column names used in the table so far
+                 column_to_field_name = {}  # Maps column names to names of model fields

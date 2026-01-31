@@ -1,0 +1,12 @@
+diff --git a/django/db/models/lookups.py b/django/db/models/lookups.py
+--- a/django/db/models/lookups.py
++++ b/django/db/models/lookups.py
+@@ -4,7 +4,7 @@
+ 
+ from django.core.exceptions import EmptyResultSet, FullResultSet
+ from django.db.backends.base.operations import BaseDatabaseOperations
+-from django.db.models.expressions import Case, Expression, Func, Value, When
++from django.db.models.expressions import Case, ColPairs, Expression, Func, Value, When
+ from django.db.models.fields import (
+     BooleanField,
+     CharField,

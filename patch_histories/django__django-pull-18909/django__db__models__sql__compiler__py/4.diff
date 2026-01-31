@@ -1,0 +1,22 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1847,6 +1847,18 @@
+                 # reasons listed above and the backend doesn't support the
+                 # DEFAULT keyword each values must be expanded into their
+                 # underlying expressions.
++                prepared_db_default = field_prepare(field.db_default)
++                field_values = [
++                    (
++                        prepared_db_default
++                        if isinstance(value, DatabaseDefault)
++                        else value
++                    )
++                    for value in field_values
++                ]
++                value_cols.append(field_values)
++            value_rows = list(zip(*value_cols))
++            result.append("(%s)" % ", ".join(qn(f.column) for f in fields))
+         else:
+             # An empty object.
+             value_rows = [

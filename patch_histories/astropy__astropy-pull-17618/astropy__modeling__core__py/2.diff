@@ -1,0 +1,24 @@
+diff --git a/astropy/modeling/core.py b/astropy/modeling/core.py
+--- a/astropy/modeling/core.py
++++ b/astropy/modeling/core.py
+@@ -3319,8 +3319,18 @@
+             # this to a single array.
+             left_deriv = np.asanyarray(left_deriv)
+             right_deriv = np.asanyarray(right_deriv)
++
++            if not self.left.col_fit_deriv:
++                left_deriv = np.moveaxis(left_deriv, -1, 0)
++
+             if not self.right.col_fit_deriv:
+-                right_deriv = (np.asanyarray(right_deriv).T).tolist()
++                right_deriv = np.moveaxis(right_deriv, -1, 0)
++
++            # Some models preserve the shape of the input in the output of
++            # fit_deriv whereas some do not. For example for a 6-parameter model,
++            # passing input with shape (5, 3) might produce a deriv array with
++            # shape (6, 5, 3) or (6, 15). We therefore normalize this to always
++            # ravel all but the first dimension
+ 
+             # We now have to use various differentiation rules to apply the
+             # arithmetic operators to the derivatives.
+

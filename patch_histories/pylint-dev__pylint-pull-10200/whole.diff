@@ -1,0 +1,305 @@
+diff --git a/pylint/pyreverse/diadefslib.py b/pylint/pyreverse/diadefslib.py
+--- a/pylint/pyreverse/diadefslib.py
++++ b/pylint/pyreverse/diadefslib.py
+@@ -7,7 +7,8 @@
+ from __future__ import annotations
+ 
+ import argparse
+-from collections.abc import Generator
++import warnings
++from collections.abc import Generator, Sequence
+ from typing import Any
+ 
+ import astroid
+@@ -27,10 +28,28 @@ class DiaDefGenerator:
+     def __init__(self, linker: Linker, handler: DiadefsHandler) -> None:
+         """Common Diagram Handler initialization."""
+         self.config = handler.config
++        self.args = handler.args
+         self.module_names: bool = False
+         self._set_default_options()
+         self.linker = linker
+         self.classdiagram: ClassDiagram  # defined by subclasses
++        # Only pre-calculate depths if user has requested a max_depth
++        if handler.config.max_depth is not None:
++            # Detect which of the args are leaf nodes
++            leaf_nodes = self.get_leaf_nodes()
++
++            # Emit a warning if any of the args are not leaf nodes
++            diff = set(self.args).difference(set(leaf_nodes))
++            if len(diff) > 0:
++                warnings.warn(
++                    "Detected nested names within the specified packages. "
++                    f"The following packages: {sorted(diff)} will be ignored for "
++                    f"depth calculations, using only: {sorted(leaf_nodes)} as the base for limiting "
++                    "package depth.",
++                    stacklevel=2,
++                )
++
++            self.args_depths = {module: module.count(".") for module in leaf_nodes}
+ 
+     def get_title(self, node: nodes.ClassDef) -> str:
+         """Get title for objects."""
+@@ -39,6 +58,22 @@ def get_title(self, node: nodes.ClassDef) -> str:
+             title = f"{node.root().name}.{title}"
+         return title  # type: ignore[no-any-return]
+ 
++    def get_leaf_nodes(self) -> list[str]:
++        """
++        Get the leaf nodes from the list of args in the generator.
++
++        A leaf node is one that is not a prefix (with an extra dot) of any other node.
++        """
++        leaf_nodes = [
++            module
++            for module in self.args
++            if not any(
++                other != module and other.startswith(module + ".")
++                for other in self.args
++            )
++        ]
++        return leaf_nodes
++
+     def _set_option(self, option: bool | None) -> bool:
+         """Activate some options if not explicitly deactivated."""
+         # if we have a class diagram, we want more information by default;
+@@ -67,6 +102,30 @@ def _get_levels(self) -> tuple[int, int]:
+         """Help function for search levels."""
+         return self.anc_level, self.association_level
+ 
++    def _should_include_by_depth(self, node: nodes.NodeNG) -> bool:
++        """Check if a node should be included based on depth.
++
++        A node will be included if it is at or below the max_depth relative to the
++        specified base packages. A node is considered to be a base package if it is the
++        deepest package in the list of specified packages. In other words the base nodes
++        are the leaf nodes of the specified package tree.
++        """
++        # If max_depth is not set, include all nodes
++        if self.config.max_depth is None:
++            return True
++
++        # Calculate the absolute depth of the node
++        name = node.root().name
++        absolute_depth = name.count(".")
++
++        # Retrieve the base depth to compare against
++        relative_depth = next(
++            (v for k, v in self.args_depths.items() if name.startswith(k)), None
++        )
++        return relative_depth is not None and bool(
++            (absolute_depth - relative_depth) <= self.config.max_depth
++        )
++
+     def show_node(self, node: nodes.ClassDef) -> bool:
+         """Determine if node should be shown based on config."""
+         if node.root().name == "builtins":
+@@ -75,7 +134,8 @@ def show_node(self, node: nodes.ClassDef) -> bool:
+         if is_stdlib_module(node.root().name):
+             return self.config.show_stdlib  # type: ignore[no-any-return]
+ 
+-        return True
++        # Filter node by depth
++        return self._should_include_by_depth(node)
+ 
+     def add_class(self, node: nodes.ClassDef) -> None:
+         """Visit one class and add it to diagram."""
+@@ -163,7 +223,7 @@ def visit_module(self, node: nodes.Module) -> None:
+ 
+         add this class to the package diagram definition
+         """
+-        if self.pkgdiagram:
++        if self.pkgdiagram and self._should_include_by_depth(node):
+             self.linker.visit(node)
+             self.pkgdiagram.add_object(node.name, node)
+ 
+@@ -177,7 +237,7 @@ def visit_classdef(self, node: nodes.ClassDef) -> None:
+ 
+     def visit_importfrom(self, node: nodes.ImportFrom) -> None:
+         """Visit astroid.ImportFrom  and catch modules for package diagram."""
+-        if self.pkgdiagram:
++        if self.pkgdiagram and self._should_include_by_depth(node):
+             self.pkgdiagram.add_from_depend(node, node.modname)
+ 
+ 
+@@ -208,8 +268,9 @@ def class_diagram(self, project: Project, klass: nodes.ClassDef) -> ClassDiagram
+ class DiadefsHandler:
+     """Get diagram definitions from user (i.e. xml files) or generate them."""
+ 
+-    def __init__(self, config: argparse.Namespace) -> None:
++    def __init__(self, config: argparse.Namespace, args: Sequence[str]) -> None:
+         self.config = config
++        self.args = args
+ 
+     def get_diadefs(self, project: Project, linker: Linker) -> list[ClassDiagram]:
+         """Get the diagram's configuration data.
+diff --git a/pylint/pyreverse/main.py b/pylint/pyreverse/main.py
+--- a/pylint/pyreverse/main.py
++++ b/pylint/pyreverse/main.py
+@@ -354,7 +354,7 @@ def run(self) -> int:
+                 verbose=self.config.verbose,
+             )
+             linker = Linker(project, tag=True)
+-            handler = DiadefsHandler(self.config)
++            handler = DiadefsHandler(self.config, self.args)
+             diadefs = handler.get_diadefs(project, linker)
+         writer.DiagramWriter(self.config).write(diadefs)
+         return 0
+diff --git a/pylint/pyreverse/writer.py b/pylint/pyreverse/writer.py
+--- a/pylint/pyreverse/writer.py
++++ b/pylint/pyreverse/writer.py
+@@ -54,38 +54,6 @@ def write(self, diadefs: Iterable[ClassDiagram | PackageDiagram]) -> None:
+                 self.write_classes(diagram)
+             self.save()
+ 
+-    def should_show_node(self, qualified_name: str, is_class: bool = False) -> bool:
+-        """Determine if a node should be shown based on depth settings.
+-
+-        Depth is calculated by counting dots in the qualified name:
+-        - depth 0: top-level packages (no dots)
+-        - depth 1: first level sub-packages (one dot)
+-        - depth 2: second level sub-packages (two dots)
+-
+-        For classes, depth is measured from their containing module, excluding
+-        the class name itself from the depth calculation.
+-        """
+-        # If no depth limit is set ==> show all nodes
+-        if self.max_depth is None:
+-            return True
+-
+-        # For classes, we want to measure depth from their containing module
+-        if is_class:
+-            # Get the module part (everything before the last dot)
+-            last_dot = qualified_name.rfind(".")
+-            if last_dot == -1:
+-                module_path = ""
+-            else:
+-                module_path = qualified_name[:last_dot]
+-
+-            # Count module depth
+-            module_depth = module_path.count(".")
+-            return bool(module_depth <= self.max_depth)
+-
+-        # For packages/modules, count full depth
+-        node_depth = qualified_name.count(".")
+-        return bool(node_depth <= self.max_depth)
+-
+     def write_packages(self, diagram: PackageDiagram) -> None:
+         """Write a package diagram."""
+         module_info: dict[str, dict[str, int]] = {}
+@@ -94,10 +62,6 @@ def write_packages(self, diagram: PackageDiagram) -> None:
+         for module in sorted(diagram.modules(), key=lambda x: x.title):
+             module.fig_id = module.node.qname()
+ 
+-            # Filter nodes based on depth
+-            if not self.should_show_node(module.fig_id):
+-                continue
+-
+             if self.config.no_standalone and not any(
+                 module in (rel.from_object, rel.to_object)
+                 for rel in diagram.get_relationships("depends")
+@@ -120,10 +84,6 @@ def write_packages(self, diagram: PackageDiagram) -> None:
+             from_id = rel.from_object.fig_id
+             to_id = rel.to_object.fig_id
+ 
+-            # Filter nodes based on depth ==> skip if either source or target nodes is beyond the max depth
+-            if not self.should_show_node(from_id) or not self.should_show_node(to_id):
+-                continue
+-
+             self.printer.emit_edge(
+                 from_id,
+                 to_id,
+@@ -137,10 +97,6 @@ def write_packages(self, diagram: PackageDiagram) -> None:
+             from_id = rel.from_object.fig_id
+             to_id = rel.to_object.fig_id
+ 
+-            # Filter nodes based on depth ==> skip if either source or target nodes is beyond the max depth
+-            if not self.should_show_node(from_id) or not self.should_show_node(to_id):
+-                continue
+-
+             self.printer.emit_edge(
+                 from_id,
+                 to_id,
+@@ -161,10 +117,6 @@ def write_classes(self, diagram: ClassDiagram) -> None:
+         for obj in sorted(diagram.objects, key=lambda x: x.title):
+             obj.fig_id = obj.node.qname()
+ 
+-            # Filter class based on depth setting
+-            if not self.should_show_node(obj.fig_id, is_class=True):
+-                continue
+-
+             if self.config.no_standalone and not any(
+                 obj in (rel.from_object, rel.to_object)
+                 for rel_type in ("specialization", "association", "aggregation")
+@@ -179,12 +131,6 @@ def write_classes(self, diagram: ClassDiagram) -> None:
+             )
+         # inheritance links
+         for rel in diagram.get_relationships("specialization"):
+-            # Filter nodes based on depth setting
+-            if not self.should_show_node(
+-                rel.from_object.fig_id, is_class=True
+-            ) or not self.should_show_node(rel.to_object.fig_id, is_class=True):
+-                continue
+-
+             self.printer.emit_edge(
+                 rel.from_object.fig_id,
+                 rel.to_object.fig_id,
+@@ -193,12 +139,6 @@ def write_classes(self, diagram: ClassDiagram) -> None:
+         associations: dict[str, set[str]] = defaultdict(set)
+         # generate associations
+         for rel in diagram.get_relationships("association"):
+-            # Filter nodes based on depth setting
+-            if not self.should_show_node(
+-                rel.from_object.fig_id, is_class=True
+-            ) or not self.should_show_node(rel.to_object.fig_id, is_class=True):
+-                continue
+-
+             associations[rel.from_object.fig_id].add(rel.to_object.fig_id)
+             self.printer.emit_edge(
+                 rel.from_object.fig_id,
+@@ -208,12 +148,6 @@ def write_classes(self, diagram: ClassDiagram) -> None:
+             )
+         # generate aggregations
+         for rel in diagram.get_relationships("aggregation"):
+-            # Filter nodes based on depth setting
+-            if not self.should_show_node(
+-                rel.from_object.fig_id, is_class=True
+-            ) or not self.should_show_node(rel.to_object.fig_id, is_class=True):
+-                continue
+-
+             if rel.to_object.fig_id in associations[rel.from_object.fig_id]:
+                 continue
+             self.printer.emit_edge(
+diff --git a/pylint/typing.py b/pylint/typing.py
+--- a/pylint/typing.py
++++ b/pylint/typing.py
+@@ -7,7 +7,7 @@
+ from __future__ import annotations
+ 
+ import argparse
+-from collections.abc import Iterable
++from collections.abc import Iterable, Sequence
+ from pathlib import Path
+ from re import Pattern
+ from typing import (
+@@ -24,8 +24,10 @@
+ 
+ if TYPE_CHECKING:
+     from pylint.config.callback_actions import _CallbackAction
++    from pylint.pyreverse.diadefslib import DiaDefGenerator
+     from pylint.pyreverse.inspector import Project
+     from pylint.reporters.ureports.nodes import Section
++    from pylint.testutils.pyreverse import PyreverseConfig
+     from pylint.utils import LinterStats
+ 
+ 
+@@ -134,3 +136,9 @@ class GetProjectCallable(Protocol):
+     def __call__(
+         self, module: str, name: str | None = "No Name"
+     ) -> Project: ...  # pragma: no cover
++
++
++class GeneratorFactory(Protocol):
++    def __call__(
++        self, config: PyreverseConfig | None = None, args: Sequence[str] | None = None
++    ) -> DiaDefGenerator: ...

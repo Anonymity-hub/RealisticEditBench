@@ -1,0 +1,12 @@
+diff --git a/django/db/models/query_utils.py b/django/db/models/query_utils.py
+--- a/django/db/models/query_utils.py
++++ b/django/db/models/query_utils.py
+@@ -222,6 +222,8 @@
+             if val is None:
+                 if not instance._is_pk_set():
+                     raise AttributeError(
++                        f"Cannot retrieve deferred field {field_name!r} "
++                        "from an unsaved model."
+                     )
+                 instance.refresh_from_db(fields=[field_name])
+             else:

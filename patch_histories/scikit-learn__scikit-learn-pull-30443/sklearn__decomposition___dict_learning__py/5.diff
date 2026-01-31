@@ -1,0 +1,21 @@
+diff --git a/sklearn/decomposition/_dict_learning.py b/sklearn/decomposition/_dict_learning.py
+--- a/sklearn/decomposition/_dict_learning.py
++++ b/sklearn/decomposition/_dict_learning.py
+@@ -1177,6 +1177,8 @@
+         X_new : ndarray of shape (n_samples, n_features)
+             Transformed data.
+         """
++        check_is_fitted(self)
++        return self._inverse_transform(X, self.components_)
+ 
+ 
+ class SparseCoder(_BaseSparseCoding, BaseEstimator):
+@@ -1364,6 +1366,8 @@
+             Transformed data.
+         """
+         return super()._transform(X, self.dictionary)
++
++    def inverse_transform(self, X):
+ 
+     def __sklearn_tags__(self):
+         tags = super().__sklearn_tags__()

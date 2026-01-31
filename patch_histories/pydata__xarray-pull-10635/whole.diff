@@ -1,0 +1,84 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -34,12 +34,7 @@
+ from xarray.computation import ops
+ from xarray.computation.arithmetic import DatasetArithmetic
+ from xarray.core import dtypes as xrdtypes
+-from xarray.core import (
+-    duck_array_ops,
+-    formatting,
+-    formatting_html,
+-    utils,
+-)
++from xarray.core import duck_array_ops, formatting, formatting_html, utils
+ from xarray.core._aggregations import DatasetAggregations
+ from xarray.core.common import (
+     DataWithCoords,
+@@ -2563,7 +2558,7 @@ def _validate_indexers(
+ 
+         # all indexers should be int, slice, np.ndarrays, or Variable
+         for k, v in indexers.items():
+-            if isinstance(v, int | slice | Variable):
++            if isinstance(v, int | slice | Variable) and not isinstance(v, bool):
+                 yield k, v
+             elif isinstance(v, DataArray):
+                 yield k, v.variable
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -496,7 +496,7 @@ def __init__(
+ 
+         new_key = []
+         for k in key:
+-            if isinstance(k, integer_types):
++            if isinstance(k, integer_types) and not isinstance(k, bool):
+                 k = int(k)
+             elif isinstance(k, slice):
+                 k = as_integer_slice(k)
+@@ -513,7 +513,7 @@ def __init__(
+                 k = duck_array_ops.astype(k, np.int64, copy=False)
+             else:
+                 raise TypeError(
+-                    f"unexpected indexer type for {type(self).__name__}: {k!r}"
++                    f"unexpected indexer type for {type(self).__name__}: {k!r}, {type(k)}"
+                 )
+             new_key.append(k)
+ 
+@@ -1585,7 +1585,7 @@ def is_fancy_indexer(indexer: Any) -> bool:
+     """Return False if indexer is a int, slice, a 1-dimensional list, or a 0 or
+     1-dimensional ndarray; in all other cases return True
+     """
+-    if isinstance(indexer, int | slice):
++    if isinstance(indexer, int | slice) and not isinstance(indexer, bool):
+         return False
+     if isinstance(indexer, np.ndarray):
+         return indexer.ndim > 1
+@@ -1717,11 +1717,7 @@ def transpose(self, order):
+ 
+ 
+ def _apply_vectorized_indexer_dask_wrapper(indices, coord):
+-    from xarray.core.indexing import (
+-        VectorizedIndexer,
+-        apply_indexer,
+-        as_indexable,
+-    )
++    from xarray.core.indexing import VectorizedIndexer, apply_indexer, as_indexable
+ 
+     return apply_indexer(
+         as_indexable(coord), VectorizedIndexer((indices.squeeze(axis=-1),))
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -646,7 +646,10 @@ def _broadcast_indexes(self, key):
+             k.item() if isinstance(k, np.ndarray) and k.ndim == 0 else k for k in key
+         )
+ 
+-        if all(isinstance(k, BASIC_INDEXING_TYPES) for k in key):
++        if all(
++            (isinstance(k, BASIC_INDEXING_TYPES) and not isinstance(k, bool))
++            for k in key
++        ):
+             return self._broadcast_indexes_basic(key)
+ 
+         self._validate_indexers(key)

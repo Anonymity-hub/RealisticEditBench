@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/image.py b/lib/matplotlib/image.py
+--- a/lib/matplotlib/image.py
++++ b/lib/matplotlib/image.py
+@@ -1576,6 +1576,10 @@
+         default 'Software' key.
+     """
+     from matplotlib.figure import Figure
++
++    # Normalizing input (e.g., list or tuples) to NumPy array if needed
++    arr = np.asanyarray(arr)
++
+     if isinstance(fname, os.PathLike):
+         fname = os.fspath(fname)
+     if format is None:

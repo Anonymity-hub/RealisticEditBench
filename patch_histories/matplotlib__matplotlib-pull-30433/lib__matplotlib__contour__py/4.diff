@@ -1,0 +1,18 @@
+diff --git a/lib/matplotlib/contour.py b/lib/matplotlib/contour.py
+--- a/lib/matplotlib/contour.py
++++ b/lib/matplotlib/contour.py
+@@ -772,11 +772,12 @@
+                 facecolor="none",
+                 linewidths=self._process_linewidths(linewidths),
+                 linestyle=self._process_linestyles(linestyles),
++                label="_nolegend_",
+                 # Default zorder taken from LineCollection, which is higher
+                 # than for filled contours so that lines are displayed on top.
+-                zorder=kwargs.pop("zorder", 2),
+-                label="_nolegend_",
++                zorder=2,
+             )
++        self.set(**kwargs)  # Let user-set values override defaults.
+ 
+         self.axes.add_collection(self, autolim=False)
+         self.sticky_edges.x[:] = [self._mins[0], self._maxs[0]]

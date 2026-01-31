@@ -1,0 +1,17 @@
+diff --git a/lib/matplotlib/axes/_base.py b/lib/matplotlib/axes/_base.py
+--- a/lib/matplotlib/axes/_base.py
++++ b/lib/matplotlib/axes/_base.py
+@@ -4749,6 +4749,13 @@ def label_outer(self, remove_inner_ticks=False):
+         self._label_outer_yaxis(skip_non_rectangular_axes=False,
+                                 remove_inner_ticks=remove_inner_ticks)
+ 
++    def _get_subplotspec_with_optional_colorbar(self):
++        """
++        Return the subplotspec for this Axes, except that if this Axes has been
++        moved to a subgridspec to make room for a colorbar, then return the
++        subplotspec that encloses both this Axes and the colorbar Axes.
++        """
++
+     def _label_outer_xaxis(self, *, skip_non_rectangular_axes,
+                            remove_inner_ticks=False):
+         # see documentation in label_outer.

@@ -1,0 +1,66 @@
+diff --git a/lib/matplotlib/path.py b/lib/matplotlib/path.py
+--- a/lib/matplotlib/path.py
++++ b/lib/matplotlib/path.py
+@@ -275,17 +275,37 @@ def copy(self):
+         """
+         return copy.copy(self)
+ 
+-    def __deepcopy__(self, memo=None):
++    def __deepcopy__(self, memo):
+         """
+         Return a deepcopy of the `Path`.  The `Path` will not be
+         readonly, even if the source `Path` is.
+         """
+         # Deepcopying arrays (vertices, codes) strips the writeable=False flag.
+-        p = copy.deepcopy(super(), memo)
++        cls = type(self)
++        memo[id(self)] = p = cls.__new__(cls)
++
++        for k, v in self.__dict__.items():
++            setattr(p, k, copy.deepcopy(v, memo))
++
+         p._readonly = False
+         return p
+ 
+-    deepcopy = __deepcopy__
++    def deepcopy(self, memo=None):
++        """
++        Return a deep copy of the `Path`.  The `Path` will not be readonly,
++        even if the source `Path` is.
++
++        Parameters
++        ----------
++        memo : dict, optional
++            A dictionary to use for memoizing, passed to `copy.deepcopy`.
++
++        Returns
++        -------
++        Path
++            A deep copy of the `Path`, but not readonly.
++        """
++        return copy.deepcopy(self, memo)
+ 
+     @classmethod
+     def make_compound_path_from_polys(cls, XY):
+diff --git a/lib/matplotlib/transforms.py b/lib/matplotlib/transforms.py
+--- a/lib/matplotlib/transforms.py
++++ b/lib/matplotlib/transforms.py
+@@ -35,7 +35,6 @@
+ # `np.minimum` instead of the builtin `min`, and likewise for `max`.  This is
+ # done so that `nan`s are propagated, instead of being silently dropped.
+ 
+-import copy
+ import functools
+ import itertools
+ import textwrap
+@@ -139,7 +138,9 @@ def __setstate__(self, data_dict):
+             for k, v in self._parents.items() if v is not None}
+ 
+     def __copy__(self):
+-        other = copy.copy(super())
++        cls = type(self)
++        other = cls.__new__(cls)
++        other.__dict__.update(self.__dict__)
+         # If `c = a + b; a1 = copy(a)`, then modifications to `a1` do not
+         # propagate back to `c`, i.e. we need to clear the parents of `a1`.
+         other._parents = {}

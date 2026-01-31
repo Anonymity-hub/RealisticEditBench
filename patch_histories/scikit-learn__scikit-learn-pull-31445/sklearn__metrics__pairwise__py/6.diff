@@ -1,0 +1,21 @@
+diff --git a/sklearn/metrics/pairwise.py b/sklearn/metrics/pairwise.py
+--- a/sklearn/metrics/pairwise.py
++++ b/sklearn/metrics/pairwise.py
+@@ -1177,7 +1177,7 @@
+     if X is Y or Y is None:
+         # Ensure that distances between vectors and themselves are set to 0.0.
+         # This may not be the case due to floating point rounding errors.
+-        S = _fill_or_add_to_diagonal(S, 0.0, xp, add_value=False)
++        _fill_diagonal(S, 0.0, xp)
+     return S
+ 
+ 
+@@ -1982,7 +1982,7 @@
+     if (X is Y or Y is None) and func is euclidean_distances:
+         # zeroing diagonal for euclidean norm.
+         # TODO: do it also for other norms.
+-        ret = _fill_or_add_to_diagonal(ret, 0, xp=xp, add_value=False)
++        _fill_diagonal(ret, 0, xp=xp)
+ 
+     # Transform output back
+     return ret.T

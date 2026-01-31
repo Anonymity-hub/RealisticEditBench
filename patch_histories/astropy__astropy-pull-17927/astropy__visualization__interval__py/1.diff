@@ -1,0 +1,17 @@
+diff --git a/astropy/visualization/interval.py b/astropy/visualization/interval.py
+--- a/astropy/visualization/interval.py
++++ b/astropy/visualization/interval.py
+@@ -123,12 +123,7 @@ def get_limits(self, values):
+         if self.vmin is not None and self.vmax is not None:
+             return self.vmin, self.vmax
+ 
+-        # Make sure values is a Numpy array
+-        values = np.asarray(values).ravel()
+-
+-        # Filter out invalid values (inf, nan)
+-        values = values[np.isfinite(values)]
+-
++        values = self._process_values(values)
+         vmin = np.min(values) if self.vmin is None else self.vmin
+         vmax = np.max(values) if self.vmax is None else self.vmax
+ 

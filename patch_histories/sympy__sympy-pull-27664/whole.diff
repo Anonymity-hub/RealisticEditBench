@@ -1,0 +1,68 @@
+diff --git a/sympy/matrices/repmatrix.py b/sympy/matrices/repmatrix.py
+--- a/sympy/matrices/repmatrix.py
++++ b/sympy/matrices/repmatrix.py
+@@ -10,7 +10,7 @@
+ from sympy.polys.domains import ZZ, QQ, GF, EXRAW
+ from sympy.polys.matrices import DomainMatrix
+ from sympy.polys.matrices.exceptions import DMNonInvertibleMatrixError
+-from sympy.polys.polyerrors import CoercionFailed
++from sympy.polys.polyerrors import CoercionFailed, NotInvertible
+ from sympy.utilities.exceptions import sympy_deprecation_warning
+ from sympy.utilities.iterables import is_sequence
+ from sympy.utilities.misc import filldedent, as_int
+@@ -451,11 +451,20 @@ def inv_mod(M, m):
+         except CoercionFailed:
+             raise ValueError("inv_mod: matrix entries must be integers")
+ 
+-        try:
+-            dMi = dM.inv()
+-        except DMNonInvertibleMatrixError as exc:
+-            msg = f'Matrix is not invertible (mod {m})'
+-            raise NonInvertibleMatrixError(msg) from exc
++        if K.is_Field:
++            try:
++                dMi = dM.inv()
++            except DMNonInvertibleMatrixError as exc:
++                msg = f'Matrix is not invertible (mod {m})'
++                raise NonInvertibleMatrixError(msg) from exc
++        else:
++            dMadj, det = dM.adj_det()
++            try:
++                detinv = 1 / det
++            except NotInvertible:
++                msg = f'Matrix is not invertible (mod {m})'
++                raise NonInvertibleMatrixError(msg)
++            dMi = dMadj * detinv
+ 
+         return dMi.to_Matrix()
+ 
+diff --git a/sympy/polys/domains/finitefield.py b/sympy/polys/domains/finitefield.py
+--- a/sympy/polys/domains/finitefield.py
++++ b/sympy/polys/domains/finitefield.py
+@@ -232,6 +232,14 @@ def __init__(self, mod, symmetric=True):
+     def tp(self):
+         return self._tp
+ 
++    @property
++    def is_Field(self):
++        is_field = getattr(self, '_is_field', None)
++        if is_field is None:
++            from sympy.ntheory.primetest import isprime
++            self._is_field = is_field = isprime(self.mod)
++        return is_field
++
+     def __str__(self):
+         return 'GF(%s)' % self.mod
+ 
+diff --git a/sympy/stats/rv.py b/sympy/stats/rv.py
+--- a/sympy/stats/rv.py
++++ b/sympy/stats/rv.py
+@@ -1639,7 +1639,7 @@ def sample(self, size=(), library='scipy', seed=None):
+                 import pymc3 as pymc
+ 
+             with pymc.Model():
+-                if do_sample_pymc(self):
++                if do_sample_pymc(self) is not None:
+                     samps = pymc.sample(draws=prod(size), chains=1, compute_convergence_checks=False,
+                             progressbar=False, random_seed=seed, return_inferencedata=False)[:]['X']
+                     samps = samps.reshape(size)

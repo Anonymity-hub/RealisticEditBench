@@ -1,0 +1,19 @@
+diff --git a/lib/matplotlib/contour.py b/lib/matplotlib/contour.py
+--- a/lib/matplotlib/contour.py
++++ b/lib/matplotlib/contour.py
+@@ -766,13 +766,7 @@
+                 _api.warn_external('linewidths is ignored by contourf')
+             # Lower and upper contour levels.
+             lowers, uppers = self._get_lowers_and_uppers()
+-            self.set(
+-                edgecolor="none",
+-                # Default zorder taken from Collection
+-                zorder=kwargs.pop("zorder", 1),
+-                rasterized=kwargs.pop("rasterized", False),
+-            )
+-
++            self.set(edgecolor="none")
+         else:
+             self.set(
+                 facecolor="none",
+

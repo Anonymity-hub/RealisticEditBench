@@ -1,0 +1,13 @@
+diff --git a/django/contrib/staticfiles/management/commands/collectstatic.py b/django/contrib/staticfiles/management/commands/collectstatic.py
+--- a/django/contrib/staticfiles/management/commands/collectstatic.py
++++ b/django/contrib/staticfiles/management/commands/collectstatic.py
+@@ -167,6 +167,7 @@
+             "modified": self.copied_files + self.symlinked_files,
+             "unmodified": self.unmodified_files,
+             "post_processed": self.post_processed_files,
++            "skipped": self.skipped_files,
+         }
+ 
+     def handle(self, **options):
+
+ 

@@ -1,0 +1,44 @@
+diff --git a/astropy/coordinates/representation/base.py b/astropy/coordinates/representation/base.py
+--- a/astropy/coordinates/representation/base.py
++++ b/astropy/coordinates/representation/base.py
+@@ -5,6 +5,7 @@
+ import functools
+ import operator
+ import warnings
++from typing import ClassVar, Final
+ 
+ import numpy as np
+
+@@ -143,10 +144,31 @@ class BaseRepresentationOrDifferential(MaskableShapedLikeNDArray):
+ 
+     # Ensure multiplication/division with ndarray or Quantity doesn't lead to
+     # object arrays.
+-    __array_priority__ = 50000
++    __array_priority__: Final = 50000
++
++    # Have to define this default b/c init_subclass is not called for the base class.
++    name: ClassVar[str] = "base"
++    """Name of the representation or differential.
++
++    When a subclass is defined, by default, the name is the lower-cased name of the
++    class with with any trailing 'representation' or 'differential' removed. (E.g.,
++    'spherical' for `~astropy.coordinates.SphericalRepresentation` or
++    `~astropy.coordinates.SphericalDifferential`.)
++
++    This can be customized when defining a subclass by setting the class attribute.
++    """
+ 
+     info = BaseRepresentationOrDifferentialInfo()
+ 
++    def __init_subclass__(cls) -> None:
++        # Name of the representation or differential
++        if "name" not in cls.__dict__:
++            cls.name = (
++                cls.__name__.lower()
++                .removesuffix("representation")
++                .removesuffix("differential")
++            )
++
+     def __init__(self, *args, **kwargs):
+         # make argument a list, so we can pop them off.
+         args = list(args)

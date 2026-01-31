@@ -1,0 +1,11 @@
+diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py
+--- a/django/db/migrations/serializer.py
++++ b/django/db/migrations/serializer.py
+@@ -10,6 +10,7 @@
+ import re
+ import types
+ import uuid
++import zoneinfo
+ 
+ from django.conf import SettingsReference
+ from django.db import models

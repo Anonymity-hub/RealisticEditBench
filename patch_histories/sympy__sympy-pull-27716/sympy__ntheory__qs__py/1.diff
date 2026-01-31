@@ -1,0 +1,32 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -220,13 +220,8 @@ def _gen_sieve_array(M, factor_base):
+ 
+ 
+ def _check_smoothness(num, factor_base):
+-    """Here we check that if `num` is a smooth number or not. If `a` is a smooth
+-    number then it returns a vector of prime exponents modulo 2. For example
+-    if a = 2 * 5**2 * 7**3 and the factor base contains {2, 3, 5, 7} then
+-    `a` is a smooth number and this function returns (18, True) (18 = [1, 0, 0, 1, 0]).
+-    If `a` is a partial relation which means that `a` a has one prime factor
+-    greater than the `factor_base` then it returns `(a, False)` which denotes `a`
+-    is a partial relation.
++    r""" Check if `num` is smooth with respect to the given `factor_base`
++    and compute its factorization vector.
+ 
+     Parameters
+     ==========
+@@ -249,11 +244,7 @@ def _check_smoothness(num, factor_base):
+             num //= fb.prime
+         if e % 2:
+             vec += 1 << i
+-    if num == 1:
+-        return vec, True
+-    if isprime(num):
+-        return num, False
+-    return None, None
++    return vec, num
+ 
+ 
+ def _trial_division_stage(N, M, factor_base, sieve_array, sieve_poly, partial_relations, ERROR_TERM):

@@ -1,0 +1,37 @@
+diff --git a/astropy/io/fits/hdu/hdulist.py b/astropy/io/fits/hdu/hdulist.py
+--- a/astropy/io/fits/hdu/hdulist.py
++++ b/astropy/io/fits/hdu/hdulist.py
+@@ -27,7 +27,7 @@
+ from astropy.utils.compat.numpycompat import NUMPY_LT_2_0
+ 
+ # NOTE: Python can be built without bz2.
+-from astropy.utils.compat.optional_deps import HAS_BZ2
++from astropy.utils.compat.optional_deps import HAS_BZ2, HAS_LZMA
+ from astropy.utils.exceptions import AstropyUserWarning
+ 
+ from .base import ExtensionHDU, _BaseHDU, _NonstandardHDU, _ValidHDU
+@@ -39,6 +39,9 @@
+ if HAS_BZ2:
+     import bz2
+ 
++if HAS_LZMA:
++    import lzma
++
+ __all__ = ["HDUList", "fitsopen"]
+ 
+ # FITS file signature as per RFC 4047
+@@ -1002,10 +1005,10 @@ def writeto(
+ 
+         Notes
+         -----
+-        gzip, zip and bzip2 compression algorithms are natively supported.
++        gzip, zip, bzip2 and lzma compression algorithms are natively supported.
+         Compression mode is determined from the filename extension
+-        ('.gz', '.zip' or '.bz2' respectively).  It is also possible to pass a
+-        compressed file object, e.g. `gzip.GzipFile`.
++        ('.gz', '.zip', '.bz2' or '.xz' respectively).  It is also possible to
++        pass a compressed file object, e.g. `gzip.GzipFile`.
+         """
+         if len(self) == 0:
+             warnings.warn("There is nothing to write.", AstropyUserWarning)
+ 

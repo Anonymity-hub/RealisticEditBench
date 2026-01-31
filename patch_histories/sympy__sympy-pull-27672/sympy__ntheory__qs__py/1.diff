@@ -1,0 +1,18 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -513,12 +513,12 @@ def qs_factor(N, prime_bound, M, ERROR_TERM=25, seed=1234):
+         factors[n] = e
+         return factors
+     N_copy = N
++    randint = _randint(seed)
+     idx_1000, idx_5000, factor_base = _generate_factor_base(prime_bound, N)
+     threshold = len(factor_base) * 105//100
+     while len(smooth_relations) < threshold:
+         if ith_poly == 0:
+-            seed += 1
+-            ith_sieve_poly, B_array = _initialize_first_polynomial(N, M, factor_base, idx_1000, idx_5000, seed)
++            ith_sieve_poly, B_array = _initialize_first_polynomial(N, M, factor_base, idx_1000, idx_5000, randint)
+         else:
+             ith_sieve_poly = _initialize_ith_poly(N, factor_base, ith_poly, ith_sieve_poly, B_array)
+         ith_poly += 1

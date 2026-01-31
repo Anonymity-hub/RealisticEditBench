@@ -1,0 +1,14 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1390,6 +1390,9 @@
+                 seen = True
+             elif seen := field_names[field_name]:
+                 expression = F(field_name)
++            if seen:
++                field_name_prefix = field_name
++                while (field_name := f"{field_name_prefix}{counter}") in field_names:
+                     counter += 1
+ 
+         clone = self._values(*_fields, **expressions)
+         clone._iterable_class = (

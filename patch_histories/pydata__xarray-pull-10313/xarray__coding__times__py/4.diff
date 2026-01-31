@@ -1,0 +1,13 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -1236,6 +1236,9 @@
+     data_units = infer_timedelta_units(timedeltas)
+     if units is None:
+         units = data_units
++    # units take precedence in the case of zero-size array
++    if timedeltas.size == 0:
++        data_units = units
+ 
+     time_delta = _unit_timedelta_numpy(units)
+     time_deltas = pd.TimedeltaIndex(ravel(timedeltas))

@@ -1,0 +1,17 @@
+diff --git a/sympy/polys/rings.py b/sympy/polys/rings.py
+--- a/sympy/polys/rings.py
++++ b/sympy/polys/rings.py
+@@ -923,11 +923,11 @@ def __rmul__(self, other: PolyElement[Er] | Er | int) -> PolyElement[Er]:
+         ring = self.ring
+         if isinstance(other, PolyElement):
+             try:
+-                p2 = ring.ring_new(other)
++                p2 = ring.domain_new(other)
+             except CoercionFailed:
+                 return NotImplemented # unreachable
+             else:
+-                return self._mul(p2)
++                return self.mul_ground(p2)
+ 
+         try:
+             cp2 = ring.domain_new(other)

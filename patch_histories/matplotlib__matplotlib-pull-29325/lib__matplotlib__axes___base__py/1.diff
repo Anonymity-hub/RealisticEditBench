@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/axes/_base.py b/lib/matplotlib/axes/_base.py
+--- a/lib/matplotlib/axes/_base.py
++++ b/lib/matplotlib/axes/_base.py
+@@ -4596,7 +4596,7 @@ def _make_twin_axes(self, *args, **kwargs):
+         self._twinned_axes.join(self, twin)
+         return twin
+ 
+-    def twinx(self):
++    def twinx(self, axes_class=None, **kwargs):
+         """
+         Create a twin Axes sharing the xaxis.
+ 

@@ -1,0 +1,113 @@
+diff --git a/sympy/codegen/ast.py b/sympy/codegen/ast.py
+--- a/sympy/codegen/ast.py
++++ b/sympy/codegen/ast.py
+@@ -1892,6 +1892,41 @@ class FunctionCall(Token, Expr):
+     _construct_function_args = staticmethod(lambda args: Tuple(*args))
+ 
+ 
++class KeywordFunctionCall(FunctionCall):
++    """ Represents a call to a function with keyword arguments in the code.
++
++    Parameters
++    ==========
++
++    name : str
++    function_args : Tuple
++    keyword_args : dict
++        Dictionary mapping parameter names to their values
++
++    Examples
++    ========
++
++    >>> from sympy.codegen.ast import KeywordFunctionCall, String
++    >>> from sympy.core.containers import Tuple
++    >>> from sympy import fcode
++    >>> fcall = KeywordFunctionCall(String('reshape'), Tuple(String('array'), String('shape')), {'order': String('order_array')})
++    >>> print(fcode(fcall, source_format='free'))
++    reshape(array, shape, order=order_array)
++
++    """
++    __slots__ = ('keyword_args',)
++    _fields = ('name', 'function_args', 'keyword_args')  # type: ignore
++
++    defaults = {'keyword_args': {}}
++
++    @staticmethod
++    def _construct_keyword_args(kwargs):
++        from sympy.core.containers import Dict
++        if kwargs is None:
++            return Dict({})
++        return Dict(kwargs)
++
++
+ class Raise(Token):
+     """ Prints as 'raise ...' in Python, 'throw ...' in C++"""
+     __slots__ = _fields = ('exception',)
+diff --git a/sympy/codegen/fnodes.py b/sympy/codegen/fnodes.py
+--- a/sympy/codegen/fnodes.py
++++ b/sympy/codegen/fnodes.py
+@@ -496,13 +496,39 @@ def reshape(source, shape, pad=None, order=None):
+ 
+     source : Symbol or String
+     shape : ArrayExpr
++    pad : Symbol or String, optional
++        The padding array
++    order : Symbol or String, optional
++        The order of the elements in the array
++
++    Examples
++    ========
++
++    >>> from sympy import fcode, symbols
++    >>> from sympy.codegen.fnodes import reshape
++    >>> array, shape, pad, order = symbols('array shape pad order')
++    >>> fcode(reshape(array, shape), source_format='free')
++    'reshape(array, shape)'
++    >>> fcode(reshape(array, shape, pad), source_format='free')
++    'reshape(array, shape, pad=pad)'
++    >>> fcode(reshape(array, shape, None, order), source_format='free')
++    'reshape(array, shape, order=order)'
++    >>> fcode(reshape(array, shape, pad, order), source_format='free')
++    'reshape(array, shape, pad=pad, order=order)'
+ 
+     """
+-    return FunctionCall(
++    from sympy.codegen.ast import KeywordFunctionCall
++
++    kwargs = {}
++    if pad is not None:
++        kwargs['pad'] = _printable(pad)
++    if order is not None:
++        kwargs['order'] = _printable(order)
++
++    return KeywordFunctionCall(
+         'reshape',
+-        [_printable(source), _printable(shape)] +
+-        ([_printable(pad)] if pad else []) +
+-        ([_printable(order)] if pad else [])
++        [_printable(source), _printable(shape)],
++        kwargs
+     )
+ 
+ 
+diff --git a/sympy/printing/fortran.py b/sympy/printing/fortran.py
+--- a/sympy/printing/fortran.py
++++ b/sympy/printing/fortran.py
+@@ -772,6 +772,17 @@ def _print_ArrayConstructor(self, ac):
+         fmtstr = "[%s]" if self._settings["standard"] >= 2003 else '(/%s/)'
+         return fmtstr % ', '.join((self._print(arg) for arg in ac.elements))
+ 
++    def _print_KeywordFunctionCall(self, expr):
++        args = [self._print(arg) for arg in expr.function_args]
++
++        for key, value in expr.keyword_args.items():
++            args.append(f"{key}={self._print(value)}")
++
++        return '{name}({args})'.format(
++            name=self._print(expr.name),
++            args=', '.join(args)
++        )
++
+     def _print_ArrayElement(self, elem):
+         return '{symbol}({idxs})'.format(
+             symbol=self._print(elem.name),

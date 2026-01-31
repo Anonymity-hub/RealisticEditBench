@@ -1,0 +1,26 @@
+diff --git a/django/db/backends/sqlite3/features.py b/django/db/backends/sqlite3/features.py
+--- a/django/db/backends/sqlite3/features.py
++++ b/django/db/backends/sqlite3/features.py
+@@ -13,7 +13,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
+     test_db_allows_multiple_connections = False
+     supports_unspecified_pk = True
+     supports_timezones = False
+-    max_query_params = 999
+     supports_transactions = True
+     atomic_transactions = False
+     can_rollback_ddl = True
+@@ -147,6 +146,14 @@ def introspected_field_types(self):
+             "SmallAutoField": "AutoField",
+         }
+ 
++    @property
++    def max_query_params(self):
++        """
++        SQLite has a variable limit per query. The limit can be changed using
++        the SQLITE_MAX_VARIABLE_NUMBER compile-time option (which defaults to
++        999 in versions < 3.32.0 or 32766 in newer versions) or lowered per
++        connection at run-time with setlimit(SQLITE_LIMIT_VARIABLE_NUMBER, N).
++        """
+     @cached_property
+     def supports_json_field(self):
+         with self.connection.cursor() as cursor:

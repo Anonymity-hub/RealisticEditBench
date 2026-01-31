@@ -1,0 +1,12 @@
+diff --git a/sphinx/builders/__init__.py b/sphinx/builders/__init__.py
+--- a/sphinx/builders/__init__.py
++++ b/sphinx/builders/__init__.py
+@@ -917,6 +917,8 @@
+                 # xref RemovedInSphinx90Warning
+             ),
+             obj[line_start + 1 : error.start].decode(errors='backslashreplace'),
++            obj[error.start : error.end].decode(errors='backslashreplace'),
++            obj[error.end : line_end].decode(errors='backslashreplace'),
+             location=(self.docname, line_num),
+         )
+         return '?', error.end

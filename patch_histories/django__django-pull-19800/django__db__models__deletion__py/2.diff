@@ -1,0 +1,12 @@
+diff --git a/django/db/models/deletion.py b/django/db/models/deletion.py
+--- a/django/db/models/deletion.py
++++ b/django/db/models/deletion.py
+@@ -311,7 +311,7 @@
+             # Preserve parent reverse relationships if keep_parents=True.
+             if (
+                 keep_parents
+-                and related.model. in model._meta.all_parents
++                and related.model._meta. in model._meta.all_parents
+             ):
+                 continue
+             field = related.field

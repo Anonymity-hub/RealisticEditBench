@@ -1,0 +1,11 @@
+diff --git a/sympy/matrices/expressions/blockmatrix.py b/sympy/matrices/expressions/blockmatrix.py
+--- a/sympy/matrices/expressions/blockmatrix.py
++++ b/sympy/matrices/expressions/blockmatrix.py
+@@ -590,6 +590,7 @@
+                 raise ValueError(
+                     f"BlockDiagMatrix requires matrix-like objects. "
+                     f"Got {type(mat).__name__} with value {mat}")
++        return Basic.__new__(BlockDiagMatrix, *mats)
+ 
+     @property
+     def diag(self):

@@ -1,0 +1,15 @@
+diff --git a/lib/matplotlib/projections/polar.py b/lib/matplotlib/projections/polar.py
+--- a/lib/matplotlib/projections/polar.py
++++ b/lib/matplotlib/projections/polar.py
+@@ -1243,11 +1243,6 @@
+         """
+         self._r_label_position.clear().translate(np.deg2rad(value), 0.0)
+ 
+-    def set_yscale(self, *args, **kwargs):
+-        super().set_yscale(*args, **kwargs)
+-        self.yaxis.set_major_locator(
+-            self.RadialLocator(self.yaxis.get_major_locator(), self))
+-
+     def set_rscale(self, *args, **kwargs):
+         return Axes.set_yscale(self, *args, **kwargs)
+

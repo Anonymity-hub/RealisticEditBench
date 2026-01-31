@@ -1,0 +1,23 @@
+diff --git a/sklearn/decomposition/_dict_learning.py b/sklearn/decomposition/_dict_learning.py
+--- a/sklearn/decomposition/_dict_learning.py
++++ b/sklearn/decomposition/_dict_learning.py
+@@ -356,14 +356,11 @@ def sparse_encode(
+            [ 0.,  1.,  1.,  0.,  0.]])
+     """
+     if check_input:
+-        if algorithm == "lasso_cd":
+-            dictionary = check_array(
+-                dictionary, order="C", dtype=[np.float64, np.float32]
+-            )
+-            X = check_array(X, order="C", dtype=[np.float64, np.float32])
+-        else:
+-            dictionary = check_array(dictionary)
+-            X = check_array(X)
++        order = "C" if algorithm == "lasso_cd" else None
++        dictionary = check_array(
++            dictionary, order=order, dtype=[np.float64, np.float32]
++        )
++        X = check_array(X, order=order, dtype=[np.float64, np.float32])
+ 
+     if dictionary.shape[1] != X.shape[1]:
+         raise ValueError(

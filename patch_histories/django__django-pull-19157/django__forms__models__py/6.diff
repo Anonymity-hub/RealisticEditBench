@@ -1,0 +1,16 @@
+diff --git a/django/forms/models.py b/django/forms/models.py
+--- a/django/forms/models.py
++++ b/django/forms/models.py
+@@ -504,9 +504,11 @@
+         except ValidationError as e:
+             self._update_errors(e)
+ 
+-        # Validate uniqueness if needed.
++        # Validate uniqueness and constraints if needed.
+         if self._validate_unique:
+             self.validate_unique()
++        if self._validate_constraints:
++            self.validate_constraints()
+ 
+     def validate_unique(self):
+         """

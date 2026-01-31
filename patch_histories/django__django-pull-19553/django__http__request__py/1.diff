@@ -1,0 +1,13 @@
+diff --git a/django/http/request.py b/django/http/request.py
+--- a/django/http/request.py
++++ b/django/http/request.py
+@@ -90,7 +90,7 @@ def headers(self):
+
+     @cached_property
+     def accepted_types(self):
+-        """Return a list of MediaType instances, in order of preference."""
++        """Return a list of MediaType instances, in order of preference (quality)."""
+         header_value = self.headers.get("Accept", "*/*")
+         return sorted(
+             (
+

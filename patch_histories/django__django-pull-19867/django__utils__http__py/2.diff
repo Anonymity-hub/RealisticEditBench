@@ -1,0 +1,26 @@
+diff --git a/django/utils/http.py b/django/utils/http.py
+--- a/django/utils/http.py
++++ b/django/utils/http.py
+@@ -316,6 +316,19 @@
+     return url
+ 
+ 
++def _parseparam(s):
++    while s[:1] == ";":
++        s = s[1:]
++        end = s.find(";")
++        while end > 0 and (s.count('"', 0, end) - s.count('\\"', 0, end)) % 2:
++            end = s.find(";", end + 1)
++        if end < 0:
++            end = len(s)
++        f = s[:end]
++        yield f.strip()
++        s = s[end:]
++
++
+ def parse_header_parameters(line, max_length=MAX_HEADER_LENGTH):
+     """
+     Parse a Content-type like header.
+
+ 
+ 

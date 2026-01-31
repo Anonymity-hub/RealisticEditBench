@@ -1,0 +1,12 @@
+diff --git a/sympy/polys/domains/finitefield.py b/sympy/polys/domains/finitefield.py
+--- a/sympy/polys/domains/finitefield.py
++++ b/sympy/polys/domains/finitefield.py
+@@ -232,6 +232,8 @@ def __init__(self, mod, symmetric=True):
+     def tp(self):
+         return self._tp
+ 
++    @property
++    def is_Field(self):
+     def __str__(self):
+         return 'GF(%s)' % self.mod
+ 

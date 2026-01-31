@@ -1,0 +1,12 @@
+diff --git a/xarray/core/coordinates.py b/xarray/core/coordinates.py
+--- a/xarray/core/coordinates.py
++++ b/xarray/core/coordinates.py
+@@ -375,6 +375,8 @@
+             A collection of Xarray indexed coordinates created from the index.
+ 
+         """
++        variables = index.create_variables()
++
+ 
+     @classmethod
+     def from_pandas_multiindex(cls, midx: pd.MultiIndex, dim: Hashable) -> Self:

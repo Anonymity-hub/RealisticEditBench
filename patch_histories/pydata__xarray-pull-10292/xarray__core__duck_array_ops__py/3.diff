@@ -1,0 +1,13 @@
+diff --git a/xarray/core/duck_array_ops.py b/xarray/core/duck_array_ops.py
+--- a/xarray/core/duck_array_ops.py
++++ b/xarray/core/duck_array_ops.py
+@@ -272,7 +272,8 @@
+         extension_array_types = [
+             x.dtype for x in scalars_or_arrays if is_extension_array_dtype(x)
+         ]
+-        if len(extension_array_types) == len(scalars_or_arrays) and all(
++        non_nans = [x for x in scalars_or_arrays if not isna(x)]
++        if len(extension_array_types) == len(non_nans) and all(
+             isinstance(x, type(extension_array_types[0])) for x in extension_array_types
+         ):
+             return scalars_or_arrays

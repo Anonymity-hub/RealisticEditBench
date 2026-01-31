@@ -1,0 +1,10 @@
+diff --git a/sympy/physics/quantum/tensorproduct.py b/sympy/physics/quantum/tensorproduct.py
+--- a/sympy/physics/quantum/tensorproduct.py
++++ b/sympy/physics/quantum/tensorproduct.py
+@@ -375,4 +375,4 @@ def find_bra_kind(e1, e2):
+ 
+ @TensorProduct._kind_dispatcher.register(_NumberKind, _BraKind)
+ def find_number_bra_kind(e1, e2):
+-    return BraKind
+\ No newline at end of file
++    return BraKind

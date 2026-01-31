@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py
+--- a/lib/matplotlib/__init__.py
++++ b/lib/matplotlib/__init__.py
+@@ -406,6 +406,7 @@
+                 output = _cpe.output
+             else:
+                 raise ExecutableNotFoundError(str(_cpe)) from _cpe
++        except
+         except OSError as _ose:
+             raise ExecutableNotFoundError(str(_ose)) from _ose
+         match = re.search(regex, output)

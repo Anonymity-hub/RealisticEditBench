@@ -1,0 +1,24 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -18,7 +18,7 @@
+ 
+ from astropy.utils.compat import COPY_IF_NEEDED
+ from astropy.utils.decorators import deprecated, lazyproperty
+-from astropy.utils.exceptions import AstropyWarning
++from astropy.utils.exceptions import AstropyDeprecationWarning, AstropyWarning
+ from astropy.utils.misc import isiterable
+ 
+ from .errors import UnitConversionError, UnitParserWarning, UnitsError, UnitsWarning
+@@ -790,6 +790,11 @@
+     def _warn_about_operation_with_deprecated_type(op: str, other: bytes | str) -> None:
+         warnings.warn(
+             AstropyDeprecationWarning(
++                f"{op} involving a unit and a '{type(other).__name__}' instance are "
++                f"deprecated since v7.1. Convert {other!r} to a unit explicitly."
++            ),
++            stacklevel=3,
++        )
+ 
+     def __truediv__(self, m):
+         if isinstance(m, UnitBase):

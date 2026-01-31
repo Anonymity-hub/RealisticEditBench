@@ -1,0 +1,12 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -1718,7 +1718,7 @@
+                                     % (
+                                         through._meta.object_name,
+                                         field_name,
+-                                        related_model._meta.object_name,
++                                        related_object_name,
+                                     ),
+                                     hint=hint,
+                                     obj=self,

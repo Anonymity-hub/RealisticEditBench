@@ -1,0 +1,19 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -1713,6 +1713,15 @@
+                 for name, *_ in models.Model._get_expr_references(field.expression)
+             ):
+                 dependencies.append(
++                    OperationDependency(
++                        app_label,
++                        model_name,
++                        field.name,
++                        OperationDependency.Type.REMOVE,
++                    )
++                )
++        return dependencies
++
+     def _get_dependencies_for_model(self, app_label, model_name):
+         """Return foreign key dependencies of the given model."""
+         dependencies = []

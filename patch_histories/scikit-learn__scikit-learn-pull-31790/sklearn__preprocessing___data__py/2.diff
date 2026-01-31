@@ -1,0 +1,15 @@
+diff --git a/sklearn/preprocessing/_data.py b/sklearn/preprocessing/_data.py
+--- a/sklearn/preprocessing/_data.py
++++ b/sklearn/preprocessing/_data.py
+@@ -1243,7 +1243,10 @@
+            [ 0. ,  1. , -0.5]])
+     """
+ 
+-    _parameter_constraints: dict = {"copy": ["boolean"]}
++    _parameter_constraints: dict = {
++        "copy": ["boolean"],
++        "clip": ["boolean"],
++    }
+ 
+     def __init__(self, *, copy=True, clip=False):
+         self.copy = copy

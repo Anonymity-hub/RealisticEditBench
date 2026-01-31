@@ -1,0 +1,34 @@
+diff --git a/pylint/pyreverse/diadefslib.py b/pylint/pyreverse/diadefslib.py
+--- a/pylint/pyreverse/diadefslib.py
++++ b/pylint/pyreverse/diadefslib.py
+@@ -102,6 +102,30 @@
+         """Help function for search levels."""
+         return self.anc_level, self.association_level
+ 
++    def _should_include_by_depth(self, node: nodes.NodeNG) -> bool:
++        """Check if a node should be included based on depth.
++
++        A node will be included if it is at or below the max_depth relative to the
++        specified base packages. A node is considered to be a base package if it is the
++        deepest package in the list of specified packages. In other words the base nodes
++        are the leaf nodes of the specified package tree.
++        """
++        # If max_depth is not set, include all nodes
++        if self.config.max_depth is None:
++            return True
++
++        # Calculate the absolute depth of the node
++        name = node.root().name
++        absolute_depth = name.count(".")
++
++        # Retrieve the base depth to compare against
++        relative_depth = next(
++            (v for k, v in self.args_depths.items() if name.startswith(k)), None
++        )
++        return relative_depth is not None and bool(
++            (absolute_depth - relative_depth) <= self.config.max_depth
++        )
++
+     def show_node(self, node: nodes.ClassDef) -> bool:
+         """Determine if node should be shown based on config."""
+         if node.root().name == "builtins":

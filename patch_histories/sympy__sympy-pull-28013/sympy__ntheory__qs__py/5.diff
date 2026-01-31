@@ -1,0 +1,28 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -179,8 +179,13 @@
+     M : sieve interval
+     factor_base : factor_base primes
+     """
+-    sieve_array = [0]*(2*M + 1)
+-    for factor in factor_base:
++    if g.a % 2 == 0:
++        sieve_array = [0] * (2*M)
++    elif (M - g.b) % 2:
++        sieve_array = [_LOG2_SHIFT, 0] * M
++    else:
++        sieve_array = [0, _LOG2_SHIFT] * M
++    for factor in factor_base[1:]:
+         if factor.soln1 is None: #The prime does not divides a
+             continue
+         for idx in range((M + factor.soln1) % factor.prime, 2*M, factor.prime):
+@@ -244,7 +249,7 @@
+     partial_relations : stores partial relations with one large prime
+     ERROR_TERM : error term for accumulated_val
+     """
+-    accumulated_val = (log(M) + log(N)/2 - ERROR_TERM) * 2**10
++    accumulated_val = (log(M) + log(N)/2 - ERROR_TERM) * _SHIFT
+     smooth_relations = []
+     proper_factor = set()
+     partial_relation_upper_bound = 128*factor_base[-1].prime

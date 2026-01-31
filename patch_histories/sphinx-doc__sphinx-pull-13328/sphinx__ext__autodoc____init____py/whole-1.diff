@@ -1,0 +1,12 @@
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -66,7 +66,7 @@
+     r"""^ ([\w.]+::)?            # explicit module name
+           ([\w.]+\.)?            # module and/or class name(s)
+           (\w+)  \s*             # thing name
+-          (?: \[\s*(.*)\s*])?    # optional: type parameters list
++          (?: \[\s*(.*?)\s*])?   # optional: type parameters list
+           (?: \((.*)\)           # optional: arguments
+            (?:\s* -> \s* (.*))?  #           return annotation
+           )? $                   # and nothing more

@@ -1,0 +1,12 @@
+diff --git a/django/db/migrations/writer.py b/django/db/migrations/writer.py
+--- a/django/db/migrations/writer.py
++++ b/django/db/migrations/writer.py
+@@ -312,7 +312,7 @@
+ %(migration_header)s%(imports)s
+ 
+ class Migration(migrations.Migration):
+-%(replaces_str)s%(initial_str)s
++%(replaces_str)s%(initial_str)s%(atomic_str)s%(run_before_str)s
+     dependencies = [
+ %(dependencies)s\
+     ]

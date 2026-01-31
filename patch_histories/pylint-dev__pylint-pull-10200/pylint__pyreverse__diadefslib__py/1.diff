@@ -1,0 +1,32 @@
+diff --git a/pylint/pyreverse/diadefslib.py b/pylint/pyreverse/diadefslib.py
+--- a/pylint/pyreverse/diadefslib.py
++++ b/pylint/pyreverse/diadefslib.py
+@@ -7,7 +7,8 @@
+ from __future__ import annotations
+ 
+ import argparse
+-from collections.abc import Generator
++import warnings
++from collections.abc import Generator, Sequence
+ from typing import Any
+ 
+ import astroid
+@@ -27,6 +28,7 @@ class DiaDefGenerator:
+     def __init__(self, linker: Linker, handler: DiadefsHandler) -> None:
+         """Common Diagram Handler initialization."""
+         self.config = handler.config
++        self.args = handler.args
+         self.module_names: bool = False
+         self._set_default_options()
+         self.linker = linker
+@@ -208,8 +210,9 @@ def class_diagram(self, project: Project, klass: nodes.ClassDef) -> ClassDiagram
+ class DiadefsHandler:
+     """Get diagram definitions from user (i.e. xml files) or generate them."""
+ 
+-    def __init__(self, config: argparse.Namespace) -> None:
++    def __init__(self, config: argparse.Namespace, args: Sequence[str]) -> None:
+         self.config = config
++        self.args = args
+ 
+     def get_diadefs(self, project: Project, linker: Linker) -> list[ClassDiagram]:
+         """Get the diagram's configuration data.

@@ -1,0 +1,93 @@
+diff --git a/galleries/examples/lines_bars_and_markers/broken_barh.py b/galleries/examples/lines_bars_and_markers/broken_barh.py
+--- a/galleries/examples/lines_bars_and_markers/broken_barh.py
++++ b/galleries/examples/lines_bars_and_markers/broken_barh.py
+@@ -18,13 +18,13 @@
+ network = np.column_stack([10*np.random.random(10), np.full(10, 0.05)])
+ 
+ fig, ax = plt.subplots()
+-# broken_barh(xranges, (ymin, height))
+-ax.broken_barh(cpu_1, (-0.2, 0.4))
+-ax.broken_barh(cpu_2, (0.8, 0.4))
+-ax.broken_barh(cpu_3, (1.8, 0.4))
+-ax.broken_barh(cpu_4, (2.8, 0.4))
+-ax.broken_barh(disk, (3.8, 0.4), color="tab:orange")
+-ax.broken_barh(network, (4.8, 0.4), color="tab:green")
++# broken_barh(xranges, (ypos, height))
++ax.broken_barh(cpu_1, (0, 0.4), align="center")
++ax.broken_barh(cpu_2, (1, 0.4), align="center")
++ax.broken_barh(cpu_3, (2, 0.4), align="center")
++ax.broken_barh(cpu_4, (3, 0.4), align="center")
++ax.broken_barh(disk, (4, 0.4), align="center", color="tab:orange")
++ax.broken_barh(network, (5, 0.4), align="center", color="tab:green")
+ ax.set_xlim(0, 10)
+ ax.set_yticks(range(6),
+               labels=["CPU 1", "CPU 2", "CPU 3", "CPU 4", "disk", "network"])
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -2935,7 +2935,7 @@ def sign(x):
+ 
+     @_preprocess_data()
+     @_docstring.interpd
+-    def broken_barh(self, xranges, yrange, **kwargs):
++    def broken_barh(self, xranges, yrange, align="bottom", **kwargs):
+         """
+         Plot a horizontal sequence of rectangles.
+ 
+@@ -2948,8 +2948,16 @@ def broken_barh(self, xranges, yrange, **kwargs):
+             The x-positions and extents of the rectangles. For each tuple
+             (*xmin*, *xwidth*) a rectangle is drawn from *xmin* to *xmin* +
+             *xwidth*.
+-        yrange : (*ymin*, *yheight*)
++        yrange : (*ypos*, *yheight*)
+             The y-position and extent for all the rectangles.
++        align : {"bottom", "center", "top"}, default: 'bottom'
++            The alignment of the yrange with respect to the y-position. One of:
++
++            - "bottom": Resulting y-range [ypos, ypos + yheight]
++            - "center": Resulting y-range [ypos - yheight/2, ypos + yheight/2]
++            - "top": Resulting y-range [ypos - yheight, ypos]
++
++            .. versionadded:: 3.11
+ 
+         Returns
+         -------
+@@ -2984,7 +2992,15 @@ def broken_barh(self, xranges, yrange, **kwargs):
+ 
+         vertices = []
+         y0, dy = yrange
+-        y0, y1 = self.convert_yunits((y0, y0 + dy))
++
++        _api.check_in_list(['bottom', 'center', 'top'], align=align)
++        if align == "bottom":
++            y0, y1 = self.convert_yunits((y0, y0 + dy))
++        elif align == "center":
++            y0, y1 = self.convert_yunits((y0 - dy/2, y0 + dy/2))
++        else:
++            y0, y1 = self.convert_yunits((y0 - dy, y0))
++
+         for xr in xranges:  # convert the absolute values, not the x and dx
+             try:
+                 x0, dx = xr
+diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py
+--- a/lib/matplotlib/pyplot.py
++++ b/lib/matplotlib/pyplot.py
+@@ -3111,12 +3111,17 @@ def boxplot(
+ def broken_barh(
+     xranges: Sequence[tuple[float, float]],
+     yrange: tuple[float, float],
++    align: Literal["bottom", "center", "top"] = "bottom",
+     *,
+     data=None,
+     **kwargs,
+ ) -> PolyCollection:
+     return gca().broken_barh(
+-        xranges, yrange, **({"data": data} if data is not None else {}), **kwargs
++        xranges,
++        yrange,
++        align=align,
++        **({"data": data} if data is not None else {}),
++        **kwargs,
+     )
+ 
+ 

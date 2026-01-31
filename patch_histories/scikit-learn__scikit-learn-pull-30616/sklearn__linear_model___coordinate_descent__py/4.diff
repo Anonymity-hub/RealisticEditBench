@@ -1,0 +1,51 @@
+diff --git a/sklearn/linear_model/_coordinate_descent.py b/sklearn/linear_model/_coordinate_descent.py
+--- a/sklearn/linear_model/_coordinate_descent.py
++++ b/sklearn/linear_model/_coordinate_descent.py
+@@ -1735,7 +1735,6 @@
+         path_params.pop("cv", None)
+         path_params.pop("n_jobs", None)
+ 
+-        alphas = self.alphas
+         n_l1_ratio = len(l1_ratios)
+ 
+         check_scalar_alpha = partial(
+@@ -1745,7 +1744,7 @@
+             include_boundaries="left",
+         )
+ 
+-        if alphas is None:
++        if isinstance(self._alphas, Integral):
+             alphas = [
+                 _alpha_grid(
+                     X,
+@@ -1753,7 +1752,7 @@
+                     l1_ratio=l1_ratio,
+                     fit_intercept=self.fit_intercept,
+                     eps=self.eps,
+-                    n_alphas=self.n_alphas,
++                    n_alphas=self._alphas,
+                     copy_X=self.copy_X,
+                     sample_weight=sample_weight,
+                 )
+@@ -1761,10 +1760,10 @@
+             ]
+         else:
+             # Making sure alphas entries are scalars.
+-            for index, alpha in enumerate(alphas):
++            for index, alpha in enumerate(self._alphas):
+                 check_scalar_alpha(alpha, f"alphas[{index}]")
+             # Making sure alphas is properly ordered.
+-            alphas = np.tile(np.sort(alphas)[::-1], (n_l1_ratio, 1))
++            alphas = np.tile(np.sort(self._alphas)[::-1], (n_l1_ratio, 1))
+ 
+         # We want n_alphas to be the number of alphas used for each l1_ratio.
+         n_alphas = len(alphas[0])
+@@ -1850,7 +1849,7 @@
+ 
+         self.l1_ratio_ = best_l1_ratio
+         self.alpha_ = best_alpha
+-        if self.alphas is None:
++        if isinstance(self._alphas, Integral):
+             self.alphas_ = np.asarray(alphas)
+             if n_l1_ratio == 1:
+                 self.alphas_ = self.alphas_[0]

@@ -1,0 +1,19 @@
+diff --git a/sklearn/linear_model/_stochastic_gradient.py b/sklearn/linear_model/_stochastic_gradient.py
+--- a/sklearn/linear_model/_stochastic_gradient.py
++++ b/sklearn/linear_model/_stochastic_gradient.py
+@@ -731,6 +731,15 @@
+                 ),
+                 ConvergenceWarning,
+             )
++
++        if self.power_t < 0:
++            warnings.warn(
++                "Negative values for `power_t` are deprecated in version 1.8 "
++                "and will raise an error in 1.10. "
++                "Use values in the range [0.0, inf) instead.",
++                FutureWarning,
++            )
++
+         return self
+ 
+     def _fit_binary(self, X, y, alpha, C, sample_weight, learning_rate, max_iter):

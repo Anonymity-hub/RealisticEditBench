@@ -1,0 +1,246 @@
+diff --git a/sphinx/ext/intersphinx/_cli.py b/sphinx/ext/intersphinx/_cli.py
+--- a/sphinx/ext/intersphinx/_cli.py
++++ b/sphinx/ext/intersphinx/_cli.py
+@@ -37,9 +37,10 @@ def inspect_main(argv: list[str], /) -> int:
+         for key in sorted(inv_data or {}):
+             print(key)
+             inv_entries = sorted(inv_data[key].items())
+-            for entry, (_proj, _ver, url_path, display_name) in inv_entries:
++            for entry, inv_item in inv_entries:
++                display_name = inv_item.display_name
+                 display_name = display_name * (display_name != '-')
+-                print(f'    {entry:<40} {display_name:<40}: {url_path}')
++                print(f'    {entry:<40} {display_name:<40}: {inv_item.uri}')
+     except ValueError as exc:
+         print(exc.args[0] % exc.args[1:], file=sys.stderr)
+         return 1
+diff --git a/sphinx/ext/intersphinx/_resolve.py b/sphinx/ext/intersphinx/_resolve.py
+--- a/sphinx/ext/intersphinx/_resolve.py
++++ b/sphinx/ext/intersphinx/_resolve.py
+@@ -30,30 +30,33 @@
+     from sphinx.domains._domains_container import _DomainsContainer
+     from sphinx.environment import BuildEnvironment
+     from sphinx.ext.intersphinx._shared import InventoryName
+-    from sphinx.util.typing import Inventory, InventoryItem, RoleFunction
++    from sphinx.util.inventory import _InventoryItem
++    from sphinx.util.typing import Inventory, RoleFunction
+ 
+ 
+ def _create_element_from_result(
+     domain_name: str,
+     inv_name: InventoryName | None,
+-    data: InventoryItem,
++    inv_item: _InventoryItem,
+     node: pending_xref,
+     contnode: TextElement,
+ ) -> nodes.reference:
+-    proj, version, uri, dispname = data
++    uri = inv_item.uri
+     if '://' not in uri and node.get('refdoc'):
+         # get correct path in case of subdirectories
+         uri = (_relative_path(Path(), Path(node['refdoc']).parent) / uri).as_posix()
+-    if version:
+-        reftitle = _('(in %s v%s)') % (proj, version)
++    if inv_item.project_version:
++        reftitle = _('(in %s v%s)') % (inv_item.project_name, inv_item.project_version)
+     else:
+-        reftitle = _('(in %s)') % (proj,)
++        reftitle = _('(in %s)') % (inv_item.project_name,)
+ 
+     newnode = nodes.reference('', '', internal=False, refuri=uri, reftitle=reftitle)
+     if node.get('refexplicit'):
+         # use whatever title was given
+         newnode.append(contnode)
+-    elif dispname == '-' or (domain_name == 'std' and node['reftype'] == 'keyword'):
++    elif inv_item.display_name == '-' or (
++        domain_name == 'std' and node['reftype'] == 'keyword'
++    ):
+         # use whatever title was given, but strip prefix
+         title = contnode.astext()
+         if inv_name is not None and title.startswith(inv_name + ':'):
+@@ -66,7 +69,7 @@ def _create_element_from_result(
+             newnode.append(contnode)
+     else:
+         # else use the given display name (used for :ref:)
+-        newnode.append(contnode.__class__(dispname, dispname))
++        newnode.append(contnode.__class__(inv_item.display_name, inv_item.display_name))
+     return newnode
+ 
+ 
+diff --git a/sphinx/util/inventory.py b/sphinx/util/inventory.py
+--- a/sphinx/util/inventory.py
++++ b/sphinx/util/inventory.py
+@@ -4,9 +4,11 @@
+ 
+ import posixpath
+ import re
++import warnings
+ import zlib
+ from typing import TYPE_CHECKING
+ 
++from sphinx.deprecation import RemovedInSphinx10Warning
+ from sphinx.locale import __
+ from sphinx.util import logging
+ 
+@@ -15,12 +17,12 @@
+ 
+ if TYPE_CHECKING:
+     import os
+-    from collections.abc import Callable, Sequence
+-    from typing import Protocol
++    from collections.abc import Callable, Iterator, Sequence
++    from typing import NoReturn, Protocol
+ 
+     from sphinx.builders import Builder
+     from sphinx.environment import BuildEnvironment
+-    from sphinx.util.typing import Inventory, InventoryItem
++    from sphinx.util.typing import Inventory
+ 
+     # Readable file stream for inventory loading
+     class _SupportsRead(Protocol):
+@@ -82,8 +84,12 @@ def _loads_v1(cls, lines: Sequence[str], *, uri: str) -> Inventory:
+             else:
+                 item_type = f'py:{item_type}'
+                 location += f'#{name}'
+-            inv_item: InventoryItem = projname, version, location, '-'
+-            invdata.setdefault(item_type, {})[name] = inv_item
++            invdata.setdefault(item_type, {})[name] = _InventoryItem(
++                project_name=projname,
++                project_version=version,
++                uri=location,
++                display_name='-',
++            )
+         return invdata
+ 
+     @classmethod
+@@ -148,8 +154,12 @@ def _loads_v2(cls, inv_data: bytes, *, uri: str) -> Inventory:
+             if location.endswith('$'):
+                 location = location[:-1] + name
+             location = posixpath.join(uri, location)
+-            inv_item: InventoryItem = projname, version, location, dispname
+-            invdata.setdefault(type, {})[name] = inv_item
++            invdata.setdefault(type, {})[name] = _InventoryItem(
++                project_name=projname,
++                project_version=version,
++                uri=location,
++                display_name=dispname,
++            )
+         for ambiguity in actual_ambiguities:
+             logger.info(
+                 __('inventory <%s> contains multiple definitions for %s'),
+@@ -194,3 +204,89 @@ def escape(string: str) -> str:
+                     entry = f'{fullname} {domain.name}:{type} {prio} {uri} {dispname}\n'
+                     f.write(compressor.compress(entry.encode()))
+             f.write(compressor.flush())
++
++
++class _InventoryItem:
++    __slots__ = 'project_name', 'project_version', 'uri', 'display_name'
++
++    project_name: str
++    project_version: str
++    uri: str
++    display_name: str
++
++    def __init__(
++        self,
++        *,
++        project_name: str,
++        project_version: str,
++        uri: str,
++        display_name: str,
++    ) -> None:
++        object.__setattr__(self, 'project_name', project_name)
++        object.__setattr__(self, 'project_version', project_version)
++        object.__setattr__(self, 'uri', uri)
++        object.__setattr__(self, 'display_name', display_name)
++
++    def __repr__(self) -> str:
++        return (
++            '_InventoryItem('
++            f'project_name={self.project_name!r}, '
++            f'project_version={self.project_version!r}, '
++            f'uri={self.uri!r}, '
++            f'display_name={self.display_name!r}'
++            ')'
++        )
++
++    def __eq__(self, other: object) -> bool:
++        if not isinstance(other, _InventoryItem):
++            return NotImplemented
++        return (
++            self.project_name == other.project_name
++            and self.project_version == other.project_version
++            and self.uri == other.uri
++            and self.display_name == other.display_name
++        )
++
++    def __hash__(self) -> int:
++        return hash((
++            self.project_name,
++            self.project_version,
++            self.uri,
++            self.display_name,
++        ))
++
++    def __setattr__(self, key: str, value: object) -> NoReturn:
++        msg = '_InventoryItem is immutable'
++        raise AttributeError(msg)
++
++    def __delattr__(self, key: str) -> NoReturn:
++        msg = '_InventoryItem is immutable'
++        raise AttributeError(msg)
++
++    def __getstate__(self) -> tuple[str, str, str, str]:
++        return self.project_name, self.project_version, self.uri, self.display_name
++
++    def __setstate__(self, state: tuple[str, str, str, str]) -> None:
++        project_name, project_version, uri, display_name = state
++        object.__setattr__(self, 'project_name', project_name)
++        object.__setattr__(self, 'project_version', project_version)
++        object.__setattr__(self, 'uri', uri)
++        object.__setattr__(self, 'display_name', display_name)
++
++    def __getitem__(self, key: int | slice) -> str | tuple[str, ...]:
++        warnings.warn(
++            'The tuple interface for _InventoryItem objects is deprecated.',
++            RemovedInSphinx10Warning,
++            stacklevel=2,
++        )
++        tpl = self.project_name, self.project_version, self.uri, self.display_name
++        return tpl[key]
++
++    def __iter__(self) -> Iterator[str]:
++        warnings.warn(
++            'The iter() interface for _InventoryItem objects is deprecated.',
++            RemovedInSphinx10Warning,
++            stacklevel=2,
++        )
++        tpl = self.project_name, self.project_version, self.uri, self.display_name
++        return iter(tpl)
+diff --git a/sphinx/util/typing.py b/sphinx/util/typing.py
+--- a/sphinx/util/typing.py
++++ b/sphinx/util/typing.py
+@@ -23,6 +23,7 @@
+     from typing_extensions import TypeIs
+ 
+     from sphinx.application import Sphinx
++    from sphinx.util.inventory import _InventoryItem
+ 
+     _RestifyMode: TypeAlias = Literal[
+         'fully-qualified-except-typing',
+@@ -110,13 +111,7 @@ def __call__(
+ TitleGetter: TypeAlias = Callable[[nodes.Node], str]
+ 
+ # inventory data on memory
+-InventoryItem: TypeAlias = tuple[
+-    str,  # project name
+-    str,  # project version
+-    str,  # URL
+-    str,  # display name
+-]
+-Inventory: TypeAlias = dict[str, dict[str, InventoryItem]]
++Inventory: TypeAlias = dict[str, dict[str, '_InventoryItem']]
+ 
+ 
+ class ExtensionMetadata(typing.TypedDict, total=False):

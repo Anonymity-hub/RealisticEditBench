@@ -1,0 +1,23 @@
+diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py
+--- a/astropy/io/fits/fitsrec.py
++++ b/astropy/io/fits/fitsrec.py
+@@ -1018,11 +1018,17 @@
+         This is returned as a numpy byte array.
+         """
+         raw_data = self._get_raw_data()
+-        if self._heapsize and
++        if self._heapsize and raw_data is not None:
++            # Read the heap from disk
++            raw_data = raw_data.view(np.ubyte)
+             heap_end = self._heapoffset + self._heapsize
+             return raw_data[self._heapoffset : heap_end]
+         else:
+-            return np.array([], dtype=np.ubyte)
++            # Data is only in memory so create the heap data, one column
++            # at a time, in the order that the data pointers appear in the
++            # column (regardless if that data pointer has a different,
++            # previous heap offset listed)
++            data = []
+ 
+     def _get_raw_data(self):
+         """

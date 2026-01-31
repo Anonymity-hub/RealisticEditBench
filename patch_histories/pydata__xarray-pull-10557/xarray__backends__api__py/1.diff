@@ -1,0 +1,12 @@
+diff --git a/xarray/backends/api.py b/xarray/backends/api.py
+--- a/xarray/backends/api.py
++++ b/xarray/backends/api.py
+@@ -122,7 +122,7 @@ def _get_default_engine_gz() -> Literal["scipy"]:
+     return engine
+ 
+ 
+-def _get_default_engine_netcdf() -> Literal["netcdf4", "scipy"]:
++def _get_default_engine_netcdf() -> Literal["netcdf4", "h5netcdf", "scipy"]:
+     engine: Literal["netcdf4", "scipy"]
+     try:
+         import netCDF4  # noqa: F401

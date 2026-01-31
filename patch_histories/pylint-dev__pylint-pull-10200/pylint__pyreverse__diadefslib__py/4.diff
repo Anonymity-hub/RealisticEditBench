@@ -1,0 +1,31 @@
+diff --git a/pylint/pyreverse/diadefslib.py b/pylint/pyreverse/diadefslib.py
+--- a/pylint/pyreverse/diadefslib.py
++++ b/pylint/pyreverse/diadefslib.py
+@@ -134,7 +134,8 @@
+         if is_stdlib_module(node.root().name):
+             return self.config.show_stdlib  # type: ignore[no-any-return]
+ 
+-        return True
++        # Filter node by depth
++        return self._should_include_by_depth(node)
+ 
+     def add_class(self, node: nodes.ClassDef) -> None:
+         """Visit one class and add it to diagram."""
+@@ -222,7 +223,7 @@
+ 
+         add this class to the package diagram definition
+         """
+-        if self.pkgdiagram:
++        if self.pkgdiagram and self._should_include_by_depth(node):
+             self.linker.visit(node)
+             self.pkgdiagram.add_object(node.name, node)
+ 
+@@ -236,7 +237,7 @@
+ 
+     def visit_importfrom(self, node: nodes.ImportFrom) -> None:
+         """Visit astroid.ImportFrom  and catch modules for package diagram."""
+-        if self.pkgdiagram:
++        if self.pkgdiagram and self._should_include_by_depth(node):
+             self.pkgdiagram.add_from_depend(node, node.modname)
+ 
+ 

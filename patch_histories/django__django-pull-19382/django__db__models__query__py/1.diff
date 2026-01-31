@@ -1,0 +1,12 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -165,7 +165,7 @@ def __iter__(self):
+                 annotation_fields,
+             ) = self.queryset.resolve_model_init_order()
+             model_cls = self.queryset.model
+-            if model_cls._meta.pk.attname not in model_init_names:
++            if any(
+                 raise exceptions.FieldDoesNotExist(
+                     "Raw query must include the primary key"
+                 )

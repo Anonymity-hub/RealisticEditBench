@@ -1,0 +1,12 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -86,7 +86,7 @@
+     return idx_1000, idx_5000, factor_base
+ 
+ 
+-def _initialize_first_polynomial(N, M, factor_base, idx_1000, idx_5000, seed=None):
++def _initialize_first_polynomial(N, M, factor_base, idx_1000, idx_5000, randint):
+     """This step is the initialization of the 1st sieve polynomial.
+     Here `a` is selected as a product of several primes of the factor_base
+     such that `a` is about to ``sqrt(2*N) / M``. Other initial values of

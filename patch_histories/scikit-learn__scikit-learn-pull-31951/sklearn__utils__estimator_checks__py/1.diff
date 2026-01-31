@@ -1,0 +1,25 @@
+diff --git a/sklearn/utils/estimator_checks.py b/sklearn/utils/estimator_checks.py
+--- a/sklearn/utils/estimator_checks.py
++++ b/sklearn/utils/estimator_checks.py
+@@ -424,6 +424,7 @@ def _maybe_mark(
+     expected_failed_checks: dict[str, str] | None = None,
+     mark: Literal["xfail", "skip", None] = None,
+     pytest=None,
++    xfail_strict: bool | None = None,
+ ):
+     """Mark the test as xfail or skip if needed.
+ 
+@@ -442,6 +443,13 @@ def _maybe_mark(
+         Pytest module to use to mark the check. This is only needed if ``mark`` is
+         `"xfail"`. Note that one can run `check_estimator` without having `pytest`
+         installed. This is used in combination with `parametrize_with_checks` only.
++    xfail_strict : bool, default=None
++        Whether to run checks in xfail strict mode. This option is ignored unless
++        `mark="xfail"`. If True, checks that are expected to fail but actually
++        pass will lead to a test failure. If False, unexpectedly passing tests
++        will be marked as xpass. If None, the default pytest behavior is used.
++
++        .. versionadded:: 1.8
+     """
+     should_be_marked, reason = _should_be_skipped_or_marked(
+         estimator, check, expected_failed_checks

@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py
+--- a/lib/matplotlib/legend.py
++++ b/lib/matplotlib/legend.py
+@@ -618,8 +618,6 @@ def __init__(
+                         break
+                     except AttributeError:
+                         continue
+-                else:
+-                    text.set_color('none')
+         elif cbook._str_equal(labelcolor, 'none'):
+             for text in self.texts:
+                 text.set_color(labelcolor)

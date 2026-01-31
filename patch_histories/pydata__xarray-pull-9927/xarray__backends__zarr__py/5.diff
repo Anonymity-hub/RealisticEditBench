@@ -1,0 +1,12 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -481,6 +481,8 @@
+         mode=mode,
+         shape=shape,
+     )
++    if _zarr_v3() and chunks is None:
++        chunks = "auto"
+     encoding["chunks"] = chunks
+     return encoding
+ 

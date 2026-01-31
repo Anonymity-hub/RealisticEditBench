@@ -1,0 +1,22 @@
+diff --git a/sympy/logic/boolalg.py b/sympy/logic/boolalg.py
+--- a/sympy/logic/boolalg.py
++++ b/sympy/logic/boolalg.py
+@@ -1065,17 +1065,7 @@
+         elif True in argset and remove_true:
+             argset.remove(True)
+             return Not(Xor(*argset))
+-        else:
+-            obj._args = tuple(ordered(argset))
+-            obj._argset = frozenset(argset)
+-            return obj
+-
+-    # XXX: This should be cached on the object rather than using cacheit
+-    # Maybe it can be computed in __new__?
+-    @property  # type: ignore
+-    @cacheit
+-    def args(self):
+-        return tuple(ordered(self._argset))
++        return super().__new__(cls, *ordered(argset))
+ 
+     def to_nnf(self, simplify=True):
+         args = []

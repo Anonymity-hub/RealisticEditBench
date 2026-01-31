@@ -1,0 +1,77 @@
+diff --git a/xarray/structure/alignment.py b/xarray/structure/alignment.py
+--- a/xarray/structure/alignment.py
++++ b/xarray/structure/alignment.py
+@@ -554,22 +554,37 @@
+         self,
+         obj: T_Alignable,
+         matching_indexes: dict[MatchingIndexKey, Index],
++        matching_index_vars: dict[MatchingIndexKey, dict[Hashable, Variable]],
+     ) -> tuple[dict[Hashable, Index], dict[Hashable, Variable]]:
+         new_indexes = {}
+         new_variables = {}
+ 
+         for key, aligned_idx in self.aligned_indexes.items():
+-            index_vars = self.aligned_index_vars[key]
++            aligned_idx_vars = self.aligned_index_vars[key]
+             obj_idx = matching_indexes.get(key)
++            obj_idx_vars = matching_index_vars.get(key)
++
+             if obj_idx is None:
+-                # add the index if it relates to unindexed dimensions in obj
+-                index_vars_dims = {d for var in index_vars.values() for d in var.dims}
+-                if index_vars_dims <= set(obj.dims):
++                # add the aligned index if it relates to unindexed dimensions in obj
++                dims = {d for var in aligned_idx_vars.values() for d in var.dims}
++                if dims <= set(obj.dims):
+                     obj_idx = aligned_idx
++
+             if obj_idx is not None:
+-                for name, var in index_vars.items():
+-                    new_indexes[name] = aligned_idx
+-                    new_variables[name] = var.copy(deep=self.copy)
++                # TODO: always copy object's index when no re-indexing is required?
++                # (instead of assigning the aligned index)
++                # (need performance assessment)
++                if key in self.keep_original_indexes:
++                    assert self.reindex[key] is False
++                    new_idx = obj_idx.copy(deep=self.copy)
++                    new_idx_vars = new_idx.create_variables(obj_idx_vars)
++                else:
++                    new_idx = aligned_idx
++                    new_idx_vars = {
++                        k: v.copy(deep=self.copy) for k, v in aligned_idx_vars.items()
++                    }
++                new_indexes.update(dict.fromkeys(new_idx_vars, new_idx))
++                new_variables.update(new_idx_vars)
+ 
+         return new_indexes, new_variables
+ 
+@@ -577,8 +592,11 @@
+         self,
+         obj: T_Alignable,
+         matching_indexes: dict[MatchingIndexKey, Index],
++        matching_index_vars: dict[MatchingIndexKey, dict[Hashable, Variable]],
+     ) -> T_Alignable:
+-        new_indexes, new_variables = self._get_indexes_and_vars(obj, matching_indexes)
++        new_indexes, new_variables = self._get_indexes_and_vars(
++            obj, matching_indexes, matching_index_vars
++        )
+         dim_pos_indexers = self._get_dim_pos_indexers(matching_indexes)
+ 
+         return obj._reindex_callback(
+@@ -593,9 +611,12 @@
+ 
+     def reindex_all(self) -> None:
+         self.results = tuple(
+-            self._reindex_one(obj, matching_indexes)
+-            for obj, matching_indexes in zip(
+-                self.objects, self.objects_matching_indexes, strict=True
++            self._reindex_one(obj, matching_indexes, matching_index_vars)
++            for obj, matching_indexes, matching_index_vars in zip(
++                self.objects,
++                self.objects_matching_indexes,
++                self.objects_matching_index_vars,
++                strict=True,
+             )
+         )
+ 

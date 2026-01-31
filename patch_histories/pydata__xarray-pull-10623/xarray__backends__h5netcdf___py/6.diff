@@ -1,0 +1,12 @@
+diff --git a/xarray/backends/h5netcdf_.py b/xarray/backends/h5netcdf_.py
+--- a/xarray/backends/h5netcdf_.py
++++ b/xarray/backends/h5netcdf_.py
+@@ -16,6 +16,7 @@
+     WritableCFDataStore,
+     _normalize_path,
+     _open_remote_file,
++    collect_ancestor_dimensions,
+     datatree_from_dict_with_io_cleanup,
+     find_root_and_group,
+ )
+

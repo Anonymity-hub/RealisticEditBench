@@ -1,0 +1,24 @@
+diff --git a/sphinx/util/typing.py b/sphinx/util/typing.py
+--- a/sphinx/util/typing.py
++++ b/sphinx/util/typing.py
+@@ -3,12 +3,20 @@
+ from __future__ import annotations
+ 
+ import contextvars
++import ctypes
+ import dataclasses
++import io
++import json
++import lzma
++import multiprocessing
+ import pathlib
++import pickle  # NoQA: S403
+ import struct
+ import sys
+ import types
+ import typing
++import weakref
++import zipfile
+ from collections.abc import Callable, Sequence
+ from typing import TYPE_CHECKING
+ 

@@ -1,0 +1,20 @@
+diff --git a/django/db/models/query_utils.py b/django/db/models/query_utils.py
+--- a/django/db/models/query_utils.py
++++ b/django/db/models/query_utils.py
+@@ -112,6 +112,16 @@
+                 else:
+                     path = lhs
+                     lookup = None
++                field = models.F(path)
++                if (
++                    field_replacement := field.replace_expressions(replacements)
++                ) is not field:
++                    # Handle the implicit __exact case by falling back to an
++                    # extra transform when get_lookup returns no match for the
++                    # last component of the path.
++                    if lookup is None:
++                        lookup = "exact"
++                    if (lookup_class := field_replacement.get_lookup(lookup)) is None:
+     def flatten(self):
+         """
+         Recursively yield this Q object and all subexpressions, in depth-first

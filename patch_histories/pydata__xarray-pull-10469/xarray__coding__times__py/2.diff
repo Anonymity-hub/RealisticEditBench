@@ -1,0 +1,12 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -1430,7 +1430,7 @@
+ 
+     def __init__(
+         self,
+-        time_unit: PDDatetimeUnitOptions = "ns",
++        time_unit: PDDatetimeUnitOptions | None = None,
+         decode_via_units: bool = True,
+         decode_via_dtype: bool = True,
+     ) -> None:

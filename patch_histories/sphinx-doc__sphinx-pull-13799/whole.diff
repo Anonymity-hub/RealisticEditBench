@@ -1,0 +1,154 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -325,7 +325,7 @@ def get_real_modname(self) -> str:
+         It can differ from the name of the module through which the object was
+         imported.
+         """
+-        return self.get_attr(self.object, '__module__', None) or self.modname
++        return self.props._obj___module__ or self.props.module_name
+ 
+     def check_module(self) -> bool:
+         """Check if *self.object* is really defined in the module given by
+@@ -925,7 +925,7 @@ def _generate(
+         # where the attribute documentation would actually be found in.
+         # This is used for situations where you have a module that collects the
+         # functions and classes of internal submodules.
+-        guess_modname = self.get_real_modname()
++        guess_modname = self.props._obj___module__ or self.props.module_name
+         self.real_modname: str = real_modname or guess_modname
+ 
+         # try to also get a source code analyzer for attribute docs
+@@ -1764,7 +1764,9 @@ def get_variable_comment(self) -> list[str] | None:
+             if self.props.doc_as_attr:
+                 analyzer = ModuleAnalyzer.for_module(self.modname)
+             else:
+-                analyzer = ModuleAnalyzer.for_module(self.get_real_modname())
++                analyzer = ModuleAnalyzer.for_module(
++                    self.props._obj___module__ or self.props.module_name
++                )
+             analyzer.analyze()
+             return list(analyzer.attr_docs.get(key, []))
+         except PycodeError:
+@@ -1795,7 +1797,9 @@ def add_content(self, more_content: StringList | None) -> None:
+             more_content = StringList(
+                 [_('alias of TypeVar(%s)') % ', '.join(attrs), ''], source=''
+             )
+-        if self.props.doc_as_attr and self.modname != self.get_real_modname():
++        if self.props.doc_as_attr and self.modname != (
++            self.props._obj___module__ or self.props.module_name
++        ):
+             try:
+                 # override analyzer to obtain doccomment around its definition.
+                 self.analyzer = ModuleAnalyzer.for_module(self.modname)
+@@ -1953,10 +1957,6 @@ def add_directive_header(self, sig: str) -> None:
+     def document_members(self, all_members: bool = False) -> None:
+         pass
+ 
+-    def get_real_modname(self) -> str:
+-        real_modname = self.get_attr(self.parent or self.object, '__module__', None)
+-        return real_modname or self.modname
+-
+     def get_module_comment(self, attrname: str) -> list[str] | None:
+         try:
+             analyzer = ModuleAnalyzer.for_module(self.modname)
+@@ -2306,10 +2306,6 @@ def update_annotations(self, parent: Any) -> None:
+     def _is_non_data_descriptor(self) -> bool:
+         return not inspect.isattributedescriptor(self.object)
+ 
+-    def get_real_modname(self) -> str:
+-        real_modname = self.get_attr(self.parent or self.object, '__module__', None)
+-        return real_modname or self.modname
+-
+     def should_suppress_value_header(self) -> bool:
+         if self.object is SLOTS_ATTR:
+             return True
+@@ -2484,10 +2480,6 @@ def format_args(self, **kwargs: Any) -> str:
+     def document_members(self, all_members: bool = False) -> None:
+         pass
+ 
+-    def get_real_modname(self) -> str:
+-        real_modname = self.get_attr(self.parent or self.object, '__module__', None)
+-        return real_modname or self.modname
+-
+     def add_directive_header(self, sig: str) -> None:
+         super().add_directive_header(sig)
+         sourcename = self.get_sourcename()
+diff --git a/sphinx/ext/autodoc/_property_types.py b/sphinx/ext/autodoc/_property_types.py
+--- a/sphinx/ext/autodoc/_property_types.py
++++ b/sphinx/ext/autodoc/_property_types.py
+@@ -43,6 +43,7 @@ class _ItemProperties:
+     docstring_lines: tuple[str, ...]
+ 
+     _obj: Any
++    _obj___module__: str | None
+ 
+     @property
+     def name(self) -> str:
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -824,6 +824,7 @@ def _load_object_by_name(
+             file_path=Path(file_path) if file_path is not None else None,
+             all=tuple(mod_all) if mod_all is not None else None,
+             _obj=obj,
++            _obj___module__=obj.__name__,
+         )
+     elif objtype in {'class', 'exception'}:
+         if isinstance(obj, NewType | TypeVar):
+@@ -842,6 +843,7 @@ def _load_object_by_name(
+             docstring_lines=(),
+             bases=getattr(obj, '__bases__', None),
+             _obj=obj,
++            _obj___module__=get_attr(obj, '__module__', None),
+             _obj___name__=getattr(obj, '__name__', None),
+         )
+     elif objtype in {'function', 'decorator'}:
+@@ -857,6 +859,7 @@ def _load_object_by_name(
+             docstring_lines=(),
+             properties=frozenset(obj_properties),
+             _obj=obj,
++            _obj___module__=get_attr(obj, '__module__', None),
+         )
+     elif objtype == 'method':
+         # to distinguish classmethod/staticmethod
+@@ -873,6 +876,7 @@ def _load_object_by_name(
+             docstring_lines=(),
+             properties=frozenset(obj_properties),
+             _obj=obj,
++            _obj___module__=get_attr(obj, '__module__', None),
+         )
+     elif objtype == 'property':
+         if not inspect.isproperty(obj):
+@@ -892,6 +896,7 @@ def _load_object_by_name(
+             docstring_lines=(),
+             properties=frozenset(obj_properties),
+             _obj=obj,
++            _obj___module__=get_attr(parent or obj, '__module__', None) or module_name,
+         )
+     elif objtype == 'data':
+         # Update __annotations__ to support type_comment and so on
+@@ -920,6 +925,7 @@ def _load_object_by_name(
+             class_var=False,
+             instance_var=False,
+             _obj=obj,
++            _obj___module__=get_attr(parent or obj, '__module__', None) or module_name,
+         )
+     elif objtype == 'attribute':
+         if _is_slots_attribute(parent=parent, obj_path=parts):
+@@ -959,6 +965,7 @@ def _load_object_by_name(
+             class_var=False,
+             instance_var=False,
+             _obj=obj,
++            _obj___module__=get_attr(obj, '__module__', None),
+         )
+     else:
+         props = _ItemProperties(
+@@ -967,6 +974,7 @@ def _load_object_by_name(
+             parts=parts,
+             docstring_lines=(),
+             _obj=obj,
++            _obj___module__=get_attr(obj, '__module__', None),
+         )
+ 
+     return props, args, retann, module, parent

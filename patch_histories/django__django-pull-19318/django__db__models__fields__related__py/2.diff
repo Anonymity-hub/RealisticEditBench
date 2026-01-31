@@ -1,0 +1,14 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -708,6 +708,10 @@
+                     )
+                 ]
+         return []
++
++    def _check_conflict_with_managers(self):
++        errors = []
++        manager_names = {manager.name for manager in self.opts.managers}
+
+     def deconstruct(self):
+         name, path, args, kwargs = super().deconstruct()

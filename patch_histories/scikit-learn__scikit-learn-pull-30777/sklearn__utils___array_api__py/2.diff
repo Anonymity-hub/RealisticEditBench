@@ -1,0 +1,19 @@
+diff --git a/sklearn/utils/_array_api.py b/sklearn/utils/_array_api.py
+--- a/sklearn/utils/_array_api.py
++++ b/sklearn/utils/_array_api.py
+@@ -1065,3 +1065,15 @@
+     return out
+ 
+ 
++def _cholesky(covariance, xp):
++    if _is_numpy_namespace(xp):
++        return scipy.linalg.cholesky(covariance, lower=True)
++    else:
++        return xp.linalg.cholesky(covariance)
++
++
++def _linalg_solve(cov_chol, eye_matrix, xp):
++    if _is_numpy_namespace(xp):
++        return scipy.linalg.solve_triangular(cov_chol, eye_matrix, lower=True)
++    else:
++        return xp.linalg.solve(cov_chol, eye_matrix)

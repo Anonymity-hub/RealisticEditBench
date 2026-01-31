@@ -1,0 +1,23 @@
+diff --git a/xarray/core/datatree.py b/xarray/core/datatree.py
+--- a/xarray/core/datatree.py
++++ b/xarray/core/datatree.py
+@@ -1429,6 +1429,7 @@ def map_over_datasets(
+         self,
+         func: Callable,
+         *args: Any,
++        kwargs: Mapping[str, Any] | None = None,
+     ) -> DataTree | tuple[DataTree, ...]:
+         """
+         Apply a function to every dataset in this subtree, returning a new tree which stores the results.
+@@ -1446,7 +1447,10 @@ def map_over_datasets(
+ 
+             Function will not be applied to any nodes without datasets.
+         *args : tuple, optional
+-            Positional arguments passed on to `func`.
++            Positional arguments passed on to `func`. Any DataTree arguments will be
++            converted to Dataset objects via `.dataset`.
++        kwargs : dict, optional
++            Optional keyword arguments passed directly to ``func``.
+ 
+         Returns
+         -------

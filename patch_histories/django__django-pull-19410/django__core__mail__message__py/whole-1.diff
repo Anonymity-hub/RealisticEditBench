@@ -1,0 +1,14 @@
+diff --git a/django/core/mail/message.py b/django/core/mail/message.py
+--- a/django/core/mail/message.py
++++ b/django/core/mail/message.py
+@@ -191,8 +191,8 @@ def __setitem__(self, name, val):
+         MIMEMultipart.__setitem__(self, name, val)
+ 
+ 
+-EmailAlternative = namedtuple("Alternative", ["content", "mimetype"])
+-EmailAttachment = namedtuple("Attachment", ["filename", "content", "mimetype"])
++EmailAlternative = namedtuple("EmailAlternative", ["content", "mimetype"])
++EmailAttachment = namedtuple("EmailAttachment", ["filename", "content", "mimetype"])
+ 
+ 
+ class EmailMessage:

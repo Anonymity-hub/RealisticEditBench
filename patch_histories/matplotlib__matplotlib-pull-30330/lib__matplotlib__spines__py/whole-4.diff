@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/spines.py b/lib/matplotlib/spines.py
+--- a/lib/matplotlib/spines.py
++++ b/lib/matplotlib/spines.py
+@@ -247,7 +247,6 @@ def _get_bounds_or_viewLim(self):
+             low, high = self.axes.viewLim.intervalx
+         else:
+             raise ValueError(f'spine_type: {self.spine_type} not supported')
+-            # circle not supported
+         return low, high
+ 
+     def _adjust_location(self):

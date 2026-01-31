@@ -1,0 +1,12 @@
+diff --git a/astropy/timeseries/downsample.py b/astropy/timeseries/downsample.py
+--- a/astropy/timeseries/downsample.py
++++ b/astropy/timeseries/downsample.py
+@@ -197,7 +197,7 @@
+     )
+ 
+     if aggregate_func is None:
+-        aggregate_func = np.nanmean
++        aggregate_func = nanmean_reduceat
+ 
+     # Start and end times of the binned timeseries
+     bin_start = binned.time_bin_start

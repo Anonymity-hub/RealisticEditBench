@@ -1,0 +1,16 @@
+diff --git a/astropy/table/column.py b/astropy/table/column.py
+--- a/astropy/table/column.py
++++ b/astropy/table/column.py
+@@ -219,8 +219,10 @@
+             message=".*Promotion of numbers and bools to strings.*",
+         )
+ 
+-        has_unit =
++        has_unit = has_len_gt0 and any(hasattr(v, "unit") for v in data)
++
+         try:
++            cls =
+             np_data = np.array(data, dtype=dtype)
+         except np.ma.MaskError:
+             # Catches case of dtype=int with masked values, instead let it
+

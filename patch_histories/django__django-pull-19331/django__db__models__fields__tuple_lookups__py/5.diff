@@ -1,0 +1,12 @@
+diff --git a/django/db/models/fields/tuple_lookups.py b/django/db/models/fields/tuple_lookups.py
+--- a/django/db/models/fields/tuple_lookups.py
++++ b/django/db/models/fields/tuple_lookups.py
+@@ -367,6 +367,8 @@
+             lookups = [Exact(col, val) for col, val in zip(lhs, vals)]
+             root.children.append(WhereNode(lookups, connector=AND))
+ 
++        if not root.children:
++            raise EmptyResultSet
+         return root.as_sql(compiler, connection)
+ 
+ 

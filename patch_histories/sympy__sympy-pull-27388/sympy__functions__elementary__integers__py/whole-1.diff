@@ -1,0 +1,43 @@
+diff --git a/sympy/functions/elementary/integers.py b/sympy/functions/elementary/integers.py
+--- a/sympy/functions/elementary/integers.py
++++ b/sympy/functions/elementary/integers.py
+@@ -219,7 +219,7 @@ def __ge__(self, other):
+                 return self.args[0] >= other
+             if other.is_number and other.is_real:
+                 return self.args[0] >= ceiling(other)
+-        if self.args[0] == other and other.is_real:
++        if self.args[0] == other and other.is_real and other.is_noninteger:
+             return S.false
+         if other is S.NegativeInfinity and self.is_finite:
+             return S.true
+@@ -247,8 +247,8 @@ def __lt__(self, other):
+                 return self.args[0] < other
+             if other.is_number and other.is_real:
+                 return self.args[0] < ceiling(other)
+-        if self.args[0] == other and other.is_real:
+-            return S.false
++        if self.args[0] == other and other.is_real and other.is_noninteger:
++            return S.true
+         if other is S.Infinity and self.is_finite:
+             return S.true
+ 
+@@ -387,8 +387,8 @@ def __gt__(self, other):
+                 return self.args[0] > other
+             if other.is_number and other.is_real:
+                 return self.args[0] > floor(other)
+-        if self.args[0] == other and other.is_real:
+-            return S.false
++        if self.args[0] == other and other.is_real and other.is_noninteger:
++            return S.true
+         if other is S.NegativeInfinity and self.is_finite:
+             return S.true
+ 
+@@ -415,7 +415,7 @@ def __le__(self, other):
+                 return self.args[0] <= other
+             if other.is_number and other.is_real:
+                 return self.args[0] <= floor(other)
+-        if self.args[0] == other and other.is_real:
++        if self.args[0] == other and other.is_real and other.is_noninteger:
+             return S.false
+         if other is S.Infinity and self.is_finite:
+             return S.true

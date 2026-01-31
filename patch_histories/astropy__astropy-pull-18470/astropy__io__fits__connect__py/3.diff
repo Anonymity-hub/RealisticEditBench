@@ -1,0 +1,12 @@
+diff --git a/astropy/io/fits/connect.py b/astropy/io/fits/connect.py
+--- a/astropy/io/fits/connect.py
++++ b/astropy/io/fits/connect.py
+@@ -450,7 +450,7 @@ def write_table_fits(input, output, overwrite=False, append=False):
+     # Encode any mixin columns into standard Columns.
+     input = _encode_mixins(input)
+
+-    table_hdu = table_to_hdu(input, character_as_bytes=True)
++    table_hdu = table_to_hdu(input, character_as_bytes=True, name=name)
+
+     # Check if output file already exists
+     if isinstance(output, (str, os.PathLike)) and os.path.exists(output):

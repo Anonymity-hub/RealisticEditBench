@@ -1,0 +1,28 @@
+diff --git a/sklearn/linear_model/_glm/_newton_solver.py b/sklearn/linear_model/_glm/_newton_solver.py
+--- a/sklearn/linear_model/_glm/_newton_solver.py
++++ b/sklearn/linear_model/_glm/_newton_solver.py
+@@ -178,21 +178,22 @@ def fallback_lbfgs_solve(self, X, y, sample_weight):
+             - self.coef
+             - self.converged
+         """
++        max_iter = self.max_iter - self.iteration
+         opt_res = scipy.optimize.minimize(
+             self.linear_loss.loss_gradient,
+             self.coef,
+             method="L-BFGS-B",
+             jac=True,
+             options={
+-                "maxiter": self.max_iter - self.iteration,
++                "maxiter": max_iter,
+                 "maxls": 50,  # default is 20
+                 "iprint": self.verbose - 1,
+                 "gtol": self.tol,
+                 "ftol": 64 * np.finfo(np.float64).eps,
+             },
+             args=(X, y, sample_weight, self.l2_reg_strength, self.n_threads),
+         )
+-        self.iteration += _check_optimize_result("lbfgs", opt_res)
++        self.iteration += _check_optimize_result("lbfgs", opt_res, max_iter=max_iter)
+         self.coef = opt_res.x
+         self.converged = opt_res.status == 0
+ 

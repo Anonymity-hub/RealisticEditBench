@@ -1,0 +1,23 @@
+diff --git a/xarray/core/duck_array_ops.py b/xarray/core/duck_array_ops.py
+--- a/xarray/core/duck_array_ops.py
++++ b/xarray/core/duck_array_ops.py
+@@ -28,6 +28,7 @@
+ from xarray.compat import dask_array_compat, dask_array_ops
+ from xarray.compat.array_api_compat import get_array_namespace
+ from xarray.core import dtypes, nputils
++from xarray.core.extension_array import PandasExtensionArray
+ from xarray.core.options import OPTIONS
+ from xarray.core.utils import is_duck_array, is_duck_dask_array, module_available
+ from xarray.namedarray.parallelcompat import get_chunked_array_type
+@@ -278,7 +279,10 @@
+         ):
+             return [
+                 x
+-                if
++                if not isna(x)
++                else PandasExtensionArray(
++                    type(non_nans[0].array)._from_sequence([x], dtype=non_nans[0].dtype)
++                )
+                 for x in scalars_or_arrays
+             ]
+         raise ValueError(

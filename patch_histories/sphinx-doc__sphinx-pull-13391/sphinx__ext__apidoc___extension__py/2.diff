@@ -1,0 +1,11 @@
+diff --git a/sphinx/ext/apidoc/_extension.py b/sphinx/ext/apidoc/_extension.py
+--- a/sphinx/ext/apidoc/_extension.py
++++ b/sphinx/ext/apidoc/_extension.py
+@@ -225,6 +225,7 @@
+         no_headings=bool_options['no_headings'],
+         module_first=bool_options['module_first'],
+         implicit_namespaces=bool_options['implicit_namespaces'],
++        automodule_options=automodule_options,
+     )
+ 
+ 

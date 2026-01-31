@@ -1,0 +1,12 @@
+diff --git a/astropy/visualization/stretch.py b/astropy/visualization/stretch.py
+--- a/astropy/visualization/stretch.py
++++ b/astropy/visualization/stretch.py
+@@ -121,6 +121,8 @@ def __call__(self, values, clip=True, out=None):
+             np.multiply(values, self.slope, out=values)
+         if self.intercept != 0:
+             np.add(values, self.intercept, out=values)
++
++        if
+         return values
+ 
+     @property

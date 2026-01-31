@@ -1,0 +1,92 @@
+diff --git a/sympy/physics/control/lti.py b/sympy/physics/control/lti.py
+--- a/sympy/physics/control/lti.py
++++ b/sympy/physics/control/lti.py
+@@ -5098,6 +5098,67 @@
+         T = Matrix.hstack(obs_subsp, unobs_subsp)
+         return self.apply_similarity_transform(T)
+ 
++    def to_controllable_form(self):
++        r"""
++        Returns an equivalent state space model decomposed in controllable and
++        uncontrollable parts.
++        The returned system is algebraically similar to the original but with
++        the A and B matrices in block triangular form showing the controllable
++        and uncontrollable subsystems.
++
++        .. math::
++            \begin{bmatrix}
++            A_{R} & A_{R\bar R}\\0  & A_{\bar R}
++            \end{bmatrix}
++
++        .. math::
++            \begin{bmatrix}
++            B_{R} \\ 0
++            \end{bmatrix}
++
++        .. math::
++            \begin{bmatrix}
++            C_{R} & C_{\bar R}
++            \end{bmatrix}
++
++        Examples
++        ========
++
++        >>> from sympy import Matrix
++        >>> from sympy.physics.control import StateSpace
++        >>> A = Matrix([[1, 0, 1], [0, 0, 0],[0, 0, -2]])
++        >>> B = Matrix([1, 1, 0])
++        >>> C = Matrix([1, 1, 0]).T
++        >>> ss = StateSpace(A, B, C)
++        >>> ss = ss.to_controllable_form()
++        >>> ss.A
++        Matrix([
++        [0, 0,  0],
++        [1, 1,  1],
++        [0, 0, -2]])
++        >>> ss.B
++        Matrix([
++        [1],
++        [0],
++        [0]])
++        >>> ss.C
++        Matrix([[2, 1, 0]])
++
++        """
++        contr_subsp = Matrix.hstack(*self.controllable_subspace())
++        uncontr_subsp = Matrix.hstack(*self.uncontrollable_subspace())
++
++        if uncontr_subsp.shape[1] == 0:
++            # fully controllable system
++            return self
++
++        if contr_subsp.shape[1] == 0:
++            # fully uncontrollable system
++            return self
++
++        T = Matrix.hstack(contr_subsp, uncontr_subsp)
++        return self.apply_similarity_transform(T)
++
+     def observability_matrix(self):
+         """
+         Returns the observability matrix of the state space model:
+@@ -5213,6 +5274,20 @@
+         return self._calc_orthogonal_complement(M, self._A.shape[0])
+ 
+     def is_observable(self):
++        """
++        Returns conditions for the state space model to be observable.
++
++        Examples
++        ========
++
++        >>> from sympy import Matrix
++        >>> from sympy.physics.control import StateSpace
++        >>> A1 = Matrix([[-1.5, -2], [1, 0]])
++        >>> B1 = Matrix([0.5, 0])
++        >>> C1 = Matrix([[0, 1]])
++        >>> D1 = Matrix([1])
++        >>> ss1 = StateSpace(A1, B1, C1, D1)
++        >>> ss1.is_observable()
+         True
+ 
+         """

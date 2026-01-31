@@ -1,0 +1,13 @@
+diff --git a/pylint/checkers/typecheck.py b/pylint/checkers/typecheck.py
+--- a/pylint/checkers/typecheck.py
++++ b/pylint/checkers/typecheck.py
+@@ -192,6 +192,9 @@
+         name_len = len(name)
+
+         min_distance = abs(attr_len - name_len)
++        if min_distance > distance_threshold:
++            continue
++
+         distance = _string_distance(attrname or "", name)
+         if distance <= distance_threshold:
+             possible_names.append((name, distance))

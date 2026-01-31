@@ -1,0 +1,12 @@
+diff --git a/xarray/coding/frequencies.py b/xarray/coding/frequencies.py
+--- a/xarray/coding/frequencies.py
++++ b/xarray/coding/frequencies.py
+@@ -92,7 +92,7 @@
+ 
+         if _is_numpy_subdtype(dtype, "datetime64"):
+             index = pd.DatetimeIndex(index.values)
+-        elif dtype == "timedelta64[ns]":
++        elif _is_numpy_subdtype(dtype, "timedelta64"):
+             index = pd.TimedeltaIndex(index.values)
+         else:
+             index = CFTimeIndex(index.values)

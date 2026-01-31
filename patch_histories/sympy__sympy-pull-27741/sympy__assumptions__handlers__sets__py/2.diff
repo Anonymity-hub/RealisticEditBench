@@ -1,0 +1,15 @@
+diff --git a/sympy/assumptions/handlers/sets.py b/sympy/assumptions/handlers/sets.py
+--- a/sympy/assumptions/handlers/sets.py
++++ b/sympy/assumptions/handlers/sets.py
+@@ -63,6 +63,11 @@
+     if expr.is_number:
+         return _IntegerPredicate_number(expr, assumptions)
+     return test_closed_group(expr, assumptions, Q.integer)
++
++@IntegerPredicate.register(Pow)
++def _(expr,assumptions):
++    if expr.is_number:
++        return _IntegerPredicate_number(expr, assumptions)
+ 
+ @IntegerPredicate.register(Mul)
+ def _(expr, assumptions):

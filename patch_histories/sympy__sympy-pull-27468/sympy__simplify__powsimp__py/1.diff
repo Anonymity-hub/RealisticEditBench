@@ -1,0 +1,12 @@
+diff --git a/sympy/simplify/powsimp.py b/sympy/simplify/powsimp.py
+--- a/sympy/simplify/powsimp.py
++++ b/sympy/simplify/powsimp.py
+@@ -188,6 +188,8 @@ def recurse(arg, **kwargs):
+             bpos = b.is_positive or b.is_polar
+             if bpos:
+                 binv = 1/b
++                #Special case for float 1
++                if b.is_Float and equal_valued(b, 1):
+                 if b != binv and binv in c_powers:
+                     if b.as_numer_denom()[0] is S.One:
+                         c_powers.pop(b)

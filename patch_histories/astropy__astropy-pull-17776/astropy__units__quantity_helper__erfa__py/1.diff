@@ -1,0 +1,14 @@
+diff --git a/astropy/units/quantity_helper/erfa.py b/astropy/units/quantity_helper/erfa.py
+--- a/astropy/units/quantity_helper/erfa.py
++++ b/astropy/units/quantity_helper/erfa.py
+@@ -22,8 +22,8 @@
+     "s2c", "s2p", "c2s", "p2s", "pm", "pdp", "pxp", "rxp", "cpv", "p2pv", "pv2p",
+     "pv2s", "pvdpv", "pvm", "pvmpv", "pvppv", "pvstar", "pvtob", "pvu", "pvup",
+     "pvxpv", "rxpv", "s2pv", "s2xpv", "starpv", "sxpv", "trxpv", "gd2gc", "gd2gce",
+-    "gc2gd", "gc2gde", "ldn", "aper", "apio", "atciq", "atciqn", "atciqz", "aticq",
+-    "atioq", "atoiq",
++    "gc2gd", "gc2gde", "ldn", "apco13", "aper", "apio",
++    "atciq", "atciqn", "atciqz", "aticq", "atioq", "atoiq",
+ )  # fmt: skip
+ 
+ 

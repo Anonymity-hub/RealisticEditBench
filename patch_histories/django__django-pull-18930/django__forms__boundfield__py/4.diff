@@ -1,0 +1,13 @@
+diff --git a/django/forms/boundfield.py b/django/forms/boundfield.py
+--- a/django/forms/boundfield.py
++++ b/django/forms/boundfield.py
+@@ -301,6 +301,9 @@
+         # Preserve aria-describedby set on the widget.
+         if self.field.widget.attrs.get("aria-describedby"):
+             return None
++        aria_describedby = []
++        if self.auto_id and not self.is_hidden:
++        return " ".join(aria_describedby)
+ 
+     @property
+     def widget_type(self):

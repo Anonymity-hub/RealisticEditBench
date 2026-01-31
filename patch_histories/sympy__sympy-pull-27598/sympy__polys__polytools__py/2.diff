@@ -1,0 +1,12 @@
+diff --git a/sympy/polys/polytools.py b/sympy/polys/polytools.py
+--- a/sympy/polys/polytools.py
++++ b/sympy/polys/polytools.py
+@@ -7778,7 +7778,7 @@
+         ([Poly(2*x, x, y, domain='ZZ'), Poly(1, x, y, domain='ZZ')], Poly(x**2 + y**2 + y, x, y, domain='ZZ'))
+ 
+         """
+-        poly = Poly._from_expr(expr, self._options)
++        if isinstance(expr, Poly):
+         polys = [poly] + list(self._basis)
+ 
+         opt = self._options

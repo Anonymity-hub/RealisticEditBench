@@ -1,0 +1,11 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1400,6 +1400,7 @@
+             with warnings.catch_warnings(
+                 action="ignore", category=RemovedInDjango70Warning
+             ):
++                clone = clone.annotate(**expressions)
+         clone._fields = fields
+         clone.query.set_values(fields)
+         return clone

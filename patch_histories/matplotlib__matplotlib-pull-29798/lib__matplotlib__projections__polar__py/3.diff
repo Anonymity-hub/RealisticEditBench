@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/projections/polar.py b/lib/matplotlib/projections/polar.py
+--- a/lib/matplotlib/projections/polar.py
++++ b/lib/matplotlib/projections/polar.py
+@@ -1295,6 +1295,7 @@
+         result = Axes.set_yticks(self, *args, **kwargs)
+         self.yaxis.set_major_locator(
+             self.RadialLocator(self.yaxis.get_major_locator(), self))
++        return result
+ 
+     def set_thetagrids(self, angles, labels=None, fmt=None, **kwargs):
+         """

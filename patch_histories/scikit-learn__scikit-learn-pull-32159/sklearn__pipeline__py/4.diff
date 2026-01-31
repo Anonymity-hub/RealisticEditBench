@@ -1,0 +1,68 @@
+diff --git a/sklearn/pipeline.py b/sklearn/pipeline.py
+--- a/sklearn/pipeline.py
++++ b/sklearn/pipeline.py
+@@ -1017,22 +1017,21 @@
+         y_log_proba : ndarray of shape (n_samples, n_classes)
+             Result of calling `predict_log_proba` on the final estimator.
+         """
+-        # TODO(1.8): Remove the context manager and use check_is_fitted(self)
+-        with _raise_or_warn_if_not_fitted(self):
+-            Xt = X
+-
+-            if not _routing_enabled():
+-                for _, name, transform in self._iter(with_final=False):
+-                    Xt = transform.transform(Xt)
+-                return self.steps[-1][1].predict_log_proba(Xt, **params)
+-
+-            # metadata routing enabled
+-            routed_params = process_routing(self, "predict_log_proba", **params)
++        check_is_fitted(self)
++        Xt = X
++
++        if not _routing_enabled():
+             for _, name, transform in self._iter(with_final=False):
+-                Xt = transform.transform(Xt, **routed_params[name].transform)
+-            return self.steps[-1][1].predict_log_proba(
+-                Xt, **routed_params[self.steps[-1][0]].predict_log_proba
+-            )
++                Xt = transform.transform(Xt)
++            return self.steps[-1][1].predict_log_proba(Xt, **params)
++
++        # metadata routing enabled
++        routed_params = process_routing(self, "predict_log_proba", **params)
++        for _, name, transform in self._iter(with_final=False):
++            Xt = transform.transform(Xt, **routed_params[name].transform)
++        return self.steps[-1][1].predict_log_proba(
++            Xt, **routed_params[self.steps[-1][0]].predict_log_proba
++        )
+ 
+     def _can_transform(self):
+         return self._final_estimator == "passthrough" or hasattr(
+@@ -1072,17 +1071,16 @@
+         Xt : ndarray of shape (n_samples, n_transformed_features)
+             Transformed data.
+         """
+-        # TODO(1.8): Remove the context manager and use check_is_fitted(self)
+-        with _raise_or_warn_if_not_fitted(self):
+-            _raise_for_params(params, self, "transform")
+-
+-            # not branching here since params is only available if
+-            # enable_metadata_routing=True
+-            routed_params = process_routing(self, "transform", **params)
+-            Xt = X
+-            for _, name, transform in self._iter():
+-                Xt = transform.transform(Xt, **routed_params[name].transform)
+-            return Xt
++        check_is_fitted(self)
++        _raise_for_params(params, self, "transform")
++
++        # not branching here since params is only available if
++        # enable_metadata_routing=True
++        routed_params = process_routing(self, "transform", **params)
++        Xt = X
++        for _, name, transform in self._iter():
++            Xt = transform.transform(Xt, **routed_params[name].transform)
++        return Xt
+ 
+     def _can_inverse_transform(self):
+         return all(hasattr(t, "inverse_transform") for _, _, t in self._iter())

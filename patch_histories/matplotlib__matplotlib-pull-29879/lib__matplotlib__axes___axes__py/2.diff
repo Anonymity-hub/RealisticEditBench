@@ -1,0 +1,26 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -3512,6 +3512,12 @@
+             The linewidth of the errorbar lines. If None, the linewidth of
+             the current style is used.
+ 
++        elinestyle : str or tuple, default: 'solid'
++           The linestyle of the errorbar lines.
++           Valid values for linestyles include {'-', '--', '-.',
++            ':', '', (offset, on-off-seq)}. See `.Line2D.set_linestyle` for a
++            complete description.
++
+         capsize : float, default: :rc:`errorbar.capsize`
+             The length of the error bar caps in points.
+ 
+@@ -3712,6 +3718,9 @@
+         for key in ('transform', 'alpha', 'zorder', 'rasterized'):
+             if key in kwargs:
+                 eb_lines_style[key] = kwargs[key]
++
++        if elinestyle is not None:
++            eb_lines_style['linestyle'] = elinestyle
+ 
+         # Make the style dict for caps (the "hats").
+         eb_cap_style = {**base_style, 'linestyle': 'none'}

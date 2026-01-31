@@ -1,0 +1,14 @@
+diff --git a/sympy/assumptions/handlers/ntheory.py b/sympy/assumptions/handlers/ntheory.py
+--- a/sympy/assumptions/handlers/ntheory.py
++++ b/sympy/assumptions/handlers/ntheory.py
+@@ -66,7 +66,9 @@
+         prime_base = ask(Q.prime(expr.base), assumptions)
+         if prime_base is False:
+             return False
+-        is_exp_one =
++        is_exp_one = ask(Q.eq(expr.exp, 1), assumptions)
++        if is_exp_one is False:
++            return False
+ 
+ @PrimePredicate.register(Integer)
+ def _(expr, assumptions):

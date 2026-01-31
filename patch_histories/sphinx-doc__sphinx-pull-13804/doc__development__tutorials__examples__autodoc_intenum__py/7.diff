@@ -1,0 +1,12 @@
+diff --git a/doc/development/tutorials/examples/autodoc_intenum.py b/doc/development/tutorials/examples/autodoc_intenum.py
+--- a/doc/development/tutorials/examples/autodoc_intenum.py
++++ b/doc/development/tutorials/examples/autodoc_intenum.py
+@@ -41,7 +41,7 @@ def add_content(
+         super().add_content(more_content)
+ 
+         source_name = self.get_sourcename()
+-        enum_object: IntEnum = self.object
++        enum_object: IntEnum = self.props._obj
+         use_hex = self.options.hex
+         self.add_line('', source_name)
+ 

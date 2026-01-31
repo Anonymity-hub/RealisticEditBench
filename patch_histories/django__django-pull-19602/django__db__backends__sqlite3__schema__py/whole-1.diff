@@ -1,0 +1,12 @@
+diff --git a/django/db/backends/sqlite3/schema.py b/django/db/backends/sqlite3/schema.py
+--- a/django/db/backends/sqlite3/schema.py
++++ b/django/db/backends/sqlite3/schema.py
+@@ -144,7 +144,7 @@ def is_self_referential(f):
+             # Choose a default and insert it into the copy map
+             if (
+                 not create_field.has_db_default()
+-                and not (create_field.many_to_many or create_field.generated)
++                and not create_field.generated
+                 and create_field.concrete
+             ):
+                 mapping[create_field.column] = self.prepare_default(

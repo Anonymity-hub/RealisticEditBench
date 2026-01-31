@@ -1,0 +1,33 @@
+diff --git a/xarray/coding/cftimeindex.py b/xarray/coding/cftimeindex.py
+--- a/xarray/coding/cftimeindex.py
++++ b/xarray/coding/cftimeindex.py
+@@ -42,9 +42,8 @@
+ from __future__ import annotations
+ 
+ import math
+-import warnings
+ from datetime import timedelta
+-from typing import TYPE_CHECKING, Any
++from typing import TYPE_CHECKING, Any, Optional
+ 
+ import numpy as np
+ import pandas as pd
+@@ -58,7 +57,8 @@
+ )
+ from xarray.core.common import _contains_cftime_datetimes
+ from xarray.core.options import OPTIONS
+-from xarray.core.utils import attempt_import, is_scalar
++from xarray.core.types import PDDatetimeUnitOptions
++from xarray.core.utils import attempt_import, emit_user_level_warning, is_scalar
+ 
+ if TYPE_CHECKING:
+     from xarray.coding.cftime_offsets import BaseCFTimeOffset
+@@ -238,6 +238,8 @@
+     --------
+     cftime_range
+     """
++
++    _data: np.ndarray
+ 
+     year = _field_accessor("year", "The year of the datetime")
+     month = _field_accessor("month", "The month of the datetime")

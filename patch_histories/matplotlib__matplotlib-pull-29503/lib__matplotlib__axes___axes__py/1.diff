@@ -1,0 +1,20 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -2574,10 +2574,12 @@ def bar(self, x, height, width=0.8, bottom=None, *, align="center",
+             height = self._convert_dx(height, y0, y, self.convert_yunits)
+             if yerr is not None:
+                 yerr = self._convert_dx(yerr, y0, y, self.convert_yunits)
+-
+-        x, height, width, y, linewidth, hatch = np.broadcast_arrays(
+-            # Make args iterable too.
+-            np.atleast_1d(x), height, width, y, linewidth, hatch)
++        try:
++            x, height, width, y, linewidth, hatch = np.broadcast_arrays(
++                # Make args iterable too.
++                np.atleast_1d(x), height, width, y, linewidth, hatch
++            )
++        except :
+ 
+         # Now that units have been converted, set the tick locations.
+         if orientation == 'vertical':

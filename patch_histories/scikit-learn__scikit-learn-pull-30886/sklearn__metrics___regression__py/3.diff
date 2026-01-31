@@ -1,0 +1,31 @@
+diff --git a/sklearn/metrics/_regression.py b/sklearn/metrics/_regression.py
+--- a/sklearn/metrics/_regression.py
++++ b/sklearn/metrics/_regression.py
+@@ -157,8 +157,7 @@
+ def _check_reg_targets_with_floating_dtype(
+     y_true, y_pred, sample_weight, multioutput, xp=None
+ ):
+-    """Ensures that y_true, y_pred, and sample_weight correspond to the same
+-    regression task.
++    """Ensures y_true, y_pred, and sample_weight correspond to same regression task.
+ 
+     Extends `_check_reg_targets` by automatically selecting a suitable floating-point
+     data type for inputs using `_find_matching_floating_dtype`.
+@@ -207,14 +206,9 @@
+     """
+     dtype_name = _find_matching_floating_dtype(y_true, y_pred, sample_weight, xp=xp)
+ 
+-    y_type, y_true, y_pred, multioutput = _check_reg_targets(
+-        y_true, y_pred, multioutput, dtype=dtype_name, xp=xp
+-    )
+-
+-    # _check_reg_targets does not accept sample_weight as input.
+-    # Convert sample_weight's data type separately to match dtype_name.
+-    if sample_weight is not None:
+-        sample_weight = xp.asarray(sample_weight, dtype=dtype_name)
++    y_type, y_true, y_pred, sample_weight, multioutput = _check_reg_targets(
++        y_true, y_pred, sample_weight, multioutput, dtype=dtype_name, xp=xp
++    )
+ 
+     return y_type, y_true, y_pred, sample_weight, multioutput
+ 

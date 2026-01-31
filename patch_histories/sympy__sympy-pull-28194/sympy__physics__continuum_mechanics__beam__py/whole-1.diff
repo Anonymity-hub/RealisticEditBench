@@ -1,0 +1,44 @@
+diff --git a/sympy/physics/continuum_mechanics/beam.py b/sympy/physics/continuum_mechanics/beam.py
+--- a/sympy/physics/continuum_mechanics/beam.py
++++ b/sympy/physics/continuum_mechanics/beam.py
+@@ -471,6 +471,13 @@ def join(self, beam, via="fixed"):
+         else:
+             new_second_moment = self.second_moment
+ 
++        if via== "fixed" or via=="hinge":
++            pass
++        else:
++            raise ValueError(
++                "Invalid joining method. Choose from 'fixed' or 'hinge'."
++            )
++
+         if via == "fixed":
+             new_beam = Beam(new_length, E, new_second_moment, x)
+             new_beam._joined_beam = True
+@@ -535,6 +542,13 @@ def apply_support(self, loc, type="fixed"):
+         """
+         loc = sympify(loc)
+ 
++        if type == "fixed" or type=="roller" or type=="pin":
++            pass
++        else:
++            raise ValueError(
++                "Invalid support type. Choose from 'pin', 'roller', or 'fixed'."
++            )
++
+         self._applied_supports.append((loc, type))
+         if type in ("pin", "roller"):
+             reaction_load = Symbol('R_'+str(loc))
+@@ -2887,6 +2901,12 @@ def apply_moment_load(self, value, start, order, dir="y"):
+             self._load_Singularity[0] += value*SingularityFunction(x, start, order)
+ 
+     def apply_support(self, loc, type="fixed"):
++        if type in ("pin", "roller", "fixed"):
++            pass
++        else:
++            raise ValueError(
++                "Invalid support type. Choose from 'pin', 'roller', or 'fixed'."
++            )
+         if type in ("pin", "roller"):
+             reaction_load = Symbol('R_'+str(loc))
+             self._reaction_loads[reaction_load] = reaction_load

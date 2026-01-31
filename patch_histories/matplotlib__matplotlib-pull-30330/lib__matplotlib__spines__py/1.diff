@@ -1,0 +1,16 @@
+diff --git a/lib/matplotlib/spines.py b/lib/matplotlib/spines.py
+--- a/lib/matplotlib/spines.py
++++ b/lib/matplotlib/spines.py
+@@ -232,6 +232,12 @@ def _clear(self):
+         """
+         self._position = None  # clear position
+
++    def _get_bounds_or_viewLim(self):
++        """
++        Get the bounds of the spine.
++        If self._bounds is None, return self.axes.viewLim.intervalx
++        or self.axes.viewLim.intervaly based on self.spine_type
++        """
+     def _adjust_location(self):
+         """Automatically set spine bounds to the view interval."""
+

@@ -1,0 +1,16 @@
+diff --git a/sklearn/decomposition/_dict_learning.py b/sklearn/decomposition/_dict_learning.py
+--- a/sklearn/decomposition/_dict_learning.py
++++ b/sklearn/decomposition/_dict_learning.py
+@@ -1156,6 +1156,12 @@
+                 "number of components in the dictionary."
+                 f"Expected {expected_n_components}, got {code.shape[1]}."
+             )
++        if self.split_sign:
++            n_samples, n_features = code.shape
++            n_features //= 2
++            code = code[:, :n_features] - code[:, n_features:]
++
++        return code @ dictionary
+ 
+ class SparseCoder(_BaseSparseCoding, BaseEstimator):
+     """Sparse coding.

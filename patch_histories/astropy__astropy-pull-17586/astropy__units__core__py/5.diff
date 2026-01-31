@@ -1,0 +1,19 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -844,6 +844,7 @@
+                 return m
+             return CompositeUnit(1, [self, m], [1, 1], _error_check=False)
+ 
++        if isinstance(m, (bytes, str)):
+         # Cannot handle this as Unit, re-try as Quantity.
+         try:
+             from .quantity import Quantity
+@@ -854,6 +855,7 @@
+ 
+     def __rmul__(self, m):
+         if isinstance(m, (bytes, str)):
++            self._warn_about_operation_with_deprecated_type("products", m)
+             return Unit(m) * self
+ 
+         # Cannot handle this as Unit.  Here, m cannot be a Quantity,

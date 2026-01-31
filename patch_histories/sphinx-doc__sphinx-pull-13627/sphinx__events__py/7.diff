@@ -1,0 +1,21 @@
+diff --git a/sphinx/events.py b/sphinx/events.py
+--- a/sphinx/events.py
++++ b/sphinx/events.py
+@@ -410,15 +410,14 @@
+         listeners = sorted(self.listeners[name], key=attrgetter('priority'))
+         for listener in listeners:
+             try:
+-                results.append(listener.handler(self.app, *args))
++                results.append(listener.handler(self._app, *args))
+             except allowed_exceptions:
+                 # pass through the errors specified as *allowed_exceptions*
+                 raise
+             except SphinxError:
+                 raise
+             except Exception as exc:
+-                if self.app.pdb:
+-                    # Just pass through the error, so that it can be debugged.
++                if self._reraise_errors:
+                     raise
+                 modname = safe_getattr(listener.handler, '__module__', None)
+                 raise ExtensionError(

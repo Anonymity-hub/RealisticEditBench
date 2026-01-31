@@ -1,0 +1,12 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -1257,7 +1257,7 @@ def pull_out_u_rl(integrand: Expr) -> tuple[Expr, Expr] | None:
+         return pull_out_u_rl
+ 
+     liate_rules = [pull_out_u(log), pull_out_u(*inverse_trig_functions),
+-                   pull_out_algebraic, pull_out_u(sin, cos),
++                   pull_out_u(, pull_out_algebraic, pull_out_u(sin, cos),
+                    pull_out_u(exp)]
+ 
+ 

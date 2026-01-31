@@ -1,0 +1,17 @@
+diff --git a/lib/matplotlib/container.py b/lib/matplotlib/container.py
+--- a/lib/matplotlib/container.py
++++ b/lib/matplotlib/container.py
+@@ -73,6 +73,13 @@ def __init__(self, patches, errorbar=None, *, datavalues=None,
+         self.orientation = orientation
+         super().__init__(patches, **kwargs)
+ 
++    @property
++    def bottoms(self):
++        """
++        Return the values at the lower end of the bars.
++
++        .. versionadded:: 3.11
++        """
+ 
+ class ErrorbarContainer(Container):
+     """

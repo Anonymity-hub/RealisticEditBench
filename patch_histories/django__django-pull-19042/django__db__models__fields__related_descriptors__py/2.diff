@@ -1,0 +1,12 @@
+diff --git a/django/db/models/fields/related_descriptors.py b/django/db/models/fields/related_descriptors.py
+--- a/django/db/models/fields/related_descriptors.py
++++ b/django/db/models/fields/related_descriptors.py
+@@ -1120,7 +1120,7 @@
+             queryset._add_hints(instance=instances[0])
+             queryset = queryset.using(queryset._db or self._db)
+             queryset = _filter_prefetch_queryset(
+-                queryset._next_is_sticky(), self.query_field_name, instances
++                queryset, self.query_field_name, instances
+             )
+ 
+             # M2M: need to annotate the query in order to get the primary model

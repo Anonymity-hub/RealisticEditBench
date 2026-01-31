@@ -1,0 +1,36 @@
+diff --git a/xarray/backends/pydap_.py b/xarray/backends/pydap_.py
+--- a/xarray/backends/pydap_.py
++++ b/xarray/backends/pydap_.py
+@@ -194,7 +194,7 @@
+     This backend is selected by default for urls.
+ 
+     For more information about the underlying library, visit:
+-    https://www.pydap.org
++    https://pydap.github.io/pydap/en/intro.html
+ 
+     See Also
+     --------
+@@ -221,6 +221,7 @@
+         drop_variables: str | Iterable[str] | None = None,
+         use_cftime=None,
+         decode_timedelta=None,
++        group=None,
+         application=None,
+         session=None,
+         output_grid=None,
+@@ -230,6 +231,7 @@
+     ) -> Dataset:
+         store = PydapDataStore.open(
+             url=filename_or_obj,
++            group=group,
+             application=application,
+             session=session,
+             output_grid=output_grid,
+@@ -237,7 +241,6 @@
+             verify=verify,
+             user_charset=user_charset,
+         )
+-
+         store_entrypoint = StoreBackendEntrypoint()
+         with close_on_error(store):
+             ds = store_entrypoint.open_dataset(

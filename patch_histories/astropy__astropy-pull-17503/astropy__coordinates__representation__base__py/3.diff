@@ -1,0 +1,66 @@
+diff --git a/astropy/coordinates/representation/base.py b/astropy/coordinates/representation/base.py
+--- a/astropy/coordinates/representation/base.py
++++ b/astropy/coordinates/representation/base.py
+@@ -657,6 +657,8 @@
+     _differentials = {}
+ 
+     def __init_subclass__(cls, **kwargs):
++        super().__init_subclass__(**kwargs)  # sets `cls.name`
++
+         # Register representation name (except for bases on which other
+         # representations are built, but which cannot themselves be used).
+         if cls.__name__.startswith("Base"):
+@@ -667,7 +669,7 @@
+                 'Representations must have an "attr_classes" class attribute.'
+             )
+ 
+-        repr_name = cls.get_name()
++        repr_name = cls.name
+         # first time a duplicate is added
+         # remove first entry and add both using their qualnames
+         if repr_name in REPRESENTATION_CLASSES:
+@@ -717,8 +719,6 @@
+                     ),
+                 )
+ 
+-        super().__init_subclass__(**kwargs)
+-
+     def __init__(self, *args, differentials=None, **kwargs):
+         # Handle any differentials passed in.
+         super().__init__(*args, **kwargs)
+@@ -815,7 +815,7 @@
+ 
+     @classproperty
+     def _compatible_differentials(cls):
+-        return [DIFFERENTIAL_CLASSES[cls.get_name()]]
++        return [DIFFERENTIAL_CLASSES[cls.name]]
+ 
+     @property
+     def differentials(self):
+@@ -1337,6 +1337,8 @@
+         For these, the components are those of the base representation prefixed
+         by 'd_', and the class is `~astropy.units.Quantity`.
+         """
++        super().__init_subclass__(**kwargs)  # sets `cls.name`
++
+         # Don't do anything for base helper classes.
+         if cls.__name__ in (
+             "BaseDifferential",
+@@ -1356,7 +1358,7 @@
+             base_attr_classes = cls.base_representation.attr_classes
+             cls.attr_classes = {"d_" + c: u.Quantity for c in base_attr_classes}
+ 
+-        repr_name = cls.get_name()
++        repr_name = cls.name
+         if repr_name in DIFFERENTIAL_CLASSES:
+             raise ValueError(f"Differential class {repr_name} already defined")
+ 
+@@ -1375,8 +1377,6 @@
+                     ),
+                 )
+ 
+-        super().__init_subclass__(**kwargs)
+-
+     @classmethod
+     def _check_base(cls, base):
+         if cls not in base._compatible_differentials:

@@ -1,0 +1,29 @@
+diff --git a/sklearn/utils/validation.py b/sklearn/utils/validation.py
+--- a/sklearn/utils/validation.py
++++ b/sklearn/utils/validation.py
+@@ -2134,7 +2134,13 @@ def _check_psd_eigenvalues(lambdas, enable_warnings=False):
+ 
+ 
+ def _check_sample_weight(
+-    sample_weight, X, *, dtype=None, ensure_non_negative=False, copy=False
++    sample_weight,
++    X,
++    *,
++    dtype=None,
++    force_float_dtype=True,
++    ensure_non_negative=False,
++    copy=False,
+ ):
+     """Validate sample weights.
+ 
+@@ -2162,6 +2168,10 @@ def _check_sample_weight(
+         If `dtype` is not `{np.float32, np.float64, None}`, then output will
+         be `np.float64`.
+ 
++    force_float_dtype : bool, default=True
++        Whether `X` should be forced to be float dtype, when `dtype` is a non-float
++        dtype or None.
++
+     ensure_non_negative : bool, default=False,
+         Whether or not the weights are expected to be non-negative.
+ 

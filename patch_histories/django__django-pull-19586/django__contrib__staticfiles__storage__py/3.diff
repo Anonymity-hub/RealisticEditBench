@@ -1,0 +1,12 @@
+diff --git a/django/contrib/staticfiles/storage.py b/django/contrib/staticfiles/storage.py
+--- a/django/contrib/staticfiles/storage.py
++++ b/django/contrib/staticfiles/storage.py
+@@ -501,7 +501,7 @@
+             None, ContentFile(json.dumps(sorted_hashed_files).encode())
+         )
+         payload = {
+-            "paths": self.hashed_files,
++            "paths": dict(sorted_hashed_files),
+             "version": self.manifest_version,
+             "hash": self.manifest_hash,
+         }

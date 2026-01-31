@@ -1,0 +1,12 @@
+diff --git a/sympy/assumptions/handlers/calculus.py b/sympy/assumptions/handlers/calculus.py
+--- a/sympy/assumptions/handlers/calculus.py
++++ b/sympy/assumptions/handlers/calculus.py
+@@ -167,6 +167,8 @@
+             if result is not False:
+                 result = None
+         else:
++            if possible_zero:
++                return None
+             result = False
+     return result
+ 

@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py
+--- a/lib/matplotlib/pyplot.py
++++ b/lib/matplotlib/pyplot.py
+@@ -1251,7 +1251,7 @@
+ 
+ 
+ @_copy_docstring_and_deprecators(Figure.savefig)
+-def savefig(*args, **kwargs) -> None:
++def savefig(fname: str | os.PathLike | IO, **kwargs) -> None:
+     fig = gcf()
+     # savefig default implementation has no return, so mypy is unhappy
+     # presumably this is here because subclasses can return?

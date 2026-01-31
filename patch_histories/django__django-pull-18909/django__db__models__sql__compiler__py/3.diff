@@ -1,0 +1,18 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1839,6 +1839,14 @@
+                     fields.remove(field)
+                     continue
+ 
++                if supports_default_keyword_in_bulk_insert:
++                    value_cols.append(field_values)
++                    continue
++
++                # If the field cannot be excluded from the INSERT for the
++                # reasons listed above and the backend doesn't support the
++                # DEFAULT keyword each values must be expanded into their
++                # underlying expressions.
+         else:
+             # An empty object.
+             value_rows = [

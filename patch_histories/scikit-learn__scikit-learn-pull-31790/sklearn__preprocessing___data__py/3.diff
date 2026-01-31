@@ -1,0 +1,15 @@
+diff --git a/sklearn/preprocessing/_data.py b/sklearn/preprocessing/_data.py
+--- a/sklearn/preprocessing/_data.py
++++ b/sklearn/preprocessing/_data.py
+@@ -1365,8 +1365,11 @@
+ 
+         if sparse.issparse(X):
+             inplace_column_scale(X, 1.0 / self.scale_)
++            if self.clip:
++                np.clip(X.data, -1.0, 1.0, out=X.data)
+         else:
+             X /= self.scale_
++            if self.clip:
+         return X
+ 
+     def inverse_transform(self, X):

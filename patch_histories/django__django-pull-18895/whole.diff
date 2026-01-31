@@ -1,0 +1,74 @@
+diff --git a/django/db/backends/base/operations.py b/django/db/backends/base/operations.py
+--- a/django/db/backends/base/operations.py
++++ b/django/db/backends/base/operations.py
+@@ -8,7 +8,6 @@
+ 
+ from django.conf import settings
+ from django.db import NotSupportedError, transaction
+-from django.db.backends import utils
+ from django.db.models.expressions import Col
+ from django.utils import timezone
+ from django.utils.deprecation import RemovedInDjango60Warning
+@@ -586,7 +585,7 @@ def adapt_decimalfield_value(self, value, max_digits=None, decimal_places=None):
+         Transform a decimal.Decimal value to an object compatible with what is
+         expected by the backend driver for decimal (numeric) columns.
+         """
+-        return utils.format_number(value, max_digits, decimal_places)
++        return value
+ 
+     def adapt_ipaddressfield_value(self, value):
+         """
+diff --git a/django/db/backends/mysql/operations.py b/django/db/backends/mysql/operations.py
+--- a/django/db/backends/mysql/operations.py
++++ b/django/db/backends/mysql/operations.py
+@@ -166,9 +166,6 @@ def force_no_ordering(self):
+         """
+         return [(None, ("NULL", [], False))]
+ 
+-    def adapt_decimalfield_value(self, value, max_digits=None, decimal_places=None):
+-        return value
+-
+     def last_executed_query(self, cursor, sql, params):
+         # With MySQLdb, cursor objects have an (undocumented) "_executed"
+         # attribute where the exact query sent to the database is saved.
+diff --git a/django/db/backends/oracle/operations.py b/django/db/backends/oracle/operations.py
+--- a/django/db/backends/oracle/operations.py
++++ b/django/db/backends/oracle/operations.py
+@@ -629,9 +629,6 @@ def adapt_timefield_value(self, value):
+             1900, 1, 1, value.hour, value.minute, value.second, value.microsecond
+         )
+ 
+-    def adapt_decimalfield_value(self, value, max_digits=None, decimal_places=None):
+-        return value
+-
+     def combine_expression(self, connector, sub_expressions):
+         lhs, rhs = sub_expressions
+         if connector == "%%":
+diff --git a/django/db/backends/postgresql/operations.py b/django/db/backends/postgresql/operations.py
+--- a/django/db/backends/postgresql/operations.py
++++ b/django/db/backends/postgresql/operations.py
+@@ -346,9 +346,6 @@ def adapt_datetimefield_value(self, value):
+     def adapt_timefield_value(self, value):
+         return value
+ 
+-    def adapt_decimalfield_value(self, value, max_digits=None, decimal_places=None):
+-        return value
+-
+     def adapt_ipaddressfield_value(self, value):
+         if value:
+             return Inet(value)
+diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py
+--- a/django/db/models/fields/__init__.py
++++ b/django/db/models/fields/__init__.py
+@@ -1828,9 +1828,8 @@ def to_python(self, value):
+             )
+         return decimal_value
+ 
+-    def get_db_prep_save(self, value, connection):
+-        if hasattr(value, "as_sql"):
+-            return value
++    def get_db_prep_value(self, value, connection, prepared=False):
++        value = super().get_db_prep_value(value, connection, prepared)
+         return connection.ops.adapt_decimalfield_value(
+             self.to_python(value), self.max_digits, self.decimal_places
+         )

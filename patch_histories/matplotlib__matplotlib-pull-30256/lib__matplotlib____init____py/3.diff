@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py
+--- a/lib/matplotlib/__init__.py
++++ b/lib/matplotlib/__init__.py
+@@ -406,7 +406,9 @@
+                 output = _cpe.output
+             else:
+                 raise ExecutableNotFoundError(str(_cpe)) from _cpe
+-        except
++        except subprocess.TimeoutExpired as _te:
++            msg = f"Timed out running {cbook._pformat_subprocess(args)}"
++            raise ExecutableNotFoundError(msg) from _te
+         except OSError as _ose:
+             raise ExecutableNotFoundError(str(_ose)) from _ose
+         match = re.search(regex, output)

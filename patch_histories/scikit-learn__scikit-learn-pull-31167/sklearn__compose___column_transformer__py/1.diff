@@ -1,0 +1,12 @@
+diff --git a/sklearn/compose/_column_transformer.py b/sklearn/compose/_column_transformer.py
+--- a/sklearn/compose/_column_transformer.py
++++ b/sklearn/compose/_column_transformer.py
+@@ -578,8 +578,6 @@ def _get_remainder_cols_dtype(self):
+ 
+     def _get_remainder_cols(self, indices):
+         dtype = self._get_remainder_cols_dtype()
+-        if self.force_int_remainder_cols and dtype != "int":
+-            return _RemainderColsList(indices, future_dtype=dtype)
+         if dtype == "str":
+             return list(self.feature_names_in_[indices])
+         if dtype == "bool":

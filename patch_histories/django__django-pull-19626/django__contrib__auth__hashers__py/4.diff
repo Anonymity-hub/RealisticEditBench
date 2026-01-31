@@ -1,0 +1,32 @@
+diff --git a/django/contrib/auth/hashers.py b/django/contrib/auth/hashers.py
+--- a/django/contrib/auth/hashers.py
++++ b/django/contrib/auth/hashers.py
+@@ -589,8 +589,8 @@
+         r = r or self.block_size
+         p = p or self.parallelism
+         hash_ = hashlib.scrypt(
+-            password.encode(),
+-            salt=salt.encode(),
++            password=force_bytes(password),
++            salt=force_bytes(salt),
+             n=n,
+             r=r,
+             p=p,
+@@ -598,7 +598,7 @@
+             dklen=64,
+         )
+         hash_ = base64.b64encode(hash_).decode("ascii").strip()
+-        return "%s$%d$%s$%d$%d$%s" % (self.algorithm, n, salt, r, p, hash_)
++        return "%s$%d$%s$%d$%d$%s" % (self.algorithm, n, force_str(salt), r, p, hash_)
+ 
+     def decode(self, encoded):
+         algorithm, work_factor, salt, block_size, parallelism, hash_ = encoded.split(
+@@ -659,6 +659,8 @@
+ 
+     def encode(self, password, salt):
+         self._check_encode_args(password, salt)
++        password = force_str(password)
++        salt = force_str(salt)
+         hash = hashlib.md5((salt + password).encode()).hexdigest()
+         return "%s$%s$%s" % (self.algorithm, salt, hash)
+ 

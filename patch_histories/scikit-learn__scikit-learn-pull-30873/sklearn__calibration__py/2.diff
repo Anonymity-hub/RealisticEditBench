@@ -1,0 +1,13 @@
+diff --git a/sklearn/calibration.py b/sklearn/calibration.py
+--- a/sklearn/calibration.py
++++ b/sklearn/calibration.py
+@@ -349,6 +349,9 @@
+             if sample_weight is not None:
+                 # Check that the sample_weight dtype is consistent with the predictions
+                 # to avoid unintentional upcasts.
++                sample_weight = _check_sample_weight(
++                    sample_weight, predictions, dtype=predictions.dtype
++                )
+ 
+             calibrated_classifier = _fit_calibrator(
+                 estimator,

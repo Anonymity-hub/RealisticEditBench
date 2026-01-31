@@ -1,0 +1,11 @@
+diff --git a/django/tasks/backends/dummy.py b/django/tasks/backends/dummy.py
+--- a/django/tasks/backends/dummy.py
++++ b/django/tasks/backends/dummy.py
+@@ -1,7 +1,5 @@
+ from copy import deepcopy
+-from functools import partial
+ 
+-from django.db import transaction
+ from django.tasks.base import TaskResult, TaskResultStatus
+ from django.tasks.exceptions import TaskResultDoesNotExist
+ from django.tasks.signals import task_enqueued

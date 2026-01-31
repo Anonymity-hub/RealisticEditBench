@@ -1,0 +1,16 @@
+diff --git a/django/core/mail/message.py b/django/core/mail/message.py
+--- a/django/core/mail/message.py
++++ b/django/core/mail/message.py
+@@ -391,7 +391,11 @@
+             # This duplicates logic from EmailMessage.attach() to properly
+             # handle EmailMessage.attachments not created through attach().
+             try:
+-                content =
++                content = content.decode()
++            except UnicodeDecodeError:
++                mimetype = DEFAULT_ATTACHMENT_MIME_TYPE
++                basetype, subtype = mimetype.split("/", 1)
++
+         if basetype == "text":
+             encoding = self.encoding or settings.DEFAULT_CHARSET
+             attachment = SafeMIMEText(content, subtype, encoding)

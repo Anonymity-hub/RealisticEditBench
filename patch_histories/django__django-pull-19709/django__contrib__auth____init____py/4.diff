@@ -1,0 +1,15 @@
+diff --git a/django/contrib/auth/__init__.py b/django/contrib/auth/__init__.py
+--- a/django/contrib/auth/__init__.py
++++ b/django/contrib/auth/__init__.py
+@@ -276,7 +276,10 @@
+     if hasattr(request, "auser"):
+         from django.contrib.auth.models import AnonymousUser
+ 
+-        request.user = AnonymousUser()
++        async def auser():
++            return AnonymousUser()
++
++        request.auser = auser
+ 
+ 
+ def get_user_model():

@@ -1,0 +1,22 @@
+diff --git a/lib/matplotlib/_api/__init__.py b/lib/matplotlib/_api/__init__.py
+--- a/lib/matplotlib/_api/__init__.py
++++ b/lib/matplotlib/_api/__init__.py
+@@ -174,12 +174,17 @@ def check_shape(shape, /, **kwargs):
+             )
+ 
+ 
+-def check_getitem(mapping, /, **kwargs):
++def check_getitem(mapping, /, _error_cls=ValueError, **kwargs):
+     """
+     *kwargs* must consist of a single *key, value* pair.  If *key* is in
+     *mapping*, return ``mapping[value]``; else, raise an appropriate
+     ValueError.
+ 
++    Parameters
++    ----------
++    _error_cls :
++        Class of error to raise.
++
+     Examples
+     --------
+     >>> _api.check_getitem({"foo": "bar"}, arg=arg)

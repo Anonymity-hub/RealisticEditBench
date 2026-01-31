@@ -1,0 +1,13 @@
+diff --git a/astropy/io/fits/file.py b/astropy/io/fits/file.py
+--- a/astropy/io/fits/file.py
++++ b/astropy/io/fits/file.py
+@@ -595,7 +595,8 @@
+             lzma_mode = "w" if is_ostream else "r"
+             self._file = lzma.LZMAFile(obj_or_name, mode=lzma_mode)
+             self.compression = "lzma"
+-        elif
++        elif (is_ostream and ext == ".Z") or magic.startswith(LZW_MAGIC):
++            # Handle LZW files
+         return self.compression is not None
+ 
+     def _open_fileobj(self, fileobj, mode, overwrite):

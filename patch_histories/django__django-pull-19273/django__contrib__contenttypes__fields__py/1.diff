@@ -1,0 +1,15 @@
+diff --git a/django/contrib/contenttypes/fields.py b/django/contrib/contenttypes/fields.py
+--- a/django/contrib/contenttypes/fields.py
++++ b/django/contrib/contenttypes/fields.py
+@@ -205,10 +205,7 @@ def gfk_key(obj):
+                 model = self.get_content_type(
+                     id=ct_id, using=obj._state.db
+                 ).model_class()
+-                return (
+-                    model._meta.pk.get_prep_value(getattr(obj, self.fk_field)),
+-                    model,
+-                )
++                return str(getattr(obj, self.fk_field)), model
+ 
+         return (
+             ret_val,

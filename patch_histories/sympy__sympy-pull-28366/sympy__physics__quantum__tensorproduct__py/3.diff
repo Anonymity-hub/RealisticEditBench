@@ -1,0 +1,12 @@
+diff --git a/sympy/physics/quantum/tensorproduct.py b/sympy/physics/quantum/tensorproduct.py
+--- a/sympy/physics/quantum/tensorproduct.py
++++ b/sympy/physics/quantum/tensorproduct.py
+@@ -371,3 +371,8 @@
+ @TensorProduct._kind_dispatcher.register(_BraKind, _BraKind)
+ def find_bra_kind(e1, e2):
+     return BraKind
++
++
++@TensorProduct._kind_dispatcher.register(_NumberKind, _BraKind)
++def find_number_bra_kind(e1, e2):
++    return BraKind

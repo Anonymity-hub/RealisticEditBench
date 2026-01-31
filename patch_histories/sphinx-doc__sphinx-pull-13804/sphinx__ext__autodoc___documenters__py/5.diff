@@ -1,0 +1,164 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -1189,9 +1189,11 @@
+             kwargs.setdefault('short_literals', True)
+ 
+         try:
+-            self._events.emit('autodoc-before-process-signature', self.object, False)
++            self._events.emit(
++                'autodoc-before-process-signature', self.props._obj, False
++            )
+             sig = inspect.signature(
+-                self.object, type_aliases=self.config.autodoc_type_aliases
++                self.props._obj, type_aliases=self.config.autodoc_type_aliases
+             )
+             args = stringify_signature(sig, **kwargs)
+         except TypeError as exc:
+@@ -1217,8 +1219,8 @@
+         sourcename = self.get_sourcename()
+         super().add_directive_header(sig)
+ 
+-        is_coro = inspect.iscoroutinefunction(self.object)
+-        is_acoro = inspect.isasyncgenfunction(self.object)
++        is_coro = inspect.iscoroutinefunction(self.props._obj)
++        is_acoro = inspect.isasyncgenfunction(self.props._obj)
+         if is_coro or is_acoro:
+             self.add_line('   :async:', sourcename)
+ 
+@@ -1241,11 +1243,11 @@
+             sig = super().format_signature(**kwargs)
+             sigs.append(sig)
+ 
+-        if inspect.is_singledispatch_function(self.object):
++        if inspect.is_singledispatch_function(self.props._obj):
+             from sphinx.ext.autodoc._property_types import _FunctionDefProperties
+ 
+             # append signature of singledispatch'ed functions
+-            for typ, func in self.object.registry.items():
++            for typ, func in self.props._obj.registry.items():
+                 if typ is object:
+                     pass  # default implementation. skipped.
+                 else:
+@@ -1261,13 +1263,12 @@
+                             _obj___module__=None,
+                             properties=frozenset(),
+                         )
+-                        documenter.object = dispatchfunc
+                         sigs.append(documenter.format_signature())
+         if overloaded and self.analyzer is not None:
+             actual = inspect.signature(
+-                self.object, type_aliases=self.config.autodoc_type_aliases
++                self.props._obj, type_aliases=self.config.autodoc_type_aliases
+             )
+-            __globals__ = safe_getattr(self.object, '__globals__', {})
++            __globals__ = safe_getattr(self.props._obj, '__globals__', {})
+             for overload in self.analyzer.overloads[self.props.dotted_parts]:
+                 overload = self.merge_default_value(actual, overload)
+                 overload = evaluate_signature(
+@@ -1402,7 +1403,7 @@
+         )
+
+     def _get_signature(self) -> tuple[Any | None, str | None, Signature | None]:
+-        if isinstance(self.object, NewType | TypeVar):
++        if isinstance(self.props._obj, NewType | TypeVar):
+             # Suppress signature
+             return None, None, None
+
+@@ -1419,8 +1420,8 @@
+         # ValueError means that no signature could be found, so we keep going.
+ 
+         # First, we check if obj has a __signature__ attribute
+-        if hasattr(self.object, '__signature__'):
+-            object_sig = self.object.__signature__
++        if hasattr(self.props._obj, '__signature__'):
++            object_sig = self.props._obj.__signature__
+             if isinstance(object_sig, Signature):
+                 return None, None, object_sig
+             if sys.version_info[:2] in {(3, 12), (3, 13)} and callable(object_sig):
+@@ -1430,7 +1431,7 @@
+ 
+         # Next, let's see if it has an overloaded __call__ defined
+         # in its metaclass
+-        call = get_user_defined_function_or_method(type(self.object), '__call__')
++        call = get_user_defined_function_or_method(type(self.props._obj), '__call__')
+ 
+         if call is not None:
+             if f'{call.__module__}.{call.__qualname__}' in _METACLASS_CALL_BLACKLIST:
+@@ -1444,12 +1445,12 @@
+                     bound_method=True,
+                     type_aliases=self.config.autodoc_type_aliases,
+                 )
+-                return type(self.object), '__call__', sig
++                return type(self.props._obj), '__call__', sig
+             except ValueError:
+                 pass
+ 
+         # Now we check if the 'obj' class has a '__new__' method
+-        new = get_user_defined_function_or_method(self.object, '__new__')
++        new = get_user_defined_function_or_method(self.props._obj, '__new__')
+ 
+         if new is not None:
+             if f'{new.__module__}.{new.__qualname__}' in _CLASS_NEW_BLACKLIST:
+@@ -1463,12 +1464,12 @@
+                     bound_method=True,
+                     type_aliases=self.config.autodoc_type_aliases,
+                 )
+-                return self.object, '__new__', sig
++                return self.props._obj, '__new__', sig
+             except ValueError:
+                 pass
+ 
+         # Finally, we should have at least __init__ implemented
+-        init = get_user_defined_function_or_method(self.object, '__init__')
++        init = get_user_defined_function_or_method(self.props._obj, '__init__')
+         if init is not None:
+             self._events.emit('autodoc-before-process-signature', init, True)
+             try:
+@@ -1477,7 +1478,7 @@
+                     bound_method=True,
+                     type_aliases=self.config.autodoc_type_aliases,
+                 )
+-                return self.object, '__init__', sig
++                return self.props._obj, '__init__', sig
+             except ValueError:
+                 pass
+ 
+@@ -1485,10 +1486,10 @@
+         # handle it.
+         # We don't know the exact method that inspect.signature will read
+         # the signature from, so just pass the object itself to our hook.
+-        self._events.emit('autodoc-before-process-signature', self.object, False)
++        self._events.emit('autodoc-before-process-signature', self.props._obj, False)
+         try:
+             sig = inspect.signature(
+-                self.object,
++                self.props._obj,
+                 bound_method=False,
+                 type_aliases=self.config.autodoc_type_aliases,
+             )
+@@ -1592,10 +1593,12 @@
+         return []
+ 
+     def get_canonical_fullname(self) -> str | None:
+-        __modname__ = safe_getattr(self.object, '__module__', self.props.module_name)
+-        __qualname__ = safe_getattr(self.object, '__qualname__', None)
++        __modname__ = safe_getattr(
++            self.props._obj, '__module__', self.props.module_name
++        )
++        __qualname__ = safe_getattr(self.props._obj, '__qualname__', None)
+         if __qualname__ is None:
+-            __qualname__ = safe_getattr(self.object, '__name__', None)
++            __qualname__ = safe_getattr(self.props._obj, '__name__', None)
+         if __qualname__ and '<locals>' in __qualname__:
+             # No valid qualname found if the object is defined as locals
+             __qualname__ = None
+@@ -1612,7 +1615,7 @@
+             self.directivetype = 'attribute'
+         super().add_directive_header(sig)
+ 
+-        if isinstance(self.object, NewType | TypeVar):
++        if isinstance(self.props._obj, NewType | TypeVar):
+             return
+ 
+         if self.analyzer and self.props.dotted_parts in self.analyzer.finals:

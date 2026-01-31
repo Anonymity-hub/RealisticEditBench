@@ -1,0 +1,21 @@
+diff --git a/sphinx/util/logging.py b/sphinx/util/logging.py
+--- a/sphinx/util/logging.py
++++ b/sphinx/util/logging.py
+@@ -625,7 +625,7 @@
+     info_handler = NewLineStreamHandler(SafeEncodingWriter(status))
+     info_handler.addFilter(InfoFilter())
+     info_handler.addFilter(InfoLogRecordTranslator(app))
+-    info_handler.setLevel(VERBOSITY_MAP[app.verbosity])
++    info_handler.setLevel(log_level)
+     info_handler.setFormatter(ColorizeFormatter())
+ 
+     warning_handler = WarningStreamHandler(SafeEncodingWriter(warning))
+@@ -639,7 +639,7 @@
+ 
+     messagelog_handler = logging.StreamHandler(LastMessagesWriter(app, status))
+     messagelog_handler.addFilter(InfoFilter())
+-    messagelog_handler.setLevel(VERBOSITY_MAP[app.verbosity])
++    messagelog_handler.setLevel(log_level)
+ 
+     logger.addHandler(info_handler)
+     logger.addHandler(warning_handler)

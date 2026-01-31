@@ -1,0 +1,35 @@
+diff --git a/astropy/table/index.py b/astropy/table/index.py
+--- a/astropy/table/index.py
++++ b/astropy/table/index.py
+@@ -833,11 +833,6 @@
+         if len(self.indices) == 0:
+             raise ValueError("Can only use TableLoc for a table with indices")
+ 
+-        if isinstance(item, tuple):
+-            key, item = item
+-        else:
+-            key = self.table.primary_key
+-
+         index = self.indices[key]
+         if len(index.columns) > 1:
+             raise ValueError("Cannot use .loc on multi-column indices")
+@@ -852,12 +847,15 @@
+                 item = [item]
+             # item should be a list or ndarray of values
+             rows = []
+-            for key in item:
+-                p = index.find((key,))
++            for index_key in item:
++                p = index.find((index_key,))
+                 if len(p) == 0:
+-                    raise KeyError(f"No matches found for key {key}")
++                    raise KeyError(f"No matches found for key {index_key}")
+                 else:
+                     rows.extend(p)
++        return rows
++
++    def _get_row_idxs_as_list_or_int(self, item):
+         return rows
+ 
+     def __getitem__(self, item):
+ 

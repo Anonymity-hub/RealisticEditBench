@@ -1,0 +1,43 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -876,6 +876,7 @@
+             docstring_lines=(),
+             properties=frozenset(obj_properties),
+             _obj=obj,
++            _obj___module__=get_attr(obj, '__module__', None),
+         )
+     elif objtype == 'property':
+         if not inspect.isproperty(obj):
+@@ -895,6 +896,7 @@
+             docstring_lines=(),
+             properties=frozenset(obj_properties),
+             _obj=obj,
++            _obj___module__=get_attr(parent or obj, '__module__', None) or module_name,
+         )
+     elif objtype == 'data':
+         # Update __annotations__ to support type_comment and so on
+@@ -923,6 +925,7 @@
+             class_var=False,
+             instance_var=False,
+             _obj=obj,
++            _obj___module__=get_attr(parent or obj, '__module__', None) or module_name,
+         )
+     elif objtype == 'attribute':
+         if _is_slots_attribute(parent=parent, obj_path=parts):
+@@ -962,6 +965,7 @@
+             class_var=False,
+             instance_var=False,
+             _obj=obj,
++            _obj___module__=get_attr(obj, '__module__', None),
+         )
+     else:
+         props = _ItemProperties(
+@@ -970,6 +974,7 @@
+             parts=parts,
+             docstring_lines=(),
+             _obj=obj,
++            _obj___module__=get_attr(obj, '__module__', None),
+         )
+ 
+     return props, args, retann, module, parent

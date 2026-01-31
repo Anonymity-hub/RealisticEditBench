@@ -1,0 +1,27 @@
+diff --git a/sphinx/util/docutils.py b/sphinx/util/docutils.py
+--- a/sphinx/util/docutils.py
++++ b/sphinx/util/docutils.py
+@@ -15,7 +15,9 @@
+ from docutils.frontend import OptionParser
+ from docutils.io import FileOutput
+ from docutils.parsers.rst import Directive, directives, roles
++from docutils.readers import standalone
+ from docutils.statemachine import StateMachine
++from docutils.transforms.references import DanglingReferences
+ from docutils.utils import Reporter, unescape
+ 
+ from sphinx.errors import SphinxError
+@@ -69,6 +71,13 @@ def __call__(
+         ) -> tuple[RoleFunction | None, list[system_message]]: ...
+ 
+ 
++_READER_TRANSFORMS = [
++    transform
++    for transform in standalone.Reader().get_transforms()
++    if transform is not DanglingReferences
++]
++
++
+ additional_nodes: set[type[Element]] = set()
+ 
+ 

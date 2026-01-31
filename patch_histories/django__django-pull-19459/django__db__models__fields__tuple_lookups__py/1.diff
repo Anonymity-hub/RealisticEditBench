@@ -1,0 +1,12 @@
+diff --git a/django/db/models/fields/tuple_lookups.py b/django/db/models/fields/tuple_lookups.py
+--- a/django/db/models/fields/tuple_lookups.py
++++ b/django/db/models/fields/tuple_lookups.py
+@@ -129,6 +129,8 @@ def get_fallback_sql(self, compiler, connection):
+         )
+ 
+     def as_sql(self, compiler, connection):
++        if (
++            not
+         if not connection.features.supports_tuple_lookups:
+             return self.get_fallback_sql(compiler, connection)
+         return super().as_sql(compiler, connection)

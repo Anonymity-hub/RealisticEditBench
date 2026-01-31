@@ -1,0 +1,13 @@
+diff --git a/astropy/table/table.py b/astropy/table/table.py
+--- a/astropy/table/table.py
++++ b/astropy/table/table.py
+@@ -2781,7 +2781,8 @@
+         """
+         # If the table has been sliced then each index will have original=False
+         # indicating that the data are a sliced reference (not from the original table).
+-        sliced =
++        sliced = any(not index.original for index in self.indices)
++        if not sliced:
+ 
+         keep_mask = np.ones(len(self), dtype=bool)
+         keep_mask[row_specifier] = False

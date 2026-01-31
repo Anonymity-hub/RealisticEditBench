@@ -1,0 +1,13 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -1449,6 +1449,9 @@
+     c = Wild('c', exclude=[symbol])
+     # n = Wild('n', exclude=[symbol], properties=[lambda n: n > 0])
+     f = WildFunction('f')
++    guassian_pattern = exp(a * symbol**2 + b * symbol + c)
++    trigexp_over_x_pattern = f*exp(a * symbol)/symbol
++    trigexp_over_x_match = integrand.match(trigexp_over_x_pattern)
+         return
+ 
+     # Replace trig and hyperbolic functions with their exponential forms

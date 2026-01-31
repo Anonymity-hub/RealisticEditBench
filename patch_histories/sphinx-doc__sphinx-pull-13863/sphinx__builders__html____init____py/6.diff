@@ -1,0 +1,15 @@
+diff --git a/sphinx/builders/html/__init__.py b/sphinx/builders/html/__init__.py
+--- a/sphinx/builders/html/__init__.py
++++ b/sphinx/builders/html/__init__.py
+@@ -1059,9 +1059,8 @@
+                     # than the present one, because it contains no wildcard
+                     continue
+                 matched = pattern
+-                sidebars = pat_sidebars
+-
+-        ctx['sidebars'] = list(sidebars)
++                sidebars = tuple(pat_sidebars)
++        return sidebars
+ 
+     def add_sidebars(self, pagename: str, ctx: dict[str, Any]) -> None:
+         ctx['sidebars'] = list(self._get_sidebars(pagename))

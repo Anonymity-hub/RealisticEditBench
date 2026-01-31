@@ -1,0 +1,24 @@
+diff --git a/astropy/units/deprecated.py b/astropy/units/deprecated.py
+--- a/astropy/units/deprecated.py
++++ b/astropy/units/deprecated.py
+@@ -30,15 +30,17 @@
+ _add_prefixes(astrophys.jupiterRad, namespace=local_units, prefixes=True)
+ _add_prefixes(astrophys.earthRad, namespace=local_units, prefixes=True)
+ 
++__all__ = [
++    name for (name, member) in local_units.items() if isinstance(member, UnitBase)
++]
+ __all__ += ["enable"]
+ 
+ if __doc__ is not None:
+     # This generates a docstring for this module that describes all of the
+     # standard units defined here.
+-    __doc__ += generate_unit_summary(globals())
+-    __doc__ += generate_prefixonly_unit_summary(globals())
+
+
++def __getattr__(name):
+ def enable():
+     """
+     Enable deprecated units so they appear in results of
+

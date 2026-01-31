@@ -1,0 +1,25 @@
+diff --git a/sympy/physics/quantum/qapply.py b/sympy/physics/quantum/qapply.py
+--- a/sympy/physics/quantum/qapply.py
++++ b/sympy/physics/quantum/qapply.py
+@@ -111,6 +111,13 @@
+     elif isinstance(e, TensorProduct):
+         return TensorProduct(*[qapply(t, **options) for t in e.args])
+ 
++    # For a Sum, call qapply on its function.
++    elif isinstance(e, Sum):
++        result = Sum(qapply(e.function, **options), *e.limits)
++        if sum_doit:
++            result = result.doit()
++        return result
++
+     # For a Pow, call qapply on its base.
+     elif isinstance(e, Pow):
+         return qapply(e.base, **options)**e.exp
+@@ -138,6 +145,7 @@
+ def qapply_Mul(e, **options):
+ 
+     ip_doit = options.get('ip_doit', True)
++    sum_doit = options.get('sum_doit', False)
+ 
+     args = list(e.args)
+ 

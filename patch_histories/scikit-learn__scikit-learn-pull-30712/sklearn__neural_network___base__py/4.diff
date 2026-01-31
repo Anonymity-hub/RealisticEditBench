@@ -1,0 +1,13 @@
+diff --git a/sklearn/neural_network/_base.py b/sklearn/neural_network/_base.py
+--- a/sklearn/neural_network/_base.py
++++ b/sklearn/neural_network/_base.py
+@@ -211,6 +211,9 @@
+     # TODO: Decide what to do with the term `xlogy(y_true, y_true) - y_true`. For now,
+     # it is included. But the _loss module doesn't use it (for performance reasons) and
+     # only adds it as return of constant_to_optimal_zero (mainly for testing).
++    return np.average(
++        xlogy(y_true, y_true / y_pred) - y_true + y_pred, weights=sample_weight, axis=0
++    ).sum()
+ 
+ 
+ def log_loss(y_true, y_prob, sample_weight=None):

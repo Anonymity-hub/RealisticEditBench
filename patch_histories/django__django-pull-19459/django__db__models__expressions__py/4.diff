@@ -1,0 +1,16 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1804,7 +1804,11 @@
+                 self.output_field
+             except AttributeError:
+                 return resolved.query
+-            if self.output_field and
++            if self.output_field and self.output_field != resolved.query.output_field:
++                return ExpressionWrapper(resolved.query, output_field=self.output_field)
++            return resolved.query
++        return resolved
++
+     def copy(self):
+         clone = super().copy()
+         clone.query = clone.query.clone()

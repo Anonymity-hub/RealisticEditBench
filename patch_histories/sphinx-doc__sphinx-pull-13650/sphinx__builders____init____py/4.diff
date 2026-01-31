@@ -1,0 +1,21 @@
+diff --git a/sphinx/builders/__init__.py b/sphinx/builders/__init__.py
+--- a/sphinx/builders/__init__.py
++++ b/sphinx/builders/__init__.py
+@@ -269,7 +269,7 @@ def cat2relpath(cat: CatalogInfo, srcdir: Path = self.srcdir) -> str:
+             __('writing output... '),
+             'darkgreen',
+             len(catalogs),
+-            self._app.verbosity,
++            self.config.verbosity,
+             stringify_func=cat2relpath,
+         ):
+             catalog.write_mo(
+@@ -587,7 +587,7 @@ def _read_serial(self, docnames: list[str]) -> None:
+             __('reading sources... '),
+             'purple',
+             len(docnames),
+-            self._app.verbosity,
++            self.config.verbosity,
+         ):
+             # remove all inventory entries for that file
+             self.events.emit('env-purge-doc', self.env, docname)

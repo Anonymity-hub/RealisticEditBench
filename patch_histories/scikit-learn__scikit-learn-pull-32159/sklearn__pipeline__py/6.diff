@@ -1,0 +1,47 @@
+diff --git a/sklearn/pipeline.py b/sklearn/pipeline.py
+--- a/sklearn/pipeline.py
++++ b/sklearn/pipeline.py
+@@ -3,9 +3,7 @@
+ # Authors: The scikit-learn developers
+ # SPDX-License-Identifier: BSD-3-Clause
+ 
+-import warnings
+ from collections import Counter, defaultdict
+-from contextlib import contextmanager
+ from copy import deepcopy
+ from itertools import chain, islice
+ 
+@@ -35,33 +33,6 @@
+ from sklearn.utils.validation import check_is_fitted, check_memory
+ 
+ __all__ = ["FeatureUnion", "Pipeline", "make_pipeline", "make_union"]
+-
+-
+-@contextmanager
+-def _raise_or_warn_if_not_fitted(estimator):
+-    """A context manager to make sure a NotFittedError is raised, if a sub-estimator
+-    raises the error.
+-
+-    Otherwise, we raise a warning if the pipeline is not fitted, with the deprecation.
+-
+-    TODO(1.8): remove this context manager and replace with check_is_fitted.
+-    """
+-    try:
+-        yield
+-    except NotFittedError as exc:
+-        raise NotFittedError("Pipeline is not fitted yet.") from exc
+-
+-    # we only get here if the above didn't raise
+-    try:
+-        check_is_fitted(estimator)
+-    except NotFittedError:
+-        warnings.warn(
+-            "This Pipeline instance is not fitted yet. Call 'fit' with "
+-            "appropriate arguments before using other methods such as transform, "
+-            "predict, etc. This will raise an error in 1.8 instead of the current "
+-            "warning.",
+-            FutureWarning,
+-        )
+ 
+ 
+ def _final_estimator_has(attr):

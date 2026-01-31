@@ -1,0 +1,28 @@
+diff --git a/sympy/core/mod.py b/sympy/core/mod.py
+--- a/sympy/core/mod.py
++++ b/sympy/core/mod.py
+@@ -96,21 +96,9 @@ def number_eval(p, q):
+ 
+             # by difference
+             # -2|q| < p < 2|q|
+-            d = abs(p)
+-            for _ in range(2):
+-                d -= abs(q)
+-                if d.is_negative:
+-                    if q.is_positive:
+-                        if p.is_positive:
+-                            return d + q
+-                        elif p.is_negative:
+-                            return -d
+-                    elif q.is_negative:
+-                        if p.is_positive:
+-                            return d
+-                        elif p.is_negative:
+-                            return -d + q
+-                    break
++            if q.is_positive:
++                comp1, comp2 = is_le, is_lt
++            elif q.is_negative:
+ 
+         rv = number_eval(p, q)
+         if rv is not None:

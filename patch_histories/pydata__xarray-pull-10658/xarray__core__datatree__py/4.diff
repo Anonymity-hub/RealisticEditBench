@@ -1,0 +1,80 @@
+diff --git a/xarray/core/datatree.py b/xarray/core/datatree.py
+--- a/xarray/core/datatree.py
++++ b/xarray/core/datatree.py
+@@ -4,7 +4,7 @@
+ import io
+ import itertools
+ import textwrap
+-from collections import ChainMap
++from collections import ChainMap, defaultdict
+ from collections.abc import (
+     Callable,
+     Hashable,
+@@ -12,6 +12,7 @@
+     Iterator,
+     Mapping,
+ )
++from dataclasses import dataclass, field
+ from html import escape
+ from os import PathLike
+ from typing import (
+@@ -442,6 +443,17 @@
+ 
+ 
+ FromDictDataValue: TypeAlias = "CoercibleValue | Dataset | DataTree | None"
++
++
++@dataclass
++class _CoordWrapper:
++    value: CoercibleValue
++
++
++@dataclass
++class _DatasetArgs:
++    data_vars: dict[str, CoercibleValue] = field(default_factory=dict)
++    coords: dict[str, CoercibleValue] = field(default_factory=dict)
+ 
+ 
+ class DataTree(
+@@ -1300,6 +1310,41 @@
+                             y        int64 8B 2
+ 
+         """
++        if data is None:
++            data = {}
++
++        if coords is None:
++            coords = {}
++
++        if nested:
++            data_items = utils.flat_items(data)
++            coords_items = utils.flat_items(coords)
++        else:
++            data_items = data.items()
++            coords_items = coords.items()
++            for arg_name, items in [("data", data_items), ("coords", coords_items)]:
++                for key, value in items:
++                    if isinstance(value, dict):
++                        raise TypeError(
++                            f"{arg_name} contains a dict value at {key=}, "
++                            "which is not a valid argument to "
++                            f"DataTree.from_dict() with nested=False: {value}"
++                        )
++
++        # Canonicalize and unify paths between `data` and `coords`
++        flat_data_and_coords = itertools.chain(
++            data_items,
++            ((k, _CoordWrapper(v)) for k, v in coords_items),
++        )
++        nodes: dict[NodePath, _CoordWrapper | FromDictDataValue] = {}
++        for key, value in flat_data_and_coords:
++            path = NodePath(key).absolute()
++            if path in nodes:
++                raise ValueError(
++                    f"multiple entries found corresponding to node {str(path)!r}"
++                )
++            nodes[path] = value
++
+                     raise ValueError(
+                         "multiple entries found corresponding to the root node"
+                     )

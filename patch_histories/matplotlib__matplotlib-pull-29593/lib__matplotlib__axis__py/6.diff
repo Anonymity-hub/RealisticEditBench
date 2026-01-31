@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -1062,6 +1062,7 @@
+             'length': 'size',
+             'direction': 'tickdir',
+             'rotation': 'labelrotation',
++            'rotation_mode': 'labelrotation_mode',
+             'left': 'tick1On',
+             'bottom': 'tick1On',
+             'right': 'tick2On',

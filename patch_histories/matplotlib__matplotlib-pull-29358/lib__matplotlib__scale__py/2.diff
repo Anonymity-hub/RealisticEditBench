@@ -1,0 +1,16 @@
+diff --git a/lib/matplotlib/scale.py b/lib/matplotlib/scale.py
+--- a/lib/matplotlib/scale.py
++++ b/lib/matplotlib/scale.py
+@@ -831,7 +831,11 @@
+     axis : `~matplotlib.axis.Axis`
+     """
+     scale_cls = _api.check_getitem(_scale_mapping, scale=scale)
+-    return scale_cls(axis, **kwargs)
++
++    if _scale_has_axis_parameter[scale]:
++        return scale_cls(axis, **kwargs)
++    else:
++        return scale_cls(**kwargs)
+ 
+ 
+ if scale_factory.__doc__:

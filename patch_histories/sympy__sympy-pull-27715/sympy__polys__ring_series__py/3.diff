@@ -1,0 +1,17 @@
+diff --git a/sympy/polys/ring_series.py b/sympy/polys/ring_series.py
+--- a/sympy/polys/ring_series.py
++++ b/sympy/polys/ring_series.py
+@@ -1731,8 +1731,11 @@
+                 c_expr = c.as_expr()
+                 const = R(tanh(c_expr))
+             except ValueError:
+-                raise DomainError("The given series cannot be expanded in "
+-                    "this domain.")
++                R = R.add_gens([tanh(c_expr)])
++                p = p.set_ring(R)
++                x = x.set_ring(R)
++                c = c.set_ring(R)
++                const = R(tanh(c_expr))
+         else:
+             try:
+                 const = R(tanh(c))

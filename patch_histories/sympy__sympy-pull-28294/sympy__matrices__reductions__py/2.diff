@@ -1,0 +1,14 @@
+diff --git a/sympy/matrices/reductions.py b/sympy/matrices/reductions.py
+--- a/sympy/matrices/reductions.py
++++ b/sympy/matrices/reductions.py
+@@ -104,7 +104,7 @@
+             i, j = piv_row, piv_col
+             mat[i*cols + j] = one
+             for p in range(i*cols + j + 1, (i + 1)*cols):
+-                mat[p] = isimp(mat[p] / pivot_val)
++                mat[p] = isimp(pivot_val**(-1) * mat[p])
+             # after normalizing, the pivot value is 1
+             pivot_val = one
+
+
+ 

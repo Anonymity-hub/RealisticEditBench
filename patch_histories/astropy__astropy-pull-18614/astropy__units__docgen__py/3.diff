@@ -1,0 +1,11 @@
+diff --git a/astropy/units/docgen.py b/astropy/units/docgen.py
+--- a/astropy/units/docgen.py
++++ b/astropy/units/docgen.py
+@@ -6,6 +6,7 @@
+ package.
+ """
+ 
++import keyword
+ import re
+ import unicodedata
+ from collections.abc import Iterable, Mapping

@@ -1,0 +1,13 @@
+diff --git a/django/core/mail/__init__.py b/django/core/mail/__init__.py
+--- a/django/core/mail/__init__.py
++++ b/django/core/mail/__init__.py
+@@ -145,6 +145,9 @@
+     if not isinstance(recipients, (list, tuple)) or not all(
+         isinstance(address, (str, Promise)) for address in recipients
+     ):
++        raise ImproperlyConfigured(
++            f"The {setting_name} setting must be a list of email address strings."
++        )
+ 
+     mail = EmailMultiAlternatives(
+         subject="%s%s" % (settings.EMAIL_SUBJECT_PREFIX, subject),

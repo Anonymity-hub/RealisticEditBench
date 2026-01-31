@@ -1,0 +1,11 @@
+diff --git a/astropy/coordinates/matrix_utilities.py b/astropy/coordinates/matrix_utilities.py
+--- a/astropy/coordinates/matrix_utilities.py
++++ b/astropy/coordinates/matrix_utilities.py
+@@ -54,6 +55,7 @@
+         A unitary rotation matrix.
+     """
+     if not isinstance(angle, u.Quantity):
++        angle = Angle(angle, unit=unit or u.deg, copy=COPY_IF_NEEDED)
+
+     s = np.sin(angle_in_rad)
+     c = np.cos(angle_in_rad)

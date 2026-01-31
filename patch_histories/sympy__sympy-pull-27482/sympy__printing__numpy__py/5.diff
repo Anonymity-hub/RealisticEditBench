@@ -1,0 +1,13 @@
+diff --git a/sympy/printing/numpy.py b/sympy/printing/numpy.py
+--- a/sympy/printing/numpy.py
++++ b/sympy/printing/numpy.py
+@@ -240,8 +240,7 @@
+         return '{}({}.asarray([{}]), axis=0)'.format(self._module_format(self._module + '.amax'), self._module_format(self._module), ','.join(self._print(i) for i in expr.args))
+ 
+     def _print_amax(self, expr):
+-        inner, = expr.args
+-        return '{}({})'.format(self._module_format(self._module + '.amax'), self._print(inner))
++        return '{}({}, axis={})'.format(self._module_format(self._module + '.amax'), self._print(expr.array), self._print(expr.axis))
+ 
+     def _print_maximum(self, expr):
+         op = self._module_format(self._module + '.maximum')

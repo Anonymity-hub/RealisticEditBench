@@ -1,0 +1,39 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -2288,6 +2288,16 @@ def _check_local_fields(cls, fields, option):
+                             id="models.E013",
+                         )
+                     )
++                elif isinstance(field, models.CompositePrimaryKey):
++                    errors.append(
++                        checks.Error(
++                            f"{option!r} refers to a CompositePrimaryKey "
++                            f"{field_name!r}, but CompositePrimaryKeys are not "
++                            f"permitted in {option!r}.",
++                            obj=cls,
++                            id="models.E048",
++                        )
++                    )
+                 elif field not in cls._meta.local_fields:
+                     errors.append(
+                         checks.Error(
+diff --git a/django/db/models/constraints.py b/django/db/models/constraints.py
+--- a/django/db/models/constraints.py
++++ b/django/db/models/constraints.py
+@@ -93,11 +93,13 @@ def _check(self, model, connection):
+         return []
+ 
+     def _check_references(self, model, references):
++        from django.db.models.fields.composite import CompositePrimaryKey
++
+         errors = []
+         fields = set()
+         for field_name, *lookups in references:
+-            # pk is an alias that won't be found by opts.get_field.
+-            if field_name != "pk":
++            # pk is an alias that won't be found by opts.get_field().
++            if field_name != "pk" or isinstance(model._meta.pk, CompositePrimaryKey):
+                 fields.add(field_name)
+             if not lookups:
+                 # If it has no lookups it cannot result in a JOIN.

@@ -1,0 +1,18 @@
+diff --git a/django/db/migrations/writer.py b/django/db/migrations/writer.py
+--- a/django/db/migrations/writer.py
++++ b/django/db/migrations/writer.py
+@@ -191,10 +191,13 @@
+                 "then update the\n# RunPython operations to refer to the local "
+                 "versions:\n# %s"
+             ) % "\n# ".join(sorted(migration_imports))
+-        # If there's a replaces, make a string for it
+         if self.migration.replaces:
+             items["replaces_str"] = (
+                 "\n    replaces = %s\n" % self.serialize(self.migration.replaces)[0]
++            )
++        if self.migration.run_before:
++            items["run_before_str"] = (
++                "\n    run_before = %s\n" % self.serialize(self.migration.run_before)[0]
+             )
+         # Hinting that goes into comment
+         if self.include_header:

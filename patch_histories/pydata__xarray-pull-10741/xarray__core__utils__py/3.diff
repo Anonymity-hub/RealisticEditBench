@@ -1,0 +1,20 @@
+diff --git a/xarray/core/utils.py b/xarray/core/utils.py
+--- a/xarray/core/utils.py
++++ b/xarray/core/utils.py
+@@ -259,8 +259,14 @@
+     # For non-array/list types, use == but require boolean result
+     result = first == second
+     if not isinstance(result, bool):
+-
+-    return (first == second) or (pd.isnull(first) and pd.isnull(second))  # type: ignore[call-overload]
++        # Accept numpy bool scalars as well
++        if isinstance(result, np.bool_):
++            return bool(result)
++        # Reject any other non-boolean type (Dataset, Series, custom objects, etc.)
++        return False
++
++    # Check for NaN equivalence
++    return result or (pd.isnull(first) and pd.isnull(second))  # type: ignore[call-overload]
+ 
+ 
+ def list_equiv(first: Sequence[T], second: Sequence[T]) -> bool:

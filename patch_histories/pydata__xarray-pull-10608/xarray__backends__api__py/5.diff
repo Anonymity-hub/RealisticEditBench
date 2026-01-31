@@ -1,0 +1,27 @@
+diff --git a/xarray/backends/api.py b/xarray/backends/api.py
+--- a/xarray/backends/api.py
++++ b/xarray/backends/api.py
+@@ -2029,6 +2029,8 @@
+     # validate Dataset keys, DataArray names, and attr keys/values
+     _validate_dataset_names(dataset)
+     _validate_attrs(dataset, engine, invalid_netcdf)
++    # sanitize unlimited_dims
++    unlimited_dims = _sanitize_unlimited_dims(dataset, unlimited_dims)
+ 
+     try:
+         store_open = WRITEABLE_STORES[engine]
+@@ -2066,14 +2068,6 @@
+         kwargs["auto_complex"] = auto_complex
+ 
+     store = store_open(target, mode, format, group, **kwargs)
+-
+-    if unlimited_dims is None:
+-        unlimited_dims = dataset.encoding.get("unlimited_dims", None)
+-    if unlimited_dims is not None:
+-        if isinstance(unlimited_dims, str) or not isinstance(unlimited_dims, Iterable):
+-            unlimited_dims = [unlimited_dims]
+-        else:
+-            unlimited_dims = list(unlimited_dims)
+ 
+     writer = ArrayWriter()
+ 

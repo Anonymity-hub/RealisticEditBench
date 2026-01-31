@@ -1,0 +1,15 @@
+diff --git a/django/template/base.py b/django/template/base.py
+--- a/django/template/base.py
++++ b/django/template/base.py
+@@ -317,8 +317,9 @@
+         if (
+             self._source_start is not None
+             and self._source_end is not None
+-            and
++            and 0 <= self._source_start <= self._source_end <= len(full_source)
+         ):
++            return full_source[self._source_start : self._source_end]
+ 
+         return ""
+ 
+

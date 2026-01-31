@@ -1,0 +1,12 @@
+diff --git a/sympy/printing/rust.py b/sympy/printing/rust.py
+--- a/sympy/printing/rust.py
++++ b/sympy/printing/rust.py
+@@ -564,7 +564,7 @@
+ 
+     def _print_sign(self, expr):
+         arg = self._print(expr.args[0])
+-        return "(if (%s == 0.0) 
++        return "(if (%s == 0.0) { 0.0 } else { (%s).signum() })" % (arg, arg)
+ 
+     def _cast_to_float(self, expr):
+         if not expr.is_number:

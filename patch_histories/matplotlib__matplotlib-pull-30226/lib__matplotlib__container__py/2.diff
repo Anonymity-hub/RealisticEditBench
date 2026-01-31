@@ -1,0 +1,24 @@
+diff --git a/lib/matplotlib/container.py b/lib/matplotlib/container.py
+--- a/lib/matplotlib/container.py
++++ b/lib/matplotlib/container.py
+@@ -80,6 +80,20 @@
+ 
+         .. versionadded:: 3.11
+         """
++        if self.orientation == 'vertical':
++            return [p.get_y() for p in self.patches]
++        elif self.orientation == 'horizontal':
++            return [p.get_x() for p in self.patches]
++        else:
++            raise ValueError("orientation must be 'vertical' or 'horizontal'.")
++
++    @property
++    def tops(self):
++        """
++        Return the values at the upper end of the bars.
++
++        .. versionadded:: 3.11
++        """
+ 
+ class ErrorbarContainer(Container):
+     """

@@ -1,0 +1,13 @@
+diff --git a/django/db/backends/mysql/operations.py b/django/db/backends/mysql/operations.py
+--- a/django/db/backends/mysql/operations.py
++++ b/django/db/backends/mysql/operations.py
+@@ -166,9 +166,6 @@ def force_no_ordering(self):
+         """
+         return [(None, ("NULL", [], False))]
+ 
+-    def adapt_decimalfield_value(self, value, max_digits=None, decimal_places=None):
+-        return value
+-
+     def last_executed_query(self, cursor, sql, params):
+         # With MySQLdb, cursor objects have an (undocumented) "_executed"
+         # attribute where the exact query sent to the database is saved.

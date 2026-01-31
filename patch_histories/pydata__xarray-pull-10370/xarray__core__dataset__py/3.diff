@@ -1,0 +1,14 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -3806,6 +3806,9 @@
+ 
+         # optimization: subset to coordinate range of the target index
+         if method in ["linear", "nearest"]:
++            for k, v in validated_indexers.items():
++                obj, newidx = missing._localize(obj, {k: v})
++                validated_indexers[k] = newidx[k]
+ 
+         has_chunked_array = bool(
+             any(is_chunked_array(v._data) for v in obj._variables.values())
+

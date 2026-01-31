@@ -1,0 +1,35 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -690,6 +690,7 @@
+         zarr_format=None,
+         use_zarr_fill_value_as_mask=None,
+         write_empty: bool | None = None,
++        cache_members: bool = True,
+     ):
+         (
+             zarr_group,
+@@ -720,6 +721,7 @@
+             write_empty,
+             close_store_on_close,
+             use_zarr_fill_value_as_mask,
++            cache_members,
+         )
+ 
+     def __init__(
+@@ -1556,6 +1558,7 @@
+         store=None,
+         engine=None,
+         use_zarr_fill_value_as_mask=None,
++        cache_members: bool = True,
+     ) -> Dataset:
+         filename_or_obj = _normalize_path(filename_or_obj)
+         if not store:
+@@ -1571,6 +1574,7 @@
+                 zarr_version=zarr_version,
+                 use_zarr_fill_value_as_mask=None,
+                 zarr_format=zarr_format,
++                cache_members=cache_members,
+             )
+ 
+         store_entrypoint = StoreBackendEntrypoint()

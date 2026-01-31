@@ -1,0 +1,12 @@
+diff --git a/astropy/units/cds.py b/astropy/units/cds.py
+--- a/astropy/units/cds.py
++++ b/astropy/units/cds.py
+@@ -68,7 +68,7 @@
+         (["al"], u.lyr, "Light year", ["c", "d"]),
+         (["lyr"], u.lyr, "Light year"),
+         (["alpha"], _si.alpha, "Fine structure constant"),
+-        (["Angstrom", "Å", ], u.AA, "Angstrom"),
++        (["Angstrom", "Å", "Angstroem", "AA"], u.AA, "Angstrom"),
+         (["arcmin", "arcm"], u.arcminute, "minute of arc"),
+         (["arcsec", "arcs"], u.arcsecond, "second of arc"),
+         (["atm"], _si.atm, "atmosphere"),

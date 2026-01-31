@@ -1,0 +1,12 @@
+diff --git a/sklearn/linear_model/_base.py b/sklearn/linear_model/_base.py
+--- a/sklearn/linear_model/_base.py
++++ b/sklearn/linear_model/_base.py
+@@ -681,7 +681,7 @@
+             )
+ 
+             if y.ndim < 2:
+-                self.coef_ = lsqr(X_centered, y)[0]
++                self.coef_ = lsqr(X_centered, y, atol=self.tol, btol=self.tol)[0]
+             else:
+                 # sparse_lstsq cannot handle y with shape (M, K)
+                 outs = Parallel(n_jobs=n_jobs_)(

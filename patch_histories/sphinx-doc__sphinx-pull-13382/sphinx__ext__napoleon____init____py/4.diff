@@ -1,0 +1,11 @@
+diff --git a/sphinx/ext/napoleon/__init__.py b/sphinx/ext/napoleon/__init__.py
+--- a/sphinx/ext/napoleon/__init__.py
++++ b/sphinx/ext/napoleon/__init__.py
+@@ -11,6 +11,7 @@
+ from sphinx.util import inspect
+ 
+ if TYPE_CHECKING:
++    from collections.abc import Sequence, Set
+     from typing import Any
+ 
+     from sphinx.config import _ConfigRebuild

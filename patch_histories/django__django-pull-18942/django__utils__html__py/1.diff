@@ -1,0 +1,24 @@
+diff --git a/django/utils/html.py b/django/utils/html.py
+--- a/django/utils/html.py
++++ b/django/utils/html.py
+@@ -237,17 +237,15 @@ def unquote_quote(segment):
+         # see also https://bugs.python.org/issue16285
+         return quote(segment, safe=RFC3986_SUBDELIMS + RFC3986_GENDELIMS + "~")
+ 
+-    # Handle IDN before quoting.
+     try:
+         scheme, netloc, path, query, fragment = urlsplit(url)
+     except ValueError:
+         # invalid IPv6 URL (normally square brackets in hostname part).
+         return unquote_quote(url)
+ 
+-    try:
+-        netloc = punycode(netloc)  # IDN -> ACE
+-    except UnicodeError:  # invalid domain part
+-        return unquote_quote(url)
++    # Handle IDN as percent-encoded UTF-8 octets, per WHATWG URL Specification
++    # section 3.5 and RFC 3986 section 3.2.2. Defer any IDNA to the user agent.
++    # See #36013.
+ 
+     if query:
+         # Separately unquoting key/value, so as to not mix querystring separators

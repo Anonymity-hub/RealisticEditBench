@@ -1,0 +1,30 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -66,7 +66,7 @@ def _check_zero_division(zero_division):
+         return np.nan
+ 
+ 
+-def _check_targets(y_true, y_pred):
++def _check_targets(y_true, y_pred, sample_weight=None):
+     """Check that y_true and y_pred belong to the same classification task.
+ 
+     This converts multiclass or binary types to a common shape, and raises a
+@@ -83,6 +83,8 @@ def _check_targets(y_true, y_pred):
+ 
+     y_pred : array-like
+ 
++    sample_weight : array-like, default=None
++
+     Returns
+     -------
+     type_true : one of {'multilabel-indicator', 'multiclass', 'binary'}
+@@ -92,6 +94,8 @@ def _check_targets(y_true, y_pred):
+     y_true : array or indicator matrix
+ 
+     y_pred : array or indicator matrix
++
++    sample_weight : array or None
+     """
+     xp, _ = get_namespace(y_true, y_pred)
+     check_consistent_length(y_true, y_pred)

@@ -1,0 +1,26 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -324,6 +324,22 @@
+ 
+         self.group = _resolve_group(self.obj, self.group)
+ 
++        if self.eagerly_compute_group:
++            raise ValueError(
++                f""""Eagerly computing the DataArray you're grouping by ({self.group.name!r}) "
++                has been removed.
++                Please load this array's data manually using `.compute` or `.load`.
++                To intentionally avoid eager loading, either (1) specify
++                `.groupby({self.group.name}=UniqueGrouper(labels=...))`
++                or (2) pass explicit bin edges using ``bins`` or
++                `.groupby({self.group.name}=BinGrouper(bins=...))`; as appropriate."""
++            )
++        if self.eagerly_compute_group is not None:
++            emit_user_level_warning(
++                "Passing `eagerly_compute_group` is now deprecated. It has no effect.",
++                DeprecationWarning,
++            )
++
+         if not isinstance(self.group, _DummyGroup) and is_chunked_array(
+             self.group.variable._data
+         ):

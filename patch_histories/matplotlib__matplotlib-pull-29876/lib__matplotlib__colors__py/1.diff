@@ -1,0 +1,21 @@
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -2337,6 +2337,17 @@ def _changed(self):
+         """
+         self.callbacks.process('changed')
+ 
++    @property
++    @abstractmethod
++    def n_components(self):
++        """
++        The number of normalized components.
++
++        This is the number of elements of the parameter to ``__call__`` and of
++        *vmin*, *vmax*.
++        """
++        pass
++
+ 
+ class Normalize(Norm):
+     """

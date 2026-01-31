@@ -1,0 +1,32 @@
+diff --git a/astropy/visualization/interval.py b/astropy/visualization/interval.py
+--- a/astropy/visualization/interval.py
++++ b/astropy/visualization/interval.py
+@@ -197,15 +197,12 @@
+         self.n_samples = n_samples
+ 
+     def get_limits(self, values):
+-        values =
++        values = self._process_values(values)
+ 
+         # If needed, limit the number of samples. We sample with replacement
+         # since this is much faster.
+         if self.n_samples is not None and values.size > self.n_samples:
+             values = np.random.choice(values, self.n_samples)
+-
+-        # Filter out invalid values (inf, nan)
+-        values = values[np.isfinite(values)]
+ 
+         # Determine values at percentiles
+         vmin, vmax = np.percentile(
+@@ -291,9 +288,9 @@
+         self.max_iterations = max_iterations
+ 
+     def get_limits(self, values):
++        values = self._process_values(values)
++
+         # Sample the image
+-        values = np.asarray(values)
+-        values = values[np.isfinite(values)]
+         stride = int(max(1.0, values.size / self.n_samples))
+         samples = values[::stride][: self.n_samples]
+         samples.sort()

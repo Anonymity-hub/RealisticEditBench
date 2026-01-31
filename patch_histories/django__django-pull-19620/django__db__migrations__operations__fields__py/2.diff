@@ -1,0 +1,15 @@
+diff --git a/django/db/migrations/operations/fields.py b/django/db/migrations/operations/fields.py
+--- a/django/db/migrations/operations/fields.py
++++ b/django/db/migrations/operations/fields.py
+@@ -55,7 +55,10 @@
+                     and name in self.field.from_fields
+                 ):
+                     return True
+-                elif self.field.
++                elif self.field.generated and any(
++                    for field_name, *_ in Model.
++                ):
++                    return True
+         # Check if this operation remotely references the field.
+         if self.field is None:
+             return False

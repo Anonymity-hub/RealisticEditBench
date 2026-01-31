@@ -1,0 +1,27 @@
+diff --git a/sphinx/domains/javascript.py b/sphinx/domains/javascript.py
+--- a/sphinx/domains/javascript.py
++++ b/sphinx/domains/javascript.py
+@@ -332,6 +332,7 @@
+     final_argument_whitespace = False
+     option_spec: ClassVar[OptionSpec] = {
+         'no-index': directives.flag,
++        'no-index-entry': directives.flag,
+         'no-contents-entry': directives.flag,
+         'no-typesetting': directives.flag,
+         'noindex': directives.flag,
+@@ -364,9 +365,12 @@
+             )
+ 
+             # The node order is: index node first, then target node
+-            indextext = _('%s (module)') % mod_name
+-            inode = addnodes.index(entries=[('single', indextext, node_id, '', None)])
+-            ret.append(inode)
++            if 'no-index-entry' not in self.options:
++                index_text = _('%s (module)') % mod_name
++                inode = addnodes.index(
++                    entries=[('single', index_text, node_id, '', None)]
++                )
++                ret.append(inode)
+             target = nodes.target('', '', ids=[node_id], ismod=True)
+             self.state.document.note_explicit_target(target)
+             ret.append(target)

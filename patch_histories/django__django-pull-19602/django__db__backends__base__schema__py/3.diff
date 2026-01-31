@@ -1,0 +1,16 @@
+diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py
+--- a/django/db/backends/base/schema.py
++++ b/django/db/backends/base/schema.py
+@@ -1694,8 +1694,10 @@
+         ):
+             old_kwargs.pop("db_default")
+             new_kwargs.pop("db_default")
+-        return self.quote_name(old_field.column) != self.quote_name(
+-            new_field.column
++        return (
++            old_field.concrete
++            and new_field.concrete
++            and (self.quote_name(old_field.column) != self.quote_name(new_field.column))
+         ) or (old_path, old_args, old_kwargs) != (new_path, new_args, new_kwargs)
+ 
+     def _field_should_be_indexed(self, model, field):

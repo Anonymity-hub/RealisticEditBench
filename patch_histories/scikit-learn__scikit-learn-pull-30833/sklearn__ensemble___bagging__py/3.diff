@@ -1,0 +1,55 @@
+diff --git a/sklearn/ensemble/_bagging.py b/sklearn/ensemble/_bagging.py
+--- a/sklearn/ensemble/_bagging.py
++++ b/sklearn/ensemble/_bagging.py
+@@ -626,10 +626,47 @@
+             routing information.
+         """
+         router = MetadataRouter(owner=self.__class__.__name__)
+-        router.add(
+-            estimator=self._get_estimator(),
+-            method_mapping=MethodMapping().add(callee="fit", caller="fit"),
+-        )
++
++        method_mapping = MethodMapping()
++        method_mapping.add(caller="fit", callee="fit").add(
++            caller="decision_function", callee="decision_function"
++        )
++
++        # the router needs to be built depending on whether the sub-estimator has a
++        # `predict_proba` method (as BaggingClassifier decides dynamically at runtime):
++        if hasattr(self._get_estimator(), "predict_proba"):
++            (
++                method_mapping.add(caller="predict", callee="predict_proba").add(
++                    caller="predict_proba", callee="predict_proba"
++                )
++            )
++
++        else:
++            (
++                method_mapping.add(caller="predict", callee="predict").add(
++                    caller="predict_proba", callee="predict"
++                )
++            )
++
++        # the router needs to be built depending on whether the sub-estimator has a
++        # `predict_log_proba` method (as BaggingClassifier decides dynamically at
++        # runtime):
++        if hasattr(self._get_estimator(), "predict_log_proba"):
++            method_mapping.add(caller="predict_log_proba", callee="predict_log_proba")
++
++        else:
++            # if `predict_log_proba` is not available in BaggingClassifier's
++            # sub-estimator, the routing should go to its `predict_proba` if it is
++            # available or else to its `predict` method; according to how
++            # `sample_weight` is passed to the respective methods dynamically at
++            # runtime:
++            if hasattr(self._get_estimator(), "predict_proba"):
++                method_mapping.add(caller="predict_log_proba", callee="predict_proba")
++
++            else:
++                method_mapping.add(caller="predict_log_proba", callee="predict")
++
++        router.add(estimator=self._get_estimator(), method_mapping=method_mapping)
+         return router
+ 
+     @abstractmethod

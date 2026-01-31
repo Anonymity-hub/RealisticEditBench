@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -1336,7 +1336,8 @@
+                  for tick in ticks
+                  if tick.label1.get_visible() and tick.label1.get_in_layout()],
+                 [tick.label2.get_window_extent(renderer)
+-                 for tick in ticks if tick.label2.get_visible()])
++                 for tick in ticks
++                 if tick.label2.get_visible() and tick.label2.get_in_layout()])
+ 
+     def get_tightbbox(self, renderer=None, *, for_layout_only=False):
+         """

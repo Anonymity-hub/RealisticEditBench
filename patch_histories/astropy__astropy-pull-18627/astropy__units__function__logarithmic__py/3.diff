@@ -1,0 +1,12 @@
+diff --git a/astropy/units/function/logarithmic.py b/astropy/units/function/logarithmic.py
+--- a/astropy/units/function/logarithmic.py
++++ b/astropy/units/function/logarithmic.py
+@@ -187,7 +187,7 @@ def to_string(self, format="generic"):
+             else:
+                 return f"[{self.physical_unit.to_string(format=format)}]"
+         else:
+-            return super().to_string()
++            return super().to_string(format=format)
+ 
+ 
+ class DecibelUnit(LogUnit):

@@ -1,0 +1,13 @@
+diff --git a/sklearn/metrics/cluster/_supervised.py b/sklearn/metrics/cluster/_supervised.py
+--- a/sklearn/metrics/cluster/_supervised.py
++++ b/sklearn/metrics/cluster/_supervised.py
+@@ -1043,7 +1043,7 @@
+     # Calculate the expected value for the mutual information
+     emi = expected_mutual_information(contingency, n_samples)
+     # Calculate entropy for each labeling
+-    h_true, h_pred = entropy(labels_true), entropy(labels_pred)
++    h_true, h_pred = _entropy(labels_true), _entropy(labels_pred)
+     normalizer = _generalized_average(h_true, h_pred, average_method)
+     denominator = normalizer - emi
+     # Avoid 0.0 / 0.0 when expectation equals maximum, i.e. a perfect match.
+

@@ -1,0 +1,11 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -1796,6 +1796,7 @@ def deconstruct(self):
+                 kwargs["through"] = self.remote_field.through
+             elif not self.remote_field.through._meta.auto_created:
+                 kwargs["through"] = self.remote_field.through._meta.label
++        if through_fields := getattr(self.remote_field, "through_fields", None):
+         # If swappable is True, then see if we're actually pointing to the target
+         # of a swap.
+         swappable_setting = self.swappable_setting

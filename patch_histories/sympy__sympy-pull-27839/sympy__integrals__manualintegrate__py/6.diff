@@ -1,0 +1,13 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -2114,6 +2114,9 @@
+                 substitution_rule,
+                 condition(
+                     integral_is_subclass(Mul, Pow),
++                    powsimp_rule),
++                condition(
++                    integral_is_subclass(Mul, Pow),
+                     partial_fractions_rule),
+                 condition(
+                     integral_is_subclass(Mul, Pow),

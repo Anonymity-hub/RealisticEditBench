@@ -1,0 +1,38 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -513,14 +513,14 @@
+         When it returns None, autodoc-process-docstring will not be called for this
+         object.
+         """
+-        if self.object is UNINITIALIZED_ATTR:
++        if self.props._obj is UNINITIALIZED_ATTR:
+             return []
+ 
+         if self.__docstring_signature__ and self._new_docstrings is not None:
+             return self._new_docstrings
+ 
+         docstring = getdoc(
+-            self.object,
++            self.props._obj,
+             self.get_attr,
+             self.config.autodoc_inherit_docstrings,
+             self.parent,
+@@ -540,7 +540,7 @@
+                     'autodoc-process-docstring',
+                     self.objtype,
+                     self.props.full_name,
+-                    self.object,
++                    self.props._obj,
+                     self.options,
+                     docstringlines,
+                 )
+@@ -952,7 +952,7 @@
+         docstrings: list[str] = functools.reduce(
+             operator.iadd, self.get_doc() or [], []
+         )
+-        if ismock(self.object) and not docstrings:
++        if ismock(self.props._obj) and not docstrings:
+             logger.warning(
+                 __('A mocked object is detected: %r'),
+                 self.name,

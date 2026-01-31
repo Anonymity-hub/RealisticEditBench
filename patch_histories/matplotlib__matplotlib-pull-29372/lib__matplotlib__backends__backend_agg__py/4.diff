@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/backends/backend_agg.py b/lib/matplotlib/backends/backend_agg.py
+--- a/lib/matplotlib/backends/backend_agg.py
++++ b/lib/matplotlib/backends/backend_agg.py
+@@ -510,7 +510,7 @@
+     def print_webp(self, filename_or_obj, *, metadata=None, pil_kwargs=None):
+         self._print_pil(filename_or_obj, "webp", pil_kwargs, metadata)
+ 
+-    print_jpg.__doc__, print_tif.__doc__, print_webp.__doc__ = map(
++    print_gif.__doc__, print_jpg.__doc__, print_tif.__doc__, print_webp.__doc__ = map(
+         """
+         Write the figure to a {} file.
+ 
+

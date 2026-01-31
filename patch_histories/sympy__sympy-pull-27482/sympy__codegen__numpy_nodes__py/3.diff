@@ -1,0 +1,23 @@
+diff --git a/sympy/codegen/numpy_nodes.py b/sympy/codegen/numpy_nodes.py
+--- a/sympy/codegen/numpy_nodes.py
++++ b/sympy/codegen/numpy_nodes.py
+@@ -129,7 +129,7 @@
+     _construct_axis = staticmethod(sympify)
+ 
+ 
+-class amax(Function):
++class amax(Token):
+     """ Maximum value along an axis.
+ 
+     Helper class for use with e.g. numpy.amax
+@@ -140,7 +140,9 @@
+ 
+     https://numpy.org/doc/stable/reference/generated/numpy.amax.html
+     """
+-    nargs = 1
++    __slots__ = _fields = ('array', 'axis')
++    defaults = {'axis': none}
++    _construct_axis = staticmethod(sympify)
+ 
+ 
+ class maximum(Function):

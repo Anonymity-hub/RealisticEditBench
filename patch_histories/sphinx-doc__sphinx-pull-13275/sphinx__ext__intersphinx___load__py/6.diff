@@ -1,0 +1,26 @@
+diff --git a/sphinx/ext/intersphinx/_load.py b/sphinx/ext/intersphinx/_load.py
+--- a/sphinx/ext/intersphinx/_load.py
++++ b/sphinx/ext/intersphinx/_load.py
+@@ -30,7 +30,7 @@
+         InventoryName,
+         InventoryURI,
+     )
+-    from sphinx.util.typing import Inventory
++    from sphinx.util.typing import Inventory, _Inventory
+ 
+ 
+ def validate_intersphinx_mapping(app: Sphinx, config: Config) -> None:
+@@ -327,11 +327,11 @@ def _fetch_inventory(
+         raw_data = _fetch_inventory_file(inv_location=inv_location, srcdir=srcdir)
+ 
+     try:
+-        invdata = InventoryFile.loads(raw_data, uri=target_uri)
++        inv = InventoryFile.loads(raw_data, uri=target_uri)
+     except ValueError as exc:
+         msg = f'unknown or unsupported inventory version: {exc!r}'
+         raise ValueError(msg) from exc
+-    return invdata
++    return inv
+ 
+ 
+ def _fetch_inventory_url(

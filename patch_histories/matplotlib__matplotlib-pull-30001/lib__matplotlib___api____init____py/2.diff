@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/_api/__init__.py b/lib/matplotlib/_api/__init__.py
+--- a/lib/matplotlib/_api/__init__.py
++++ b/lib/matplotlib/_api/__init__.py
+@@ -10,6 +10,7 @@
+
+ """
+
++import difflib
+ import functools
+ import itertools
+ import pathlib

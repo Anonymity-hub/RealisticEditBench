@@ -1,0 +1,28 @@
+diff --git a/sphinx/writers/latex.py b/sphinx/writers/latex.py
+--- a/sphinx/writers/latex.py
++++ b/sphinx/writers/latex.py
+@@ -132,11 +132,9 @@
+             self.colsep = None
+         self.colwidths: list[int] = []
+         self.has_problematic = False
+-        self.has_oldproblematic = False
+         self.has_verbatim = False
+         # cf https://github.com/sphinx-doc/sphinx/issues/13646#issuecomment-2958309632
+         self.is_nested = False
+-        self.entry_needs_linetrimming = 0
+         self.caption: list[str] = []
+         self.stubs: list[int] = []
+ 
+@@ -223,12 +221,6 @@
+         elif self.get_table_type() == 'tabulary':
+             # sphinx.sty sets T to be J by default.
+             return '{' + _colsep + (('T' + _colsep) * self.colcount) + '}' + CR
+-        elif self.has_oldproblematic:
+-            return (
+-                r'{%s*{%d}{\X{1}{%d}%s}}'
+-                % (_colsep, self.colcount, self.colcount, _colsep)
+-                + CR
+-            )
+         else:
+             return '{' + _colsep + (('l' + _colsep) * self.colcount) + '}' + CR
+ 

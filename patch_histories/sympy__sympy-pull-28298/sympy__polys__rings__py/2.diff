@@ -1,0 +1,12 @@
+diff --git a/sympy/polys/rings.py b/sympy/polys/rings.py
+--- a/sympy/polys/rings.py
++++ b/sympy/polys/rings.py
+@@ -923,7 +923,7 @@
+         ring = self.ring
+         if isinstance(other, PolyElement):
+             try:
+-                p2 = ring.ring_new(other)
++                p2 = ring.domain_new(other)
+             except CoercionFailed:
+                 return NotImplemented # unreachable
+             else:

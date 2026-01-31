@@ -1,0 +1,99 @@
+diff --git a/sympy/physics/control/lti.py b/sympy/physics/control/lti.py
+--- a/sympy/physics/control/lti.py
++++ b/sympy/physics/control/lti.py
+@@ -5129,11 +5129,21 @@
+         for i in range(1,n):
+             ob = ob.col_join(self._C * self._A**i)
+ 
+-        return ob
+-
+-    def observable_subspace(self):
+-        """
+-        Returns the observable subspace of the state space model.
++        return Matrix(ob)
++
++    def unobservable_subspace(self):
++        """
++        Returns the unobservable subspace of the state space model.
++
++        Note: this method raises an error for matrices with symbolic entries
++        because it is not possible determine the unobservable subspace
++        in general.
++
++        Raises
++        ======
++        NotImplementedError
++            If the state space model has symbolic entries, the unobservable
++            subspace cannot be determined in general.
+ 
+         Examples
+         ========
+@@ -5148,17 +5158,32 @@
+         >>> ob_subspace = ss.observable_subspace()
+         >>> ob_subspace
+         [Matrix([
++        [1],
++        [0]]), Matrix([
+         [0],
+-        [1]]), Matrix([
+-        [1],
+-        [0]])]
+-
+-        """
+-        return self.observability_matrix().columnspace()
+-
+-    def is_observable(self):
+-        """
+-        Returns if the state space model is observable.
++        [1]])]
++        """
++        M = self.observability_matrix()
++        if len(M.free_symbols) > 0:
++            raise NotImplementedError(
++                "Unbservable subspace cannot be determined for " \
++                "symbolic matrices."
++            )
++        return M.nullspace()
++
++    def observable_subspace(self):
++        """
++        Returns the observable subspace of the state space model.
++
++        Note: this method raises an error for matrices with symbolic entries
++        because it is not possible determine the observable subspace
++        in general.
++
++        Raises
++        ======
++        NotImplementedError
++            If the state space model has symbolic entries, the observable
++            subspace cannot be determined in general.
+ 
+         Examples
+         ========
+@@ -5170,7 +5195,24 @@
+         >>> C = Matrix([[0, 1]])
+         >>> D = Matrix([1])
+         >>> ss = StateSpace(A, B, C, D)
+-        >>> ss.is_observable()
++        >>> ob_subspace = ss.observable_subspace()
++        >>> ob_subspace
++        [Matrix([
++        [1],
++        [0]]), Matrix([
++        [0],
++        [1]])]
++
++        """
++        M = Matrix.hstack(*self.unobservable_subspace())
++        if len(M.free_symbols) > 0:
++                raise NotImplementedError(
++                    "Observable subspace cannot be determined for " \
++                    "symbolic matrices."
++                )
++        return self._calc_orthogonal_complement(M, self._A.shape[0])
++
++    def is_observable(self):
+         True
+ 
+         """

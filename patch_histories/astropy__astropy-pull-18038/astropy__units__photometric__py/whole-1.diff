@@ -1,0 +1,12 @@
+diff --git a/astropy/units/photometric.py b/astropy/units/photometric.py
+--- a/astropy/units/photometric.py
++++ b/astropy/units/photometric.py
+@@ -15,7 +15,7 @@
+ 
+ import numpy as np
+ 
+-from astropy.constants import L_bol0
++from astropy.constants.si import L_bol0
+ 
+ from . import astrophys, cgs, si
+ from .core import Unit, UnitBase, def_unit

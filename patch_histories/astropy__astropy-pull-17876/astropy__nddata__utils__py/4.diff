@@ -1,0 +1,38 @@
+diff --git a/astropy/nddata/utils.py b/astropy/nddata/utils.py
+--- a/astropy/nddata/utils.py
++++ b/astropy/nddata/utils.py
+@@ -308,6 +308,10 @@
+     position : tuple
+         Position of the small array's center, with respect to the large array.
+         Coordinates should be in the same order as the array shape.
++    limit_rounding_method : callable
++        The rounding method when calculating the minimum and maximum pixel indices.
++        This must be a callable function. Examples: `~numpy.ceil`, `~numpy.floor`,
++        `~numpy.round`. Default is `~numpy.ceil`.
+ 
+     Returns
+     -------
+@@ -341,7 +345,10 @@
+         for (large_shape, small_shape) in zip(array_large.shape, array_small.shape)
+     ):
+         large_slices, small_slices = overlap_slices(
+-            array_large.shape, array_small.shape, position
++            array_large.shape,
++            array_small.shape,
++            position,
++            limit_rounding_method=limit_rounding_method,
+         )
+         array_large[large_slices] += array_small[small_slices]
+         return array_large
+@@ -478,6 +485,11 @@
+         into the original ``data`` array.  If `True`, then the
+         cutout data will hold a copy of the original ``data`` array.
+ 
++    limit_rounding_method : callable
++        The rounding method when calculating the minimum and maximum pixel indices.
++        This must be a callable function. Examples: `~numpy.ceil`, `~numpy.floor`,
++        `~numpy.round`. Default is `~numpy.ceil`.
++
+     Attributes
+     ----------
+     data : 2D `~numpy.ndarray`

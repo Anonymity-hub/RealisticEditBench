@@ -1,0 +1,12 @@
+diff --git a/astropy/io/fits/connect.py b/astropy/io/fits/connect.py
+--- a/astropy/io/fits/connect.py
++++ b/astropy/io/fits/connect.py
+@@ -296,7 +296,7 @@ def read_table_fits(
+ 
+         arr = data[col.name]
+         if strip_spaces and coltype is np.bytes_:
+-            arr = np.strings.rstrip(arr)
++            arr = arr.rstrip()
+ 
+         if masked or np.any(mask):
+             column = MaskedColumn(

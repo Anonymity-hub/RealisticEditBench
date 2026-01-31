@@ -1,0 +1,19 @@
+diff --git a/sklearn/utils/estimator_checks.py b/sklearn/utils/estimator_checks.py
+--- a/sklearn/utils/estimator_checks.py
++++ b/sklearn/utils/estimator_checks.py
+@@ -459,7 +459,14 @@
+ 
+     estimator_name = estimator.__class__.__name__
+     if mark == "xfail":
+-        return pytest.param(estimator, check, marks=pytest.mark.xfail(reason=reason))
++        # With xfail_strict=None we want the value from the pytest config to
++        # take precedence and that means not passing strict to the xfail
++        # mark at all.
++        if xfail_strict is None:
++            mark = pytest.mark.xfail(reason=reason)
++        else:
++            mark = pytest.mark.xfail(reason=reason, strict=xfail_strict)
++        return pytest.param(estimator, check, marks=mark)
+     else:
+ 
+         @wraps(check)

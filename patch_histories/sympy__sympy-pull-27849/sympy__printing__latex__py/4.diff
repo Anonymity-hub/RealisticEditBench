@@ -1,0 +1,11 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -168,6 +168,7 @@
+         "max": None,
+         "diff_operator": "d",
+         "adjoint_style": "dagger",
++        "disable_split_super_sub": False,
+     }
+ 
+     def __init__(self, settings=None):

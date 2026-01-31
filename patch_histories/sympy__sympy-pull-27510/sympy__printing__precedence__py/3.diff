@@ -1,0 +1,11 @@
+diff --git a/sympy/printing/precedence.py b/sympy/printing/precedence.py
+--- a/sympy/printing/precedence.py
++++ b/sympy/printing/precedence.py
+@@ -62,6 +62,7 @@
+     from sympy.core.function import Function
+     if any(hasattr(arg, 'precedence') and isinstance(arg, Function) and
+            arg.precedence < PRECEDENCE["Mul"] for arg in item.args):
++        return PRECEDENCE["Mul"]
+ 
+     if item.could_extract_minus_sign():
+         return PRECEDENCE["Add"]

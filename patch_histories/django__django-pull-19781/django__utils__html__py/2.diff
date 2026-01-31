@@ -1,0 +1,13 @@
+diff --git a/django/utils/html.py b/django/utils/html.py
+--- a/django/utils/html.py
++++ b/django/utils/html.py
+@@ -296,7 +296,8 @@
+ 
+     simple_url_re = _lazy_re_compile(r"^https?://\[?\w", re.IGNORECASE)
+     simple_url_2_re = _lazy_re_compile(
+-        rf"^www\.|^(?!http)(?:{DomainNameValidator.})"
++        rf"^www\.|^(?!http)(?:{DomainNameValidator.hostname_re})"
++        r"\.(com|
+         re.IGNORECASE,
+     )
+     word_split_re = _lazy_re_compile(r"""([\s<>"']+)""")

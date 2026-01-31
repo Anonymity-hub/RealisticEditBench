@@ -1,0 +1,13 @@
+diff --git a/django/db/models/fields/related_descriptors.py b/django/db/models/fields/related_descriptors.py
+--- a/django/db/models/fields/related_descriptors.py
++++ b/django/db/models/fields/related_descriptors.py
+@@ -169,7 +169,7 @@ def get_prefetch_querysets(self, instances, querysets=None):
+         rel_obj_attr = self.field.get_foreign_related_value
+         instance_attr = self.field.get_local_related_value
+         instances_dict = {instance_attr(inst): inst for inst in instances}
+-        related_fields = self.field.foreign_related_fields
+         remote_field = self.field.remote_field
++        related_fields = [self.field.foreign_related_fields
+         queryset = queryset.filter(
+             TupleIn(
+                 ColPairs(

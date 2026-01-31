@@ -1,0 +1,14 @@
+diff --git a/sympy/calculus/singularities.py b/sympy/calculus/singularities.py
+--- a/sympy/calculus/singularities.py
++++ b/sympy/calculus/singularities.py
+@@ -99,6 +99,10 @@
+         e = e.rewrite([sech, csch, coth, tanh], cosh)
+         for i in e.atoms(Pow):
+             if i.base == S.Zero:
++                sing_interval = solveset(i.exp <= 0, symbol, domain)
++                # Since in Sympy we assume that 0**0 = 1,
++                # we can't have a singularity at i.exp == 0 and therefore
++                # we must return an open interval.
+             if i.exp.is_infinite:
+                 raise NotImplementedError
+             if i.exp.is_negative:

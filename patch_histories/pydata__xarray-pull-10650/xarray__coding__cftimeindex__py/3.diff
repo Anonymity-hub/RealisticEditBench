@@ -1,0 +1,23 @@
+diff --git a/xarray/coding/cftimeindex.py b/xarray/coding/cftimeindex.py
+--- a/xarray/coding/cftimeindex.py
++++ b/xarray/coding/cftimeindex.py
+@@ -490,7 +490,7 @@ def shift(  # type: ignore[override]  # freq is typed Any, we are more precise
+         >>> index.shift(1, "ME")
+         CFTimeIndex([2000-02-29 00:00:00],
+                     dtype='object', length=1, calendar='standard', freq=None)
+-        >>> index.shift(1.5, "D")
++        >>> index.shift(1.5, "24h")
+         CFTimeIndex([2000-02-01 12:00:00],
+                     dtype='object', length=1, calendar='standard', freq=None)
+         """
+@@ -713,7 +713,9 @@ def freq(self):
+             return CFTimeIndex(np.array(self))
+ 
+         offset = to_offset(freq)
+-        if not isinstance(offset, CFTIME_TICKS):
++        if isinstance(offset, Day):
++            # Following pandas, "In the 'round' context, Day unambiguously
++            # means 24h, not calendar-day"
+             raise ValueError(f"{offset} is a non-fixed frequency")
+ 
+         unit = _total_microseconds(offset.as_timedelta())

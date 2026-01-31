@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/projections/polar.py b/lib/matplotlib/projections/polar.py
+--- a/lib/matplotlib/projections/polar.py
++++ b/lib/matplotlib/projections/polar.py
+@@ -681,6 +681,8 @@
+ 
+     def set_major_locator(self, locator):
+         if not isinstance(locator, RadialLocator):
++            locator = RadialLocator(locator, self.axes)
++        super().set_major_locator(locator)
+ 
+     def clear(self):
+         # docstring inherited

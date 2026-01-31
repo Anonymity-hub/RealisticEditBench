@@ -1,0 +1,21 @@
+diff --git a/astropy/io/fits/file.py b/astropy/io/fits/file.py
+--- a/astropy/io/fits/file.py
++++ b/astropy/io/fits/file.py
+@@ -605,7 +605,7 @@
+             # means that the current file position is at the end of the file.
+             if mode in ["ostream", "append"]:
+                 self._file.seek(0)
+-            magic = self._file.read()
++            magic = self._file.read(6)
+             # No matter whether the underlying file was opened with 'ab' or
+             # 'ab+', we need to return to the beginning of the file in order
+             # to properly process the FITS header (and handle the possibility
+@@ -665,7 +665,7 @@
+ 
+         if os.path.exists(self.name):
+             with open(self.name, "rb") as f:
+-                magic = f.read(4)
++                magic = f.read(6)
+         else:
+             magic = b""
+ 

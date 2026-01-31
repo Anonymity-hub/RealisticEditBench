@@ -1,0 +1,20 @@
+diff --git a/astropy/units/deprecated.py b/astropy/units/deprecated.py
+--- a/astropy/units/deprecated.py
++++ b/astropy/units/deprecated.py
+@@ -26,11 +26,10 @@
+ def_unit(["emu"], cgs.Bi, namespace=local_units, doc="Biot: CGS (EMU) unit of current")
+ # Add only some *prefixes* as deprecated units.
+ _add_prefixes(astrophys.jupiterMass, namespace=local_units, prefixes=True)
+-_add_prefixes(astrophys.earthMass, namespace=globals(), prefixes=True)
+-_add_prefixes(astrophys.jupiterRad, namespace=globals(), prefixes=True)
+-_add_prefixes(astrophys.earthRad, namespace=globals(), prefixes=True)
++_add_prefixes(astrophys.earthMass, namespace=local_units, prefixes=True)
++_add_prefixes(astrophys.jupiterRad, namespace=local_units, prefixes=True)
++_add_prefixes(astrophys.earthRad, namespace=local_units, prefixes=True)
+ 
+-__all__ = [name for (name, member) in globals().items() if isinstance(member, UnitBase)]
+ __all__ += ["enable"]
+ 
+ if __doc__ is not None:
+
+

@@ -1,0 +1,94 @@
+diff --git a/django/db/migrations/operations/models.py b/django/db/migrations/operations/models.py
+--- a/django/db/migrations/operations/models.py
++++ b/django/db/migrations/operations/models.py
+@@ -95,6 +95,17 @@ def database_forwards(self, app_label, schema_editor, from_state, to_state):
+         model = to_state.apps.get_model(app_label, self.name)
+         if self.allow_migrate_model(schema_editor.connection.alias, model):
+             schema_editor.create_model(model)
++            # While the `index_together` option has been deprecated some
++            # historical migrations might still have references to them.
++            # This can be moved to the schema editor once it's adapted to
++            # from model states instead of rendered models (#29898).
++            to_model_state = to_state.models[app_label, self.name_lower]
++            if index_together := to_model_state.options.get("index_together"):
++                schema_editor.alter_index_together(
++                    model,
++                    set(),
++                    index_together,
++                )
+ 
+     def database_backwards(self, app_label, schema_editor, from_state, to_state):
+         model = from_state.apps.get_model(app_label, self.name)
+@@ -700,12 +711,13 @@ def state_forwards(self, app_label, state):
+     def database_forwards(self, app_label, schema_editor, from_state, to_state):
+         new_model = to_state.apps.get_model(app_label, self.name)
+         if self.allow_migrate_model(schema_editor.connection.alias, new_model):
+-            old_model = from_state.apps.get_model(app_label, self.name)
++            from_model_state = from_state.models[app_label, self.name_lower]
++            to_model_state = to_state.models[app_label, self.name_lower]
+             alter_together = getattr(schema_editor, "alter_%s" % self.option_name)
+             alter_together(
+                 new_model,
+-                getattr(old_model._meta, self.option_name, set()),
+-                getattr(new_model._meta, self.option_name, set()),
++                from_model_state.options.get(self.option_name) or set(),
++                to_model_state.options.get(self.option_name) or set(),
+             )
+ 
+     def database_backwards(self, app_label, schema_editor, from_state, to_state):
+diff --git a/django/db/migrations/state.py b/django/db/migrations/state.py
+--- a/django/db/migrations/state.py
++++ b/django/db/migrations/state.py
+@@ -323,13 +323,14 @@ def rename_field(self, app_label, model_name, old_name, new_name):
+                         for from_field_name in from_fields
+                     ]
+                 )
+-        # Fix unique_together to refer to the new field.
++        # Fix index/unique_together to refer to the new field.
+         options = model_state.options
+-        if "unique_together" in options:
+-            options["unique_together"] = [
+-                [new_name if n == old_name else n for n in together]
+-                for together in options["unique_together"]
+-            ]
++        for option in ("index_together", "unique_together"):
++            if option in options:
++                options[option] = [
++                    [new_name if n == old_name else n for n in together]
++                    for together in options[option]
++                ]
+         # Fix to_fields to refer to the new field.
+         delay = True
+         references = get_references(self, model_key, (old_name, found))
+@@ -827,9 +828,6 @@ def from_model(cls, model, exclude_rels=False):
+                 if name == "unique_together":
+                     ut = model._meta.original_attrs["unique_together"]
+                     options[name] = set(normalize_together(ut))
+-                elif name == "index_together":
+-                    it = model._meta.original_attrs["index_together"]
+-                    options[name] = set(normalize_together(it))
+                 elif name == "indexes":
+                     indexes = [idx.clone() for idx in model._meta.indexes]
+                     for index in indexes:
+@@ -845,7 +843,7 @@ def from_model(cls, model, exclude_rels=False):
+         # If we're ignoring relationships, remove all field-listing model
+         # options (that option basically just means "make a stub model")
+         if exclude_rels:
+-            for key in ["unique_together", "index_together", "order_with_respect_to"]:
++            for key in ["unique_together", "order_with_respect_to"]:
+                 if key in options:
+                     del options[key]
+         # Private fields are ignored, so remove options that refer to them.
+@@ -950,7 +948,11 @@ def clone(self):
+     def render(self, apps):
+         """Create a Model object from our current state into the given apps."""
+         # First, make a Meta object
+-        meta_contents = {"app_label": self.app_label, "apps": apps, **self.options}
++        meta_options = {**self.options}
++        # Prune index_together from options as it's no longer an allowed meta
++        # attribute.
++        meta_options.pop("index_together", None)
++        meta_contents = {"app_label": self.app_label, "apps": apps, **meta_options}
+         meta = type("Meta", (), meta_contents)
+         # Then, work out our bases
+         try:

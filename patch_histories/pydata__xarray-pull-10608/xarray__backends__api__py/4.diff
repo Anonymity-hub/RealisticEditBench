@@ -1,0 +1,18 @@
+diff --git a/xarray/backends/api.py b/xarray/backends/api.py
+--- a/xarray/backends/api.py
++++ b/xarray/backends/api.py
+@@ -256,6 +256,14 @@
+             unlimited_dims = list(unlimited_dims)
+         dataset_dims = set(dataset.dims)
+         unlimited_dims = set(unlimited_dims)
++        if undeclared_dims := (unlimited_dims - dataset_dims):
++            msg = (
++                f"Unlimited dimension(s) {undeclared_dims!r} declared in {msg_origin!r}, "
++                f"but not part of current dataset dimensions. "
++                f"Consider removing {undeclared_dims!r} from {msg_origin!r}."
++            )
++            raise ValueError(msg)
++        return unlimited_dims
+ 
+ 
+ def _resolve_decoders_kwargs(decode_cf, open_backend_dataset_parameters, **decoders):

@@ -1,0 +1,11 @@
+diff --git a/django/tasks/base.py b/django/tasks/base.py
+--- a/django/tasks/base.py
++++ b/django/tasks/base.py
+@@ -146,7 +146,6 @@
+             func=f,
+             queue_name=queue_name,
+             backend=backend,
+-            enqueue_on_commit=enqueue_on_commit,
+             takes_context=takes_context,
+             run_after=None,
+         )

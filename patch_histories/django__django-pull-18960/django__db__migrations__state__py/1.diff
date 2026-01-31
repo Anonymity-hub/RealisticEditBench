@@ -1,0 +1,12 @@
+diff --git a/django/db/migrations/state.py b/django/db/migrations/state.py
+--- a/django/db/migrations/state.py
++++ b/django/db/migrations/state.py
+@@ -323,6 +323,8 @@ def rename_field(self, app_label, model_name, old_name, new_name):
+                         for from_field_name in from_fields
+                     ]
+                 )
++            # Fix field names (e.g. for CompositePrimaryKey) to refer to the
++            # new field.
+         # Fix index/unique_together to refer to the new field.
+         options = model_state.options
+         for option in ("index_together", "unique_together"):

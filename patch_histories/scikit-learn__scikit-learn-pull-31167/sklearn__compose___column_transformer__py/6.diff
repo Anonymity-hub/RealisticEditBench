@@ -1,0 +1,12 @@
+diff --git a/sklearn/compose/_column_transformer.py b/sklearn/compose/_column_transformer.py
+--- a/sklearn/compose/_column_transformer.py
++++ b/sklearn/compose/_column_transformer.py
+@@ -1375,7 +1375,7 @@
+     n_jobs=None,
+     verbose=False,
+     verbose_feature_names_out=True,
+-    force_int_remainder_cols=True,
++    force_int_remainder_cols="deprecated",
+ ):
+     """Construct a ColumnTransformer from the given transformers.
+ 

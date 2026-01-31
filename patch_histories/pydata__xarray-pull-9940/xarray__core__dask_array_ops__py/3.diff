@@ -1,0 +1,13 @@
+diff --git a/xarray/core/dask_array_ops.py b/xarray/core/dask_array_ops.py
+--- a/xarray/core/dask_array_ops.py
++++ b/xarray/core/dask_array_ops.py
+@@ -154,5 +154,9 @@
+         valid_positions = da.where(nan_bitmask == 0, cumsum_nan, np.nan)
+         valid_positions = push(valid_positions, None, axis, method=method)
+         # All the NaNs at the beginning are converted to 0
++        valid_positions = da.nan_to_num(valid_positions)
++        valid_positions = cumsum_nan - valid_positions
++        valid_positions = valid_positions <= n
++        pushed_array = da.where(valid_positions, pushed_array, np.nan)
+ 
+     return pushed_array

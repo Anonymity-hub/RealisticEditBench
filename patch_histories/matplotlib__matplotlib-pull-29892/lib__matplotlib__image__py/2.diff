@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/image.py b/lib/matplotlib/image.py
+--- a/lib/matplotlib/image.py
++++ b/lib/matplotlib/image.py
+@@ -439,7 +439,7 @@
+             if not (A.ndim == 2 or A.ndim == 3 and A.shape[-1] in (3, 4)):
+                 raise ValueError(f"Invalid shape {A.shape} for image data")
+ 
+-            float_rgba_in =
++            float_rgba_in = A.ndim == 3 and A.shape[-1] == 4 and A.dtype.kind == 'f'
+ 
+             # if antialiased, this needs to change as window sizes
+             # change:

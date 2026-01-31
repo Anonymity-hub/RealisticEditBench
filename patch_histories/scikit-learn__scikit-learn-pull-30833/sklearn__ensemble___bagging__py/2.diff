@@ -1,0 +1,44 @@
+diff --git a/sklearn/ensemble/_bagging.py b/sklearn/ensemble/_bagging.py
+--- a/sklearn/ensemble/_bagging.py
++++ b/sklearn/ensemble/_bagging.py
+@@ -240,7 +240,7 @@
+     return proba
+ 
+ 
+-def _parallel_predict_log_proba(estimators, estimators_features, X, n_classes):
++def _parallel_predict_log_proba(estimators, estimators_features, X, n_classes, params):
+     """Private function used to compute log probabilities within a job."""
+     n_samples = X.shape[0]
+     log_proba = np.empty((n_samples, n_classes))
+@@ -248,7 +248,7 @@
+     all_classes = np.arange(n_classes, dtype=int)
+ 
+     for estimator, features in zip(estimators, estimators_features):
+-        log_proba_estimator = estimator.predict_log_proba(X[:, features])
++        log_proba_estimator = estimator.predict_log_proba(X[:, features], **params)
+ 
+         if n_classes == len(estimator.classes_):
+             log_proba = np.logaddexp(log_proba, log_proba_estimator)
+@@ -265,18 +265,18 @@
+     return log_proba
+ 
+ 
+-def _parallel_decision_function(estimators, estimators_features, X):
++def _parallel_decision_function(estimators, estimators_features, X, params):
+     """Private function used to compute decisions within a job."""
+     return sum(
+-        estimator.decision_function(X[:, features])
++        estimator.decision_function(X[:, features], **params)
+         for estimator, features in zip(estimators, estimators_features)
+     )
+ 
+ 
+-def _parallel_predict_regression(estimators, estimators_features, X):
++def _parallel_predict_regression(estimators, estimators_features, X, params):
+     """Private function used to compute predictions within a job."""
+     return sum(
+-        estimator.predict(X[:, features])
++        estimator.predict(X[:, features], **params)
+         for estimator, features in zip(estimators, estimators_features)
+     )
+ 

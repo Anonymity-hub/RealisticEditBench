@@ -1,0 +1,9 @@
+diff --git a/django/contrib/redirects/admin.py b/django/contrib/redirects/admin.py
+--- a/django/contrib/redirects/admin.py
++++ b/django/contrib/redirects/admin.py
+@@ -7,4 +7,3 @@ class RedirectAdmin(admin.ModelAdmin):
+     list_display = ("old_path", "new_path")
+     list_filter = ("site",)
+     search_fields = ("old_path", "new_path")
+-    radio_fields = {"site": admin.VERTICAL}
+

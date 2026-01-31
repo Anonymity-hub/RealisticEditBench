@@ -1,0 +1,36 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -1957,10 +1957,6 @@
+     def document_members(self, all_members: bool = False) -> None:
+         pass
+ 
+-    def get_real_modname(self) -> str:
+-        real_modname = self.get_attr(self.parent or self.object, '__module__', None)
+-        return real_modname or self.modname
+-
+     def get_module_comment(self, attrname: str) -> list[str] | None:
+         try:
+             analyzer = ModuleAnalyzer.for_module(self.modname)
+@@ -2310,10 +2306,6 @@
+     def _is_non_data_descriptor(self) -> bool:
+         return not inspect.isattributedescriptor(self.object)
+ 
+-    def get_real_modname(self) -> str:
+-        real_modname = self.get_attr(self.parent or self.object, '__module__', None)
+-        return real_modname or self.modname
+-
+     def should_suppress_value_header(self) -> bool:
+         if self.object is SLOTS_ATTR:
+             return True
+@@ -2488,10 +2480,6 @@
+     def document_members(self, all_members: bool = False) -> None:
+         pass
+ 
+-    def get_real_modname(self) -> str:
+-        real_modname = self.get_attr(self.parent or self.object, '__module__', None)
+-        return real_modname or self.modname
+-
+     def add_directive_header(self, sig: str) -> None:
+         super().add_directive_header(sig)
+         sourcename = self.get_sourcename()

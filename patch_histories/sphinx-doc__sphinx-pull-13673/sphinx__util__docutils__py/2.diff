@@ -1,0 +1,51 @@
+diff --git a/sphinx/util/docutils.py b/sphinx/util/docutils.py
+--- a/sphinx/util/docutils.py
++++ b/sphinx/util/docutils.py
+@@ -38,8 +38,10 @@
+     from docutils import Component
+     from docutils.frontend import Values
+     from docutils.nodes import Element, Node, system_message
++    from docutils.parsers import Parser
+     from docutils.parsers.rst.states import Inliner
+     from docutils.statemachine import State, StringList
++    from docutils.transforms import Transform
+ 
+     from sphinx.builders import Builder
+     from sphinx.config import Config
+@@ -830,6 +832,36 @@
+     return document
+ 
+ 
++def _parse_str_to_doctree(
++    content: str,
++    *,
++    filename: Path,
++    default_role: str = '',
++    default_settings: Mapping[str, Any],
++    env: BuildEnvironment,
++    parser: Parser,
++    transforms: Sequence[type[Transform]] = (),
++) -> nodes.document:
++    env.current_document._parser = parser
++
++    # Propagate exceptions by default when used programmatically:
++    defaults = {'traceback': True, **default_settings}
++    settings = _get_settings(standalone.Reader, parser, defaults=defaults)
++    settings._source = str(filename)
++
++    # Create root document node
++    reporter = LoggingReporter(
++        source=str(filename),
++        report_level=settings.report_level,
++        halt_level=settings.halt_level,
++        debug=settings.debug,
++        error_handler=settings.error_encoding_error_handler,
++    )
++    document = nodes.document(settings, reporter, source=str(filename))
++    document.note_source(str(filename), -1)
++
++
++
+ def _get_settings(
+     *components: Component | type[Component],
+     defaults: Mapping[str, Any],

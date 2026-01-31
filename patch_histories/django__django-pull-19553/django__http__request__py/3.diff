@@ -1,0 +1,16 @@
+diff --git a/django/http/request.py b/django/http/request.py
+--- a/django/http/request.py
++++ b/django/http/request.py
+@@ -104,6 +104,11 @@
+ 
+     @cached_property
+     def accepted_types_by_precedence(self):
++        """
++        Return a list of MediaType instances, in order of precedence (specificity).
++        """
++        return sorted(
++            self.accepted_types,
+             key=operator.attrgetter("specificity", "quality"),
+             reverse=True,
+         )
+

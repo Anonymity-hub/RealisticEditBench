@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/spines.py b/lib/matplotlib/spines.py
+--- a/lib/matplotlib/spines.py
++++ b/lib/matplotlib/spines.py
+@@ -274,6 +274,8 @@
+                         rorigin = self.axes.get_rorigin()
+                     except AttributeError:
+                         rorigin = rmin
++                    else:
++                        rorigin = tr.transform(rorigin)
+                     scaled_diameter = (rmin - rorigin) / (rmax - rorigin)
+                     self._height = scaled_diameter
+                     self._width = scaled_diameter

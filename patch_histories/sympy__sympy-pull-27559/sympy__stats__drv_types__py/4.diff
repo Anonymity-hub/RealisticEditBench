@@ -1,0 +1,19 @@
+diff --git a/sympy/stats/drv_types.py b/sympy/stats/drv_types.py
+--- a/sympy/stats/drv_types.py
++++ b/sympy/stats/drv_types.py
+@@ -457,13 +457,13 @@
+         r = self.r
+         p = self.p
+ 
+-        return ((1 - p) / (1 - p * exp(I*t)))**r
++        return (p / (1 - (1 - p) * exp(I*t)))**r
+ 
+     def _moment_generating_function(self, t):
+         r = self.r
+         p = self.p
+ 
+-        return ((1 - p) / (1 - p * exp(t)))**r
++        return (p / (1 - (1 - p) * exp(t)))**r
+ 
+ def NegativeBinomial(name, r, p):
+     r"""

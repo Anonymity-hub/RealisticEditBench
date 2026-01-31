@@ -1,0 +1,19 @@
+diff --git a/sklearn/metrics/cluster/__init__.py b/sklearn/metrics/cluster/__init__.py
+--- a/sklearn/metrics/cluster/__init__.py
++++ b/sklearn/metrics/cluster/__init__.py
+@@ -14,6 +14,7 @@
+     adjusted_rand_score,
+     completeness_score,
+     contingency_matrix,
++    # TODO(1.10): Remove
+     entropy,
+     expected_mutual_information,
+     fowlkes_mallows_score,
+@@ -40,6 +41,7 @@
+     "consensus_score",
+     "contingency_matrix",
+     "davies_bouldin_score",
++    # TODO(1.10): Remove
+     "entropy",
+     "expected_mutual_information",
+     "fowlkes_mallows_score",

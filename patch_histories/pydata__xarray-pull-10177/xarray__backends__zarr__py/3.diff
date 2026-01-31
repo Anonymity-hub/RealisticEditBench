@@ -1,0 +1,11 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -1088,6 +1088,7 @@
+             if _zarr_v3():
+                 empty = dict(config={"write_empty_chunks": self._write_empty})
+             else:
++                empty = dict(write_empty_chunks=self._write_empty)
+ 
+             zarr_array = zarr.open(
+                 store=(

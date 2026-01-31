@@ -1,0 +1,29 @@
+diff --git a/sympy/logic/boolalg.py b/sympy/logic/boolalg.py
+--- a/sympy/logic/boolalg.py
++++ b/sympy/logic/boolalg.py
+@@ -17,6 +17,7 @@
+ from sympy.core.kind import BooleanKind, NumberKind
+ from sympy.core.numbers import Number
+ from sympy.core.operations import AssocOp, LatticeOp
++from sympy.core.parameters import global_parameters
+ from sympy.core.singleton import Singleton, S
+ from sympy.core.sorting import ordered
+ from sympy.core.sympify import _sympy_converter, _sympify, sympify
+@@ -1017,10 +1018,14 @@
+     x
+ 
+     """
+-    def __new__(cls, *args, remove_true=True, **kwargs):
++    def __new__(cls, *args, remove_true=True, evaluate=None, **kwargs):
++        if evaluate is None:
++            evaluate = global_parameters.evaluate
++        if not evaluate:
++            return super().__new__(cls, *args, evaluate=evaluate, **kwargs)
++
+         argset = set()
+-        obj = super().__new__(cls, *args, **kwargs)
+-        for arg in obj._args:
++        for arg in map(_sympify, args):
+             if isinstance(arg, Number) or arg in (True, False):
+                 if arg:
+                     arg = true

@@ -1,0 +1,14 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -4218,8 +4218,9 @@
+             reindex_indexers := {
+                 k: v for k, (_, v) in validated_indexers.items() if v.dims == (k,)
+             }
++        ):
+             reindexed = alignment.reindex(
+-                obj,
++                obj[reindex_vars],
+                 indexers=reindex_indexers,
+                 method=method_non_numeric,
+                 exclude_vars=variables.keys(),

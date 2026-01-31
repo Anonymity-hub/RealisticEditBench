@@ -1,0 +1,11 @@
+diff --git a/sympy/printing/pycode.py b/sympy/printing/pycode.py
+--- a/sympy/printing/pycode.py
++++ b/sympy/printing/pycode.py
+@@ -203,6 +203,7 @@
+     def _print_Assignment(self, expr):
+         # Emit a single outer assignment when rhs is piecewise to avoid
+         # invalid python like "((x = a) if cond else (x = b))"
++        from sympy.functions.elementary.piecewise import Piecewise
+         lhs = expr.lhs
+         rhs = expr.rhs
+         if isinstance(rhs, Piecewise):

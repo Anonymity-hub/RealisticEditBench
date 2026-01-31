@@ -1,0 +1,11 @@
+diff --git a/sphinx/builders/__init__.py b/sphinx/builders/__init__.py
+--- a/sphinx/builders/__init__.py
++++ b/sphinx/builders/__init__.py
+@@ -916,6 +916,7 @@
+                 'This will become an error in Sphinx 9.0.'
+                 # xref RemovedInSphinx90Warning
+             ),
++            obj[line_start + 1 : error.start].decode(errors='backslashreplace'),
+             location=(self.docname, line_num),
+         )
+         return '?', error.end

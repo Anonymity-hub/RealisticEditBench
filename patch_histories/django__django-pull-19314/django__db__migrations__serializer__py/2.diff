@@ -1,0 +1,14 @@
+diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py
+--- a/django/db/migrations/serializer.py
++++ b/django/db/migrations/serializer.py
+@@ -335,6 +335,10 @@
+ 
+ 
+ class ZoneInfoSerializer(BaseSerializer):
++    def serialize(self):
++        return repr(self.value), {"import zoneinfo"}
++
++
+ class Serializer:
+     _registry = {
+         # Some of these are order-dependent.

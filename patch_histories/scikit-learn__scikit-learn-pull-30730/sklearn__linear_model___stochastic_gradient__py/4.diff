@@ -1,0 +1,17 @@
+diff --git a/sklearn/linear_model/_stochastic_gradient.py b/sklearn/linear_model/_stochastic_gradient.py
+--- a/sklearn/linear_model/_stochastic_gradient.py
++++ b/sklearn/linear_model/_stochastic_gradient.py
+@@ -160,6 +160,13 @@
+         # raises ValueError if not registered
+         self._get_penalty_type(self.penalty)
+         self._get_learning_rate_type(self.learning_rate)
++
++    def _get_l1_ratio(self):
++        if self.l1_ratio is None:
++            # plain_sgd expects a float. Any value is fine since at this point
++            # penalty can't be "elsaticnet" so l1_ratio is not used.
++            return 0.0
++        return self.l1_ratio
+ 
+     def _get_loss_function(self, loss):
+         """Get concrete ``LossFunction`` object for str ``loss``."""

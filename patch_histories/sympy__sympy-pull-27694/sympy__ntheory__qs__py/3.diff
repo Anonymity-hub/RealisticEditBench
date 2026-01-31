@@ -1,0 +1,35 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -319,22 +319,15 @@
+     return smooth_relations, proper_factor
+ 
+ 
+-def _gauss_mod_2(A):
+-    """Fast gaussian reduction for modulo 2 matrix.
+-
+-    Parameters
+-    ==========
+-
+-    A : Matrix
+-
+-    Examples
+-    ========
+-
+-    >>> from sympy.ntheory.qs import _gauss_mod_2
+-    >>> _gauss_mod_2([[0, 1, 1], [1, 0, 1], [0, 1, 0], [1, 1, 1]])
+-    ([[[1, 0, 1], 3]],
+-     [True, True, True, False],
+-     [[0, 1, 0], [1, 0, 0], [0, 0, 1], [1, 0, 1]])
++def _find_factor(N, smooth_relations, col):
++    """ Finds proper factor of N using fast gaussian reduction for modulo 2 matrix.
++
++    Parameters
++    ==========
++
++    N : Number to be factored
++    smooth_relations : Smooth relations vectors matrix
++    col : Number of columns in the matrix
+ 
+     Reference
+     ==========

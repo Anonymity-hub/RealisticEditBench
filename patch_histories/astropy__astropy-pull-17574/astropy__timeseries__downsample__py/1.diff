@@ -1,0 +1,12 @@
+diff --git a/astropy/timeseries/downsample.py b/astropy/timeseries/downsample.py
+--- a/astropy/timeseries/downsample.py
++++ b/astropy/timeseries/downsample.py
+@@ -13,6 +13,7 @@
+ __all__ = ["aggregate_downsample"]
+ 
+ 
++def nanmean_reduceat(data, indices):
+ def reduceat(array, indices, function):
+     """
+     Manual reduceat functionality for cases where Numpy functions don't have a reduceat.
+

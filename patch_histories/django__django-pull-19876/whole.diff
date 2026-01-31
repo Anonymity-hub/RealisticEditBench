@@ -1,0 +1,127 @@
+diff --git a/django/tasks/backends/base.py b/django/tasks/backends/base.py
+--- a/django/tasks/backends/base.py
++++ b/django/tasks/backends/base.py
+@@ -4,8 +4,6 @@
+ from asgiref.sync import sync_to_async
+ 
+ from django.conf import settings
+-from django.core import checks
+-from django.db import connections
+ from django.tasks import DEFAULT_TASK_QUEUE_NAME
+ from django.tasks.base import (
+     DEFAULT_TASK_PRIORITY,
+@@ -39,16 +37,8 @@ class BaseTaskBackend(metaclass=ABCMeta):
+     def __init__(self, alias, params):
+         self.alias = alias
+         self.queues = set(params.get("QUEUES", [DEFAULT_TASK_QUEUE_NAME]))
+-        self.enqueue_on_commit = bool(params.get("ENQUEUE_ON_COMMIT", True))
+         self.options = params.get("OPTIONS", {})
+ 
+-    def _get_enqueue_on_commit_for_task(self, task):
+-        return (
+-            task.enqueue_on_commit
+-            if task.enqueue_on_commit is not None
+-            else self.enqueue_on_commit
+-        )
+-
+     def validate_task(self, task):
+         """
+         Determine whether the provided Task can be executed by the backend.
+@@ -119,20 +109,4 @@ async def aget_result(self, result_id):
+         )
+ 
+     def check(self, **kwargs):
+-        if self.enqueue_on_commit and not connections._settings:
+-            yield checks.Error(
+-                "ENQUEUE_ON_COMMIT cannot be used when no databases are configured.",
+-                hint="Set ENQUEUE_ON_COMMIT to False",
+-                id="tasks.E001",
+-            )
+-
+-        elif (
+-            self.enqueue_on_commit
+-            and not connections["default"].features.supports_transactions
+-        ):
+-            yield checks.Error(
+-                "ENQUEUE_ON_COMMIT cannot be used on a database which doesn't support "
+-                "transactions.",
+-                hint="Set ENQUEUE_ON_COMMIT to False",
+-                id="tasks.E002",
+-            )
++        return []
+diff --git a/django/tasks/backends/dummy.py b/django/tasks/backends/dummy.py
+--- a/django/tasks/backends/dummy.py
++++ b/django/tasks/backends/dummy.py
+@@ -1,7 +1,5 @@
+ from copy import deepcopy
+-from functools import partial
+ 
+-from django.db import transaction
+ from django.tasks.base import TaskResult, TaskResultStatus
+ from django.tasks.exceptions import TaskResultDoesNotExist
+ from django.tasks.signals import task_enqueued
+@@ -43,10 +41,7 @@ def enqueue(self, task, args, kwargs):
+             worker_ids=[],
+         )
+ 
+-        if self._get_enqueue_on_commit_for_task(task) is not False:
+-            transaction.on_commit(partial(self._store_result, result))
+-        else:
+-            self._store_result(result)
++        self._store_result(result)
+ 
+         # Copy the task to prevent mutation issues.
+         return deepcopy(result)
+diff --git a/django/tasks/backends/immediate.py b/django/tasks/backends/immediate.py
+--- a/django/tasks/backends/immediate.py
++++ b/django/tasks/backends/immediate.py
+@@ -1,8 +1,6 @@
+ import logging
+-from functools import partial
+ from traceback import format_exception
+ 
+-from django.db import transaction
+ from django.tasks.base import TaskContext, TaskError, TaskResult, TaskResultStatus
+ from django.tasks.signals import task_enqueued, task_finished, task_started
+ from django.utils import timezone
+@@ -92,9 +90,6 @@ def enqueue(self, task, args, kwargs):
+             worker_ids=[],
+         )
+ 
+-        if self._get_enqueue_on_commit_for_task(task) is not False:
+-            transaction.on_commit(partial(self._execute_task, task_result))
+-        else:
+-            self._execute_task(task_result)
++        self._execute_task(task_result)
+ 
+         return task_result
+diff --git a/django/tasks/base.py b/django/tasks/base.py
+--- a/django/tasks/base.py
++++ b/django/tasks/base.py
+@@ -48,10 +48,6 @@ class Task:
+     queue_name: str
+     run_after: Optional[datetime]  # The earliest this Task will run.
+ 
+-    # Whether the Task will be enqueued when the current transaction commits,
+-    # immediately, or whatever the backend decides.
+-    enqueue_on_commit: Optional[bool]
+-
+     # Whether the Task receives the Task context when executed.
+     takes_context: bool = False
+ 
+@@ -140,7 +136,6 @@ def task(
+     priority=DEFAULT_TASK_PRIORITY,
+     queue_name=DEFAULT_TASK_QUEUE_NAME,
+     backend=DEFAULT_TASK_BACKEND_ALIAS,
+-    enqueue_on_commit=None,
+     takes_context=False,
+ ):
+     from . import task_backends
+@@ -151,7 +146,6 @@ def wrapper(f):
+             func=f,
+             queue_name=queue_name,
+             backend=backend,
+-            enqueue_on_commit=enqueue_on_commit,
+             takes_context=takes_context,
+             run_after=None,
+         )

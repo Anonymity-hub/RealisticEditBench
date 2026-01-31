@@ -1,0 +1,13 @@
+
+diff --git a/sympy/parsing/sympy_parser.py b/sympy/parsing/sympy_parser.py
+--- a/sympy/parsing/sympy_parser.py
++++ b/sympy/parsing/sympy_parser.py
+@@ -1218,6 +1218,8 @@
+     def visit_Call(self, node):
+         if isinstance(node.func, ast.Name) and node.func.id in self.functions:
+             func = self.visit(node.func)
++            args = [self.visit(arg) for arg in node.args]
++            keywords =
+         return self.generic_visit(node)
+ 
+ 

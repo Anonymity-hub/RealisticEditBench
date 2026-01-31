@@ -1,0 +1,18 @@
+diff --git a/sphinx/config.py b/sphinx/config.py
+--- a/sphinx/config.py
++++ b/sphinx/config.py
+@@ -88,10 +88,10 @@ def __init__(self, *candidates: str | bool | None) -> None:
+     def __repr__(self) -> str:
+         return f'ENUM({", ".join(sorted(map(repr, self._candidates)))})'
+ 
+-    def match(self, value: str | Sequence[str | bool | None]) -> bool:
+-        if isinstance(value, frozenset | list | set | tuple):
+-            return all(item in self._candidates for item in value)
+-        return value in self._candidates
++    def match(self, value: str | bool | None | Sequence[str | bool | None]) -> bool:  # NoQA: RUF036
++        if isinstance(value, str | bool | None):
++            return value in self._candidates
++        return all(item in self._candidates for item in value)
+ 
+ 
+ _OptValidTypes: TypeAlias = tuple[()] | tuple[type, ...] | frozenset[type] | ENUM

@@ -1,0 +1,12 @@
+diff --git a/sklearn/model_selection/_validation.py b/sklearn/model_selection/_validation.py
+--- a/sklearn/model_selection/_validation.py
++++ b/sklearn/model_selection/_validation.py
+@@ -1184,7 +1184,7 @@ def cross_val_predict(
+         # methods. For these router methods, we create the router to use
+         # `process_routing` on it.
+         router = (
+-            MetadataRouter(owner="cross_validate")
++            MetadataRouter(owner="cross_val_predict")
+             .add(
+                 splitter=cv,
+                 method_mapping=MethodMapping().add(caller="fit", callee="split"),

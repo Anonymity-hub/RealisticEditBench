@@ -1,0 +1,12 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -513,7 +513,7 @@
+                 k = duck_array_ops.astype(k, np.int64, copy=False)
+             else:
+                 raise TypeError(
+-                    f"unexpected indexer type for {type(self).__name__}: {k!r}"
++                    f"unexpected indexer type for {type(self).__name__}: {k!r}, {type(k)}"
+                 )
+             new_key.append(k)
+ 

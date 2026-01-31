@@ -1,0 +1,12 @@
+diff --git a/astropy/__init__.py b/astropy/__init__.py
+--- a/astropy/__init__.py
++++ b/astropy/__init__.py
+@@ -254,7 +254,7 @@
+ for varname in dir():
+     if not (
+         (varname.startswith("__") and varname.endswith("__"))
+-        or varname in 
++        or varname in __all__
+         or (
+             varname[0] != "_"
+             and isinstance(locals()[varname], __module_type__)

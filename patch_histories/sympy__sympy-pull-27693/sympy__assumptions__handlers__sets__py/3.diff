@@ -1,0 +1,12 @@
+diff --git a/sympy/assumptions/handlers/sets.py b/sympy/assumptions/handlers/sets.py
+--- a/sympy/assumptions/handlers/sets.py
++++ b/sympy/assumptions/handlers/sets.py
+@@ -330,6 +330,8 @@
+         if ask(Q.real(expr.exp), assumptions):
+             if ask(Q.zero(expr.base), assumptions) is not False:
+                 if ask(Q.positive(expr.exp), assumptions):
++                    return True
++                return
+             if expr.exp.is_Rational and \
+                     ask(Q.even(expr.exp.q), assumptions):
+                 return ask(Q.positive(expr.base), assumptions)

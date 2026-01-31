@@ -1,0 +1,14 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -153,6 +153,10 @@ def _numpy_to_netcdf_timeunit(units: NPDatetimeUnitOptions) -> str:
+     }[units]
+ 
+ 
++def _numpy_dtype_to_netcdf_timeunit(dtype: np.dtype) -> str:
++    unit, _ = np.datetime_data(dtype)
++
++
+ def _ensure_padded_year(ref_date: str) -> str:
+     # Reference dates without a padded year (e.g. since 1-1-1 or since 2-3-4)
+     # are ambiguous (is it YMD or DMY?). This can lead to some very odd

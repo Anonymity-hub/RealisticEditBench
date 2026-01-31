@@ -1,0 +1,17 @@
+diff --git a/django/http/request.py b/django/http/request.py
+--- a/django/http/request.py
++++ b/django/http/request.py
+@@ -106,11 +106,12 @@
+         """
+         Return the preferred MediaType instance which matches the given media type.
+         """
++        media_type = MediaType(media_type)
+         return next(
+             (
+                 accepted_type
+                 for accepted_type in self.accepted_types
+-                if accepted_type.match(media_type)
++                if media_type.match(accepted_type)
+             ),
+             None,
+         )

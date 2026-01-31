@@ -1,0 +1,121 @@
+diff --git a/sphinx/application.py b/sphinx/application.py
+--- a/sphinx/application.py
++++ b/sphinx/application.py
+@@ -239,7 +239,7 @@ def __init__(
+         self._fail_on_warnings = bool(warningiserror)
+         self.pdb = pdb
+         self._exception_on_warning = exception_on_warning
+-        logging.setup(self, self._status, self._warning)
++        logging.setup(self, self._status, self._warning, verbosity=verbosity)
+ 
+         self.events = EventManager(self)
+ 
+diff --git a/sphinx/builders/__init__.py b/sphinx/builders/__init__.py
+--- a/sphinx/builders/__init__.py
++++ b/sphinx/builders/__init__.py
+@@ -269,7 +269,7 @@ def cat2relpath(cat: CatalogInfo, srcdir: Path = self.srcdir) -> str:
+             __('writing output... '),
+             'darkgreen',
+             len(catalogs),
+-            self._app.verbosity,
++            self.config.verbosity,
+             stringify_func=cat2relpath,
+         ):
+             catalog.write_mo(
+@@ -587,7 +587,7 @@ def _read_serial(self, docnames: list[str]) -> None:
+             __('reading sources... '),
+             'purple',
+             len(docnames),
+-            self._app.verbosity,
++            self.config.verbosity,
+         ):
+             # remove all inventory entries for that file
+             self.events.emit('env-purge-doc', self.env, docname)
+@@ -604,7 +604,7 @@ def _read_parallel(self, docnames: list[str], nproc: int) -> None:
+             __('reading sources... '),
+             'purple',
+             len(chunks),
+-            self._app.verbosity,
++            self.config.verbosity,
+         )
+ 
+         # clear all outdated docs at once
+@@ -776,7 +776,7 @@ def _write_serial(self, docnames: Sequence[str]) -> None:
+                 __('writing output... '),
+                 'darkgreen',
+                 len(docnames),
+-                self._app.verbosity,
++                self.config.verbosity,
+             ):
+                 _write_docname(docname, env=self.env, builder=self, tags=self.tags)
+ 
+@@ -800,7 +800,7 @@ def write_process(docs: list[tuple[str, nodes.document]]) -> None:
+             __('writing output... '),
+             'darkgreen',
+             len(chunks),
+-            self._app.verbosity,
++            self.config.verbosity,
+         )
+ 
+         def on_chunk_done(args: list[tuple[str, nodes.document]], result: None) -> None:
+diff --git a/sphinx/environment/__init__.py b/sphinx/environment/__init__.py
+--- a/sphinx/environment/__init__.py
++++ b/sphinx/environment/__init__.py
+@@ -281,7 +281,9 @@ def setup(self, app: Sphinx) -> None:
+         # The old config is self.config, restored from the pickled environment.
+         # The new config is app.config, always recreated from ``conf.py``
+         self.config_status, self.config_status_extra = self._config_status(
+-            old_config=self.config, new_config=app.config, verbosity=app.verbosity
++            old_config=self.config,
++            new_config=app.config,
++            verbosity=app.config.verbosity,
+         )
+         self.config = app.config
+ 
+diff --git a/sphinx/ext/viewcode.py b/sphinx/ext/viewcode.py
+--- a/sphinx/ext/viewcode.py
++++ b/sphinx/ext/viewcode.py
+@@ -295,7 +295,7 @@ def collect_pages(app: Sphinx) -> Iterator[tuple[str, dict[str, Any], str]]:
+         __('highlighting module code... '),
+         'blue',
+         len(env._viewcode_modules),
+-        app.verbosity,
++        app.config.verbosity,
+         operator.itemgetter(0),
+     ):
+         if not entry:
+diff --git a/sphinx/util/logging.py b/sphinx/util/logging.py
+--- a/sphinx/util/logging.py
++++ b/sphinx/util/logging.py
+@@ -608,8 +608,12 @@ def write(self, data: str) -> None:
+         self._app.messagelog.append(data)
+ 
+ 
+-def setup(app: Sphinx, status: IO[str], warning: IO[str]) -> None:
++def setup(
++    app: Sphinx, status: IO[str], warning: IO[str], *, verbosity: int = 0
++) -> None:
+     """Setup root logger for Sphinx"""
++    log_level = VERBOSITY_MAP[max(verbosity, 0)]
++
+     logger = logging.getLogger(NAMESPACE)
+     logger.setLevel(logging.DEBUG)
+     logger.propagate = False
+@@ -621,7 +625,7 @@ def setup(app: Sphinx, status: IO[str], warning: IO[str]) -> None:
+     info_handler = NewLineStreamHandler(SafeEncodingWriter(status))
+     info_handler.addFilter(InfoFilter())
+     info_handler.addFilter(InfoLogRecordTranslator(app))
+-    info_handler.setLevel(VERBOSITY_MAP[app.verbosity])
++    info_handler.setLevel(log_level)
+     info_handler.setFormatter(ColorizeFormatter())
+ 
+     warning_handler = WarningStreamHandler(SafeEncodingWriter(warning))
+@@ -635,7 +639,7 @@ def setup(app: Sphinx, status: IO[str], warning: IO[str]) -> None:
+ 
+     messagelog_handler = logging.StreamHandler(LastMessagesWriter(app, status))
+     messagelog_handler.addFilter(InfoFilter())
+-    messagelog_handler.setLevel(VERBOSITY_MAP[app.verbosity])
++    messagelog_handler.setLevel(log_level)
+ 
+     logger.addHandler(info_handler)
+     logger.addHandler(warning_handler)

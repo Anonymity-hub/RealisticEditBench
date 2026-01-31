@@ -1,0 +1,15 @@
+diff --git a/xarray/core/utils.py b/xarray/core/utils.py
+--- a/xarray/core/utils.py
++++ b/xarray/core/utils.py
+@@ -255,6 +255,11 @@
+ 
+     if isinstance(first, list) or isinstance(second, list):
+         return list_equiv(first, second)  # type: ignore[arg-type]
++
++    # For non-array/list types, use == but require boolean result
++    result = first == second
++    if not isinstance(result, bool):
++
+     return (first == second) or (pd.isnull(first) and pd.isnull(second))  # type: ignore[call-overload]
+ 
+

@@ -1,0 +1,11 @@
+diff --git a/sklearn/utils/fixes.py b/sklearn/utils/fixes.py
+--- a/sklearn/utils/fixes.py
++++ b/sklearn/utils/fixes.py
+@@ -14,6 +14,7 @@
+ import scipy
+ import scipy.sparse.linalg
+ import scipy.stats
++from scipy import optimize
+ 
+ try:
+     import pandas as pd

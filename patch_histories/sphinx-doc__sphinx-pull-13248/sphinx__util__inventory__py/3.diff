@@ -1,0 +1,33 @@
+diff --git a/sphinx/util/inventory.py b/sphinx/util/inventory.py
+--- a/sphinx/util/inventory.py
++++ b/sphinx/util/inventory.py
+@@ -84,8 +84,12 @@
+             else:
+                 item_type = f'py:{item_type}'
+                 location += f'#{name}'
+-            inv_item: InventoryItem = projname, version, location, '-'
+-            invdata.setdefault(item_type, {})[name] = inv_item
++            invdata.setdefault(item_type, {})[name] = _InventoryItem(
++                project_name=projname,
++                project_version=version,
++                uri=location,
++                display_name='-',
++            )
+         return invdata
+ 
+     @classmethod
+@@ -150,8 +154,12 @@
+             if location.endswith('$'):
+                 location = location[:-1] + name
+             location = posixpath.join(uri, location)
+-            inv_item: InventoryItem = projname, version, location, dispname
+-            invdata.setdefault(type, {})[name] = inv_item
++            invdata.setdefault(type, {})[name] = _InventoryItem(
++                project_name=projname,
++                project_version=version,
++                uri=location,
++                display_name=dispname,
++            )
+         for ambiguity in actual_ambiguities:
+             logger.info(
+                 __('inventory <%s> contains multiple definitions for %s'),

@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -2944,6 +2944,10 @@
+             if len(padding) != len(bars):
+                 raise ValueError(
+                     f"padding must be of length {len(bars)} when passed as a sequence")
++        else:
++            # single value, apply to all labels
++            padding = [padding] * len(bars)
++
+         for bar, err, dat, lbl in itertools.zip_longest(
+                 bars, errs, datavalues, labels
+         ):

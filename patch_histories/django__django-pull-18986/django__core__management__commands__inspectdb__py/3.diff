@@ -1,0 +1,26 @@
+diff --git a/django/core/management/commands/inspectdb.py b/django/core/management/commands/inspectdb.py
+--- a/django/core/management/commands/inspectdb.py
++++ b/django/core/management/commands/inspectdb.py
+@@ -131,6 +131,9 @@
+                 yield ""
+                 yield "class %s(models.Model):" % model_name
+                 known_models.append(model_name)
++
++                if len(primary_key_columns) > 1:
++
+                 used_column_names = []  # Holds column names used in the table so far
+                 column_to_field_name = {}  # Maps column names to names of model fields
+                 used_relations = set()  # Holds foreign relations used in the table.
+@@ -154,12 +157,6 @@
+                     # Add primary_key and unique, if necessary.
+                     if column_name == primary_key_column:
+                         extra_params["primary_key"] = True
+-                        if len(primary_key_columns) > 1:
+-                            comment_notes.append(
+-                                "The composite primary key (%s) found, that is not "
+-                                "supported. The first column is selected."
+-                                % ", ".join(primary_key_columns)
+-                            )
+                     elif column_name in unique_columns:
+                         extra_params["unique"] = True
+ 

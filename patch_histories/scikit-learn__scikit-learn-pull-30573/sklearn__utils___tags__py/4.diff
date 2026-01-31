@@ -1,0 +1,12 @@
+diff --git a/sklearn/utils/_tags.py b/sklearn/utils/_tags.py
+--- a/sklearn/utils/_tags.py
++++ b/sklearn/utils/_tags.py
+@@ -446,7 +446,7 @@
+         "The `_safe_tags` function is deprecated in 1.6 and will be removed in "
+         "1.7. Use the public `get_tags` function instead and make sure to implement "
+         "the `__sklearn_tags__` method.",
+-        category=FutureWarning,
++        category=DeprecationWarning,
+     )
+     tags = _to_old_tags(get_tags(estimator))
+ 

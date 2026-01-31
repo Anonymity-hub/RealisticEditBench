@@ -1,0 +1,30 @@
+diff --git a/lib/matplotlib/ticker.py b/lib/matplotlib/ticker.py
+--- a/lib/matplotlib/ticker.py
++++ b/lib/matplotlib/ticker.py
+@@ -2507,16 +2507,19 @@
+                     offset = olo
+                 decades = range(emin + offset - stride, emax + stride + 1, stride)
+ 
+-        if have_subs:
+-            if stride == 1:
+-                ticklocs = np.concatenate(
+-                    [subs * decade_start for decade_start in b ** decades])
++        # Guess whether we're a minor locator, based on whether subs include
++        # anything other than 1.
++        is_minor = len(subs) > 1 or (len(subs) == 1 and subs[0] != 1.0)
++        if is_minor:
++            if stride == 1 or n_avail <= 1:
++                # Minor ticks start in the decade preceding the first major tick.
++                ticklocs = np.concatenate([
++                    subs * b**decade for decade in range(emin - 1, emax + 1)])
+             else:
+                 ticklocs = np.array([])
+         else:
+-            ticklocs = b ** decades
+-
+-        _log.debug('ticklocs %r', ticklocs)
++            ticklocs = b ** np.array(decades)
++
+         if (len(subs) > 1
+                 and stride == 1
+                 and ((vmin <= ticklocs) & (ticklocs <= vmax)).sum() <= 1):

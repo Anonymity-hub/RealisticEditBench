@@ -1,0 +1,12 @@
+diff --git a/sphinx/registry.py b/sphinx/registry.py
+--- a/sphinx/registry.py
++++ b/sphinx/registry.py
+@@ -12,7 +12,7 @@
+ from sphinx.domains.std import GenericObject, Target
+ from sphinx.errors import ExtensionError, SphinxError, VersionRequirementError
+ from sphinx.extension import Extension
+-from sphinx.io import create_publisher
++from sphinx.io import _create_publisher
+ from sphinx.locale import __
+ from sphinx.parsers import Parser as SphinxParser
+ from sphinx.roles import XRefRole

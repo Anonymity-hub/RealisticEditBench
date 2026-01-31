@@ -1,0 +1,15 @@
+diff --git a/django/forms/models.py b/django/forms/models.py
+--- a/django/forms/models.py
++++ b/django/forms/models.py
+@@ -514,6 +514,11 @@ def validate_unique(self):
+         except ValidationError as e:
+             self._update_errors(e)
+ 
++    def validate_constraints(self):
++        """
++        Call the instance's validate_constraints() method and update the form's
++        validation errors if any were raised.
++        """
+     def _save_m2m(self):
+         """
+         Save the many-to-many fields and generic relations for this form.

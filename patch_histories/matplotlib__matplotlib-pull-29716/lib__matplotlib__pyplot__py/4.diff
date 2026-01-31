@@ -1,0 +1,16 @@
+diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py
+--- a/lib/matplotlib/pyplot.py
++++ b/lib/matplotlib/pyplot.py
+@@ -3117,7 +3117,11 @@
+     **kwargs,
+ ) -> PolyCollection:
+     return gca().broken_barh(
+-        xranges, yrange, **({"data": data} if data is not None else {}), **kwargs
++        xranges,
++        yrange,
++        align=align,
++        **({"data": data} if data is not None else {}),
++        **kwargs,
+     )
+ 
+ 

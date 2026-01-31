@@ -1,0 +1,11 @@
+diff --git a/astropy/utils/data.py b/astropy/utils/data.py
+--- a/astropy/utils/data.py
++++ b/astropy/utils/data.py
+@@ -32,6 +32,7 @@
+     HAS_CERTIFI,
+     HAS_FSSPEC,
+     HAS_LZMA,
++    HAS_UNCOMPRESSPY,
+ )
+ from astropy.utils.exceptions import AstropyDeprecationWarning, AstropyWarning
+ from astropy.utils.introspection import find_current_module

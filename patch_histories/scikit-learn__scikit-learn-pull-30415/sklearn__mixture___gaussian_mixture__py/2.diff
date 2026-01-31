@@ -1,0 +1,12 @@
+diff --git a/sklearn/mixture/_gaussian_mixture.py b/sklearn/mixture/_gaussian_mixture.py
+--- a/sklearn/mixture/_gaussian_mixture.py
++++ b/sklearn/mixture/_gaussian_mixture.py
+@@ -171,7 +171,7 @@
+         The covariance matrix of the current components.
+     """
+     n_components, n_features = means.shape
+-    covariances = np.empty((n_components, n_features, n_features))
++    covariances = np.empty((n_components, n_features, n_features), dtype=X.dtype)
+     for k in range(n_components):
+         diff = X - means[k]
+         covariances[k] = np.dot(resp[:, k] * diff.T, diff) / nk[k]

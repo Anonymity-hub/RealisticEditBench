@@ -1,0 +1,14 @@
+diff --git a/django/contrib/admin/models.py b/django/contrib/admin/models.py
+--- a/django/contrib/admin/models.py
++++ b/django/contrib/admin/models.py
+@@ -24,9 +24,7 @@
+ class LogEntryManager(models.Manager):
+     use_in_migrations = True
+ 
+-    def log_actions(
+-        self, user_id, queryset, action_flag, change_message="", *, single_object=False
+-    ):
++    def log_actions(self, user_id, queryset, action_flag, change_message=""):
+         if isinstance(change_message, list):
+             change_message = json.dumps(change_message)
+ 

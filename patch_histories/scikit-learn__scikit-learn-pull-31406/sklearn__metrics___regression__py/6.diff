@@ -1,0 +1,11 @@
+diff --git a/sklearn/metrics/_regression.py b/sklearn/metrics/_regression.py
+--- a/sklearn/metrics/_regression.py
++++ b/sklearn/metrics/_regression.py
+@@ -19,6 +19,7 @@
+ from ..utils._array_api import (
+     _average,
+     _find_matching_floating_dtype,
++    _median,
+     get_namespace,
+     get_namespace_and_device,
+     size,

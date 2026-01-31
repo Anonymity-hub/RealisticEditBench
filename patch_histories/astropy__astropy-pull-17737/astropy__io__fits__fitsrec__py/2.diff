@@ -1,0 +1,13 @@
+diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py
+--- a/astropy/io/fits/fitsrec.py
++++ b/astropy/io/fits/fitsrec.py
+@@ -93,6 +93,6 @@
+                 raise KeyError(f"Key '{key}' does not exist.")
+         elif isinstance(key, slice):
+             start, stop, step = key.indices(self.array._nfields)
+-            for indx in range(slice.start, slice.stop, slice.step):
++            for i, val in zip(range(start, stop, step), value, strict=True):
+                 indx = self._get_indx(indx)
+                 self.array.field(indx)[self.row] = value
+         else:
+

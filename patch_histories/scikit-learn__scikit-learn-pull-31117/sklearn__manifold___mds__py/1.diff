@@ -1,0 +1,65 @@
+diff --git a/sklearn/manifold/_mds.py b/sklearn/manifold/_mds.py
+--- a/sklearn/manifold/_mds.py
++++ b/sklearn/manifold/_mds.py
+@@ -27,7 +27,7 @@ def _smacof_single(
+     init=None,
+     max_iter=300,
+     verbose=0,
+-    eps=1e-3,
++    eps=1e-6,
+     random_state=None,
+     normalized_stress=False,
+ ):
+@@ -59,18 +59,21 @@ def _smacof_single(
+     verbose : int, default=0
+         Level of verbosity.
+ 
+-    eps : float, default=1e-3
+-        Relative tolerance with respect to stress at which to declare
+-        convergence. The value of `eps` should be tuned separately depending
+-        on whether or not `normalized_stress` is being used.
++    eps : float, default=1e-6
++        The tolerance with respect to stress (normalized by the sum of squared
++        embedding distances) at which to declare convergence.
++
++        .. versionchanged:: 1.7
++           The default value for `eps` has changed from 1e-3 to 1e-6, as a result
++           of a bugfix in the computation of the convergence criterion.
+ 
+     random_state : int, RandomState instance or None, default=None
+         Determines the random number generator used to initialize the centers.
+         Pass an int for reproducible results across multiple function calls.
+         See :term:`Glossary <random_state>`.
+ 
+     normalized_stress : bool, default=False
+-        Whether use and return normalized stress value (Stress-1) instead of raw
++        Whether to return normalized stress value (Stress-1) instead of raw
+         stress.
+ 
+         .. versionadded:: 1.2
+@@ -168,18 +171,20 @@ def _smacof_single(
+         # Compute stress
+         distances = euclidean_distances(X)
+         stress = ((distances.ravel() - disparities.ravel()) ** 2).sum() / 2
+-        if normalized_stress:
+-            stress = np.sqrt(stress / ((disparities.ravel() ** 2).sum() / 2))
+ 
+-        normalization = np.sqrt((X**2).sum(axis=1)).sum()
+         if verbose >= 2:  # pragma: no cover
+             print(f"Iteration {it}, stress {stress:.4f}")
+         if old_stress is not None:
+-            if (old_stress - stress / normalization) < eps:
++            sum_squared_distances = (distances.ravel() ** 2).sum()
++            if ((old_stress - stress) / (sum_squared_distances / 2)) < eps:
+                 if verbose:  # pragma: no cover
+                     print("Convergence criterion reached.")
+                 break
+-        old_stress = stress / normalization
++        old_stress = stress
++
++    if normalized_stress:
++        sum_squared_distances = (distances.ravel() ** 2).sum()
++        stress = np.sqrt(stress / (sum_squared_distances / 2))
+ 
+     return X, stress, it + 1
+ 

@@ -1,0 +1,44 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -1051,15 +1051,11 @@
+                     self.__all__ = inspect.getall(self.object)
+             except ValueError as exc:
+                 # invalid __all__ found.
+-                logger.warning(
+-                    __(
+-                        '__all__ should be a list of strings, not %r '
+-                        '(in module %s) -- ignoring __all__'
+-                    ),
+-                    exc.args[0],
+-                    self.fullname,
+-                    type='autodoc',
++                msg = __(
++                    '__all__ should be a list of strings, not %r '
++                    '(in module %s) -- ignoring __all__'
+                 )
++                logger.warning(msg, exc.args[0], self.props.full_name, type='autodoc')
+ 
+         return self.__all__
+ 
+@@ -1205,9 +1201,8 @@
+             )
+             args = stringify_signature(sig, **kwargs)
+         except TypeError as exc:
+-            logger.warning(
+-                __('Failed to get a function signature for %s: %s'), self.fullname, exc
+-            )
++            msg = __('Failed to get a function signature for %s: %s')
++            logger.warning(msg, self.props.full_name, exc)
+             return ''
+         except ValueError:
+             args = ''
+@@ -1253,6 +1248,8 @@
+             sigs.append(sig)
+ 
+         if inspect.is_singledispatch_function(self.object):
++            from sphinx.ext.autodoc._property_types import _FunctionDefProperties
++
+             # append signature of singledispatch'ed functions
+             for typ, func in self.object.registry.items():
+                 if typ is object:

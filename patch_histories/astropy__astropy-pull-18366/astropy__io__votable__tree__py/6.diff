@@ -1,0 +1,12 @@
+diff --git a/astropy/io/votable/tree.py b/astropy/io/votable/tree.py
+--- a/astropy/io/votable/tree.py
++++ b/astropy/io/votable/tree.py
+@@ -2082,7 +2082,7 @@ def __init__(
+ 
+         # TIMESYS is supported starting in version 1.4
+         if not config.get("version_1_4_or_later"):
+-            warn_or_raise(W54, W54, config["version"], config, pos)
++            warn_or_raise(W54, W54, config.get("version", "unknown"), config, pos)
+ 
+         SimpleElement.__init__(self)
+ 

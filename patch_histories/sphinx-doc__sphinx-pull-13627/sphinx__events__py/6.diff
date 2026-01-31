@@ -1,0 +1,38 @@
+diff --git a/sphinx/events.py b/sphinx/events.py
+--- a/sphinx/events.py
++++ b/sphinx/events.py
+@@ -9,6 +9,7 @@
+ from operator import attrgetter
+ from typing import TYPE_CHECKING, NamedTuple, overload
+ 
++from sphinx.deprecation import _deprecation_warning
+ from sphinx.errors import ExtensionError, SphinxError
+ from sphinx.locale import __
+ from sphinx.util import logging
+@@ -66,17 +67,25 @@ class EventManager:
+     """Event manager for Sphinx."""
+ 
+     def __init__(self, app: Sphinx) -> None:
+-        self.app = app
++        self._app = app
+         self.events = core_events.copy()
+         self.listeners: dict[str, list[EventListener]] = defaultdict(list)
+         self.next_listener_id = 0
+ 
++        # pass through errors for debugging.
++        self._reraise_errors: bool = app.pdb
++
+     def add(self, name: str) -> None:
+         """Register a custom Sphinx event."""
+         if name in self.events:
+             raise ExtensionError(__('Event %r already present') % name)
+         self.events[name] = ''
+ 
++    @property
++    def app(self) -> Sphinx:
++        _deprecation_warning(__name__, 'EventManager.app', remove=(10, 0))
++        return self._app
++
+     # ---- Core events -------------------------------------------------------
+ 
+     @overload

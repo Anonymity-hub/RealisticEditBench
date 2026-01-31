@@ -1,0 +1,51 @@
+diff --git a/sklearn/preprocessing/_data.py b/sklearn/preprocessing/_data.py
+--- a/sklearn/preprocessing/_data.py
++++ b/sklearn/preprocessing/_data.py
+@@ -329,7 +329,16 @@ class MinMaxScaler(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
+
+     clip : bool, default=False
+         Set to True to clip transformed values of held-out data to
+-        provided `feature range`.
++        provided `feature_range`.
++        Since this parameter will clip values, `inverse_transform` may not
++        be able to restore the original data.
++
++        .. note::
++            Setting `clip=True` does not prevent feature drift (a distribution
++            shift between training and test data). The transformed values are clipped
++            to the `feature_range`, which helps avoid unintended behavior in models
++            sensitive to out-of-range inputs (e.g. linear models). Use with care,
++            as clipping can distort the distribution of test data.
+
+         .. versionadded:: 0.24
+
+@@ -1172,6 +1181,18 @@ class MaxAbsScaler(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
+         Set to False to perform inplace scaling and avoid a copy (if the input
+         is already a numpy array).
+
++    clip : bool, default=False
++        Set to True to clip transformed values of held-out data to [-1, 1].
++        Since this parameter will clip values, `inverse_transform` may not
++        be able to restore the original data.
++
++        .. note::
++            Setting `clip=True` does not prevent feature drift (a distribution
++            shift between training and test data). The transformed values are clipped
++            to the [-1, 1] range, which helps avoid unintended behavior in models
++            sensitive to out-of-range inputs (e.g. linear models). Use with care,
++            as clipping can distort the distribution of test data.
++
+     Attributes
+     ----------
+     scale_ : ndarray of shape (n_features,)
+@@ -1224,8 +1245,9 @@ class MaxAbsScaler(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
+ 
+     _parameter_constraints: dict = {"copy": ["boolean"]}
+ 
+-    def __init__(self, *, copy=True):
++    def __init__(self, *, copy=True, clip=False):
+         self.copy = copy
++        self.clip = clip
+ 
+     def _reset(self):
+         """Reset internal data-dependent state of the scaler, if necessary.

@@ -1,0 +1,39 @@
+diff --git a/django/dispatch/dispatcher.py b/django/dispatch/dispatcher.py
+--- a/django/dispatch/dispatcher.py
++++ b/django/dispatch/dispatcher.py
+@@ -28,8 +28,10 @@ class Signal:
+ 
+     Internal attributes:
+ 
+-        receivers
+-            { receiverkey (id) : weakref(receiver) }
++        receivers:
++            [((id(receiver), id(sender)), ref(receiver), ref(sender), is_async)]
++        sender_receivers_cache:
++            WeakKeyDictionary[sender, list[receiver]]
+     """
+ 
+     def __init__(self, use_caching=False):
+@@ -108,7 +110,7 @@ def connect(self, receiver, sender=None, weak=True, dispatch_uid=None):
+                 ref = weakref.WeakMethod
+                 receiver_object = receiver.__self__
+             receiver = ref(receiver)
+-            weakref.finalize(receiver_object, self._remove_receiver)
++            weakref.finalize(receiver_object, self._flag_dead_receivers)
+ 
+         with self.lock:
+             self._clear_dead_receivers()
+@@ -459,11 +461,11 @@ def _live_receivers(self, sender):
+                     non_weak_sync_receivers.append(receiver)
+         return non_weak_sync_receivers, non_weak_async_receivers
+ 
+-    def _remove_receiver(self, receiver=None):
++    def _flag_dead_receivers(self, reference=None):
+         # Mark that the self.receivers list has dead weakrefs. If so, we will
+         # clean those up in connect, disconnect and _live_receivers while
+         # holding self.lock. Note that doing the cleanup here isn't a good
+-        # idea, _remove_receiver() will be called as side effect of garbage
++        # idea, _flag_dead_receivers() will be called as side effect of garbage
+         # collection, and so the call can happen while we are already holding
+         # self.lock.
+         self._dead_receivers = True

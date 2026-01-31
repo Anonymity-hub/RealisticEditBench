@@ -1,0 +1,11 @@
+diff --git a/sympy/functions/combinatorial/numbers.py b/sympy/functions/combinatorial/numbers.py
+--- a/sympy/functions/combinatorial/numbers.py
++++ b/sympy/functions/combinatorial/numbers.py
+@@ -1127,6 +1127,7 @@
+                 return Integer(res)
+         # Euler polynomials
+         elif n.is_Number:
++            from sympy.core.evalf import pure_complex
+             n = int(n)
+             reim = pure_complex(x, or_real=True)
+             return euler_poly(n, x)

@@ -1,0 +1,14 @@
+diff --git a/sphinx/environment/__init__.py b/sphinx/environment/__init__.py
+--- a/sphinx/environment/__init__.py
++++ b/sphinx/environment/__init__.py
+@@ -281,7 +281,9 @@ def setup(self, app: Sphinx) -> None:
+         # The old config is self.config, restored from the pickled environment.
+         # The new config is app.config, always recreated from ``conf.py``
+         self.config_status, self.config_status_extra = self._config_status(
+-            old_config=self.config, new_config=app.config, verbosity=app.verbosity
++            old_config=self.config,
++            new_config=app.config,
++            verbosity=app.config.verbosity,
+         )
+         self.config = app.config
+ 

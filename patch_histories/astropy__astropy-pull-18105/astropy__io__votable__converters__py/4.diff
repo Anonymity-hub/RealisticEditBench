@@ -1,0 +1,68 @@
+diff --git a/astropy/io/votable/converters.py b/astropy/io/votable/converters.py
+--- a/astropy/io/votable/converters.py
++++ b/astropy/io/votable/converters.py
+@@ -403,6 +403,10 @@
+                 value = value.encode("ascii")
+             except ValueError:
+                 vo_raise(E24, (value, self.field_name))
++
++        if self.arraysize != "*" and len(value) > self.arraysize:
++            vo_warn(W46, ("char", self.arraysize), None, None)
++
+         return self._write_length(len(value)) + value
+ 
+     def _binoutput_fixed(self, value, mask):
+@@ -438,14 +442,23 @@
+             self.binoutput = self._binoutput_var
+             self.arraysize = "*"
+         else:
+-            field.arraysize = field.arraysize.removesuffix("*")
++            # Check if this is a bounded variable-length field
++            is_variable = field.arraysize.endswith("*")
++            numeric_part = field.arraysize.removesuffix("*")
+             try:
+-                self.arraysize = int(field.arraysize)
++                self.arraysize = int(numeric_part)
+             except ValueError:
+-                vo_raise(E01, (field.arraysize, "unicode", field.ID), config)
++                vo_raise(E01, (numeric_part, "unicode", field.ID), config)
++
+             self.format = f"U{self.arraysize:d}"
+-            self.binparse = self._binparse_fixed
+-            self.binoutput = self._binoutput_fixed
++
++            if is_variable:
++                self.binparse = self._binparse_var
++                self.binoutput = self._binoutput_var
++            else:
++                self.binparse = self._binparse_fixed
++                self.binoutput = self._binoutput_fixed
++
+             self._struct_format = f">{self.arraysize * 2:d}s"
+ 
+     def parse(self, value, config=None, pos=None):
+@@ -460,6 +473,10 @@
+ 
+     def _binparse_var(self, read):
+         length = self._parse_length(read)
++
++        if self.arraysize != "*" and length > self.arraysize:
++            vo_warn(W46, ("unicodeChar", self.arraysize), None, None)
++
+         return read(length * 2).decode("utf_16_be"), False
+ 
+     def _binparse_fixed(self, read):
+@@ -473,8 +490,12 @@
+     def _binoutput_var(self, value, mask):
+         if mask or value is None or value == "":
+             return _zero_int
++
++        if self.arraysize != "*" and len(value) > self.arraysize:
++            vo_warn(W46, ("unicodeChar", self.arraysize), None, None)
++            value = value[: self.arraysize]
++
+         encoded = value.encode("utf_16_be")
+-        return self._write_length(len(encoded) / 2) + encoded
+ 
+     def _binoutput_fixed(self, value, mask):
+         if mask:

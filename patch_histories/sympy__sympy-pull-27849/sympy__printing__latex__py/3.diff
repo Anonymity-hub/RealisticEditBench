@@ -1,0 +1,20 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -2807,15 +2807,7 @@
+             self._print(h.domain), self._print(h.codomain))
+ 
+     def _print_Manifold(self, manifold):
+-        string = manifold.name.name
+-        if '{' in string:
+-            name, supers, subs = string, [], []
+-        else:
+-            name, supers, subs = split_super_sub(string)
+-
+-            name = translate(name)
+-            supers = [translate(sup) for sup in supers]
+-            subs = [translate(sub) for sub in subs]
++        name, supers, subs = self._split_super_sub(manifold.name.name)
+ 
+         name = r'\text{%s}' % name
+         if supers:

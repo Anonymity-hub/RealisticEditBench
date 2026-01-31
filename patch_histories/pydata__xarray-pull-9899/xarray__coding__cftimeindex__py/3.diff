@@ -1,0 +1,21 @@
+diff --git a/xarray/coding/cftimeindex.py b/xarray/coding/cftimeindex.py
+--- a/xarray/coding/cftimeindex.py
++++ b/xarray/coding/cftimeindex.py
+@@ -371,7 +371,7 @@
+ 
+     def _get_string_slice(self, key):
+         """Adapted from pandas.tseries.index.DatetimeIndex._get_string_slice"""
+-        parsed, resolution = _parse_iso8601_with_reso(self.date_type, key)
++        parsed, resolution = _parse_iso8601(self.date_type, key)
+         try:
+             loc = self._partial_date_slice(resolution, parsed)
+         except KeyError as err:
+@@ -418,7 +418,7 @@
+         if not isinstance(label, str):
+             return label
+
+-        parsed, resolution = _parse_iso8601_with_reso(self.date_type, label)
++        parsed, resolution = _parse_iso8601(self.date_type, label)
+         start, end = _parsed_string_to_bounds(self.date_type, resolution, parsed)
+         if self.is_monotonic_decreasing and len(self) > 1:
+             return end if side == "left" else start

@@ -1,0 +1,31 @@
+diff --git a/xarray/structure/alignment.py b/xarray/structure/alignment.py
+--- a/xarray/structure/alignment.py
++++ b/xarray/structure/alignment.py
+@@ -517,14 +517,25 @@
+         self,
+         matching_indexes: dict[MatchingIndexKey, Index],
+     ) -> dict[Hashable, Any]:
+-        dim_pos_indexers = {}
++        dim_pos_indexers: dict[Hashable, Any] = {}
++        dim_index: dict[Hashable, Index] = {}
+ 
+         for key, aligned_idx in self.aligned_indexes.items():
+             obj_idx = matching_indexes.get(key)
+             if obj_idx is not None:
+                 if self.reindex[key]:
+                     indexers = obj_idx.reindex_like(aligned_idx, **self.reindex_kwargs)
+-                    dim_pos_indexers.update(indexers)
++                    for dim, idxer in indexers.items():
++                        if dim in dim_pos_indexers and not np.array_equal(
++                            idxer, dim_pos_indexers[dim]
++                        ):
++                            raise AlignmentError(
++                                f"cannot reindex or align along dimension {dim!r} because "
++                                "of conflicting re-indexers returned by multiple indexes\n"
++                                f"first index: {obj_idx!r}\nsecond index: {dim_index[dim]!r}\n"
++                            )
++                        dim_pos_indexers[dim] = idxer
++                        dim_index[dim] = obj_idx
+ 
+         return dim_pos_indexers
+ 

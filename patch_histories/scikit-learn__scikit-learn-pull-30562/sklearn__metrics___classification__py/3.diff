@@ -1,0 +1,18 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -495,7 +495,13 @@
+     # counting operations implemented by SciPy in the coo_matrix constructor.
+     # The final results will be converted back to the input namespace and device
+     # for the sake of consistency with other metric functions with array API support.
+-
++    y_true = _convert_to_numpy(y_true, xp)
++    y_pred = _convert_to_numpy(y_pred, xp)
++    if sample_weight is None:
++        sample_weight = np.ones(y_true.shape[0], dtype=np.int64)
++    else:
++        sample_weight = _convert_to_numpy(sample_weight, xp)
++
+     if y_type not in ("binary", "multiclass"):
+         raise ValueError("%s is not supported" % y_type)
+ 

@@ -1,0 +1,14 @@
+diff --git a/sphinx/ext/apidoc/_extension.py b/sphinx/ext/apidoc/_extension.py
+--- a/sphinx/ext/apidoc/_extension.py
++++ b/sphinx/ext/apidoc/_extension.py
+@@ -217,7 +217,6 @@ def _parse_module_options(
+         dest_dir=dest_path,
+         module_path=module_path,
+         exclude_pattern=exclude_patterns,
+-        automodule_options=automodule_options,
+         max_depth=max_depth,
+         quiet=True,
+         follow_links=bool_options['follow_links'],
+
+ 
+ 

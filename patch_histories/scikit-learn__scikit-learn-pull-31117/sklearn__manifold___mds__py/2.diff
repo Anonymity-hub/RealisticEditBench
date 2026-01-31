@@ -1,0 +1,102 @@
+diff --git a/sklearn/manifold/_mds.py b/sklearn/manifold/_mds.py
+--- a/sklearn/manifold/_mds.py
++++ b/sklearn/manifold/_mds.py
+@@ -189,13 +189,14 @@
+     return X, stress, it + 1
+ 
+ 
++# TODO(1.9): change default `n_init` to 1, see PR #31117
+ @validate_params(
+     {
+         "dissimilarities": ["array-like"],
+         "metric": ["boolean"],
+         "n_components": [Interval(Integral, 1, None, closed="left")],
+         "init": ["array-like", None],
+-        "n_init": [Interval(Integral, 1, None, closed="left")],
++        "n_init": [Interval(Integral, 1, None, closed="left"), StrOptions({"warn"})],
+         "n_jobs": [Integral, None],
+         "max_iter": [Interval(Integral, 1, None, closed="left")],
+         "verbose": ["verbose"],
+@@ -212,11 +213,11 @@
+     metric=True,
+     n_components=2,
+     init=None,
+-    n_init=8,
++    n_init="warn",
+     n_jobs=None,
+     max_iter=300,
+     verbose=0,
+-    eps=1e-3,
++    eps=1e-6,
+     random_state=None,
+     return_n_iter=False,
+     normalized_stress="auto",
+@@ -267,6 +268,9 @@
+         determined by the run with the smallest final stress. If ``init`` is
+         provided, this option is overridden and a single run is performed.
+ 
++        .. versionchanged:: 1.9
++           The default value for `n_iter` will change from 8 to 1 in version 1.9.
++
+     n_jobs : int, default=None
+         The number of jobs to use for the computation. If multiple
+         initializations are used (``n_init``), each run of the algorithm is
+@@ -282,10 +286,13 @@
+     verbose : int, default=0
+         Level of verbosity.
+ 
+-    eps : float, default=1e-3
+-        Relative tolerance with respect to stress at which to declare
+-        convergence. The value of `eps` should be tuned separately depending
+-        on whether or not `normalized_stress` is being used.
++    eps : float, default=1e-6
++        The tolerance with respect to stress (normalized by the sum of squared
++        embedding distances) at which to declare convergence.
++
++        .. versionchanged:: 1.7
++           The default value for `eps` has changed from 1e-3 to 1e-6, as a result
++           of a bugfix in the computation of the convergence criterion.
+ 
+     random_state : int, RandomState instance or None, default=None
+         Determines the random number generator used to initialize the centers.
+@@ -295,7 +302,7 @@
+     return_n_iter : bool, default=False
+         Whether or not to return the number of iterations.
+ 
+-    normalized_stress : bool or "auto" default="auto"
++    normalized_stress : bool or "auto", default="auto"
+         Whether to return normalized stress value (Stress-1) instead of raw
+         stress. By default, metric MDS returns raw stress while non-metric MDS
+         returns normalized stress.
+@@ -340,16 +347,23 @@
+     >>> import numpy as np
+     >>> from sklearn.manifold import smacof
+     >>> from sklearn.metrics import euclidean_distances
+-    >>> X = np.array([[0, 1, 2], [1, 0, 3],[2, 3, 0]])
++    >>> X = np.array([[0, 1, 2], [1, 0, 3], [2, 3, 0]])
+     >>> dissimilarities = euclidean_distances(X)
+-    >>> mds_result, stress = smacof(dissimilarities, n_components=2, random_state=42)
+-    >>> np.round(mds_result, 5)
+-    array([[ 0.05352, -1.07253],
+-           [ 1.74231, -0.75675],
+-           [-1.79583,  1.82928]])
+-    >>> np.round(stress, 5).item()
+-    0.00128
++    >>> Z, stress = smacof(
++    ...     dissimilarities, n_components=2, n_init=1, eps=1e-6, random_state=42
++    ... )
++    >>> Z.shape
++    (3, 2)
++    >>> np.round(stress, 6).item()
++    3.2e-05
+     """
++
++    if n_init == "warn":
++        warnings.warn(
++            "The default value of `n_init` will change from 8 to 1 in 1.9.",
++            FutureWarning,
++        )
++        n_init = 8
+ 
+     dissimilarities = check_array(dissimilarities)
+     random_state = check_random_state(random_state)

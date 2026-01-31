@@ -1,0 +1,54 @@
+diff --git a/xarray/core/datatree_render.py b/xarray/core/datatree_render.py
+--- a/xarray/core/datatree_render.py
++++ b/xarray/core/datatree_render.py
+@@ -10,6 +10,7 @@
+ 
+ from collections import namedtuple
+ from collections.abc import Iterable, Iterator
++from math import ceil
+ from typing import TYPE_CHECKING
+ 
+ if TYPE_CHECKING:
+@@ -79,6 +80,7 @@
+         style=None,
+         childiter: type = list,
+         maxlevel: int | None = None,
++        maxchildren: int | None = None,
+     ):
+         """
+         Render tree starting at `node`.
+@@ -88,6 +90,7 @@
+                 Iterables that change the order of children  cannot be used
+                 (e.g., `reversed`).
+             maxlevel: Limit rendering to this depth.
++            maxchildren: Limit number of children at each node.
+         :any:`RenderDataTree` is an iterator, returning a tuple with 3 items:
+         `pre`
+             tree prefix.
+@@ -160,6 +163,16 @@
+         root
+         ├── sub0
+         └── sub1
++
++        # `maxchildren` limits the number of children per node
++
++        >>> print(RenderDataTree(root, maxchildren=1).by_attr("name"))
++        root
++        ├── sub0
++        │   ├── sub0B
++        │   ...
++        ...
++
+         """
+         if style is None:
+             style = ContStyle()
+@@ -264,6 +277,9 @@
+ 
+         def get() -> Iterator[str]:
+             for pre, fill, node in self:
++                if isinstance(node, str):
++                    yield f"{fill}{node}"
++                    continue
+                 attr = (
+                     attrname(node)
+                     if callable(attrname)

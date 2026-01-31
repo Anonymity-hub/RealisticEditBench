@@ -1,0 +1,16 @@
+diff --git a/django/contrib/admin/widgets.py b/django/contrib/admin/widgets.py
+--- a/django/contrib/admin/widgets.py
++++ b/django/contrib/admin/widgets.py
+@@ -284,11 +284,9 @@ def __init__(
+         if can_add_related is None:
+             can_add_related = admin_site.is_registered(rel.model)
+         self.can_add_related = can_add_related
+-        # XXX: The UX does not support multiple selected values.
+-        multiple = getattr(widget, "allow_multiple_selected", False)
+         if not isinstance(widget, AutocompleteMixin):
+             self.attrs["data-context"] = "available-source"
+-        self.can_change_related = not multiple and can_change_related
++        # Only single-select Select widgets are supported.
+         # XXX: The deletion UX can be confusing when dealing with cascading
+         # deletion.
+         cascade = getattr(rel, "on_delete", None) is CASCADE

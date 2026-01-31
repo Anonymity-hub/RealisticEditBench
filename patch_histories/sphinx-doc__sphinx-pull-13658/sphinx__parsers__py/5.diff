@@ -1,0 +1,12 @@
+diff --git a/sphinx/parsers.py b/sphinx/parsers.py
+--- a/sphinx/parsers.py
++++ b/sphinx/parsers.py
+@@ -11,7 +11,7 @@
+ from docutils.transforms.universal import SmartQuotes
+ 
+ from sphinx.deprecation import _deprecation_warning
+-from sphinx.util.rst import append_epilog, prepend_prolog
++from sphinx.util.rst import _append_epilogue, _prepend_prologue
+ 
+ if TYPE_CHECKING:
+     from docutils import nodes

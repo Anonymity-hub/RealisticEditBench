@@ -1,0 +1,11 @@
+diff --git a/sympy/matrices/expressions/blockmatrix.py b/sympy/matrices/expressions/blockmatrix.py
+--- a/sympy/matrices/expressions/blockmatrix.py
++++ b/sympy/matrices/expressions/blockmatrix.py
+@@ -585,6 +585,7 @@
+     """
+     def __new__(cls, *mats):
+         mats = [_sympify(m) for m in mats]
++        for mat in mats:
+ 
+     @property
+     def diag(self):

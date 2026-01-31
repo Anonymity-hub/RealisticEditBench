@@ -1,0 +1,11 @@
+diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py
+--- a/astropy/io/fits/fitsrec.py
++++ b/astropy/io/fits/fitsrec.py
+@@ -92,6 +92,7 @@ def __setitem__(self, key, value):
+             if indx < self.start or indx > self.end - 1:
+                 raise KeyError(f"Key '{key}' does not exist.")
+         elif isinstance(key, slice):
++            start, stop, step = key.indices(self.array._nfields)
+             for indx in range(slice.start, slice.stop, slice.step):
+                 indx = self._get_indx(indx)
+                 self.array.field(indx)[self.row] = value

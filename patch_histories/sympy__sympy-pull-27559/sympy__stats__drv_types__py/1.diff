@@ -1,0 +1,20 @@
+diff --git a/sympy/stats/drv_types.py b/sympy/stats/drv_types.py
+--- a/sympy/stats/drv_types.py
++++ b/sympy/stats/drv_types.py
+@@ -475,13 +475,15 @@ def NegativeBinomial(name, r, p):
+     The density of the Negative Binomial distribution is given by
+ 
+     .. math::
+-        f(k) := \binom{k + r - 1}{k} (1 - p)^r p^k
++        f(k) := \binom{k + r - 1}{k} (1 - p)^k p^r
+ 
+     Parameters
+     ==========
+ 
+     r : A positive value
++        Number of successes until the experiment is stopped.
+     p : A value between 0 and 1
++        Probability of success.
+ 
+     Returns
+     =======

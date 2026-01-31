@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/ticker.py b/lib/matplotlib/ticker.py
+--- a/lib/matplotlib/ticker.py
++++ b/lib/matplotlib/ticker.py
+@@ -2522,7 +2522,7 @@
+ 
+         if (len(subs) > 1
+                 and stride == 1
+-                and (
++                and (len(decades) - 2  # major
+                      + ((vmin <= ticklocs) & (ticklocs <= vmax)).sum())  # minor
+                      <= 1):
+             # If we're a minor locator *that expects at least two ticks per

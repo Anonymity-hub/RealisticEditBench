@@ -1,0 +1,105 @@
+diff --git a/lib/matplotlib/_afm.py b/lib/matplotlib/_afm.py
+--- a/lib/matplotlib/_afm.py
++++ b/lib/matplotlib/_afm.py
+@@ -78,7 +78,36 @@
+         return True
+ 
+ 
+-def _parse_header(fh):
++class FontMetricsHeader(TypedDict, total=False):
++    StartFontMetrics: float
++    FontName: str
++    FullName: str
++    FamilyName: str
++    Weight: str
++    ItalicAngle: float
++    IsFixedPitch: bool
++    FontBBox: list[int]
++    UnderlinePosition: float
++    UnderlineThickness: float
++    Version: str
++    # Some AFM files have non-ASCII characters (which are not allowed by the spec).
++    # Given that there is actually no public API to even access this field, just return
++    # it as straight bytes.
++    Notice: bytes
++    EncodingScheme: str
++    CapHeight: float  # Is the second version a mistake, or
++    Capheight: float  # do some AFM files contain 'Capheight'? -JKS
++    XHeight: float
++    Ascender: float
++    Descender: float
++    StdHW: float
++    StdVW: float
++    StartCharMetrics: int
++    CharacterSet: str
++    Characters: int
++
++
++def _parse_header(fh: BinaryIO) -> FontMetricsHeader:
+     """
+     Read the font metrics header (up to the char metrics).
+ 
+@@ -99,34 +128,15 @@
+             * '-168 -218 1000 898' -> [-168, -218, 1000, 898]
+     """
+     header_converters = {
+-        b'StartFontMetrics': _to_float,
+-        b'FontName': _to_str,
+-        b'FullName': _to_str,
+-        b'FamilyName': _to_str,
+-        b'Weight': _to_str,
+-        b'ItalicAngle': _to_float,
+-        b'IsFixedPitch': _to_bool,
+-        b'FontBBox': _to_list_of_ints,
+-        b'UnderlinePosition': _to_float,
+-        b'UnderlineThickness': _to_float,
+-        b'Version': _to_str,
+-        # Some AFM files have non-ASCII characters (which are not allowed by
+-        # the spec).  Given that there is actually no public API to even access
+-        # this field, just return it as straight bytes.
+-        b'Notice': lambda x: x,
+-        b'EncodingScheme': _to_str,
+-        b'CapHeight': _to_float,  # Is the second version a mistake, or
+-        b'Capheight': _to_float,  # do some AFM files contain 'Capheight'? -JKS
+-        b'XHeight': _to_float,
+-        b'Ascender': _to_float,
+-        b'Descender': _to_float,
+-        b'StdHW': _to_float,
+-        b'StdVW': _to_float,
+-        b'StartCharMetrics': _to_int,
+-        b'CharacterSet': _to_str,
+-        b'Characters': _to_int,
++        bool: _to_bool,
++        bytes: lambda x: x,
++        float: _to_float,
++        int: _to_int,
++        list[int]: _to_list_of_ints,
++        str: _to_str,
+     }
+-    d = {}
++    header_value_types = inspect.get_annotations(FontMetricsHeader)
++    d: FontMetricsHeader = {}
+     first_line = True
+     for line in fh:
+         line = line.rstrip()
+@@ -148,14 +158,16 @@
+         else:
+             val = b''
+         try:
+-            converter = header_converters[key]
+-        except KeyError:
++            key_str = _to_str(key)
++            value_type = header_value_types[key_str]
++        except (KeyError, UnicodeDecodeError):
+             _log.error("Found an unknown keyword in AFM header (was %r)", key)
+             continue
+         try:
+-            d[key] = converter(val)
++            converter = header_converters[value_type]
++            d[key_str] = converter(val)  # type: ignore[literal-required]
+         except ValueError:
+-            _log.error('Value error parsing header in AFM: %s, %s', key, val)
++            _log.error('Value error parsing header in AFM: %r, %r', key, val)
+             continue
+         if key == b'StartCharMetrics':
+             break

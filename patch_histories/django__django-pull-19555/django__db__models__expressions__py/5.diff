@@ -1,0 +1,12 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1629,6 +1629,8 @@
+             c.condition = self.condition.resolve_expression(
+                 query, allow_joins, reuse, summarize, for_save=False
+             )
++        return c
++
+     def get_source_fields(self):
+         # We're only interested in the fields of the result expressions.
+         return [self.result._output_field_or_none]

@@ -1,0 +1,15 @@
+diff --git a/sklearn/linear_model/_glm/_newton_solver.py b/sklearn/linear_model/_glm/_newton_solver.py
+--- a/sklearn/linear_model/_glm/_newton_solver.py
++++ b/sklearn/linear_model/_glm/_newton_solver.py
+@@ -477,6 +477,11 @@
+             n_classes = self.linear_loss.base_loss.n_classes
+             coef = self.coef.reshape(n_classes, -1, order="F")  # easier as 2d
+             coef -= coef[-1, :]  # coef -= coef of last class
++        elif self.is_multinomial_with_intercept:
++            # See inner_solve. Same as above, but only for the intercept.
++            n_classes = self.linear_loss.base_loss.n_classes
++            # intercept -= intercept of last class
++            self.coef[-n_classes:] -= self.coef[-1]
+ 
+     def update_gradient_hessian(self, X, y, sample_weight):
+         _, _, self.hessian_warning = self.linear_loss.gradient_hessian(

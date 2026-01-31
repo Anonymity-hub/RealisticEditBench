@@ -1,0 +1,12 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -496,7 +496,7 @@ def __init__(
+ 
+         new_key = []
+         for k in key:
+-            if isinstance(k, integer_types):
++            if isinstance(k, integer_types) and not isinstance(k, bool):
+                 k = int(k)
+             elif isinstance(k, slice):
+                 k = as_integer_slice(k)

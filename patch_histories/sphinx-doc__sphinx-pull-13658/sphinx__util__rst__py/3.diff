@@ -1,0 +1,46 @@
+diff --git a/sphinx/util/rst.py b/sphinx/util/rst.py
+--- a/sphinx/util/rst.py
++++ b/sphinx/util/rst.py
+@@ -1,11 +1,11 @@
+-"""reST helper functions."""
++"""reStructuredText helper functions."""
+ 
+ from __future__ import annotations
+ 
+ import re
+ from collections import defaultdict
+ from contextlib import contextmanager
+-from typing import TYPE_CHECKING, cast
++from typing import TYPE_CHECKING
+ from unicodedata import east_asian_width
+ 
+ from docutils.parsers.rst import roles
+@@ -101,16 +101,15 @@
+     content.insert(pos + lineno + 1, '', '<generated>', 0)
+ 
+ 
+-def append_epilog(content: StringList, epilog: str) -> None:
+-    """Append a string to content body as epilog."""
+-    if epilog:
+-        if len(content) > 0:
+-            source, lineno = content.info(-1)
+-            # lineno will never be None, since len(content) > 0
+-            lineno = cast('int', lineno)
+-        else:
+-            source = '<generated>'
+-            lineno = 0
+-        content.append('', source, lineno + 1)
+-        for lineno, line in enumerate(epilog.splitlines()):
+-            content.append(line, '<rst_epilog>', lineno)
++def _append_epilogue(content: StringList, epilogue: str) -> None:
++    """Append a string to content body as an epilogue."""
++    if not epilogue:
++        return
++    if len(content) > 0:
++        source, lineno = content.items[-1]
++    else:
++        source = '<generated>'
++        lineno = 0
++    content.append('', source, lineno + 1)
++    for lineno, line in enumerate(epilogue.splitlines()):
++        content.append(line, '<rst_epilogue>', lineno)

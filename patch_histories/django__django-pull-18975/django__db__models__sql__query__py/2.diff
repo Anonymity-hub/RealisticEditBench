@@ -1,0 +1,12 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -1704,7 +1704,7 @@
+                             "relations outside the %r (got %r)."
+                             % (filtered_relation.relation_name, lookup)
+                         )
+-            if len(lookup_field_parts) > :
++            if len(lookup_field_parts) > len(relation_field_parts) + 1:
+                 raise ValueError(
+                     "FilteredRelation's condition doesn't support nested "
+                     "relations deeper than the relation_name (got %r for "

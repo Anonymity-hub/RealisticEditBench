@@ -1,0 +1,12 @@
+diff --git a/django/contrib/contenttypes/fields.py b/django/contrib/contenttypes/fields.py
+--- a/django/contrib/contenttypes/fields.py
++++ b/django/contrib/contenttypes/fields.py
+@@ -209,7 +209,7 @@
+ 
+         return (
+             ret_val,
+-            lambda obj: (obj.pk, obj.__class__),
++            lambda obj: (obj._meta.pk.value_to_string(obj), obj.__class__),
+             gfk_key,
+             True,
+             self.name,

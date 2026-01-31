@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/colorbar.py b/lib/matplotlib/colorbar.py
+--- a/lib/matplotlib/colorbar.py
++++ b/lib/matplotlib/colorbar.py
+@@ -1455,8 +1455,7 @@
+ 
+     cax = fig.add_axes(pbcb, label="<colorbar>")
+     for a in parents:
+-        # tell the parent it has a colorbar
+-        a._colorbars += [cax]
++        a._colorbars.append(cax)  # tell the parent it has a colorbar
+     cax._colorbar_info = dict(
+         parents=parents,
+         location=location,

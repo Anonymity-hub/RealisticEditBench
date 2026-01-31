@@ -1,0 +1,13 @@
+diff --git a/sympy/polys/densetools.py b/sympy/polys/densetools.py
+--- a/sympy/polys/densetools.py
++++ b/sympy/polys/densetools.py
+@@ -931,6 +931,9 @@
+     else:
+         f = list(f)
+ 
++    if a0:
++        n = len(f) - 1
++
+ 
+ 
+ def dup_transform(f, p, q, K):

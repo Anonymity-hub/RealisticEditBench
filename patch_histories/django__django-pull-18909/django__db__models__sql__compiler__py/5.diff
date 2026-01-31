@@ -1,0 +1,15 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1860,7 +1860,10 @@
+             value_rows = list(zip(*value_cols))
+             result.append("(%s)" % ", ".join(qn(f.column) for f in fields))
+         else:
+-            # An empty object.
++            # No fields were specified but an INSERT statement must include at
++            # least one column. This can only happen when the model's primary
++            # key is composed of a single auto-field so default to including it
++            # as a placeholder to generate a valid INSERT statement.
+             value_rows = [
+                 [self.connection.ops.pk_default_value()] for _ in self.query.objs
+             ]

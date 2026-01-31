@@ -1,0 +1,11 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -44,6 +44,7 @@
+ from django.db.models.sql.constants import INNER, LOUTER, ORDER_DIR, SINGLE
+ from django.db.models.sql.datastructures import BaseTable, Empty, Join, MultiJoin
+ from django.db.models.sql.where import AND, OR, ExtraWhere, NothingNode, WhereNode
++from django.utils.deprecation import RemovedInDjango70Warning
+ from django.utils.functional import cached_property
+ from django.utils.regex_helper import _lazy_re_compile
+ from django.utils.tree import Node

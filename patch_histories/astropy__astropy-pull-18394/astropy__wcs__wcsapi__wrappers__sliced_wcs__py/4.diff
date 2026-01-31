@@ -1,0 +1,12 @@
+diff --git a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+--- a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
++++ b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+@@ -284,7 +284,7 @@
+         if isinstance(pixel_arrays, np.ndarray) and not pixel_arrays.shape:
+             return pixel_arrays
+         pixel = tuple(pixel_arrays[ip] for ip in self._pixel_keep)
+-        if self.pixel_n_dim == 1 and self._wcs.pixel_n_dim > 1:
++        if self.pixel_n_dim == 1:
+             pixel = pixel[0]
+         return pixel
+ 

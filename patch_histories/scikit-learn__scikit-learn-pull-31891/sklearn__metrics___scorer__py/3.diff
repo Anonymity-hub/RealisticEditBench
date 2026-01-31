@@ -1,0 +1,12 @@
+diff --git a/sklearn/metrics/_scorer.py b/sklearn/metrics/_scorer.py
+--- a/sklearn/metrics/_scorer.py
++++ b/sklearn/metrics/_scorer.py
+@@ -270,7 +270,7 @@
+         kwargs_string = "".join([f", {k}={v}" for k, v in self._kwargs.items()])
+ 
+         return (
+-            f"make_scorer({self._score_func.__name__}{sign_string}"
++            f"make_scorer({_get_func_repr_or_name(self._score_func)}{sign_string}"
+             f"{response_method_string}{kwargs_string})"
+         )
+ 

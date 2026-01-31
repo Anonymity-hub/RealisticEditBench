@@ -1,0 +1,26 @@
+diff --git a/sphinx/domains/python/_annotations.py b/sphinx/domains/python/_annotations.py
+--- a/sphinx/domains/python/_annotations.py
++++ b/sphinx/domains/python/_annotations.py
+@@ -124,6 +124,10 @@ def unparse(node: ast.AST) -> list[Node]:
+                 return [nodes.Text(repr(node.value))]
+         if isinstance(node, ast.Expr):
+             return unparse(node.value)
++        if isinstance(node, ast.Starred):
++            result = [addnodes.desc_sig_operator('', '*')]
++            result.extend(unparse(node.value))
++            return result
+         if isinstance(node, ast.Invert):
+             return [addnodes.desc_sig_punctuation('', '~')]
+         if isinstance(node, ast.USub):
+diff --git a/sphinx/pycode/ast.py b/sphinx/pycode/ast.py
+--- a/sphinx/pycode/ast.py
++++ b/sphinx/pycode/ast.py
+@@ -202,5 +202,8 @@ def visit_Tuple(self, node: ast.Tuple) -> str:
+         else:
+             return '(' + ', '.join(self.visit(e) for e in node.elts) + ')'
+ 
++    def visit_Starred(self, node: ast.Starred) -> str:
++        return f'*{self.visit(node.value)}'
++
+     def generic_visit(self, node: ast.AST) -> NoReturn:
+         raise NotImplementedError('Unable to parse %s object' % type(node).__name__)

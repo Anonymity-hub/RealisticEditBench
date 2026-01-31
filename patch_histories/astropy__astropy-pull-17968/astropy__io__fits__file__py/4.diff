@@ -1,0 +1,32 @@
+diff --git a/astropy/io/fits/file.py b/astropy/io/fits/file.py
+--- a/astropy/io/fits/file.py
++++ b/astropy/io/fits/file.py
+@@ -568,7 +568,19 @@
+             bzip2_mode = "w" if is_ostream else "r"
+             self._file = bz2.BZ2File(obj_or_name, mode=bzip2_mode)
+             self.compression = "bzip2"
+-        elif
++        elif (is_ostream and ext == ".xz") or magic.startswith(LZMA_MAGIC):
++            # Handle lzma files
++            if mode in ["update", "append"]:
++                raise OSError(
++                    "update and append modes are not supported with lzma files"
++                )
++            if not HAS_LZMA:
++                raise ModuleNotFoundError(
++                    "This Python installation does not provide the lzma module."
++                )
++            lzma_mode = "w" if is_ostream else "r"
++            self._file = lzma.LZMAFile(obj_or_name, mode=lzma_mode)
++            self.compression = "lzma"
+         return self.compression is not None
+ 
+     def _open_fileobj(self, fileobj, mode, overwrite):
+@@ -666,7 +678,6 @@
+         # Make certain we're back at the beginning of the file
+         # BZ2File does not support seek when the file is open for writing, but
+         # when opening a file for write, bz2.BZ2File always truncates anyway.
+-        if not (_is_bz2file(self._file) and mode == "ostream"):
+             self._file.seek(0)
+ 
+     @classproperty(lazy=True)

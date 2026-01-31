@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py
+--- a/lib/matplotlib/offsetbox.py
++++ b/lib/matplotlib/offsetbox.py
+@@ -1097,7 +1097,7 @@
+     # This is only called internally and *loc* should already have been
+     # validated.  If 0 (None), we just let ``bbox.anchored`` raise.
+     c = [None, "NE", "NW", "SW", "SE", "E", "W", "E", "S", "N", "C"][loc]
+-    container = parentbbox.padded(-borderpad)
++    container = parentbbox.padded(-pad_x, -pad_y)
+     return bbox.anchored(c, container=container).p0
+ 
+ 

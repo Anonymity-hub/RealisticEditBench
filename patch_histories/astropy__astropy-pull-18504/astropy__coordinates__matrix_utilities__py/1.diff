@@ -1,0 +1,23 @@
+diff --git a/astropy/coordinates/matrix_utilities.py b/astropy/coordinates/matrix_utilities.py
+--- a/astropy/coordinates/matrix_utilities.py
++++ b/astropy/coordinates/matrix_utilities.py
+@@ -53,16 +53,10 @@ def rotation_matrix(angle, axis="z", unit=None):
+     rmat : `numpy.matrix`
+         A unitary rotation matrix.
+     """
+-    if isinstance(angle, u.Quantity):
+-        angle = angle.to_value(u.radian)
+-    else:
+-        if unit is None:
+-            angle = np.deg2rad(angle)
+-        else:
+-            angle = u.Unit(unit).to(u.rad, angle)
++    if not isinstance(angle, u.Quantity):
+ 
+-    s = np.sin(angle)
+-    c = np.cos(angle)
++    s = np.sin(angle_in_rad)
++    c = np.cos(angle_in_rad)
+ 
+     # use optimized implementations for x/y/z
+     try:

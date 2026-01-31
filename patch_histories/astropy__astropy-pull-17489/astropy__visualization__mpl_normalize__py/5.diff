@@ -1,0 +1,26 @@
+diff --git a/astropy/visualization/mpl_normalize.py b/astropy/visualization/mpl_normalize.py
+--- a/astropy/visualization/mpl_normalize.py
++++ b/astropy/visualization/mpl_normalize.py
+@@ -435,6 +435,22 @@
+         return axim
+ 
+ 
++@future_keyword_only(
++    [
++        "power",
++        "asinh_a",
++        "vmin",
++        "vmax",
++        "min_percent",
++        "max_percent",
++        "percent",
++        "clip",
++        "log_a",
++        "invalid",
++        "sinh_a",
++    ],
++    since=["7.1"] * 11,
++)
+ @deprecated_renamed_argument(["min_cut", "max_cut"], ["vmin", "vmax"], ["6.1", "6.1"])
+ def simple_norm(
+     data,

@@ -1,0 +1,14 @@
+diff --git a/xarray/structure/alignment.py b/xarray/structure/alignment.py
+--- a/xarray/structure/alignment.py
++++ b/xarray/structure/alignment.py
+@@ -35,6 +35,10 @@
+     )
+ 
+ 
++class AlignmentError(ValueError):
++    """Error class for alignment failures due to incompatible arguments."""
++
++
+ def reindex_variables(
+     variables: Mapping[Any, Variable],
+     dim_pos_indexers: Mapping[Any, Any],

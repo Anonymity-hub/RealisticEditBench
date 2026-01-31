@@ -1,0 +1,71 @@
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -3360,6 +3360,67 @@
+         """The individual norms held by this `MultiNorm`."""
+         return self._norms
+ 
++    @property
++    def vmin(self):
++        """The lower limit of each constituent norm."""
++        return tuple(n.vmin for n in self._norms)
++
++    @vmin.setter
++    def vmin(self, values):
++        if values is None:
++            return
++        if not np.iterable(values) or len(values) != self.n_components:
++            raise ValueError("*vmin* must have one component for each norm. "
++                             f"Expected an iterable of length {self.n_components}, "
++                             f"but got {values!r}")
++        with self.callbacks.blocked():
++            for norm, v in zip(self.norms, values):
++                norm.vmin = v
++        self._changed()
++
++    @property
++    def vmax(self):
++        """The upper limit of each constituent norm."""
++        return tuple(n.vmax for n in self._norms)
++
++    @vmax.setter
++    def vmax(self, values):
++        if values is None:
++            return
++        if not np.iterable(values) or len(values) != self.n_components:
++            raise ValueError("*vmax* must have one component for each norm. "
++                             f"Expected an iterable of length {self.n_components}, "
++                             f"but got {values!r}")
++        with self.callbacks.blocked():
++            for norm, v in zip(self.norms, values):
++                norm.vmax = v
++        self._changed()
++
++    @property
++    def clip(self):
++        """The clip behaviour of each constituent norm."""
++        return tuple(n.clip for n in self._norms)
++
++    @clip.setter
++    def clip(self, values):
++        if values is None:
++            return
++        if not np.iterable(values) or len(values) != self.n_components:
++            raise ValueError("*clip* must have one component for each norm. "
++                             f"Expected an iterable of length {self.n_components}, "
++                             f"but got {values!r}")
++        with self.callbacks.blocked():
++            for norm, v in zip(self.norms, values):
++                norm.clip = v
++        self._changed()
++
++    def _changed(self):
++        """
++        Call this whenever the norm is changed to notify all the
++        callback listeners to the 'changed' signal.
++        """
++        self.callbacks.process('changed')
++
+ def rgb_to_hsv(arr):
+     """
+     Convert an array of float RGB values (in the range [0, 1]) to HSV values.

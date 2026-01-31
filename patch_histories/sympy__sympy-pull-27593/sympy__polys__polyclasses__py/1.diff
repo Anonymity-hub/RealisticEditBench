@@ -1,0 +1,11 @@
+diff --git a/sympy/polys/polyclasses.py b/sympy/polys/polyclasses.py
+--- a/sympy/polys/polyclasses.py
++++ b/sympy/polys/polyclasses.py
+@@ -2218,6 +2218,7 @@ def content(f):
+     def primitive(f):
+         """Returns content and a primitive form of ``f``. """
+         cont = f.content()
++        if f.is_zero:
+         prim = f._exquo_ground(cont)
+         return cont, prim
+ 

@@ -1,0 +1,11 @@
+diff --git a/astropy/io/fits/hdu/hdulist.py b/astropy/io/fits/hdu/hdulist.py
+--- a/astropy/io/fits/hdu/hdulist.py
++++ b/astropy/io/fits/hdu/hdulist.py
+@@ -1471,5 +1471,6 @@
+                         "This Python installation does not provide the bz2 module."
+                     )
+                 new_file = bz2.BZ2File(name, mode="w")
++            elif self._file.compression
+             else:
+                 new_file = name
+ 

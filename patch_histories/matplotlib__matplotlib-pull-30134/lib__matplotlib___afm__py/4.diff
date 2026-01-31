@@ -1,0 +1,130 @@
+diff --git a/lib/matplotlib/_afm.py b/lib/matplotlib/_afm.py
+--- a/lib/matplotlib/_afm.py
++++ b/lib/matplotlib/_afm.py
+@@ -251,7 +251,7 @@
+     raise RuntimeError('Bad parse')
+ 
+ 
+-def _parse_kern_pairs(fh):
++def _parse_kern_pairs(fh: BinaryIO) -> dict[tuple[str, str], float]:
+     """
+     Return a kern pairs dictionary.
+ 
+@@ -263,12 +263,11 @@
+ 
+             d['A', 'y'] = -50
+     """
+-
+     line = next(fh)
+     if not line.startswith(b'StartKernPairs'):
+-        raise RuntimeError('Bad start of kern pairs data: %s' % line)
+-
+-    d = {}
++        raise RuntimeError(f'Bad start of kern pairs data: {line!r}')
++
++    d: dict[tuple[str, str], float] = {}
+     for line in fh:
+         line = line.rstrip()
+         if not line:
+@@ -278,21 +277,26 @@
+             return d
+         vals = line.split()
+         if len(vals) != 4 or vals[0] != b'KPX':
+-            raise RuntimeError('Bad kern pairs line: %s' % line)
++            raise RuntimeError(f'Bad kern pairs line: {line!r}')
+         c1, c2, val = _to_str(vals[1]), _to_str(vals[2]), _to_float(vals[3])
+         d[(c1, c2)] = val
+     raise RuntimeError('Bad kern pairs parse')
+ 
+ 
+-CompositePart = namedtuple('CompositePart', 'name, dx, dy')
+-CompositePart.__doc__ = """
+-    Represents the information on a composite element of a composite char."""
++class CompositePart(NamedTuple):
++    """Represents the information on a composite element of a composite char."""
++
++    name: bytes
++    dx: float
++    dy: float
++
++
+ CompositePart.name.__doc__ = """Name of the part, e.g. 'acute'."""
+ CompositePart.dx.__doc__ = """x-displacement of the part from the origin."""
+ CompositePart.dy.__doc__ = """y-displacement of the part from the origin."""
+ 
+ 
+-def _parse_composites(fh):
++def _parse_composites(fh: BinaryIO) -> dict[bytes, list[CompositePart]]:
+     """
+     Parse the given filehandle for composites information.
+ 
+@@ -313,11 +317,11 @@
+ 
+     will be represented as::
+ 
+-      composites['Aacute'] = [CompositePart(name='A', dx=0, dy=0),
+-                              CompositePart(name='acute', dx=160, dy=170)]
+-
+-    """
+-    composites = {}
++      composites[b'Aacute'] = [CompositePart(name=b'A', dx=0, dy=0),
++                               CompositePart(name=b'acute', dx=160, dy=170)]
++
++    """
++    composites: dict[bytes, list[CompositePart]] = {}
+     for line in fh:
+         line = line.rstrip()
+         if not line:
+@@ -327,6 +331,9 @@
+         vals = line.split(b';')
+         cc = vals[0].split()
+         name, _num_parts = cc[1], _to_int(cc[2])
++        if len(vals) != _num_parts + 2:  # First element is 'CC', last is empty.
++            raise RuntimeError(f'Bad composites parse: expected {_num_parts} parts, '
++                               f'but got {len(vals) - 2}')
+         pccParts = []
+         for s in vals[1:-1]:
+             pcc = s.split()
+@@ -337,7 +344,8 @@
+     raise RuntimeError('Bad composites parse')
+ 
+ 
+-def _parse_optional(fh):
++def _parse_optional(fh: BinaryIO) -> tuple[dict[tuple[str, str], float],
++                                           dict[bytes, list[CompositePart]]]:
+     """
+     Parse the optional fields for kern pair data and composites.
+ 
+@@ -350,23 +358,19 @@
+         A dict containing composite information. May be empty.
+         See `._parse_composites`.
+     """
+-    optional = {
+-        b'StartKernData': _parse_kern_pairs,
+-        b'StartComposites':  _parse_composites,
+-        }
+-
+-    d = {b'StartKernData': {},
+-         b'StartComposites': {}}
++    kern_data: dict[tuple[str, str], float] = {}
++    composites: dict[bytes, list[CompositePart]] = {}
+     for line in fh:
+         line = line.rstrip()
+         if not line:
+             continue
+-        key = line.split()[0]
+-
+-        if key in optional:
+-            d[key] = optional[key](fh)
+-
+-    return d[b'StartKernData'], d[b'StartComposites']
++        match line.split()[0]:
++            case b'StartKernData':
++                kern_data = _parse_kern_pairs(fh)
++            case b'StartComposites':
++                composites = _parse_composites(fh)
++
++    return kern_data, composites
+ 
+ 
+ class AFM:

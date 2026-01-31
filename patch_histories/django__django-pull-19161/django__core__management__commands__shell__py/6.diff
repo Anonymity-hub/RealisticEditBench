@@ -1,0 +1,15 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -133,7 +133,9 @@
+         msg = f"{amount} {objects_str} imported automatically"
+ 
+         if verbosity < 2:
+-            self.stdout.write(f"{msg} (use -v 2 for details).", self.style.SUCCESS)
++            if amount:
++                msg += " (use -v 2 for details)"
++            self.stdout.write(f"{msg}.", self.style.SUCCESS)
+             return namespace
+ 
+         imports_by_module = defaultdict(list)
+

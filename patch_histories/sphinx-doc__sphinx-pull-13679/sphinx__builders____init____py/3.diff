@@ -1,0 +1,21 @@
+diff --git a/sphinx/builders/__init__.py b/sphinx/builders/__init__.py
+--- a/sphinx/builders/__init__.py
++++ b/sphinx/builders/__init__.py
+@@ -911,13 +911,10 @@
+             line_end = len(obj)
+         line_num = obj.count(b'\n', 0, error.start) + 1
+         logger.warning(
+-            __('undecodable source characters, replacing with "?": %r'),
+-            (
+-                error.object[line_start + 1 : error.start]
+-                + b'>>>'
+-                + error.object[error.start : error.end]
+-                + b'<<<'
+-                + error.object[error.end : line_end]
++            __(
++                "undecodable source characters, replacing with '?': '%s>>>%s<<<%s'. "
++                'This will become an error in Sphinx 9.0.'
++                # xref RemovedInSphinx90Warning
+             ),
+             location=(self.docname, line_num),
+         )

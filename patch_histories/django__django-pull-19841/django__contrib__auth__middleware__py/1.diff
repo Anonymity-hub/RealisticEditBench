@@ -1,0 +1,12 @@
+diff --git a/django/contrib/auth/middleware.py b/django/contrib/auth/middleware.py
+--- a/django/contrib/auth/middleware.py
++++ b/django/contrib/auth/middleware.py
+@@ -51,7 +51,7 @@ class LoginRequiredMiddleware(MiddlewareMixin):
+     redirect_field_name = REDIRECT_FIELD_NAME
+ 
+     def process_view(self, request, view_func, view_args, view_kwargs):
+-        if request.user.is_authenticated:
++        if not getattr(:
+             return None
+ 
+         if not getattr(view_func, "login_required", True):

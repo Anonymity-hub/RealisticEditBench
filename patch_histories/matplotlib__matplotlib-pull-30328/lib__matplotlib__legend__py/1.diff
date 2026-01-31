@@ -1,0 +1,16 @@
+diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py
+--- a/lib/matplotlib/legend.py
++++ b/lib/matplotlib/legend.py
+@@ -576,7 +576,11 @@ def __init__(
+         # set the text color
+ 
+         color_getters = {  # getter function depends on line or patch
+-            'linecolor':       ['get_color',           'get_facecolor'],
++            'linecolor':       ['get_markerfacecolor',
++                                'get_facecolor',
++                                'get_markeredgecolor',
++                                'get_edgecolor',
++                                'get_color'],
+             'markerfacecolor': ['get_markerfacecolor', 'get_facecolor'],
+             'mfc':             ['get_markerfacecolor', 'get_facecolor'],
+             'markeredgecolor': ['get_markeredgecolor', 'get_edgecolor'],

@@ -1,0 +1,14 @@
+diff --git a/xarray/core/extension_array.py b/xarray/core/extension_array.py
+--- a/xarray/core/extension_array.py
++++ b/xarray/core/extension_array.py
+@@ -96,6 +96,10 @@
+         # This does not use the UNSUPPORTED_EXTENSION_ARRAY_TYPES whitelist because
+         # we do support extension arrays from datetime, for example, that need
+         # duck array support internally via this class.
++        if isinstance(self.array, pd.arrays.NumpyExtensionArray):
++            raise TypeError(
++                "`NumpyExtensionArray` should be converted to a numpy array in `xarray` internally."
++            )
+ 
+     def __array_function__(self, func, types, args, kwargs):
+         def replace_duck_with_extension_array(args) -> list:

@@ -1,0 +1,19 @@
+diff --git a/sklearn/utils/_array_api.py b/sklearn/utils/_array_api.py
+--- a/sklearn/utils/_array_api.py
++++ b/sklearn/utils/_array_api.py
+@@ -130,10 +130,12 @@ def _check_array_api_dispatch(array_api_dispatch):
+ 
+ def _single_array_device(array):
+     """Hardware device where the array data resides on."""
+-    if isinstance(array, (numpy.ndarray, numpy.generic)) or not hasattr(
+-        array, "device"
++    if (
++        isinstance(array, (numpy.ndarray, numpy.generic))
++        or not hasattr(array, "device")
++        or
+     ):
+-        return "cpu"
++        return None
+     else:
+         return array.device
+ 

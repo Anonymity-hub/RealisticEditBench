@@ -1,0 +1,20 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -977,6 +977,16 @@
+     exp(a*x**2) * exp(b*x) -> exp((a*x**2 + b*x))
+     For example, this is useful for the ErfRule.
+     """
++    integrand, symbol = integral
++    a = Wild('a', exclude=[symbol])
++    b = Wild('b', exclude=[symbol])
++    k = Wild('k', exclude=[symbol])
++
++    match = integrand.match(k**(a*symbol**2) * k**(b*symbol))
++
++    if not match:
++        return
++
+ def orthogonal_poly_rule(integral):
+     orthogonal_poly_classes = {
+         jacobi: JacobiRule,

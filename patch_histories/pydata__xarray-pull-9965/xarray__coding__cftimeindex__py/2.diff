@@ -1,0 +1,23 @@
+diff --git a/xarray/coding/cftimeindex.py b/xarray/coding/cftimeindex.py
+--- a/xarray/coding/cftimeindex.py
++++ b/xarray/coding/cftimeindex.py
+@@ -593,8 +593,17 @@
+         if not self._data.size:
+             return pd.DatetimeIndex([])
+ 
+-        # transform to us-resolution is needed for DatetimeIndex
+-        nptimes = cftime_to_nptime(self, time_unit="us")
++        if time_unit is None:
++            emit_user_level_warning(
++                "In a future version of xarray to_datetimeindex will default "
++                "to returning a 'us'-resolution DatetimeIndex instead of a "
++                "'ns'-resolution DatetimeIndex. This warning can be silenced "
++                "by explicitly passing the `time_unit` keyword argument.",
++                FutureWarning,
++            )
++            time_unit = "ns"
++
++        nptimes = cftime_to_nptime(self, time_unit=time_unit)
+         calendar = infer_calendar_name(self)
+         if calendar not in _STANDARD_CALENDARS and not unsafe:
+             warnings.warn(

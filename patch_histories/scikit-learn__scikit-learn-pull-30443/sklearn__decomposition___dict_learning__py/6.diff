@@ -1,0 +1,24 @@
+diff --git a/sklearn/decomposition/_dict_learning.py b/sklearn/decomposition/_dict_learning.py
+--- a/sklearn/decomposition/_dict_learning.py
++++ b/sklearn/decomposition/_dict_learning.py
+@@ -1368,6 +1368,20 @@
+         return super()._transform(X, self.dictionary)
+ 
+     def inverse_transform(self, X):
++        """Transform data back to its original space.
++
++        Parameters
++        ----------
++        X : array-like of shape (n_samples, n_components)
++            Data to be transformed back. Must have the same number of
++            components as the data used to train the model.
++
++        Returns
++        -------
++        X_new : ndarray of shape (n_samples, n_features)
++            Transformed data.
++        """
++        return self._inverse_transform(X, self.dictionary)
+ 
+     def __sklearn_tags__(self):
+         tags = super().__sklearn_tags__()

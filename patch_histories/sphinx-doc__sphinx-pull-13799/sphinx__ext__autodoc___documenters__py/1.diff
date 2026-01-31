@@ -1,0 +1,12 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -325,7 +325,7 @@ def get_real_modname(self) -> str:
+         It can differ from the name of the module through which the object was
+         imported.
+         """
+-        return self.get_attr(self.object, '__module__', None) or self.modname
++        return self.props._obj___module__ or self.props.module_name
+ 
+     def check_module(self) -> bool:
+         """Check if *self.object* is really defined in the module given by

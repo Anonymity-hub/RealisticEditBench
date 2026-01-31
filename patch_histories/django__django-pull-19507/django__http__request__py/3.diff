@@ -1,0 +1,29 @@
+diff --git a/django/http/request.py b/django/http/request.py
+--- a/django/http/request.py
++++ b/django/http/request.py
+@@ -721,6 +721,16 @@
+         main_types = [self.main_type, other.main_type]
+         sub_types = [self.sub_type, other.sub_type]
+ 
++        # Main types and sub types must be defined.
++        if not all((*main_types, *sub_types)):
++            return False
++
++        # Main types must match or one be "*", same for sub types.
++        for this_type, other_type in (main_types, sub_types):
++            if this_type != other_type and this_type != "*" and other_type != "*":
++                return False
++
++        if bool(self.params) == bool(other.params):
+ 
+     @cached_property
+     def quality(self):
+@@ -745,7 +755,7 @@
+             return 0
+         elif self.sub_type == "*":
+             return 1
+-        elif self.quality == 1:
++        elif not self.params:
+             return 2
+         return 3
+ 

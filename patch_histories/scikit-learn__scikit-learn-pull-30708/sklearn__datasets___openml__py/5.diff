@@ -1,0 +1,12 @@
+diff --git a/sklearn/datasets/_openml.py b/sklearn/datasets/_openml.py
+--- a/sklearn/datasets/_openml.py
++++ b/sklearn/datasets/_openml.py
+@@ -1127,7 +1127,7 @@
+         shape = None
+ 
+     # obtain the data
+-    url = _DATA_FILE.format(data_description["file_id"])
++    url = data_description["url"]
+     bunch = _download_data_to_bunch(
+         url,
+         return_sparse,

@@ -1,0 +1,25 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -355,10 +355,19 @@
+     return new_indexer
+ 
+ 
+-def _index_indexer_1d(old_indexer, applied_indexer, size: int):
+-    if isinstance(applied_indexer, slice) and applied_indexer == slice(None):
++def _index_indexer_1d(
++    old_indexer: OuterIndexerType,
++    applied_indexer: OuterIndexerType,
++    size: int,
++) -> OuterIndexerType:
++    if is_full_slice(applied_indexer):
+         # shortcut for the usual case
+         return old_indexer
++    if is_full_slice(old_indexer):
++        # shortcut for full slices
++        return applied_indexer
++
++    indexer: OuterIndexerType
+     if isinstance(old_indexer, slice):
+         if isinstance(applied_indexer, slice):
+             indexer = slice_slice(old_indexer, applied_indexer, size)

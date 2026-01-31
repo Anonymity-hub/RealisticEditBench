@@ -1,0 +1,27 @@
+diff --git a/sklearn/decomposition/_dict_learning.py b/sklearn/decomposition/_dict_learning.py
+--- a/sklearn/decomposition/_dict_learning.py
++++ b/sklearn/decomposition/_dict_learning.py
+@@ -1334,16 +1334,17 @@
+         )
+         self.dictionary = dictionary
+ 
++    @_fit_context(prefer_skip_nested_validation=True)
+     def fit(self, X, y=None):
+-        """Do nothing and return the estimator unchanged.
+-
+-        This method is just there to implement the usual API and hence
+-        work in pipelines.
++        """Only validate the parameters of the estimator.
++
++        This method allows to: (i) validate the parameters of the estimator and
++        (ii) be consistent with the scikit-learn transformer API.
+ 
+         Parameters
+         ----------
+-        X : Ignored
+-            Not used, present for API consistency by convention.
++        X : array-like of shape (n_samples, n_features)
++            Training data. Only used for input validation.
+ 
+         y : Ignored
+             Not used, present for API consistency by convention.

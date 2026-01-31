@@ -1,0 +1,21 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -7193,10 +7193,14 @@ def hist(self, x, bins=None, range=None, density=False, weights=None,
+         labels = [] if label is None else np.atleast_1d(np.asarray(label, str))
+ 
+         if histtype == "step":
+-            edgecolors = itertools.cycle(np.atleast_1d(kwargs.get('edgecolor',
+-                                                                  colors)))
++            ec = kwargs.get('edgecolor', colors)
+         else:
+-            edgecolors = itertools.cycle(np.atleast_1d(kwargs.get("edgecolor", None)))
++            ec = kwargs.get('edgecolor', None)
++        if ec is None or cbook._str_lower_equal(ec, 'none'):
++            edgecolors = itertools.repeat(ec)
++        else:
++            edgecolors = itertools.cycle(mcolors.to_rgba_array(ec))
++
+ 
+         facecolors = itertools.cycle(np.atleast_1d(kwargs.get('facecolor', colors)))
+         hatches = itertools.cycle(np.atleast_1d(kwargs.get('hatch', None)))

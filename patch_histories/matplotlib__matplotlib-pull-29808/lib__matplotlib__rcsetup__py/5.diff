@@ -1,0 +1,20 @@
+diff --git a/lib/matplotlib/rcsetup.py b/lib/matplotlib/rcsetup.py
+--- a/lib/matplotlib/rcsetup.py
++++ b/lib/matplotlib/rcsetup.py
+@@ -101,6 +101,16 @@
+     """
+     try:
+         colors = mpl.color_sequences[s]
++    except KeyError:
++        try:
++            # Sometimes, a list of colors might be a single string
++            # of single-letter colornames. So give that a shot.
++            colors = [scalar_validator(v.strip()) for v in s if v.strip()]
++        except ValueError:
++            raise ValueError(f'{s!r} is neither a color sequence name nor can '
++                             'it be interpreted as a list of colors')
++
++    return colors
+ 
+ 
+ @lru_cache

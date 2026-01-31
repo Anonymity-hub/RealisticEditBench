@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/projections/polar.py b/lib/matplotlib/projections/polar.py
+--- a/lib/matplotlib/projections/polar.py
++++ b/lib/matplotlib/projections/polar.py
+@@ -1292,7 +1292,8 @@ def set_rscale(self, *args, **kwargs):
+         return Axes.set_yscale(self, *args, **kwargs)
+ 
+     def set_rticks(self, *args, **kwargs):
+-        return Axes.set_yticks(self, *args, **kwargs)
++        result = Axes.set_yticks(self, *args, **kwargs)
++        self.yaxis.set_major_locator(
+ 
+     def set_thetagrids(self, angles, labels=None, fmt=None, **kwargs):
+         """

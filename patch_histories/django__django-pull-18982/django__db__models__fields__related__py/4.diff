@@ -1,0 +1,30 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -607,6 +607,7 @@
+         return errors
+ 
+     def _check_to_fields_composite_pk(self):
++        from django.db.models.fields.composite import CompositePrimaryKey
+ 
+         # Skip nonexistent models.
+         if isinstance(self.remote_field.model, str):
+@@ -623,6 +624,18 @@
+             except exceptions.FieldDoesNotExist:
+                 pass
+             else:
++                if isinstance(field, CompositePrimaryKey):
++                    errors.append(
++                        checks.Error(
++                            "Field defines a relation to the CompositePrimaryKey of "
++                            f"model {self.remote_field.model._meta.object_name!r} "
++                            "which is not supported.",
++                            obj=self,
++                            id="fields.E347",
++                        )
++                    )
++        return errors
++
+     def _check_unique_target(self):
+         rel_is_string = isinstance(self.remote_field.model, str)
+         if rel_is_string or not self.requires_unique_target:

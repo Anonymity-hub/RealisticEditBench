@@ -1,0 +1,49 @@
+diff --git a/pylint/checkers/symilar.py b/pylint/checkers/symilar.py
+--- a/pylint/checkers/symilar.py
++++ b/pylint/checkers/symilar.py
+@@ -430,8 +430,7 @@ def _compute_sims(self) -> list[tuple[int, set[LinesChunkLimits_T]]]:
+             cpls: set[LinesChunkLimits_T]
+             for cpls in ensembles:
+                 sims.append((num, cpls))
+-        sims.sort()
+-        sims.reverse()
++        sims.sort(reverse=True)
+         return sims
+ 
+     def _display_sims(
+diff --git a/pylint/lint/report_functions.py b/pylint/lint/report_functions.py
+--- a/pylint/lint/report_functions.py
++++ b/pylint/lint/report_functions.py
+@@ -30,14 +30,15 @@ def report_messages_stats(
+ ) -> None:
+     """Make messages type report."""
+     by_msg_stats = stats.by_msg
+-    in_order = sorted(
+-        (value, msg_id)
+-        for msg_id, value in by_msg_stats.items()
+-        if not msg_id.startswith("I")
+-    )
+-    in_order.reverse()
+     lines = ["message id", "occurrences"]
+-    for value, msg_id in in_order:
++    for value, msg_id in sorted(
++        (
++            (value, msg_id)
++            for msg_id, value in by_msg_stats.items()
++            if not msg_id.startswith("I")
++        ),
++        reverse=True,
++    ):
+         lines += [msg_id, str(value)]
+     sect.append(Table(children=lines, cols=2, rheaders=1))
+ 
+@@ -70,8 +71,7 @@ def report_messages_by_module_stats(
+                 module,
+             )
+         )
+-    sorted_result.sort()
+-    sorted_result.reverse()
++    sorted_result.sort(reverse=True)
+     lines = ["module", "error", "warning", "refactor", "convention"]
+     for line in sorted_result:
+         # Don't report clean modules.

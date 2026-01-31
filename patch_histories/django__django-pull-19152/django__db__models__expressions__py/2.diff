@@ -1,0 +1,13 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -522,6 +522,9 @@
+     @functools.lru_cache(maxsize=128)
+     def _constructor_signature(cls):
+         return inspect.signature(cls.__init__)
++
++    @classmethod
++    def _identity(cls, value):
+ 
+     @cached_property
+     def identity(self):

@@ -1,0 +1,15 @@
+diff --git a/django/utils/http.py b/django/utils/http.py
+--- a/django/utils/http.py
++++ b/django/utils/http.py
+@@ -3,9 +3,8 @@
+ import unicodedata
+ from binascii import Error as BinasciiError
+ from datetime import UTC, datetime
+-from email.message import Message
+-from email.utils import collapse_rfc2231_value, formatdate
+-from urllib.parse import quote
++from email.utils import formatdate
++from urllib.parse import quote, unquote
+ from urllib.parse import urlencode as original_urlencode
+ from urllib.parse import urlsplit
+ 

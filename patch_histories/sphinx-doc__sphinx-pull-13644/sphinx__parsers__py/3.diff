@@ -1,0 +1,17 @@
+diff --git a/sphinx/parsers.py b/sphinx/parsers.py
+--- a/sphinx/parsers.py
++++ b/sphinx/parsers.py
+@@ -42,6 +42,13 @@
+         _deprecation_warning(cls_module, f'{cls_name}.config', remove=(9, 0))
+         return self._config
+ 
++    @property
++    def env(self) -> BuildEnvironment:
++        """The environment object."""
++        cls_module = self.__class__.__module__
++        cls_name = self.__class__.__qualname__
++        _deprecation_warning(cls_module, f'{cls_name}.env', remove=(9, 0))
++        return self._env
+ 
+     def set_application(self, app: Sphinx) -> None:
+         """set_application will be called from Sphinx to set app and other instance variables

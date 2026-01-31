@@ -1,0 +1,32 @@
+diff --git a/xarray/backends/api.py b/xarray/backends/api.py
+--- a/xarray/backends/api.py
++++ b/xarray/backends/api.py
+@@ -123,22 +123,12 @@
+ 
+ 
+ def _get_default_engine_netcdf() -> Literal["netcdf4", "h5netcdf", "scipy"]:
+-    engine: Literal["netcdf4", "scipy"]
+-    try:
+-        import netCDF4  # noqa: F401
+-
+-        engine = "netcdf4"
+-    except ImportError:  # pragma: no cover
+-        try:
+-            import scipy.io.netcdf  # noqa: F401
+-
+-            engine = "scipy"
+-        except ImportError as err:
+-            raise ValueError(
+-                "cannot read or write netCDF files without "
+-                "netCDF4-python or scipy installed"
+-            ) from err
+-    return engine
++    candidates: list[tuple[str, str]] = [
++        ("netcdf4", "netCDF4"),
++        ("h5netcdf", "h5netcdf"),
++        ("scipy", "scipy.io.netcdf"),
++    ]
++
+ 
+ 
+ def _get_default_engine(path: str, allow_remote: bool = False) -> T_NetcdfEngine:

@@ -1,0 +1,27 @@
+diff --git a/lib/matplotlib/cbook.py b/lib/matplotlib/cbook.py
+--- a/lib/matplotlib/cbook.py
++++ b/lib/matplotlib/cbook.py
+@@ -2343,14 +2343,16 @@
+ 
+ 
+ def _is_jax_array(x):
+-    """Check if 'x' is a JAX Array."""
++    """Return whether *x* is a JAX Array."""
+     try:
+-        # we're intentionally not attempting to import jax. If somebody
+-        # has created a jax array, jax should already be in sys.modules
+-        return isinstance(x, sys.modules['jax'].Array)
+-    except Exception:  # TypeError, KeyError, AttributeError, maybe others?
+-        # we're attempting to access attributes on imported modules which
+-        # may have arbitrary user code, so we deliberately catch all exceptions
++        # We're intentionally not attempting to import jax. If somebody
++        # has created a jax array, jax should already be in sys.modules.
++        tp = sys.modules.get("jax").Array
++    except AttributeError:
++        return False  # Module not imported or a nonstandard module with no Array attr.
++    return (isinstance(tp, type)  # Just in case it's a very nonstandard module.
++            and isinstance(x, tp))
++
+         return False
+
+

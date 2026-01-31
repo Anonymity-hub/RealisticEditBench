@@ -1,0 +1,16 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -971,6 +971,12 @@ def exp_rule(integral):
+         return ExpRule(integrand, symbol, E, integrand.args[0])
+ 
+ 
++def powsimp_rule(integral):
++    """
++    Strategy that simplifies the exponent of a power.
++    exp(a*x**2) * exp(b*x) -> exp((a*x**2 + b*x))
++    For example, this is useful for the ErfRule.
++    """
+ def orthogonal_poly_rule(integral):
+     orthogonal_poly_classes = {
+         jacobi: JacobiRule,

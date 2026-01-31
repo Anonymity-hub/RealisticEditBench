@@ -1,0 +1,19 @@
+diff --git a/sympy/solvers/polysys.py b/sympy/solvers/polysys.py
+--- a/sympy/solvers/polysys.py
++++ b/sympy/solvers/polysys.py
+@@ -420,6 +420,14 @@
+         def _solve_univariate(f):
+             return [r for r, _ in f.all_roots(multiple=False, radicals=False)]
+     else:
++        domain = opt.get('domain')
++
++        if domain is not None:
++            for i, g in enumerate(G):
++                G[i] = g.set_domain(domain)
++
++        def _solve_univariate(f):
++            return list(f.ground_roots().keys())
+ 
+     f, G = G[0].ltrim(-1), G[1:]
+     dom = f.get_domain()
+

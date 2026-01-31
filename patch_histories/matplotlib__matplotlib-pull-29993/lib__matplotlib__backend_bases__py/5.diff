@@ -1,0 +1,15 @@
+diff --git a/lib/matplotlib/backend_bases.py b/lib/matplotlib/backend_bases.py
+--- a/lib/matplotlib/backend_bases.py
++++ b/lib/matplotlib/backend_bases.py
+@@ -1530,6 +1530,11 @@
+         """
+         # Separate from MouseEvent._from_ax_coords instead of being defined in the base
+         # class, due to different parameter order in the constructor signature.
++        x, y = ax.transData.transform(xy)
++        event = cls(name, ax.figure.canvas, key, x, y, *args, **kwargs)
++        event.inaxes = ax
++        event.xdata, event.ydata = xy  # Force exact xy to avoid fp roundtrip issues.
++        return event
+ 
+ 
+ # Default callback for key events.

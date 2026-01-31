@@ -1,0 +1,12 @@
+diff --git a/sklearn/impute/_base.py b/sklearn/impute/_base.py
+--- a/sklearn/impute/_base.py
++++ b/sklearn/impute/_base.py
+@@ -88,7 +88,7 @@
+         return most_frequent_value
+     elif most_frequent_count == n_repeat:
+         # tie breaking similarly to scipy.stats.mode
+-        return min(most_frequent_value, extra_value)
++        return _safe_min([most_frequent_value, extra_value])
+ 
+ 
+ class _BaseImputer(TransformerMixin, BaseEstimator):

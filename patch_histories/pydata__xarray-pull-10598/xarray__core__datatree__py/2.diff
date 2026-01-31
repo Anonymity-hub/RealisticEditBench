@@ -1,0 +1,12 @@
+diff --git a/xarray/core/datatree.py b/xarray/core/datatree.py
+--- a/xarray/core/datatree.py
++++ b/xarray/core/datatree.py
+@@ -1507,6 +1507,8 @@
+                 Data variables:
+                     foo      (x) int64 16B 1 2
+         """
++        non_empty_cond: Callable[[DataTree], bool]
++        if drop_size_zero_vars:
+ 
+     def match(self, pattern: str) -> DataTree:
+         """

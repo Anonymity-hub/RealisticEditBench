@@ -1,0 +1,17 @@
+diff --git a/django/http/request.py b/django/http/request.py
+--- a/django/http/request.py
++++ b/django/http/request.py
+@@ -93,8 +93,12 @@
+         """Return a list of MediaType instances, in order of preference."""
+         header_value = self.headers.get("Accept", "*/*")
+         return sorted(
+-            (MediaType(token) for token in header_value.split(",") if token.strip()),
+-            key=operator.attrgetter("quality", "specificity"),
++            (
++                media_type
++                for token in header_value.split(",")
++                if token.strip() and (media_type := MediaType(token)).quality != 0
++            ),
++            key=operator.attrgetter("specificity", "quality"),
+             reverse=True,
+         )

@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py
+--- a/lib/matplotlib/pyplot.py
++++ b/lib/matplotlib/pyplot.py
+@@ -1255,7 +1255,7 @@
+     fig = gcf()
+     # savefig default implementation has no return, so mypy is unhappy
+     # presumably this is here because subclasses can return?
+-    res = fig.savefig(*args, **kwargs)  # type: ignore[func-returns-value]
++    res = fig.savefig(fname, **kwargs)  # type: ignore[func-returns-value]
+     fig.canvas.draw_idle()  # Need this if 'transparent=True', to reset colors.
+     return res
+ 

@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py
+--- a/lib/matplotlib/pyplot.py
++++ b/lib/matplotlib/pyplot.py
+@@ -1010,8 +1010,8 @@
+     if num is None:
+         num = next_num
+     else:
+-        if any([figsize, dpi, facecolor, edgecolor, not frameon,
+-                kwargs]) and num in allnums:
++        if (any(param is not None for param in [figsize, dpi, facecolor, edgecolor])
++              or not frameon or kwargs) and num in allnums:
+             _api.warn_external(
+                 "Ignoring specified arguments in this call "
+                 f"because figure with num: {num} already exists")

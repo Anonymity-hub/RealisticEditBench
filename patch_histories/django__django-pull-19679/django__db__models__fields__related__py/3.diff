@@ -1,0 +1,22 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -1545,7 +1545,17 @@
+                 model_name = None
+                 if isinstance(to_model._meta.pk, CompositePrimaryKey):
+                     model_name = self.remote_field.model._meta.object_name
+-                elif isinstance(
++                elif isinstance(from_model._meta.pk, CompositePrimaryKey):
++                    model_name = from_model_name
++                if model_name:
++                    errors.append(
++                        checks.Error(
++                            f"Field defines a relation involving model {model_name!r} "
++                            "which has a CompositePrimaryKey and such relations are "
++                            "not supported.",
++                            obj=self,
++                            id="fields.E347",
++                        )
+                     )
+             relationship_model_name = self.remote_field.through._meta.object_name
+             self_referential = from_model == to_model

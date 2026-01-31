@@ -1,0 +1,68 @@
+diff --git a/astropy/utils/decorators.py b/astropy/utils/decorators.py
+--- a/astropy/utils/decorators.py
++++ b/astropy/utils/decorators.py
+@@ -7,7 +7,9 @@
+ import threading
+ import types
+ import warnings
++from functools import wraps
+ from inspect import signature
++from types import FunctionType
+ 
+ from .exceptions import (
+     AstropyDeprecationWarning,
+@@ -652,7 +654,53 @@
+         params = signature(raw_function).parameters
+         params_names: list[str] = list(params)
+         future_kwo_to_since = dict(zip(future_kwo_names, since))
+-        ...
++
++        # check that all names exist in the current signature
++        if any(n not in params for n in future_kwo_names):
++            unknown = sorted(set(future_kwo_names) - set(params_names))
++            raise ValueError(
++                "The following arguments cannot be marked as future keyword-only "
++                "because they were not found in the decorated function's signature: "
++                f"{', '.join(unknown)}"
++            )
++
++        # check that every future kwo is currently allowed as positional-or-keyword
++        # (otherwise something's wrong with the decorator call itself)
++        pos_or_kw_names = {
++            n for (n, p) in params.items() if p.kind is p.POSITIONAL_OR_KEYWORD
++        }
++        if not pos_or_kw_names.issuperset(future_kwo_names):
++            diff = sorted(set(future_kwo_names) - pos_or_kw_names)
++            raise ValueError(
++                "The following arguments cannot be marked as future keyword-only "
++                "because they are not currently positional-or-keyword: "
++                f"{', '.join(diff)}"
++            )
++
++        # check that there are no other positionally allowed arguments beyond
++        # any future kwo (otherwise these arguments could still break)
++        future_kwo_positions = [params_names.index(n) for n in future_kwo_names]
++        idx_min = min(future_kwo_positions)
++        idx_max = max(future_kwo_positions) + 1
++        while idx_max < len(params):
++            p = params[params_names[idx_max]]
++            if p.kind in (p.KEYWORD_ONLY, p.VAR_KEYWORD):
++                break
++            idx_max += 1
++        if any(n not in future_kwo_names for n in list(params)[idx_min:idx_max]):
++            broken = params_names[max(future_kwo_positions) + 1 : idx_max]
++            raise ValueError(
++                "The following positionally-allowed arguments were not marked as "
++                "future keyword-only and would be broken under future keyword-only "
++                f"requirements: {', '.join(broken)}"
++            )
++
++        @wraps(raw_function)
++        def decorated_function(*args, **kwargs):
++        ...
++
++        return decorated_function
++
+     return decorate
+ 
+ 

@@ -1,0 +1,12 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -1096,7 +1096,7 @@
+                 ),
+                 # TODO: see if zarr should normalize these strings.
+                 path="/".join([self.zarr_group.name.rstrip("/"), name]).lstrip("/"),
+-                write_empty_chunks=self._write_empty,
++                **empty,
+             )
+         else:
+             zarr_array = self.zarr_group[name]

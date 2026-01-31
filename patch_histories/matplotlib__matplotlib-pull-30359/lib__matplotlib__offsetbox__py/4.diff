@@ -1,0 +1,18 @@
+diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py
+--- a/lib/matplotlib/offsetbox.py
++++ b/lib/matplotlib/offsetbox.py
+@@ -1069,8 +1069,12 @@
+         pad_y_pixels = borderpad_y * fontsize_in_pixels
+         bbox_to_anchor = self.get_bbox_to_anchor()
+         x0, y0 = _get_anchored_bbox(
+-            self.loc, Bbox.from_bounds(0, 0, bbox.width, bbox.height),
+-            bbox_to_anchor, pad)
++            self.loc,
++            Bbox.from_bounds(0, 0, bbox.width, bbox.height),
++            bbox_to_anchor,
++            pad_x_pixels,
++            pad_y_pixels
++        )
+         return x0 - bbox.x0, y0 - bbox.y0
+ 
+     def update_frame(self, bbox, fontsize=None):

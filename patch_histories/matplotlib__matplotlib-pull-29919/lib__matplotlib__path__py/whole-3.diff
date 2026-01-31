@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/path.py b/lib/matplotlib/path.py
+--- a/lib/matplotlib/path.py
++++ b/lib/matplotlib/path.py
+@@ -681,7 +681,7 @@ def interpolated(self, steps):
+         Path
+             The interpolated path.
+         """
+-        if steps == 1:
++        if steps == 1 or len(self) == 0:
+             return self
+ 
+         if self.codes is not None and self.MOVETO in self.codes[1:]:

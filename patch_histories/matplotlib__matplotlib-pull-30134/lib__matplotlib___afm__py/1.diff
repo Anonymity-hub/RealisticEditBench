@@ -1,0 +1,58 @@
+diff --git a/lib/matplotlib/_afm.py b/lib/matplotlib/_afm.py
+--- a/lib/matplotlib/_afm.py
++++ b/lib/matplotlib/_afm.py
+@@ -27,17 +27,18 @@
+ being used.
+ """
+ 
+-from collections import namedtuple
++import inspect
+ import logging
+ import re
++from typing import BinaryIO, NamedTuple, TypedDict
+ 
+ from ._mathtext_data import uni2type1
+ 
+ 
+ _log = logging.getLogger(__name__)
+ 
+ 
+-def _to_int(x):
++def _to_int(x: bytes | str) -> int:
+     # Some AFM files have floats where we are expecting ints -- there is
+     # probably a better way to handle this (support floats, round rather than
+     # truncate).  But I don't know what the best approach is now and this
+@@ -46,7 +47,7 @@ def _to_int(x):
+     return int(float(x))
+ 
+ 
+-def _to_float(x):
++def _to_float(x: bytes | str) -> float:
+     # Some AFM files use "," instead of "." as decimal separator -- this
+     # shouldn't be ambiguous (unless someone is wicked enough to use "," as
+     # thousands separator...).
+@@ -57,20 +58,20 @@ def _to_float(x):
+     return float(x.replace(',', '.'))
+ 
+ 
+-def _to_str(x):
++def _to_str(x: bytes) -> str:
+     return x.decode('utf8')
+ 
+ 
+-def _to_list_of_ints(s):
++def _to_list_of_ints(s: bytes) -> list[int]:
+     s = s.replace(b',', b' ')
+     return [_to_int(val) for val in s.split()]
+ 
+ 
+-def _to_list_of_floats(s):
++def _to_list_of_floats(s: bytes | str) -> list[float]:
+     return [_to_float(val) for val in s.split()]
+ 
+ 
+-def _to_bool(s):
++def _to_bool(s: bytes) -> bool:
+     if s.lower().strip() in (b'false', b'0', b'no'):
+         return False
+     else:

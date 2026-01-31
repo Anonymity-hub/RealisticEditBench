@@ -1,0 +1,21 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -142,7 +142,7 @@
+         B.append(a//q_l*gamma)
+ 
+     b = sum(B)
+-    g = SievePolynomial([a*a, 2*a*b, b*b - N], a, b)
++    g = SievePolynomial(a, b, N)
+ 
+     for fb in factor_base:
+         if a % fb.prime == 0:
+@@ -184,7 +184,7 @@
+         neg_pow = 1
+     b = g.b + 2*neg_pow*B[v - 1]
+     a = g.a
+-    g = SievePolynomial([a*a, 2*a*b, b*b - N], a, b)
++    g = SievePolynomial(a, b, N)
+     for fb in factor_base:
+         if a % fb.prime == 0:
+             continue

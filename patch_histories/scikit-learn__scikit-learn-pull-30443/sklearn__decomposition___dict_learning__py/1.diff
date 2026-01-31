@@ -1,0 +1,14 @@
+diff --git a/sklearn/decomposition/_dict_learning.py b/sklearn/decomposition/_dict_learning.py
+--- a/sklearn/decomposition/_dict_learning.py
++++ b/sklearn/decomposition/_dict_learning.py
+@@ -1142,6 +1142,10 @@ def transform(self, X):
+         check_is_fitted(self)
+         return self._transform(X, self.components_)
+ 
++    def _inverse_transform(self, code, dictionary):
++        """Private method allowing to accommodate both DictionaryLearning and
++        SparseCoder."""
++        code = check_array(code)
+ 
+ class SparseCoder(_BaseSparseCoding, BaseEstimator):
+     """Sparse coding.

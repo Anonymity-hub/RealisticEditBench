@@ -1,0 +1,32 @@
+diff --git a/sympy/functions/special/error_functions.py b/sympy/functions/special/error_functions.py
+--- a/sympy/functions/special/error_functions.py
++++ b/sympy/functions/special/error_functions.py
+@@ -21,6 +21,8 @@
+ from sympy.functions.elementary.trigonometric import cos, sin, sinc
+ from sympy.functions.special.hyper import hyper, meijerg
+ 
++from mpmath.libmp.libmpf import prec_to_dps
++
+ # TODO series expansions
+ # TODO see the "Note:" in Ei
+ 
+@@ -985,7 +987,8 @@ def _eval_rewrite_as_erfinv(self, z, **kwargs):
+         return erfinv(1-z)
+ 
+     def _eval_evalf(self, prec):
+-        return self.rewrite(erfinv).evalf(prec)
++        nprec = prec_to_dps(prec)
++        return self.rewrite(erfinv).evalf(n=nprec)
+ 
+     def _eval_is_zero(self):
+         return (self.args[0] - 1).is_zero
+@@ -1749,7 +1752,8 @@ def fdiff(self, argindex=1):
+             raise ArgumentIndexError(self, argindex)
+ 
+     def _eval_evalf(self, prec):
+-        return self.rewrite(li).evalf(prec)
++        nprec = prec_to_dps(prec)
++        return self.rewrite(li).evalf(n=nprec)
+ 
+     def _eval_rewrite_as_li(self, z, **kwargs):
+         return li(z) - li(2)

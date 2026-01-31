@@ -1,0 +1,34 @@
+diff --git a/xarray/core/extension_array.py b/xarray/core/extension_array.py
+--- a/xarray/core/extension_array.py
++++ b/xarray/core/extension_array.py
+@@ -112,10 +112,10 @@
+     def __getitem__(self, key) -> PandasExtensionArray[T_ExtensionArray]:
+         item = self.array[key]
+         if is_extension_array_dtype(item):
+-            return type(self)(item)
+-        if np.isscalar(item):
+-            return type(self)(type(self.array)([item]))  # type: ignore[call-arg]  # only subclasses with proper __init__ allowed
+-        return item
++            return PandasExtensionArray(item)
++        if np.isscalar(item) or isinstance(key, int):
++            return PandasExtensionArray(type(self.array)._from_sequence([item]))  # type: ignore[call-arg,attr-defined,unused-ignore]
++        return PandasExtensionArray(item)
+ 
+     def __setitem__(self, key, val):
+         self.array[key] = val
+@@ -130,3 +130,15 @@
+ 
+     def __len__(self):
+         return len(self.array)
++
++    @property
++    def ndim(self) -> int:
++        return 1
++
++    def __array__(
++        self, dtype: np.typing.DTypeLike = None, /, *, copy: bool | None = None
++    ) -> np.ndarray:
++        if Version(np.__version__) >= Version("2.0.0"):
++            return np.asarray(self.array, dtype=dtype, copy=copy)
++        else:
++            return np.asarray(self.array, dtype=dtype)

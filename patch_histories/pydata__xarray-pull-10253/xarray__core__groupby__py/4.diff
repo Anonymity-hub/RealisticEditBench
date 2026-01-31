@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -381,7 +381,7 @@
+     group: GroupInput,
+     groupers: dict[str, Grouper],
+     *,
+-    eagerly_compute_group: bool,
++    eagerly_compute_group: Literal[False] | None,
+ ) -> tuple[ResolvedGrouper, ...]:
+     from xarray.core.dataarray import DataArray
+     from xarray.core.variable import Variable

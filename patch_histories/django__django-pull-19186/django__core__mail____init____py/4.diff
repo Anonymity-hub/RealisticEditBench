@@ -1,0 +1,29 @@
+diff --git a/django/core/mail/__init__.py b/django/core/mail/__init__.py
+--- a/django/core/mail/__init__.py
++++ b/django/core/mail/__init__.py
+@@ -192,8 +192,11 @@
+     mail.send(fail_silently=fail_silently)
+ 
+ 
++@deprecate_posargs(
++    RemovedInDjango70Warning, ["fail_silently", "connection", "html_message"]
++)
+ def mail_admins(
+-    subject, message, fail_silently=False, connection=None, html_message=None
++    subject, message, *, fail_silently=False, connection=None, html_message=None
+ ):
+     """Send a message to the admins, as defined by the ADMINS setting."""
+     _send_server_message(
+@@ -206,8 +209,11 @@
+     )
+ 
+ 
++@deprecate_posargs(
++    RemovedInDjango70Warning, ["fail_silently", "connection", "html_message"]
++)
+ def mail_managers(
+-    subject, message, fail_silently=False, connection=None, html_message=None
++    subject, message, *, fail_silently=False, connection=None, html_message=None
+ ):
+     """Send a message to the managers, as defined by the MANAGERS setting."""
+     _send_server_message(

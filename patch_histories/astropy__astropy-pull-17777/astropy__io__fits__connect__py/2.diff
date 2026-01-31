@@ -1,0 +1,16 @@
+diff --git a/astropy/io/fits/connect.py b/astropy/io/fits/connect.py
+--- a/astropy/io/fits/connect.py
++++ b/astropy/io/fits/connect.py
+@@ -244,9 +244,10 @@
+ 
+     else:
+         if memmap:
+-            # using memmap is not compatible with masking invalid value by
+-            # default so we deactivate the masking
++            # using memmap is not compatible with masking invalid value and
++            # removing trailing whitespace by default so we deactivate that
+             mask_invalid = False
++            strip_spaces = False
+ 
+         hdulist = fits_open(input, character_as_bytes=character_as_bytes, memmap=memmap)
+ 

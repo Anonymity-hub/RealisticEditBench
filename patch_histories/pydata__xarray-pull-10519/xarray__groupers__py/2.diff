@@ -1,0 +1,53 @@
+diff --git a/xarray/groupers.py b/xarray/groupers.py
+--- a/xarray/groupers.py
++++ b/xarray/groupers.py
+@@ -584,6 +584,49 @@
+             coords=coordinates_from_variable(unique_coord),
+         )
+ 
++    def compute_chunks(self, variable: Variable, *, dim: Hashable) -> tuple[int, ...]:
++        """
++        Compute chunk sizes for this time resampler.
++
++        This method is used during chunking operations to determine appropriate
++        chunk sizes for the given variable when using this resampler.
++
++        Parameters
++        ----------
++        name : Hashable
++            The name of the dimension being chunked.
++        variable : Variable
++            The variable being chunked.
++
++        Returns
++        -------
++        tuple[int, ...]
++            A tuple of chunk sizes for the dimension.
++        """
++        from xarray.core.dataarray import DataArray
++
++        if not _contains_datetime_like_objects(variable):
++            raise ValueError(
++                f"Computing chunks with {type(self)!r} only supported for datetime variables. "
++                f"Received variable with dtype {variable.dtype!r} instead."
++            )
++
++        chunks = (
++            DataArray(
++                np.ones(variable.shape, dtype=int),
++                dims=(dim,),
++                coords={dim: variable},
++            )
++            .resample({dim: self})
++            .sum()
++        )
++        # When bins (binning) or time periods are missing (resampling)
++        # we can end up with NaNs. Drop them.
++        if chunks.dtype.kind == "f":
++            chunks = chunks.dropna(dim).astype(int)
++        chunks_tuple: tuple[int, ...] = tuple(chunks.data.tolist())
++        return chunks_tuple
++
+ 
+ def _factorize_given_labels(data: np.ndarray, labels: np.ndarray) -> np.ndarray:
+     # Copied from flox

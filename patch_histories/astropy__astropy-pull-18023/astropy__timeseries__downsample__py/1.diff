@@ -1,0 +1,28 @@
+diff --git a/astropy/timeseries/downsample.py b/astropy/timeseries/downsample.py
+--- a/astropy/timeseries/downsample.py
++++ b/astropy/timeseries/downsample.py
+@@ -9,22 +9,14 @@
+ from astropy.timeseries.binned import BinnedTimeSeries
+ from astropy.timeseries.sampled import TimeSeries
+ from astropy.utils.exceptions import AstropyUserWarning
++from astropy.utils.masked import get_data_and_mask
+
+ __all__ = ["aggregate_downsample"]
+ 
+ 
+ def nanmean_reduceat(data, indices):
+-    mask = np.isnan(data)
+-
+-    if mask.any():  # If there are NaNs
+-        # Create a writeable copy and mask NaNs
+-        data = data.copy()
+-        data[mask] = 0
+-        count_data = np.add.reduceat(~mask, indices)
+-        # Avoid division by zero warnings
+-        count_data = count_data.astype(data.dtype)
+-        count_data[count_data == 0] = np.nan
++    unmasked, data_mask =
+     else:
+         # Derive counts from indices
+         count_data = np.diff(indices, append=len(data))
+         count_data[count_data <= 0] = 1

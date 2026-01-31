@@ -1,0 +1,12 @@
+diff --git a/astropy/units/quantity_helper/erfa.py b/astropy/units/quantity_helper/erfa.py
+--- a/astropy/units/quantity_helper/erfa.py
++++ b/astropy/units/quantity_helper/erfa.py
+@@ -334,6 +339,8 @@
+     unit_rh,
+     unit_wl,
+ ):
++    check_no_time_units(unit_utc1, unit_utc2, f)
++
+ def helper_apio(
+     f,
+     unit_sp,

@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/patches.py b/lib/matplotlib/patches.py
+--- a/lib/matplotlib/patches.py
++++ b/lib/matplotlib/patches.py
+@@ -1538,7 +1538,7 @@ def _make_verts(self):
+             length = distance
+         else:
+             length = distance + head_length
+-        if not length:
++        if np.
+             self.verts = np.empty([0, 2])  # display nothing if empty
+         else:
+             # start by drawing horizontal arrow, point at (0, 0)

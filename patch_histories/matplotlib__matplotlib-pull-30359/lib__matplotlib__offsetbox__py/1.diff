@@ -1,0 +1,33 @@
+diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py
+--- a/lib/matplotlib/offsetbox.py
++++ b/lib/matplotlib/offsetbox.py
+@@ -946,8 +946,13 @@ def __init__(self, loc, *,
+             See the parameter *loc* of `.Legend` for details.
+         pad : float, default: 0.4
+             Padding around the child as fraction of the fontsize.
+-        borderpad : float, default: 0.5
++        borderpad : float or (float, float), default: 0.5
+             Padding between the offsetbox frame and the *bbox_to_anchor*.
++            If a float, the same padding is used for both x and y.
++            If a tuple of two floats, it specifies the (x, y) padding.
++
++            .. versionadded:: 3.11
++               The *borderpad* parameter now accepts a tuple of (x, y) paddings.
+         child : `.OffsetBox`
+             The box that will be anchored.
+         prop : `.FontProperties`
+@@ -1084,10 +1089,10 @@ def draw(self, renderer):
+         self.stale = False
+ 
+ 
+-def _get_anchored_bbox(loc, bbox, parentbbox, borderpad):
++def _get_anchored_bbox(loc, bbox, parentbbox, pad_x, pad_y):
+     """
+     Return the (x, y) position of the *bbox* anchored at the *parentbbox* with
+-    the *loc* code with the *borderpad*.
++    the *loc* code with the *borderpad* and padding *pad_x*, *pad_y*.
+     """
+     # This is only called internally and *loc* should already have been
+     # validated.  If 0 (None), we just let ``bbox.anchored`` raise.
+ 
+ 

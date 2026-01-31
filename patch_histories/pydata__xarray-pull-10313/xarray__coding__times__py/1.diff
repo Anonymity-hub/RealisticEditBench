@@ -1,0 +1,20 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -659,10 +659,14 @@ def decode_cf_timedelta(
+     num_timedeltas = to_numpy(num_timedeltas)
+     unit = _netcdf_to_numpy_timeunit(units)
+ 
++    # special case empty arrays
++    is_empty_array = num_timedeltas.size == 0
++
+     with warnings.catch_warnings():
+         warnings.filterwarnings("ignore", "All-NaN slice encountered", RuntimeWarning)
+-        _check_timedelta_range(np.nanmin(num_timedeltas), unit, time_unit)
+-        _check_timedelta_range(np.nanmax(num_timedeltas), unit, time_unit)
++        if not is_empty_array:
++            _check_timedelta_range(np.nanmin(num_timedeltas), unit, time_unit)
++            _check_timedelta_range(np.nanmax(num_timedeltas), unit, time_unit)
+ 
+     timedeltas = _numbers_to_timedelta(
+         num_timedeltas, unit, "s", "timedeltas", target_unit=time_unit

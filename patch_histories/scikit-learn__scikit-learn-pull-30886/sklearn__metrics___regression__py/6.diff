@@ -1,0 +1,44 @@
+diff --git a/sklearn/metrics/_regression.py b/sklearn/metrics/_regression.py
+--- a/sklearn/metrics/_regression.py
++++ b/sklearn/metrics/_regression.py
+@@ -1341,7 +1341,9 @@
+     1.0
+     """
+     xp, _ = get_namespace(y_true, y_pred)
+-    y_type, y_true, y_pred, _ = _check_reg_targets(y_true, y_pred, None, xp=xp)
++    y_type, y_true, y_pred, _, _ = _check_reg_targets(
++        y_true, y_pred, sample_weight=None, multioutput=None, xp=xp
++    )
+     if y_type == "continuous-multioutput":
+         raise ValueError("Multioutput not supported in max_error")
+     return float(xp.max(xp.abs(y_true - y_pred)))
+@@ -1446,7 +1448,6 @@
+     )
+     if y_type == "continuous-multioutput":
+         raise ValueError("Multioutput not supported in mean_tweedie_deviance")
+-    check_consistent_length(y_true, y_pred, sample_weight)
+ 
+     if sample_weight is not None:
+         sample_weight = column_or_1d(sample_weight)
+@@ -1771,10 +1772,9 @@
+     >>> d2_pinball_score(y_true, y_true, alpha=0.1)
+     1.0
+     """
+-    y_type, y_true, y_pred, multioutput = _check_reg_targets(
+-        y_true, y_pred, multioutput
+-    )
+-    check_consistent_length(y_true, y_pred, sample_weight)
++    _, y_true, y_pred, sample_weight, multioutput = _check_reg_targets(
++        y_true, y_pred, sample_weight, multioutput
++    )
+ 
+     if _num_samples(y_pred) < 2:
+         msg = "D^2 score is not well-defined with less than two samples."
+@@ -1794,7 +1794,6 @@
+             np.percentile(y_true, q=alpha * 100, axis=0), (len(y_true), 1)
+         )
+     else:
+-        sample_weight = _check_sample_weight(sample_weight, y_true)
+         y_quantile = np.tile(
+             _weighted_percentile(
+                 y_true, sample_weight=sample_weight, percentile_rank=alpha * 100

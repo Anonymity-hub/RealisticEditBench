@@ -1,0 +1,16 @@
+diff --git a/sphinx/builders/linkcheck.py b/sphinx/builders/linkcheck.py
+--- a/sphinx/builders/linkcheck.py
++++ b/sphinx/builders/linkcheck.py
+@@ -748,9 +748,9 @@ def rewrite_github_anchor(app: Sphinx, uri: str) -> str | None:
+ 
+ 
+ def compile_linkcheck_allowed_redirects(app: Sphinx, config: Config) -> None:
+-    """Compile patterns in linkcheck_allowed_redirects to the regexp objects."""
+-    linkcheck_allowed_redirects = app.config.linkcheck_allowed_redirects
+-    for url, pattern in list(linkcheck_allowed_redirects.items()):
++    """Compile patterns to the regexp objects."""
++    allowed_redirects = {}
++    for url, pattern in config.linkcheck_allowed_redirects.items():
+         try:
+             linkcheck_allowed_redirects[re.compile(url)] = re.compile(pattern)
+         except re.error as exc:

@@ -1,0 +1,18 @@
+diff --git a/sphinx/domains/python/_annotations.py b/sphinx/domains/python/_annotations.py
+--- a/sphinx/domains/python/_annotations.py
++++ b/sphinx/domains/python/_annotations.py
+@@ -587,6 +587,14 @@
+                 param_name, _, annotation = param_with_annotation.partition(':')
+                 del param_with_annotation
+ 
++                node = addnodes.desc_parameter()
++                node += addnodes.desc_sig_name('', param_name.strip())
++                if annotation:
++                    children = _parse_annotation(annotation.strip(), env=env)
++                    node += addnodes.desc_sig_punctuation('', ':')
++                    node += addnodes.desc_sig_space()
++                    node += addnodes.desc_sig_name('', '', *children)  # type: ignore[arg-type]
++                if default_value:
+             while ends_open:
+                 stack.append(addnodes.desc_optional())
+                 stack[-2] += stack[-1]

@@ -1,0 +1,37 @@
+diff --git a/sphinx/builders/__init__.py b/sphinx/builders/__init__.py
+--- a/sphinx/builders/__init__.py
++++ b/sphinx/builders/__init__.py
+@@ -14,6 +14,7 @@
+ from docutils.utils import DependencyList
+ 
+ from sphinx._cli.util.colour import bold
++from sphinx.deprecation import _deprecation_warning
+ from sphinx.environment import (
+     CONFIG_CHANGED_REASON,
+     CONFIG_OK,
+@@ -114,7 +115,7 @@ def __init__(self, app: Sphinx, env: BuildEnvironment) -> None:
+         self.doctreedir = app.doctreedir
+         ensuredir(self.doctreedir)
+ 
+-        self.app: Sphinx = app
++        self._app: Sphinx = app
+         self.env: BuildEnvironment = env
+         self.env.set_versioning_method(self.versioning_method, self.versioning_compare)
+         self.events: EventManager = app.events
+@@ -136,9 +137,15 @@ def __init__(self, app: Sphinx, env: BuildEnvironment) -> None:
+         self.parallel_ok = False
+         self.finish_tasks: Any = None
+ 
++    @property
++    def app(self) -> Sphinx:
++        cls_name = self.__class__.__qualname__
++        _deprecation_warning(__name__, f'{cls_name}.app', remove=(10, 0))
++        return self._app
++
+     @property
+     def _translator(self) -> NullTranslations | None:
+-        return self.app.translator
++        return self._app.translator
+ 
+     def get_translator_class(self, *args: Any) -> type[nodes.NodeVisitor]:
+         """Return a class of translator."""

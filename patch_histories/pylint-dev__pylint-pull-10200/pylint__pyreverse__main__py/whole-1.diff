@@ -1,0 +1,12 @@
+diff --git a/pylint/pyreverse/main.py b/pylint/pyreverse/main.py
+--- a/pylint/pyreverse/main.py
++++ b/pylint/pyreverse/main.py
+@@ -354,7 +354,7 @@ def run(self) -> int:
+                 verbose=self.config.verbose,
+             )
+             linker = Linker(project, tag=True)
+-            handler = DiadefsHandler(self.config)
++            handler = DiadefsHandler(self.config, self.args)
+             diadefs = handler.get_diadefs(project, linker)
+         writer.DiagramWriter(self.config).write(diadefs)
+         return 0

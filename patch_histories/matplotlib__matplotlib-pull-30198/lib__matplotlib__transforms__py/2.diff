@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/transforms.py b/lib/matplotlib/transforms.py
+--- a/lib/matplotlib/transforms.py
++++ b/lib/matplotlib/transforms.py
+@@ -35,7 +35,6 @@
+ # `np.minimum` instead of the builtin `min`, and likewise for `max`.  This is
+ # done so that `nan`s are propagated, instead of being silently dropped.
+ 
+-import copy
+ import functools
+ import itertools
+ import textwrap

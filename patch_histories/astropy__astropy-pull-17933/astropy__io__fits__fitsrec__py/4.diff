@@ -1,0 +1,13 @@
+diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py
+--- a/astropy/io/fits/fitsrec.py
++++ b/astropy/io/fits/fitsrec.py
+@@ -484,7 +484,8 @@
+         prefix = "FITS_rec("
+         fmt = "FITS_rec(%s,%sdtype=%s)"
+         # get data/shape string. logic taken from numeric.array_repr
+-        if
++        if self.size > 0 or self.shape == (0,):
++            lst =
+ 
+     def __getattribute__(self, attr):
+         # First, see if ndarray has this attr, and return it if so. Note that

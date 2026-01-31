@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/path.py b/lib/matplotlib/path.py
+--- a/lib/matplotlib/path.py
++++ b/lib/matplotlib/path.py
+@@ -681,7 +681,7 @@
+         Path
+             The interpolated path.
+         """
+-        if steps == 1:
++        if steps == 1 or len(self) == 0:
+             return self
+ 
+         vertices = simple_linear_interpolation(self.vertices, steps)

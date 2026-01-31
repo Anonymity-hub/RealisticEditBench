@@ -1,0 +1,60 @@
+diff --git a/sklearn/pipeline.py b/sklearn/pipeline.py
+--- a/sklearn/pipeline.py
++++ b/sklearn/pipeline.py
+@@ -935,23 +935,22 @@
+         y_score : ndarray of shape (n_samples, n_classes)
+             Result of calling `decision_function` on the final estimator.
+         """
+-        # TODO(1.8): Remove the context manager and use check_is_fitted(self)
+-        with _raise_or_warn_if_not_fitted(self):
+-            _raise_for_params(params, self, "decision_function")
+-
+-            # not branching here since params is only available if
+-            # enable_metadata_routing=True
+-            routed_params = process_routing(self, "decision_function", **params)
+-
+-            Xt = X
+-            for _, name, transform in self._iter(with_final=False):
+-                Xt = transform.transform(
+-                    Xt, **routed_params.get(name, {}).get("transform", {})
+-                )
+-            return self.steps[-1][1].decision_function(
+-                Xt,
+-                **routed_params.get(self.steps[-1][0], {}).get("decision_function", {}),
++        check_is_fitted(self)
++        _raise_for_params(params, self, "decision_function")
++
++        # not branching here since params is only available if
++        # enable_metadata_routing=True
++        routed_params = process_routing(self, "decision_function", **params)
++
++        Xt = X
++        for _, name, transform in self._iter(with_final=False):
++            Xt = transform.transform(
++                Xt, **routed_params.get(name, {}).get("transform", {})
+             )
++        return self.steps[-1][1].decision_function(
++            Xt,
++            **routed_params.get(self.steps[-1][0], {}).get("decision_function", {}),
++        )
+ 
+     @available_if(_final_estimator_has("score_samples"))
+     def score_samples(self, X):
+@@ -973,12 +972,11 @@
+         y_score : ndarray of shape (n_samples,)
+             Result of calling `score_samples` on the final estimator.
+         """
+-        # TODO(1.8): Remove the context manager and use check_is_fitted(self)
+-        with _raise_or_warn_if_not_fitted(self):
+-            Xt = X
+-            for _, _, transformer in self._iter(with_final=False):
+-                Xt = transformer.transform(Xt)
+-            return self.steps[-1][1].score_samples(Xt)
++        check_is_fitted(self)
++        Xt = X
++        for _, _, transformer in self._iter(with_final=False):
++            Xt = transformer.transform(Xt)
++        return self.steps[-1][1].score_samples(Xt)
+ 
+     @available_if(_final_estimator_has("predict_log_proba"))
+     def predict_log_proba(self, X, **params):

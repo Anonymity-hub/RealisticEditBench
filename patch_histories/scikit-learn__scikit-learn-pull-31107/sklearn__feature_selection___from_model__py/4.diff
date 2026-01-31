@@ -1,0 +1,14 @@
+diff --git a/sklearn/feature_selection/_from_model.py b/sklearn/feature_selection/_from_model.py
+--- a/sklearn/feature_selection/_from_model.py
++++ b/sklearn/feature_selection/_from_model.py
+@@ -38,8 +38,8 @@
+         is_elasticnet_l1_penalized = est_name == "ElasticNet" and (
+             hasattr(estimator, "l1_ratio") and np.isclose(estimator.l1_ratio, 1.0)
+         )
+-        is_elasticnetcv_l1_penalized = est_name == "ElasticNetCV" and
+-            
++        is_elasticnetcv_l1_penalized = est_name == "ElasticNetCV" and (
++            hasattr(estimator, "l1_ratio_") and np.isclose(estimator.l1_ratio_, 1.0)
+         )
+         if (
+             is_l1_penalized

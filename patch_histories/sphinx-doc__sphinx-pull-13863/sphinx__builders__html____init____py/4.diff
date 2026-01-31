@@ -1,0 +1,12 @@
+diff --git a/sphinx/builders/html/__init__.py b/sphinx/builders/html/__init__.py
+--- a/sphinx/builders/html/__init__.py
++++ b/sphinx/builders/html/__init__.py
+@@ -1051,7 +1051,7 @@
+         msg = __('page %s matches two patterns in html_sidebars: %r and %r')
+         for pattern, pat_sidebars in html_sidebars.items():
+             if patmatch(pagename, pattern):
+-                if matched and has_wildcard(pattern):
++                if matched and _has_wildcard(pattern):
+                     # warn if both patterns contain wildcards
+                     if has_wildcard(matched):
+                         logger.warning(msg, pagename, matched, pattern)

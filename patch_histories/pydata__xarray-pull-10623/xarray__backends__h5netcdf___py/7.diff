@@ -1,0 +1,13 @@
+diff --git a/xarray/backends/h5netcdf_.py b/xarray/backends/h5netcdf_.py
+--- a/xarray/backends/h5netcdf_.py
++++ b/xarray/backends/h5netcdf_.py
+@@ -287,6 +287,9 @@
+ 
+     def get_dimensions(self):
+         return FrozenDict((k, len(v)) for k, v in self.ds.dimensions.items())
++
++    def get_parent_dimensions(self):
++        return FrozenDict(collect_ancestor_dimensions(self.ds))
+ 
+     def get_encoding(self):
+         return {

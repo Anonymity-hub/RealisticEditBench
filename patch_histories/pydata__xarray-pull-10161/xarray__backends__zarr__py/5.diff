@@ -1,0 +1,11 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -1207,6 +1207,7 @@
+                 region=region,
+                 mode=self._mode,
+                 shape=zarr_shape,
++                zarr_format=3 if is_zarr_v3_format else 2,
+             )
+ 
+             if self._mode == "w" or name not in existing_keys:

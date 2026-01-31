@@ -1,0 +1,11 @@
+diff --git a/django/contrib/staticfiles/storage.py b/django/contrib/staticfiles/storage.py
+--- a/django/contrib/staticfiles/storage.py
++++ b/django/contrib/staticfiles/storage.py
+@@ -496,6 +496,7 @@ def post_process(self, *args, **kwargs):
+             self.save_manifest()
+ 
+     def save_manifest(self):
++        sorted_hashed_files = sorted(self.hashed_files.items())
+         self.manifest_hash = self.file_hash(
+             None, ContentFile(json.dumps(sorted(self.hashed_files.items())).encode())
+         )

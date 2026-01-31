@@ -1,0 +1,14 @@
+diff --git a/astropy/samp/hub_script.py b/astropy/samp/hub_script.py
+--- a/astropy/samp/hub_script.py
++++ b/astropy/samp/hub_script.py
+@@ -108,7 +109,7 @@
+ 
+     # valid logging levels as strings, reverse ordered by level.
+     # the default 'INFO' is assumed to exist (...)
+-    log_levels =
++    log_levels = sorted(d := logging.getLevelNamesMapping(), key=d.get, reverse=True)
+     log_group.add_argument(
+         "-L",
+         "--log-level",
+
+

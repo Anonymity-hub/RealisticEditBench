@@ -1,0 +1,12 @@
+diff --git a/sklearn/metrics/_scorer.py b/sklearn/metrics/_scorer.py
+--- a/sklearn/metrics/_scorer.py
++++ b/sklearn/metrics/_scorer.py
+@@ -525,7 +525,7 @@ def get_metadata_routing(self):
+             A :class:`~utils.metadata_routing.MetadataRouter` encapsulating
+             routing information.
+         """
+-        return get_routing_for_object(self._metadata_request)
++        return get_routing_for_object(self._estimator)
+
+     def set_score_request(self, **kwargs):
+         """Set requested parameters by the scorer.

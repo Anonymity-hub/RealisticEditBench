@@ -1,0 +1,11 @@
+diff --git a/sphinx/ext/autodoc/_property_types.py b/sphinx/ext/autodoc/_property_types.py
+--- a/sphinx/ext/autodoc/_property_types.py
++++ b/sphinx/ext/autodoc/_property_types.py
+@@ -43,6 +43,7 @@ class _ItemProperties:
+     docstring_lines: tuple[str, ...]
+ 
+     _obj: Any
++    _obj___module__: str | None
+ 
+     @property
+     def name(self) -> str:

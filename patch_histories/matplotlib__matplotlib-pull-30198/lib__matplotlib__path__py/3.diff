@@ -1,0 +1,17 @@
+diff --git a/lib/matplotlib/path.py b/lib/matplotlib/path.py
+--- a/lib/matplotlib/path.py
++++ b/lib/matplotlib/path.py
+@@ -282,7 +282,11 @@
+         """
+         # Deepcopying arrays (vertices, codes) strips the writeable=False flag.
+         cls = type(self)
+-        p = cls.__new__(cls)
++        memo[id(self)] = p = cls.__new__(cls)
++
++        for k, v in self.__dict__.items():
++            setattr(p, k, copy.deepcopy(v, memo))
++
+         p._readonly = False
+         return p
+ 
+

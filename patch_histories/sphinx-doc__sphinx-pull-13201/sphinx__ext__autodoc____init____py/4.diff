@@ -1,0 +1,12 @@
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -923,7 +923,7 @@
+             # of inner classes can be documented
+             full_mname = f'{self.modname}::' + '.'.join((*self.objpath, mname))
+             documenter = classes[-1](self.directive, full_mname, self.indent)
+-            memberdocumenters.append((documenter, isattr))
++            member_documenters.append((documenter, isattr))
+ 
+         member_order = self.options.member_order or self.config.autodoc_member_order
+         memberdocumenters = self.sort_members(memberdocumenters, member_order)

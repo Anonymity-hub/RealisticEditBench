@@ -1,0 +1,28 @@
+diff --git a/xarray/coding/cftime_offsets.py b/xarray/coding/cftime_offsets.py
+--- a/xarray/coding/cftime_offsets.py
++++ b/xarray/coding/cftime_offsets.py
+@@ -609,14 +609,19 @@ def rollback(self, date):
+             return date - YearEnd(month=self.month)
+ 
+ 
+-class Day(Tick):
+-    _freq = "D"
++class Day(BaseCFTimeOffset):
++    """Day offset following definition in pandas/_libs/tslibs/offsets.pyx"""
+ 
+-    def as_timedelta(self) -> timedelta:
+-        return timedelta(days=self.n)
++    _freq = "D"
+ 
+     def __apply__(self, other):
+-        return other + self.as_timedelta()
++        if isinstance(other, Day):
++            return Day(self.n + other.n)
++        else:
++            return other + timedelta(days=self.n)
++
++    def onOffset(self, date) -> bool:
++        return True
+ 
+ 
+ class Hour(Tick):

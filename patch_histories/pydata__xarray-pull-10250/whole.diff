@@ -1,0 +1,216 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -7091,21 +7091,21 @@ def _to_dataframe(self, ordered_dims: Mapping[Any, int]):
+             {
+                 **dict(zip(non_extension_array_columns, data, strict=True)),
+                 **{
+-                    c: self.variables[c].data.array
++                    c: self.variables[c].data
+                     for c in extension_array_columns_same_index
+                 },
+             },
+             index=index,
+         )
+         for extension_array_column in extension_array_columns_different_index:
+-            extension_array = self.variables[extension_array_column].data.array
++            extension_array = self.variables[extension_array_column].data
+             index = self[
+                 self.variables[extension_array_column].dims[0]
+             ].coords.to_index()
+             extension_array_df = pd.DataFrame(
+                 {extension_array_column: extension_array},
+                 index=pd.Index(index.array)
+-                if isinstance(index, PandasExtensionArray)
++                if isinstance(index, PandasExtensionArray)  # type: ignore[redundant-expr]
+                 else index,
+             )
+             extension_array_df.index.name = self.variables[extension_array_column].dims[
+diff --git a/xarray/core/extension_array.py b/xarray/core/extension_array.py
+--- a/xarray/core/extension_array.py
++++ b/xarray/core/extension_array.py
+@@ -1,13 +1,16 @@
+ from __future__ import annotations
+ 
+ from collections.abc import Callable, Sequence
++from dataclasses import dataclass
+ from typing import Generic, cast
+ 
+ import numpy as np
+ import pandas as pd
++from packaging.version import Version
+ from pandas.api.types import is_extension_array_dtype
+ 
+ from xarray.core.types import DTypeLikeSave, T_ExtensionArray
++from xarray.core.utils import NDArrayMixin
+ 
+ HANDLED_EXTENSION_ARRAY_FUNCTIONS: dict[Callable, Callable] = {}
+ 
+@@ -33,12 +36,12 @@ def __extension_duck_array__issubdtype(
+ def __extension_duck_array__broadcast(arr: T_ExtensionArray, shape: tuple):
+     if shape[0] == len(arr) and len(shape) == 1:
+         return arr
+-    raise NotImplementedError("Cannot broadcast 1d-only pandas categorical array.")
++    raise NotImplementedError("Cannot broadcast 1d-only pandas extension array.")
+ 
+ 
+ @implements(np.stack)
+ def __extension_duck_array__stack(arr: T_ExtensionArray, axis: int):
+-    raise NotImplementedError("Cannot stack 1d-only pandas categorical array.")
++    raise NotImplementedError("Cannot stack 1d-only pandas extension array.")
+ 
+ 
+ @implements(np.concatenate)
+@@ -62,21 +65,22 @@ def __extension_duck_array__where(
+     return cast(T_ExtensionArray, pd.Series(x).where(condition, pd.Series(y)).array)
+ 
+ 
+-class PandasExtensionArray(Generic[T_ExtensionArray]):
+-    array: T_ExtensionArray
++@dataclass(frozen=True)
++class PandasExtensionArray(Generic[T_ExtensionArray], NDArrayMixin):
++    """NEP-18 compliant wrapper for pandas extension arrays.
++
++    Parameters
++    ----------
++    array : T_ExtensionArray
++        The array to be wrapped upon e.g,. :py:class:`xarray.Variable` creation.
++    ```
++    """
+ 
+-    def __init__(self, array: T_ExtensionArray):
+-        """NEP-18 compliant wrapper for pandas extension arrays.
++    array: T_ExtensionArray
+ 
+-        Parameters
+-        ----------
+-        array : T_ExtensionArray
+-            The array to be wrapped upon e.g,. :py:class:`xarray.Variable` creation.
+-        ```
+-        """
+-        if not isinstance(array, pd.api.extensions.ExtensionArray):
+-            raise TypeError(f"{array} is not an pandas ExtensionArray.")
+-        self.array = array
++    def __post_init__(self):
++        if not isinstance(self.array, pd.api.extensions.ExtensionArray):
++            raise TypeError(f"{self.array} is not an pandas ExtensionArray.")
+ 
+     def __array_function__(self, func, types, args, kwargs):
+         def replace_duck_with_extension_array(args) -> list:
+@@ -105,19 +109,13 @@ def replace_duck_with_extension_array(args) -> list:
+     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+         return ufunc(*inputs, **kwargs)
+ 
+-    def __repr__(self):
+-        return f"PandasExtensionArray(array={self.array!r})"
+-
+-    def __getattr__(self, attr: str) -> object:
+-        return getattr(self.array, attr)
+-
+     def __getitem__(self, key) -> PandasExtensionArray[T_ExtensionArray]:
+         item = self.array[key]
+         if is_extension_array_dtype(item):
+-            return type(self)(item)
+-        if np.isscalar(item):
+-            return type(self)(type(self.array)([item]))  # type: ignore[call-arg]  # only subclasses with proper __init__ allowed
+-        return item
++            return PandasExtensionArray(item)
++        if np.isscalar(item) or isinstance(key, int):
++            return PandasExtensionArray(type(self.array)._from_sequence([item]))  # type: ignore[call-arg,attr-defined,unused-ignore]
++        return PandasExtensionArray(item)
+ 
+     def __setitem__(self, key, val):
+         self.array[key] = val
+@@ -132,3 +130,15 @@ def __ne__(self, other):
+ 
+     def __len__(self):
+         return len(self.array)
++
++    @property
++    def ndim(self) -> int:
++        return 1
++
++    def __array__(
++        self, dtype: np.typing.DTypeLike = None, /, *, copy: bool | None = None
++    ) -> np.ndarray:
++        if Version(np.__version__) >= Version("2.0.0"):
++            return np.asarray(self.array, dtype=dtype, copy=copy)
++        else:
++            return np.asarray(self.array, dtype=dtype)
+diff --git a/xarray/core/formatting.py b/xarray/core/formatting.py
+--- a/xarray/core/formatting.py
++++ b/xarray/core/formatting.py
+@@ -626,6 +626,8 @@ def short_array_repr(array):
+ 
+     if isinstance(array, AbstractArray):
+         array = array.data
++    if isinstance(array, pd.api.extensions.ExtensionArray):
++        return repr(array)
+     array = to_duck_array(array)
+ 
+     # default to lower precision so a full (abbreviated) line can fit on
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -19,7 +19,6 @@
+ 
+ from xarray.core import duck_array_ops
+ from xarray.core.coordinate_transform import CoordinateTransform
+-from xarray.core.extension_array import PandasExtensionArray
+ from xarray.core.nputils import NumpyVIndexAdapter
+ from xarray.core.options import OPTIONS
+ from xarray.core.types import T_Xarray
+@@ -37,6 +36,7 @@
+ from xarray.namedarray.pycompat import array_type, integer_types, is_chunked_array
+ 
+ if TYPE_CHECKING:
++    from xarray.core.extension_array import PandasExtensionArray
+     from xarray.core.indexes import Index
+     from xarray.core.types import Self
+     from xarray.core.variable import Variable
+@@ -1797,6 +1797,8 @@ def get_duck_array(self) -> np.ndarray | PandasExtensionArray:
+         # We return an PandasExtensionArray wrapper type that satisfies
+         # duck array protocols. This is what's needed for tests to pass.
+         if pd.api.types.is_extension_array_dtype(self.array):
++            from xarray.core.extension_array import PandasExtensionArray
++
+             return PandasExtensionArray(self.array.array)
+         return np.asarray(self)
+ 
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -410,12 +410,20 @@ def data(self):
+         Variable.as_numpy
+         Variable.values
+         """
+-        if is_duck_array(self._data):
+-            return self._data
++        if isinstance(self._data, PandasExtensionArray):
++            duck_array = self._data.array
+         elif isinstance(self._data, indexing.ExplicitlyIndexed):
+-            return self._data.get_duck_array()
++            duck_array = self._data.get_duck_array()
++        elif is_duck_array(self._data):
++            duck_array = self._data
+         else:
+-            return self.values
++            duck_array = self.values
++        if isinstance(duck_array, PandasExtensionArray):
++            # even though PandasExtensionArray is a duck array,
++            # we should not return the PandasExtensionArray wrapper,
++            # and instead return the underlying data.
++            return duck_array.array
++        return duck_array
+ 
+     @data.setter
+     def data(self, data: T_DuckArray | ArrayLike) -> None:
+@@ -1366,7 +1374,7 @@ def set_dims(self, dim, shape=None):
+         elif shape is not None:
+             dims_map = dict(zip(dim, shape, strict=True))
+             tmp_shape = tuple(dims_map[d] for d in expanded_dims)
+-            expanded_data = duck_array_ops.broadcast_to(self.data, tmp_shape)
++            expanded_data = duck_array_ops.broadcast_to(self._data, tmp_shape)
+         else:
+             indexer = (None,) * (len(expanded_dims) - self.ndim) + (...,)
+             expanded_data = self.data[indexer]

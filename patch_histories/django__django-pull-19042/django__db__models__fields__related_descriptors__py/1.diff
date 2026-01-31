@@ -1,0 +1,15 @@
+diff --git a/django/db/models/fields/related_descriptors.py b/django/db/models/fields/related_descriptors.py
+--- a/django/db/models/fields/related_descriptors.py
++++ b/django/db/models/fields/related_descriptors.py
+@@ -111,7 +111,10 @@ def _filter_prefetch_queryset(queryset, field_name, instances):
+         if high_mark is not None:
+             predicate &= LessThanOrEqual(window, high_mark)
+         queryset.query.clear_limits()
+-    return queryset.filter(predicate)
++    # All pre-existing JOINs must be re-used when applying the predicate to
++    # avoid unintended spanning of multi-valued relationships.
++    queryset.query.add_q(predicate, reuse_all=True)
++    return queryset
+ 
+ 
+ class ForwardManyToOneDescriptor:

@@ -1,0 +1,28 @@
+diff --git a/sklearn/metrics/_plot/det_curve.py b/sklearn/metrics/_plot/det_curve.py
+--- a/sklearn/metrics/_plot/det_curve.py
++++ b/sklearn/metrics/_plot/det_curve.py
+@@ -294,19 +294,20 @@
+         >>> X_train, X_test, y_train, y_test = train_test_split(
+         ...     X, y, test_size=0.4, random_state=0)
+         >>> clf = SVC(random_state=0).fit(X_train, y_train)
+-        >>> y_pred = clf.decision_function(X_test)
++        >>> y_score = clf.decision_function(X_test)
+         >>> DetCurveDisplay.from_predictions(
+-        ...    y_test, y_pred)
++        ...    y_test, y_score)
+         <...>
+         >>> plt.show()
+         """
++        y_score = _deprecate_y_pred_parameter(y_score, y_pred, "1.8")
+         pos_label_validated, name = cls._validate_from_predictions_params(
+-            y_true, y_pred, sample_weight=sample_weight, pos_label=pos_label, name=name
++            y_true, y_score, sample_weight=sample_weight, pos_label=pos_label, name=name
+         )
+ 
+         fpr, fnr, _ = det_curve(
+             y_true,
+-            y_pred,
++            y_score,
+             pos_label=pos_label,
+             sample_weight=sample_weight,
+             drop_intermediate=drop_intermediate,

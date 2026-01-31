@@ -1,0 +1,18 @@
+diff --git a/lib/matplotlib/path.py b/lib/matplotlib/path.py
+--- a/lib/matplotlib/path.py
++++ b/lib/matplotlib/path.py
+@@ -688,6 +688,13 @@
+             return self.make_compound_path(
+                 *(p.interpolated(steps) for p in self._iter_connected_components()))
+
++        if self.codes is not None and self.CLOSEPOLY in self.codes and not np.all(
++                self.vertices[self.codes == self.CLOSEPOLY] == self.vertices[0]):
++            vertices = self.vertices.copy()
++            vertices[self.codes == self.CLOSEPOLY] = vertices[0]
++        else:
++            vertices = self.vertices
++
+         vertices = simple_linear_interpolation(self.vertices, steps)
+         codes = self.codes
+         if codes is not None:
+

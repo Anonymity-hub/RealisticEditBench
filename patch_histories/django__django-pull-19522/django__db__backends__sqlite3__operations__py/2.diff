@@ -1,0 +1,14 @@
+diff --git a/django/db/backends/sqlite3/operations.py b/django/db/backends/sqlite3/operations.py
+--- a/django/db/backends/sqlite3/operations.py
++++ b/django/db/backends/sqlite3/operations.py
+@@ -43,9 +43,7 @@
+                 for field in fields
+             )
+         )
+-        if len(fields) == 1:
+-            return 500
+-        elif len(fields) > 1:
++        if fields:
+             return self.connection.features.max_query_params // len(fields)
+         else:
+             return len(objs)

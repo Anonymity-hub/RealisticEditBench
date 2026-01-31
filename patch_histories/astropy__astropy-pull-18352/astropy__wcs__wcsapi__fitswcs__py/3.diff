@@ -1,0 +1,23 @@
+diff --git a/astropy/wcs/wcsapi/fitswcs.py b/astropy/wcs/wcsapi/fitswcs.py
+--- a/astropy/wcs/wcsapi/fitswcs.py
++++ b/astropy/wcs/wcsapi/fitswcs.py
+@@ -658,11 +658,17 @@
+             else:
+                 kwargs["unit"] = self.wcs.cunit[ispec]
+ 
++                # Make sure that if restfrq is defined and restwav is not or
++                # vice-versa, we define the other one. Typically if e.g.
++                # RESTFRQ is defined in the original FITS header, wcs.restwav
++                # is 0.
++
+                 if ctype in ("VELO", "VRAD", "VOPT"):
+                     restfrq = self.wcs.restfrq
+                     restwav = self.wcs.restwav
+ 
+-                    if
++                    if restfrq > 0 or restwav > 0:
++                        if
+                     if ctype == "VELO":
+                         kwargs["doppler_convention"] = "relativistic"
+                         kwargs["doppler_rest"] = self.wcs.restfrq * u.Hz
+

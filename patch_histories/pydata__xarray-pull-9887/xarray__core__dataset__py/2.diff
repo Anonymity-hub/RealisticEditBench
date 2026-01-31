@@ -1,0 +1,12 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -4207,7 +4207,7 @@
+                 # booleans and objects and retains the dtype but inside
+                 # this loop there might be some duplicate code that slows it
+                 # down, therefore collect these signals and run it later:
+-                reindex = True
++                reindex_vars.append(name)
+             elif all(d not in indexers for d in var.dims):
+                 # For anything else we can only keep variables if they
+                 # are not dependent on any coords that are being

@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/streamplot.py b/lib/matplotlib/streamplot.py
+--- a/lib/matplotlib/streamplot.py
++++ b/lib/matplotlib/streamplot.py
+@@ -551,7 +551,9 @@
+     pass
+ 
+ 
+-def _integrate_rk12(x0, y0, dmap, f, maxlength, broken_streamlines=True):
++def _integrate_rk12(x0, y0, dmap, f, maxlength, broken_streamlines=True,
++                    integration_max_step_scale=1.0,
++                    integration_max_error_scale=1.0):
+     """
+     2nd-order Runge-Kutta algorithm with adaptive step size.
+ 

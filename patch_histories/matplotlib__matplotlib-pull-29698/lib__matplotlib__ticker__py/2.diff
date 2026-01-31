@@ -1,0 +1,21 @@
+diff --git a/lib/matplotlib/ticker.py b/lib/matplotlib/ticker.py
+--- a/lib/matplotlib/ticker.py
++++ b/lib/matplotlib/ticker.py
+@@ -2412,13 +2412,10 @@
+                 np.log(x) / np.log(self._base))
+ 
+     def tick_values(self, vmin, vmax):
+-        if self.numticks == 'auto':
+-            if self.axis is not None:
+-                numticks = np.clip(self.axis.get_tick_space(), 2, 9)
+-            else:
+-                numticks = 9
+-        else:
+-            numticks = self.numticks
++        n_request = (
++            self.numticks if self.numticks != "auto" else
++            np.clip(self.axis.get_tick_space(), 2, 9) if self.axis is not None else
++            9)
+ 
+         b = self._base
+         if vmin <= 0.0:

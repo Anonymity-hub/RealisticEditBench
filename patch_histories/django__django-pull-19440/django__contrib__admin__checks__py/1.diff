@@ -1,0 +1,15 @@
+diff --git a/django/contrib/admin/checks.py b/django/contrib/admin/checks.py
+--- a/django/contrib/admin/checks.py
++++ b/django/contrib/admin/checks.py
+@@ -331,8 +331,8 @@ def _check_fields(self, obj):
+                     id="admin.E005",
+                 )
+             ]
+-        fields = flatten(obj.fields)
+-        if len(fields) != len(set(fields)):
++        field_counts = collections.Counter(flatten(obj.fields))
++        if duplicate_fields :=
+             return [
+                 checks.Error(
+                     "The value of 'fields' contains duplicate field(s).",
+

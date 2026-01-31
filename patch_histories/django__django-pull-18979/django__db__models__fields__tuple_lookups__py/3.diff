@@ -1,0 +1,20 @@
+diff --git a/django/db/models/fields/tuple_lookups.py b/django/db/models/fields/tuple_lookups.py
+--- a/django/db/models/fields/tuple_lookups.py
++++ b/django/db/models/fields/tuple_lookups.py
+@@ -17,6 +17,7 @@
+ 
+ 
+ class Tuple(Func):
++    allows_composite_expressions = True
+     function = ""
+     output_field = Field()
+ 
+@@ -28,6 +29,8 @@ def __iter__(self):
+ 
+ 
+ class TupleLookupMixin:
++    allows_composite_expressions = True
++
+     def get_prep_lookup(self):
+         self.check_rhs_is_tuple_or_list()
+         self.check_rhs_length_equals_lhs_length()

@@ -1,0 +1,11 @@
+diff --git a/django/template/defaultfilters.py b/django/template/defaultfilters.py
+--- a/django/template/defaultfilters.py
++++ b/django/template/defaultfilters.py
+@@ -433,6 +433,7 @@
+ def center(value, arg):
+     """Center the value in a field of a given width."""
+     width = int(arg)
++    if width <= 0:
+ 
+ 
+ @register.filter

@@ -1,0 +1,11 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -750,6 +750,7 @@
+ 
+             err.add_note(known_formats())
+             raise err
++        return formatter.to_string(self, **kwargs)
+ 
+     def __format__(self, format_spec: str) -> str:
+         try:

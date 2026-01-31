@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -2989,7 +2989,7 @@
+ 
+             if orientation == "vertical":
+                 y_direction = -1 if y_inverted else 1
+-                xytext = 0, y_direction * sign(dat) * padding
++                xytext = 0, y_direction * sign(dat) * pad
+             else:  # horizontal
+                 x_direction = -1 if x_inverted else 1
+                 xytext = x_direction * sign(dat) * padding, 0

@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py
+--- a/lib/matplotlib/__init__.py
++++ b/lib/matplotlib/__init__.py
+@@ -400,7 +400,7 @@ def impl(args, regex, min_ver=None, ignore_exit_code=False):
+         try:
+             output = subprocess.check_output(
+                 args, stderr=subprocess.STDOUT,
+-                text=True, errors="replace")
++                text=True, errors="replace", timeout=30)
+         except subprocess.CalledProcessError as _cpe:
+             if ignore_exit_code:
+                 output = _cpe.output

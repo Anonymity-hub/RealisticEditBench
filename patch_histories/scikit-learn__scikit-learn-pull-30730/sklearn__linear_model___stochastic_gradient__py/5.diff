@@ -1,0 +1,12 @@
+diff --git a/sklearn/linear_model/_stochastic_gradient.py b/sklearn/linear_model/_stochastic_gradient.py
+--- a/sklearn/linear_model/_stochastic_gradient.py
++++ b/sklearn/linear_model/_stochastic_gradient.py
+@@ -1708,7 +1708,7 @@
+             penalty_type,
+             alpha,
+             C,
+-            self.l1_ratio,
++            self._get_l1_ratio(),
+             dataset,
+             validation_mask,
+             self.early_stopping,

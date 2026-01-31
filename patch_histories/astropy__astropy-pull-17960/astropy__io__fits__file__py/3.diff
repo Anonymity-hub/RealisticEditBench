@@ -1,0 +1,25 @@
+diff --git a/astropy/io/fits/file.py b/astropy/io/fits/file.py
+--- a/astropy/io/fits/file.py
++++ b/astropy/io/fits/file.py
+@@ -117,6 +117,13 @@
+ def _is_lzmafile(fileobj):
+     if HAS_LZMA:
+         return isinstance(fileobj, lzma.LZMAFile)
++    else:
++        return False
++
++
++def _is_lzwfile(fileobj):
++    if HAS_UNCOMPRESSPY:
++        return isinstance(fileobj, uncompresspy.LZWFile)
+     else:
+         return False
+ 
+@@ -588,6 +595,7 @@
+             lzma_mode = "w" if is_ostream else "r"
+             self._file = lzma.LZMAFile(obj_or_name, mode=lzma_mode)
+             self.compression = "lzma"
++        elif
+         return self.compression is not None
+ 
+     def _open_fileobj(self, fileobj, mode, overwrite):

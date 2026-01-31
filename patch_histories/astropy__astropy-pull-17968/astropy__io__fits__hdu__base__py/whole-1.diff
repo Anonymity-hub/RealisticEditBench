@@ -1,0 +1,17 @@
+diff --git a/astropy/io/fits/hdu/base.py b/astropy/io/fits/hdu/base.py
+--- a/astropy/io/fits/hdu/base.py
++++ b/astropy/io/fits/hdu/base.py
+@@ -395,10 +395,10 @@ def writeto(self, name, output_verify="exception", overwrite=False, checksum=Fal
+ 
+         Notes
+         -----
+-        gzip, zip and bzip2 compression algorithms are natively supported.
++        gzip, zip, bzip2 and lzma compression algorithms are natively supported.
+         Compression mode is determined from the filename extension
+-        ('.gz', '.zip' or '.bz2' respectively).  It is also possible to pass a
+-        compressed file object, e.g. `gzip.GzipFile`.
++        ('.gz', '.zip', '.bz2' or '.xz' respectively).  It is also possible to
++        pass a compressed file object, e.g. `gzip.GzipFile`.
+         """
+         from .hdulist import HDUList
+ 

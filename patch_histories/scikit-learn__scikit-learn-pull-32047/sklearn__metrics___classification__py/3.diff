@@ -1,0 +1,14 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -127,8 +127,8 @@ def _check_targets(y_true, y_pred, sample_weight=None):
+ 
+     if y_type in ["binary", "multiclass"]:
+         xp, _ = get_namespace(y_true, y_pred)
+-        y_true = column_or_1d(y_true)
+-        y_pred = column_or_1d(y_pred)
++        y_true = column_or_1d(y_true, input_name="y_true")
++        y_pred = column_or_1d(y_pred, input_name="y_pred")
+         if y_type == "binary":
+             try:
+                 unique_values = _union1d(y_true, y_pred, xp)

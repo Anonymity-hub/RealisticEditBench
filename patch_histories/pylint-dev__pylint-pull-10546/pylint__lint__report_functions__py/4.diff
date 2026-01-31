@@ -1,0 +1,12 @@
+diff --git a/pylint/lint/report_functions.py b/pylint/lint/report_functions.py
+--- a/pylint/lint/report_functions.py
++++ b/pylint/lint/report_functions.py
+@@ -31,7 +31,7 @@
+     """Make messages type report."""
+     by_msg_stats = stats.by_msg
+     lines = ["message id", "occurrences"]
+-    for value, msg_id in in_order:
++    for value, msg_id in sorted(
+         lines += [msg_id, str(value)]
+     sect.append(Table(children=lines, cols=2, rheaders=1))
+ 

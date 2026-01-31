@@ -1,0 +1,12 @@
+diff --git a/xarray/indexes/range_index.py b/xarray/indexes/range_index.py
+--- a/xarray/indexes/range_index.py
++++ b/xarray/indexes/range_index.py
+@@ -81,7 +81,7 @@
+     def slice(self, sl: slice) -> "RangeCoordinateTransform":
+         new_range = range(self.size)[sl]
+         new_size = len(new_range)
+-        new_start = self.start + sl.start * self.step
++        new_start = self.start + new_range.start * self.step
+         new_stop = new_start + new_size * sl.step * self.step
+ 
+         return type(self)(

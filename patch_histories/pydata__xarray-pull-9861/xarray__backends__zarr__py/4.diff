@@ -1,0 +1,35 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -803,9 +803,8 @@
+         # TODO: consider deprecating this in favor of zarr_group
+         return self.zarr_group
+ 
+-    def open_store_variable(self, name, zarr_array=None):
+-        if zarr_array is None:
+-            zarr_array = self.zarr_group[name]
++    def open_store_variable(self, name):
++        zarr_array = self.members[name]
+         data = indexing.LazilyIndexedArray(ZarrArrayWrapper(zarr_array))
+         try_nczarr = self._mode == "r"
+         dimensions, attributes = _get_zarr_dims_and_attrs(
+@@ -853,9 +852,7 @@
+         return Variable(dimensions, data, attributes, encoding)
+ 
+     def get_variables(self):
+-        return FrozenDict(
+-            (k, self.open_store_variable(k, v)) for k, v in self.zarr_group.arrays()
+-        )
++        return FrozenDict((k, self.open_store_variable(k)) for k in self.array_keys())
+ 
+     def get_attrs(self):
+         return {
+@@ -867,7 +864,7 @@
+     def get_dimensions(self):
+         try_nczarr = self._mode == "r"
+         dimensions = {}
+-        for _k, v in self.zarr_group.arrays():
++        for _k, v in self.arrays():
+             dim_names, _ = _get_zarr_dims_and_attrs(v, DIMENSION_KEY, try_nczarr)
+             for d, s in zip(dim_names, v.shape, strict=True):
+                 if d in dimensions and dimensions[d] != s:

@@ -1,0 +1,34 @@
+diff --git a/xarray/core/coordinates.py b/xarray/core/coordinates.py
+--- a/xarray/core/coordinates.py
++++ b/xarray/core/coordinates.py
+@@ -802,6 +802,30 @@
+         """
+         return cast(Self, self.to_dataset().drop_dims(drop_dims, errors=errors).coords)
+ 
++    def rename_dims(
++        self,
++        dims_dict: Mapping[Any, Hashable] | None = None,
++        **dims: Hashable,
++    ) -> Self:
++        """Returns a new object with renamed dimensions only.
++
++        Parameters
++        ----------
++        dims_dict : dict-like, optional
++            Dictionary whose keys are current dimension names and
++            whose values are the desired names. The desired names must
++            not be the name of an existing dimension or Variable in the Coordinates.
++        **dims : optional
++            Keyword form of ``dims_dict``.
++            One of dims_dict or dims must be provided.
++
++        Returns
++        -------
++        renamed : Coordinates
++            Coordinates object with renamed dimensions.
++        """
++        return cast(Self, self.to_dataset().rename_dims(dims_dict, **dims).coords)
++
+ 
+ class DatasetCoordinates(Coordinates):
+     """Dictionary like container for Dataset coordinates (variables + indexes).

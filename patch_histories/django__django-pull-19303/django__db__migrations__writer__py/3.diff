@@ -1,0 +1,13 @@
+diff --git a/django/db/migrations/writer.py b/django/db/migrations/writer.py
+--- a/django/db/migrations/writer.py
++++ b/django/db/migrations/writer.py
+@@ -210,6 +210,8 @@
+ 
+         if self.migration.initial:
+             items["initial_str"] = "\n    initial = True\n"
++        if not self.migration.atomic:
++            items["atomic_str"] = "\n    atomic = False\n"
+ 
+         return MIGRATION_TEMPLATE % items
+ 
+

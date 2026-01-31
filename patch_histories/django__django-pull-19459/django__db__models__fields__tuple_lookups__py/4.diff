@@ -1,0 +1,16 @@
+diff --git a/django/db/models/fields/tuple_lookups.py b/django/db/models/fields/tuple_lookups.py
+--- a/django/db/models/fields/tuple_lookups.py
++++ b/django/db/models/fields/tuple_lookups.py
+@@ -137,6 +137,12 @@
+                 self, (GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual)
+             )
+         ):
++            lookup = self.lookup_name
++            msg = (
++                f'"{lookup}" cannot be used to target composite fields '
++                "through subqueries on this backend"
++            )
++            raise NotSupportedError(msg)
+         if not connection.features.supports_tuple_lookups:
+             return self.get_fallback_sql(compiler, connection)
+         return super().as_sql(compiler, connection)

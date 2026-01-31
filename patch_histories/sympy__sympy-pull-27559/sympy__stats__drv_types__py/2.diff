@@ -1,0 +1,12 @@
+diff --git a/sympy/stats/drv_types.py b/sympy/stats/drv_types.py
+--- a/sympy/stats/drv_types.py
++++ b/sympy/stats/drv_types.py
+@@ -451,7 +451,7 @@
+         r = self.r
+         p = self.p
+ 
+-        return binomial(k + r - 1, k) * (1 - p)**r * p**k
++        return binomial(k + r - 1, k) * (1 - p)**k * p**r
+ 
+     def _characteristic_function(self, t):
+         r = self.r

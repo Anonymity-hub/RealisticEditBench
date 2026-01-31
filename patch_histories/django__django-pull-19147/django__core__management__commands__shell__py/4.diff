@@ -1,0 +1,35 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -148,7 +148,30 @@
+         if options and options.get("no_imports"):
+             return {}
+ 
+-        namespace = self.get_namespace()
++        path_imports = self.get_auto_imports()
++        if path_imports is None:
++            return {}
++
++        auto_imports = defaultdict(list)
++        import_errors = []
++        for path in path_imports:
++            try:
++                obj = import_dotted_path(path) if "." in path else import_module(path)
++            except ImportError:
++                import_errors.append(path)
++                continue
++
++            if "." in path:
++                module, name = path.rsplit(".", 1)
++            else:
++                module = None
++                name = path
++
++            auto_imports[module].append((name, obj))
++
++        namespace = {
++            name: obj for items in auto_imports.values() for name, obj in items
++        }
+ 
+         verbosity = options["verbosity"] if options else 0
+         if verbosity < 1:

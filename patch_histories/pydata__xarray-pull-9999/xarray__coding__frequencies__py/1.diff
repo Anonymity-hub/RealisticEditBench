@@ -1,0 +1,13 @@
+diff --git a/xarray/coding/frequencies.py b/xarray/coding/frequencies.py
+--- a/xarray/coding/frequencies.py
++++ b/xarray/coding/frequencies.py
+@@ -88,7 +88,8 @@ def infer_freq(index):
+         elif not _contains_datetime_like_objects(Variable("dim", index)):
+             raise ValueError("'index' must contain datetime-like objects")
+         dtype = np.asarray(index).dtype
+-        if dtype == "datetime64[ns]":
++
++        if _is_numpy_subdtype(dtype, "datetime64"):
+             index = pd.DatetimeIndex(index.values)
+         elif dtype == "timedelta64[ns]":
+             index = pd.TimedeltaIndex(index.values)

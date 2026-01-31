@@ -1,0 +1,32 @@
+diff --git a/astropy/io/fits/connect.py b/astropy/io/fits/connect.py
+--- a/astropy/io/fits/connect.py
++++ b/astropy/io/fits/connect.py
+@@ -258,16 +258,18 @@
+                 astropy_native=astropy_native,
+                 unit_parse_strict=unit_parse_strict,
+                 mask_invalid=mask_invalid,
++                strip_spaces=strip_spaces,
+             )
+         finally:
+             hdulist.close()
+ 
+-    # In the loop below we access the data using data[col.name] rather than
+-    # col.array to make sure that the data is scaled correctly if needed.
+     data = table.data
+ 
+     columns = []
+     for col in data.columns:
++        # use data[col.name] rather than col.array to make sure that the data
++        # is scaled correctly if needed.
++        arr = data[col.name]
+         # Check if column is masked. Here, we make a guess based on the
+         # presence of FITS mask values. For integer columns, this is simply
+         # the null header, for float and complex, the presence of NaN, and for
+@@ -279,7 +281,6 @@
+         # preserve null values.
+         masked = mask = False
+         fill_value = None
+-        coltype = col.dtype.subdtype[0].type if col.dtype.subdtype else col.dtype.type
+         if col.null is not None:
+             mask = data[col.name] == col.null
+             # Return a MaskedColumn even if no elements are masked so

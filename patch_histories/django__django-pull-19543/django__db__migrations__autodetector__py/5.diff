@@ -1,0 +1,15 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -1479,7 +1479,10 @@
+                     continue
+                 new_kwargs["fields"] = tuple(
+                     new_fields[:new_field_idx]
+-                    +
++                    + (rem_field_name,)
++                    + new_fields[new_field_idx + 1 :]
++                )
++
+         return (old_path, old_args, old_kwargs) != (new_path, new_args, new_kwargs)
+ 
+     def create_altered_constraints(self):

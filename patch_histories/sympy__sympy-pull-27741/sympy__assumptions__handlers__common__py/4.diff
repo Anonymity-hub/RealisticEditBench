@@ -1,0 +1,9 @@
+diff --git a/sympy/assumptions/handlers/common.py b/sympy/assumptions/handlers/common.py
+--- a/sympy/assumptions/handlers/common.py
++++ b/sympy/assumptions/handlers/common.py
+@@ -160,3 +160,5 @@
+         (ask(query, assumptions) for query in queries))
+ 
+ def ask_any(*queries, assumptions):
++    return fuzzy_or(
++        (ask(query, assumptions) for query in queries))

@@ -1,0 +1,79 @@
+diff --git a/sklearn/utils/_plotting.py b/sklearn/utils/_plotting.py
+--- a/sklearn/utils/_plotting.py
++++ b/sklearn/utils/_plotting.py
+@@ -1,13 +1,16 @@
+ # Authors: The scikit-learn developers
+ # SPDX-License-Identifier: BSD-3-Clause
++import warnings
++from collections.abc import Mapping
+ 
+ import numpy as np
+ 
+ from . import check_consistent_length
+ from ._optional_dependencies import check_matplotlib_support
+ from ._response import _get_response_values_binary
++from .fixes import parse_version
+ from .multiclass import type_of_target
+-from .validation import _check_pos_label_consistency
++from .validation import _check_pos_label_consistency, _num_samples
+ 
+ 
+ class _BinaryClassifierCurveDisplayMixin:
+@@ -177,3 +180,57 @@ def _despine(ax):
+         ax.spines[s].set_visible(False)
+     for s in ["bottom", "left"]:
+         ax.spines[s].set_bounds(0, 1)
++
++
++def _deprecate_estimator_name(estimator_name, name, version):
++    """Deprecate `estimator_name` in favour of `name`."""
++    version = parse_version(version)
++    version_remove = f"{version.major}.{version.minor + 2}"
++    if estimator_name != "deprecated":
++        if name:
++            raise ValueError(
++                "Cannot provide both `estimator_name` and `name`. `estimator_name` "
++                f"is deprecated in {version} and will be removed in {version_remove}. "
++                "Use `name` only."
++            )
++        warnings.warn(
++            f"`estimator_name` is deprecated in {version} and will be removed in "
++            f"{version_remove}. Use `name` instead.",
++            FutureWarning,
++        )
++        return estimator_name
++    return name
++
++
++def _convert_to_list_leaving_none(param):
++    """Convert parameters to a list, leaving `None` as is."""
++    if param is None:
++        return None
++    if isinstance(param, list):
++        return param
++    return [param]
++
++
++def _check_param_lengths(required, optional, class_name):
++    """Check required and optional parameters are of the same length."""
++    optional_provided = {}
++    for name, param in optional.items():
++        if isinstance(param, list):
++            optional_provided[name] = param
++
++    all_params = {**required, **optional_provided}
++    if len({len(param) for param in all_params.values()}) > 1:
++        param_keys = [key for key in all_params.keys()]
++        # Note: below code requires `len(param_keys) >= 2`, which is the case for all
++        # display classes
++        params_formatted = " and ".join([", ".join(param_keys[:-1]), param_keys[-1]])
++        or_plot = ""
++        if "'name' (or self.name)" in param_keys:
++            or_plot = " (or `plot`)"
++        lengths_formatted = ", ".join(
++            f"{key}: {len(value)}" for key, value in all_params.items()
++        )
++        raise ValueError(
++            f"{params_formatted} from `{class_name}` initialization{or_plot}, "
++            f"should all be lists of the same length. Got: {lengths_formatted}"
++        )
