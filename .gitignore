@@ -1,0 +1,15 @@
+*.pyc
+__pycache__/
+*.log
+node_modules/
+.DS_Store
+.idea/
+crawled_data/raw/
+crawled_data/activity/
+.vscode/launch.json
+logs/
+crawled_data/tag_version/
+tmp/
+editbench.egg-info/
+crawled_data/swe
+.vscode/
