@@ -1,0 +1,31 @@
+diff --git a/sphinx/util/inventory.py b/sphinx/util/inventory.py
+--- a/sphinx/util/inventory.py
++++ b/sphinx/util/inventory.py
+@@ -206,6 +206,27 @@ def escape(string: str) -> str:
+             f.write(compressor.flush())
+ 
+ 
++class _Inventory:
++    """Inventory data in memory."""
++
++    __slots__ = ('data',)
++
++    data: dict[str, dict[str, _InventoryItem]]
++
++    def __init__(self, data: dict[str, dict[str, _InventoryItem]], /) -> None:
++        # type -> name -> _InventoryItem
++        self.data: dict[str, dict[str, _InventoryItem]] = data
++
++    def __repr__(self) -> str:
++        return f'_Inventory({self.data!r})'
++
++    def __eq__(self, other: object) -> bool:
++        if not isinstance(other, _Inventory):
++            return NotImplemented
++        return self.data == other.data
++
++
++
+ class _InventoryItem:
+     __slots__ = 'project_name', 'project_version', 'uri', 'display_name'
+ 

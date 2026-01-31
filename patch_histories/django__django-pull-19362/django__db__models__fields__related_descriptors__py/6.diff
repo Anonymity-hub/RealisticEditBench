@@ -1,0 +1,21 @@
+diff --git a/django/db/models/fields/related_descriptors.py b/django/db/models/fields/related_descriptors.py
+--- a/django/db/models/fields/related_descriptors.py
++++ b/django/db/models/fields/related_descriptors.py
+@@ -1115,10 +1115,13 @@
+             return None
+ 
+         def _remove_prefetched_objects(self):
+-            try:
+-                self.instance._prefetched_objects_cache.pop(self.prefetch_cache_name)
+-            except (AttributeError, KeyError):
+-                pass  # nothing to clear from cache
++            # Walk up the ancestor-chain (if cached) to try and find a prefetch
++            # in an ancestor.
++            for instance, _ in _traverse_ancestors(rel.field.model, self.instance):
++                try:
++                    instance._prefetched_objects_cache.pop(self.prefetch_cache_name)
++                except (AttributeError, KeyError):
++                    pass  # nothing to clear from cache
+ 
+         def get_queryset(self):
+             if (cache := self.get_prefetch_cache()) is not None:

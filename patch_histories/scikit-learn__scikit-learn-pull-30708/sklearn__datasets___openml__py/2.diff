@@ -1,0 +1,12 @@
+diff --git a/sklearn/datasets/_openml.py b/sklearn/datasets/_openml.py
+--- a/sklearn/datasets/_openml.py
++++ b/sklearn/datasets/_openml.py
+@@ -149,7 +149,7 @@
+     def is_gzip_encoded(_fsrc):
+         return _fsrc.info().get("Content-Encoding", "") == "gzip"
+ 
+-    req = Request(_OPENML_PREFIX + openml_path)
++    req = Request(url)
+     req.add_header("Accept-encoding", "gzip")
+ 
+     if data_home is None:

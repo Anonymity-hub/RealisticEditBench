@@ -1,0 +1,12 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -2500,6 +2500,8 @@ class UnitPrefix(NamedTuple):
+         (("Ti",), ("tebi",), 2**40),
+         (("Pi",), ("pebi",), 2**50),
+         (("Ei",), ("exbi",), 2**60),
++        (("Zi",), ("zebi",), 2**70),
++        (("Yi",), ("yobi",), 2**80),
+     )
+ )
+ 

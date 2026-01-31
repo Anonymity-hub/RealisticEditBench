@@ -1,0 +1,25 @@
+diff --git a/sklearn/model_selection/_validation.py b/sklearn/model_selection/_validation.py
+--- a/sklearn/model_selection/_validation.py
++++ b/sklearn/model_selection/_validation.py
+@@ -1656,19 +1656,9 @@
+             # `process_routing` code, we pass `fit` as the caller. However,
+             # the user is not calling `fit` directly, so we change the message
+             # to make it more suitable for this case.
+-            unrequested_params = sorted(e.unrequested_params)
+             raise UnsetMetadataPassedError(
+-                message=(
+-                    f"{unrequested_params} are passed to `permutation_test_score`"
+-                    " but are not explicitly set as requested or not requested"
+-                    " for permutation_test_score's"
+-                    f" estimator: {estimator.__class__.__name__}. Call"
+-                    " `.set_fit_request({{metadata}}=True)` on the estimator for"
+-                    f" each metadata in {unrequested_params} that you"
+-                    " want to use and `metadata=False` for not using it. See the"
+-                    " Metadata Routing User guide"
+-                    " <https://scikit-learn.org/stable/metadata_routing.html> for more"
+-                    " information."
++                message=str(e).replace(
++                    "permutation_test_score.fit", "permutation_test_score"
+                 ),
+                 unrequested_params=e.unrequested_params,
+                 routed_params=e.routed_params,

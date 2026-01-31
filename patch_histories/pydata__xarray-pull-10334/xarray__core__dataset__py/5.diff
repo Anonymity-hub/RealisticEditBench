@@ -1,0 +1,11 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -99,6 +99,7 @@
+     parse_dims_as_set,
+ )
+ from xarray.core.variable import (
++    UNSUPPORTED_EXTENSION_ARRAY_TYPES,
+     IndexVariable,
+     Variable,
+     as_variable,

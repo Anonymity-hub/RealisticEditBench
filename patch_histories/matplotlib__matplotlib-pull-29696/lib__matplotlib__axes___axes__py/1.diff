@@ -1,0 +1,16 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -2884,8 +2884,11 @@ def bar_label(self, container, labels=None, *, fmt="%g", label_type="edge",
+               (useful for stacked bars, i.e.,
+               :doc:`/gallery/lines_bars_and_markers/bar_label_demo`)
+ 
+-        padding : float, default: 0
++        padding : float or array-like, default: 0
+             Distance of label from the end of the bar, in points.
++            If an array-like is provided, the padding values are applied
++            to each label individually. Must have the same length as container.
++            .. versionadded:: 3.11
+ 
+         **kwargs
+             Any remaining keyword arguments are passed through to

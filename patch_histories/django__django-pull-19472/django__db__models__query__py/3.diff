@@ -1,0 +1,12 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1550,7 +1550,7 @@
+             if len(qs) == 1:
+                 return qs[0]
+             return qs[0]._combinator_query("union", *qs[1:], all=all)
+-        elif not
++        elif not other_qs:
+         return self._combinator_query("union", *other_qs, all=all)
+ 
+     def intersection(self, *other_qs):

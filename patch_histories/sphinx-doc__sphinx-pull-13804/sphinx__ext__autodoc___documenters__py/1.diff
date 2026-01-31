@@ -1,0 +1,28 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -334,7 +334,7 @@ def check_module(self) -> bool:
+         if self.options.imported_members:
+             return True
+ 
+-        subject = inspect.unpartial(self.object)
++        subject = inspect.unpartial(self.props._obj)
+         modname = self.get_attr(subject, '__module__', None)
+         return not modname or modname == self.props.module_name
+
+@@ -552,12 +552,12 @@ def process_doc(self, docstrings: list[list[str]]) -> Iterator[str]:
+             yield from docstringlines
+ 
+     def get_sourcename(self) -> str:
+-        obj_module = inspect.safe_getattr(self.object, '__module__', None)
+-        obj_qualname = inspect.safe_getattr(self.object, '__qualname__', None)
++        obj_module = inspect.safe_getattr(self.props._obj, '__module__', None)
++        obj_qualname = inspect.safe_getattr(self.props._obj, '__qualname__', None)
+         if obj_module and obj_qualname:
+             # Get the correct location of docstring from self.object
+             # to support inherited methods
+-            fullname = f'{self.object.__module__}.{self.object.__qualname__}'
++            fullname = f'{self.props._obj.__module__}.{self.props._obj.__qualname__}'
+         else:
+             fullname = self.props.full_name
+ 

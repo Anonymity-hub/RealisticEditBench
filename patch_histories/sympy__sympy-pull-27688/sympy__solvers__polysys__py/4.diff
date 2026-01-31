@@ -1,0 +1,18 @@
+diff --git a/sympy/solvers/polysys.py b/sympy/solvers/polysys.py
+--- a/sympy/solvers/polysys.py
++++ b/sympy/solvers/polysys.py
+@@ -432,8 +432,12 @@
+     f, G = G[0].ltrim(-1), G[1:]
+     dom = f.get_domain()
+ 
+-    zeros = f.ground_roots()
+-    solutions = {((zero,), dom) for zero in zeros}
++    zeros = _solve_univariate(f)
++
++    if extension:
++        solutions = {((zero,), dom.algebraic_field(zero)) for zero in zeros}
++    else:
++        solutions = {((zero,), dom) for zero in zeros}
+ 
+     var_seq = reversed(gens[:-1])
+     vars_seq = postfixes(gens[1:])

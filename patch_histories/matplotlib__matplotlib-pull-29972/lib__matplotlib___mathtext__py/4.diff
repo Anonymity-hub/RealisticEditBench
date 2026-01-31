@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -1166,8 +1166,8 @@
+         self.glue_sign    = 0    # 0: normal, -1: shrinking, 1: stretching
+         self.glue_order   = 0    # The order of infinity (0 - 3) for the glue
+ 
+-    def __repr__(self) -> str:
+-        return '{}<w={:.02f} h={:.02f} d={:.02f} s={:.02f}>[{}]'.format(
++    def __repr__(self):
++        return "{}<w={:.02f} h={:.02f} d={:.02f} s={:.02f}>[{}]".format(
+             super().__repr__(),
+             self.width, self.height,
+             self.depth, self.shift_amount,

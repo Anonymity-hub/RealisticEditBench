@@ -1,0 +1,12 @@
+diff --git a/sympy/printing/pycode.py b/sympy/printing/pycode.py
+--- a/sympy/printing/pycode.py
++++ b/sympy/printing/pycode.py
+@@ -203,6 +203,8 @@
+     def _print_Assignment(self, expr):
+         # Emit a single outer assignment when rhs is piecewise to avoid
+         # invalid python like "((x = a) if cond else (x = b))"
++        lhs = expr.lhs
++        rhs = expr.rhs
+     def _print_Mod(self, expr):
+         PREC = precedence(expr)
+         return ('{} % {}'.format(*(self.parenthesize(x, PREC) for x in expr.args)))

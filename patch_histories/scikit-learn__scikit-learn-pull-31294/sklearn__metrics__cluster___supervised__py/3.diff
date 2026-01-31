@@ -1,0 +1,14 @@
+diff --git a/sklearn/metrics/cluster/_supervised.py b/sklearn/metrics/cluster/_supervised.py
+--- a/sklearn/metrics/cluster/_supervised.py
++++ b/sklearn/metrics/cluster/_supervised.py
+@@ -531,8 +531,8 @@
+     if len(labels_true) == 0:
+         return 1.0, 1.0, 1.0
+ 
+-    entropy_C = entropy(labels_true)
+-    entropy_K = entropy(labels_pred)
++    entropy_C = _entropy(labels_true)
++    entropy_K = _entropy(labels_pred)
+ 
+     contingency = contingency_matrix(labels_true, labels_pred, sparse=True)
+     MI = mutual_info_score(None, None, contingency=contingency)

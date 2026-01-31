@@ -1,0 +1,55 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -3463,7 +3463,8 @@ def _errorevery_to_mask(x, errorevery):
+     def errorbar(self, x, y, yerr=None, xerr=None,
+                  fmt='', ecolor=None, elinewidth=None, capsize=None,
+                  barsabove=False, lolims=False, uplims=False,
+-                 xlolims=False, xuplims=False, errorevery=1, capthick=None,
++                 xlolims=False, xuplims=False, errorevery=1,
++                 capthick=None, elinestyle=None,
+                  **kwargs):
+         """
+         Plot y versus x as lines and/or markers with attached errorbars.
+@@ -3511,6 +3512,12 @@ def errorbar(self, x, y, yerr=None, xerr=None,
+             The linewidth of the errorbar lines. If None, the linewidth of
+             the current style is used.
+ 
++        elinestyle : str or tuple, default: 'solid'
++           The linestyle of the errorbar lines.
++           Valid values for linestyles include {'-', '--', '-.',
++            ':', '', (offset, on-off-seq)}. See `.Line2D.set_linestyle` for a
++            complete description.
++
+         capsize : float, default: :rc:`errorbar.capsize`
+             The length of the error bar caps in points.
+ 
+@@ -3712,6 +3719,9 @@ def _upcast_err(err):
+             if key in kwargs:
+                 eb_lines_style[key] = kwargs[key]
+ 
++        if elinestyle is not None:
++            eb_lines_style['linestyle'] = elinestyle
++
+         # Make the style dict for caps (the "hats").
+         eb_cap_style = {**base_style, 'linestyle': 'none'}
+         capsize = mpl._val_or_rc(capsize, "errorbar.capsize")
+diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py
+--- a/lib/matplotlib/pyplot.py
++++ b/lib/matplotlib/pyplot.py
+@@ -3281,6 +3281,7 @@ def errorbar(
+     xuplims: bool | ArrayLike = False,
+     errorevery: int | tuple[int, int] = 1,
+     capthick: float | None = None,
++    elinestyle: LineStyleType | None = None,
+     *,
+     data=None,
+     **kwargs,
+@@ -3301,6 +3302,7 @@ def errorbar(
+         xuplims=xuplims,
+         errorevery=errorevery,
+         capthick=capthick,
++        elinestyle=elinestyle,
+         **({"data": data} if data is not None else {}),
+         **kwargs,
+     )

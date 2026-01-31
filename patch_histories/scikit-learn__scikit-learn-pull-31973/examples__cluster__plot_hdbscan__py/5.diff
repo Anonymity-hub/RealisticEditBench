@@ -1,0 +1,21 @@
+diff --git a/examples/cluster/plot_hdbscan.py b/examples/cluster/plot_hdbscan.py
+--- a/examples/cluster/plot_hdbscan.py
++++ b/examples/cluster/plot_hdbscan.py
+@@ -108,7 +108,7 @@ def plot(X, labels, probabilities=None, parameters=None, ground_truth=False, ax=
+ # clusters from all possible clusters (see :ref:`User Guide <HDBSCAN>`).
+ # One immediate advantage is that HDBSCAN is scale-invariant.
+ fig, axes = plt.subplots(3, 1, figsize=(10, 12))
+-hdb = HDBSCAN()
++hdb = HDBSCAN(copy=True)
+ for idx, scale in enumerate([1, 0.5, 3]):
+     hdb.fit(X * scale)
+     plot(
+@@ -159,7 +159,7 @@ def plot(X, labels, probabilities=None, parameters=None, ground_truth=False, ax=
+ # that DBSCAN is incapable of simultaneously separating the two dense clusters
+ # while preventing the sparse clusters from fragmenting. Let's compare with
+ # HDBSCAN.
+-hdb = HDBSCAN().fit(X)
++hdb = HDBSCAN(copy=True).fit(X)
+ plot(X, hdb.labels_, hdb.probabilities_)
+ 
+ # %%

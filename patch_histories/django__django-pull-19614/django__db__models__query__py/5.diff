@@ -1,0 +1,27 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1935,6 +1935,7 @@
+         else:
+             context = nullcontext()
+         with context:
++            for item in batches:
+                 inserted_rows.extend(
+                     self._insert(
+                         item,
+@@ -1945,15 +1946,6 @@
+                         unique_fields=unique_fields,
+                         returning_fields=returning_fields,
+                     )
+-                )
+-            else:
+-                self._insert(
+-                    item,
+-                    fields=fields,
+-                    using=self.db,
+-                    on_conflict=on_conflict,
+-                    update_fields=update_fields,
+-                    unique_fields=unique_fields,
+                 )
+         return inserted_rows
+ 

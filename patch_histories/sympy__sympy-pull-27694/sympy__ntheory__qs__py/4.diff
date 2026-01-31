@@ -1,0 +1,100 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -333,68 +333,35 @@
+     ==========
+ 
+     .. [1] A fast algorithm for gaussian elimination over GF(2) and
+-    its implementation on the GAPP. Cetin K.Koc, Sarath N.Arachchige"""
+-    import copy
+-    matrix = copy.deepcopy(A)
++    its implementation on the GAPP. Cetin K.Koc, Sarath N.Arachchige
++    """
++    matrix = [s_relation[2] for s_relation in smooth_relations]
+     row = len(matrix)
+-    col = len(matrix[0])
+-    mark = [False]*row
+-    for c in range(col):
+-        for r in range(row):
+-            if matrix[r][c] == 1:
++    mark = [False] * row
++    for pos in range(col):
++        m = 1 << pos
++        for i in range(row):
++            if p := matrix[i] & m:
++                add_col = p ^ matrix[i]
++                matrix[i] = m
++                mark[i] = True
++                for j in range(i + 1, row):
++                    if matrix[j] & m:
++                        matrix[j] ^= add_col
+                 break
+-        mark[r] = True
+-        for c1 in range(col):
+-            if c1 == c:
+-                continue
+-            if matrix[r][c1] == 1:
+-                for r2 in range(row):
+-                    matrix[r2][c1] = (matrix[r2][c1] + matrix[r2][c]) % 2
+-    dependent_row = []
+-    for idx, val in enumerate(mark):
+-        if val == False:
+-            dependent_row.append([matrix[idx], idx])
+-    return dependent_row, mark, matrix
+-
+-
+-def _find_factor(dependent_rows, mark, gauss_matrix, index, smooth_relations, N):
+-    """Finds proper factor of N. Here, transform the dependent rows as a
+-    combination of independent rows of the gauss_matrix to form the desired
+-    relation of the form ``X**2 = Y**2 modN``. After obtaining the desired relation
+-    we obtain a proper factor of N by `gcd(X - Y, N)`.
+-
+-    Parameters
+-    ==========
+-
+-    dependent_rows : denoted dependent rows in the reduced matrix form
+-    mark : boolean array to denoted dependent and independent rows
+-    gauss_matrix : Reduced form of the smooth relations matrix
+-    index : denoted the index of the dependent_rows
+-    smooth_relations : Smooth relations vectors matrix
+-    N : Number to be factored
+-    """
+-    idx_in_smooth = dependent_rows[index][1]
+-    independent_u = [smooth_relations[idx_in_smooth][0]]
+-    independent_v = [smooth_relations[idx_in_smooth][1]]
+-    dept_row = dependent_rows[index][0]
+-
+-    for idx, val in enumerate(dept_row):
+-        if val == 1:
+-            for row in range(len(gauss_matrix)):
+-                if gauss_matrix[row][idx] == 1 and mark[row] == True:
+-                    independent_u.append(smooth_relations[row][0])
+-                    independent_v.append(smooth_relations[row][1])
+-                    break
+-
+-    u = 1
+-    v = 1
+-    for i in independent_u:
+-        u *= i
+-    for i in independent_v:
+-        v *= i
+-    #assert u**2 % N == v % N
+-    v = isqrt(v)
+-    return gcd(u - v, N)
++
++    for m, mat, rel in zip(mark, matrix, smooth_relations):
++        if m:
++            continue
++        u, v = rel[0], rel[1]
++        for m1, mat1, rel1 in zip(mark, matrix, smooth_relations):
++            if m1 and mat & mat1:
++                u *= rel1[0]
++                v *= rel1[1]
++        # assert is_square(v)
++        v = isqrt(v)
++        if 1 < (g := gcd(u - v, N)) < N:
++            yield g
+ 
+ 
+ def qs(N, prime_bound, M, ERROR_TERM=25, seed=1234):
+

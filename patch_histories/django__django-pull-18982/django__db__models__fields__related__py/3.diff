@@ -1,0 +1,19 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -614,6 +614,15 @@
+ 
+         errors = []
+         for to_field in self.to_fields:
++            try:
++                field = (
++                    self.remote_field.model._meta.pk
++                    if to_field is None
++                    else self.remote_field.model._meta.get_field(to_field)
++                )
++            except exceptions.FieldDoesNotExist:
++                pass
++            else:
+     def _check_unique_target(self):
+         rel_is_string = isinstance(self.remote_field.model, str)
+         if rel_is_string or not self.requires_unique_target:

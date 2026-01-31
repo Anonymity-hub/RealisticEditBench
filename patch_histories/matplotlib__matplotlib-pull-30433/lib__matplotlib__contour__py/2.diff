@@ -1,0 +1,24 @@
+diff --git a/lib/matplotlib/contour.py b/lib/matplotlib/contour.py
+--- a/lib/matplotlib/contour.py
++++ b/lib/matplotlib/contour.py
+@@ -656,7 +656,6 @@
+         super().__init__(
+             antialiaseds=antialiased,
+             alpha=alpha,
+-            clip_path=clip_path,
+             transform=transform,
+             colorizer=colorizer,
+         )
+@@ -792,12 +791,6 @@
+         self.axes.autoscale_view(tight=True)
+ 
+         self.changed()  # set the colors
+-
+-        if kwargs:
+-            _api.warn_external(
+-                'The following kwargs were not used by contour: ' +
+-                ", ".join(map(repr, kwargs))
+-            )
+ 
+     allsegs = property(lambda self: [
+         [subp.vertices for subp in p._iter_connected_components()]

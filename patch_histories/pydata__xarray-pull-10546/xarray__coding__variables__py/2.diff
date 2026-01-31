@@ -1,0 +1,13 @@
+diff --git a/xarray/coding/variables.py b/xarray/coding/variables.py
+--- a/xarray/coding/variables.py
++++ b/xarray/coding/variables.py
+@@ -113,6 +113,9 @@
+ 
+     def get_duck_array(self):
+         return duck_array_ops.astype(self.array.get_duck_array(), dtype=self.dtype)
++
++    def transpose(self, order):
++        return type(self)(self.array.transpose(order))
+ 
+ 
+ def _apply_mask(

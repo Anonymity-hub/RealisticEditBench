@@ -1,0 +1,19 @@
+diff --git a/sphinx/builders/linkcheck.py b/sphinx/builders/linkcheck.py
+--- a/sphinx/builders/linkcheck.py
++++ b/sphinx/builders/linkcheck.py
+@@ -71,6 +71,15 @@ class _Status(StrEnum):
+ DEFAULT_DELAY = 60.0
+ 
+ 
++@object.__new__
++class _SENTINEL_LAR:
++    def __repr__(self) -> str:
++        return '_SENTINEL_LAR'
++
++    def __reduce__(self) -> str:
++        return self.__class__.__name__
++
++
+ class CheckExternalLinksBuilder(DummyBuilder):
+     """Checks for broken external links."""
+ 

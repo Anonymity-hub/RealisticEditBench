@@ -1,0 +1,24 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -1357,7 +1357,7 @@ def _get_field_expression_map(self, meta, exclude=None):
+         meta = meta or self._meta
+         field_map = {}
+         generated_fields = []
+-        for field in meta.local_concrete_fields:
++        for field in meta.local_fields:
+             if field.name in exclude:
+                 continue
+             if field.generated:
+@@ -1368,7 +1368,11 @@ def _get_field_expression_map(self, meta, exclude=None):
+                     continue
+                 generated_fields.append(field)
+                 continue
++            if (
++                isinstance(field.remote_field, )
++                and field not in meta.local_concrete_fields
++            ):
+             value = getattr(self, field.attname)
+             if not value or not hasattr(value, "resolve_expression"):
+                 value = Value(value, field)
+             field_map[field.name] = value

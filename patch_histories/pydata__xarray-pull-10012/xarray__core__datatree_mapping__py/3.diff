@@ -1,0 +1,38 @@
+diff --git a/xarray/core/datatree_mapping.py b/xarray/core/datatree_mapping.py
+--- a/xarray/core/datatree_mapping.py
++++ b/xarray/core/datatree_mapping.py
+@@ -13,12 +13,21 @@
+ 
+ 
+ @overload
+-def map_over_datasets(func: Callable[..., Dataset | None], *args: Any) -> DataTree: ...
++def map_over_datasets(
++    func: Callable[
++        ...,
++        Dataset | None,
++    ],
++    *args: Any,
++    kwargs: Mapping[str, Any] | None = None,
++) -> DataTree: ...
+ 
+ 
+ @overload
+ def map_over_datasets(
+-    func: Callable[..., tuple[Dataset | None, Dataset | None]], *args: Any
++    func: Callable[..., tuple[Dataset | None, Dataset | None]],
++    *args: Any,
++    kwargs: Mapping[str, Any] | None = None,
+ ) -> tuple[DataTree, DataTree]: ...
+ 
+ 
+@@ -26,7 +35,9 @@
+ # (python typing does not have a way to match tuple lengths in general)
+ @overload
+ def map_over_datasets(
+-    func: Callable[..., tuple[Dataset | None, ...]], *args: Any
++    func: Callable[..., tuple[Dataset | None, ...]],
++    *args: Any,
++    kwargs: Mapping[str, Any] | None = None,
+ ) -> tuple[DataTree, ...]: ...
+ 
+ 

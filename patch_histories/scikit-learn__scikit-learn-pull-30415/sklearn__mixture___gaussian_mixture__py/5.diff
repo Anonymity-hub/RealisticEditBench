@@ -1,0 +1,30 @@
+diff --git a/sklearn/mixture/_gaussian_mixture.py b/sklearn/mixture/_gaussian_mixture.py
+--- a/sklearn/mixture/_gaussian_mixture.py
++++ b/sklearn/mixture/_gaussian_mixture.py
+@@ -481,13 +481,13 @@
+     log_det = _compute_log_det_cholesky(precisions_chol, covariance_type, n_features)
+ 
+     if covariance_type == "full":
+-        log_prob = np.empty((n_samples, n_components))
++        log_prob = np.empty((n_samples, n_components), dtype=X.dtype)
+         for k, (mu, prec_chol) in enumerate(zip(means, precisions_chol)):
+             y = np.dot(X, prec_chol) - np.dot(mu, prec_chol)
+             log_prob[:, k] = np.sum(np.square(y), axis=1)
+ 
+     elif covariance_type == "tied":
+-        log_prob = np.empty((n_samples, n_components))
++        log_prob = np.empty((n_samples, n_components), dtype=X.dtype)
+         for k, mu in enumerate(means):
+             y = np.dot(X, precisions_chol) - np.dot(mu, precisions_chol)
+             log_prob[:, k] = np.sum(np.square(y), axis=1)
+@@ -509,7 +509,7 @@
+         )
+     # Since we are using the precision of the Cholesky decomposition,
+     # `- 0.5 * log_det_precision` becomes `+ log_det_precision_chol`
+-    return -0.5 * (n_features * np.log(2 * np.pi) + log_prob) + log_det
++    return -0.5 * (n_features * np.log(2 * np.pi).astype(X.dtype) + log_prob) + log_det
+ 
+ 
+ class GaussianMixture(BaseMixture):
+
+ 

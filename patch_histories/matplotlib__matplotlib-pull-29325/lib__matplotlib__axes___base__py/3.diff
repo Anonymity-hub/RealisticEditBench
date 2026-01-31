@@ -1,0 +1,36 @@
+diff --git a/lib/matplotlib/axes/_base.py b/lib/matplotlib/axes/_base.py
+--- a/lib/matplotlib/axes/_base.py
++++ b/lib/matplotlib/axes/_base.py
+@@ -4641,7 +4641,7 @@
+         ax2.xaxis.units = self.xaxis.units
+         return ax2
+ 
+-    def twiny(self):
++    def twiny(self, axes_class=None, **kwargs):
+         """
+         Create a twin Axes sharing the yaxis.
+ 
+@@ -4651,6 +4651,22 @@
+         To ensure that the tick marks of both x-axes align, see
+         `~matplotlib.ticker.LinearLocator`.
+ 
++        Parameters
++        ----------
++        axes_class : subclass type of `~.axes.Axes`, optional
++            The `.axes.Axes` subclass that is instantiated.  This parameter
++            is incompatible with *projection* and *polar*.  See
++            :ref:`axisartist_users-guide-index` for examples.
++
++            By default, `~.axes.Axes` is used.
++
++            .. versionadded:: 3.11
++
++        kwargs : dict
++            The keyword arguments passed to `.Figure.add_subplot` or `.Figure.add_axes`.
++
++            .. versionadded:: 3.11
++
+         Returns
+         -------
+         Axes
+\

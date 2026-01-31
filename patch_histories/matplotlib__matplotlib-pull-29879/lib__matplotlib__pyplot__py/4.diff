@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py
+--- a/lib/matplotlib/pyplot.py
++++ b/lib/matplotlib/pyplot.py
+@@ -3302,6 +3302,7 @@
+         xuplims=xuplims,
+         errorevery=errorevery,
+         capthick=capthick,
++        elinestyle=elinestyle,
+         **({"data": data} if data is not None else {}),
+         **kwargs,
+     )

@@ -1,0 +1,12 @@
+diff --git a/sklearn/linear_model/_glm/_newton_solver.py b/sklearn/linear_model/_glm/_newton_solver.py
+--- a/sklearn/linear_model/_glm/_newton_solver.py
++++ b/sklearn/linear_model/_glm/_newton_solver.py
+@@ -193,7 +193,7 @@
+             },
+             args=(X, y, sample_weight, self.l2_reg_strength, self.n_threads),
+         )
+-        self.iteration += _check_optimize_result("lbfgs", opt_res)
++        self.iteration += _check_optimize_result("lbfgs", opt_res, max_iter=max_iter)
+         self.coef = opt_res.x
+         self.converged = opt_res.status == 0
+ 

@@ -1,0 +1,11 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -63,6 +63,7 @@
+ from sympy.polys.polytools import degree, lcm_list, gcd_list, Poly
+ from sympy.simplify.radsimp import fraction
+ from sympy.simplify.simplify import simplify
++from sympy.simplify.powsimp import powsimp
+ from sympy.solvers.solvers import solve
+ from sympy.strategies.core import switch, do_one, null_safe, condition
+ from sympy.utilities.iterables import iterable

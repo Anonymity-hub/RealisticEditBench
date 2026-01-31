@@ -1,0 +1,17 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1382,6 +1382,13 @@
+                 field_name = getattr(
+                     field, "default_alias", field.__class__.__name__.lower()
+                 )
++                expression = field
++                # For backward compatibility reasons expressions are always
++                # prefixed with the counter even if their default alias doesn't
++                # collide with field names. Changing this logic could break
++                # some usage of named=True.
++                seen = True
++            elif
+                     counter += 1
+ 
+         clone = self._values(*_fields, **expressions)

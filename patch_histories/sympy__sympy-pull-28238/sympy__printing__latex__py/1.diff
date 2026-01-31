@@ -1,0 +1,12 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -1076,7 +1076,7 @@ def _print_ceiling(self, expr, exp=None):
+             return tex
+ 
+     def _print_log(self, expr, exp=None):
+-        if not self._settings["ln_notation"]:
++        if len(expr.args) == 2:
+             tex = r"\log{\left(%s \right)}" % self._print(expr.args[0])
+         else:
+             tex = r"\ln{\left(%s \right)}" % self._print(expr.args[0])

@@ -1,0 +1,11 @@
+diff --git a/django/views/generic/base.py b/django/views/generic/base.py
+--- a/django/views/generic/base.py
++++ b/django/views/generic/base.py
+@@ -256,6 +256,7 @@
+             if urlparse(url).query:
+                 url = f"{url}&{args}"
+             else:
++                url = f"{url}?{args}"
+         return url
+ 
+     def get(self, request, *args, **kwargs):

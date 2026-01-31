@@ -1,0 +1,21 @@
+
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -2579,7 +2579,15 @@
+                 # Make args iterable too.
+                 np.atleast_1d(x), height, width, y, linewidth, hatch
+             )
+-        except :
++        except ValueError as e:
++            arg_map = {
++                "arg 0": "'x'",
++                "arg 1": "'height'",
++                "arg 2": "'width'",
++                "arg 3": "'y'",
++                "arg 4": "'linewidth'",
++                "arg 5": "'hatch'"
++            }
+ 
+         # Now that units have been converted, set the tick locations.
+         if orientation == 'vertical':

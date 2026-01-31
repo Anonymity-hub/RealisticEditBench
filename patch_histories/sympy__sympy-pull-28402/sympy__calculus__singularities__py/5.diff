@@ -1,0 +1,11 @@
+diff --git a/sympy/calculus/singularities.py b/sympy/calculus/singularities.py
+--- a/sympy/calculus/singularities.py
++++ b/sympy/calculus/singularities.py
+@@ -90,6 +90,7 @@
+ 
+     """
+     from sympy.solvers.solveset import solveset
++    from sympy.sets.sets import Interval
+ 
+     if domain is None:
+         domain = S.Reals if symbol.is_real else S.Complexes

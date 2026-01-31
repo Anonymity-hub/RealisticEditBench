@@ -1,0 +1,26 @@
+diff --git a/sympy/assumptions/facts.py b/sympy/assumptions/facts.py
+--- a/sympy/assumptions/facts.py
++++ b/sympy/assumptions/facts.py
+@@ -83,6 +83,22 @@ def get_number_facts(x = None):
+         x = Symbol('x')
+ 
+     fact = And(
++
++        # Composite predicates
++        Equivalent(Q.real(x), Q.negative(x) | Q.zero(x) | Q.positive(x)),
++        Equivalent(Q.integer(x), Q.even(x) | Q.odd(x)),
++        Equivalent(Q.nonpositive(x), Q.negative(x) | Q.zero(x)),
++        Equivalent(Q.nonzero(x), Q.negative(x) | Q.positive(x)),
++        Equivalent(Q.nonnegative(x), Q.zero(x) | Q.positive(x)),
++        Equivalent(Q.extended_real(x),
++                   Q.negative_infinite(x) | Q.negative(x) | Q.zero(x) | Q.positive(x) | Q.positive_infinite(x)),
++        Equivalent(Q.extended_positive(x), Q.positive(x) | Q.positive_infinite(x)),
++        Equivalent(Q.extended_negative(x), Q.negative(x) | Q.negative_infinite(x)),
++        Equivalent(Q.extended_nonzero(x), Q.negative_infinite(x) | Q.negative(x) | Q.positive(x) | Q.positive_infinite(x)),
++        Equivalent(Q.extended_nonpositive(x), Q.negative_infinite(x) | Q.negative(x) | Q.zero(x)),
++        Equivalent(Q.extended_nonnegative(x), Q.zero(x) | Q.positive(x) | Q.positive_infinite(x)),
++        Equivalent(Q.complex(x), Q.algebraic(x) | Q.transcendental(x)),
++
+         # primitive predicates for extended real exclude each other.
+         Exclusive(Q.negative_infinite(x), Q.negative(x), Q.zero(x),
+             Q.positive(x), Q.positive_infinite(x)),

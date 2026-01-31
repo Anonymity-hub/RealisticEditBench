@@ -1,0 +1,24 @@
+diff --git a/sympy/solvers/polysys.py b/sympy/solvers/polysys.py
+--- a/sympy/solvers/polysys.py
++++ b/sympy/solvers/polysys.py
+@@ -452,16 +452,18 @@
+                 _vars = (var,) + vars
+ 
+                 if g.has_only_gens(*_vars) and g.degree(var) != 0:
++                    if extension:
++                        g = g.set_domain(g.domain.unify(dom))
+                     h = g.ltrim(var).eval(dict(mapping))
+ 
+                     if g.degree(var) == h.degree():
+                         H.append(h)
+ 
+             p = min(H, key=lambda h: h.degree())
+-            zeros = p.ground_roots()
++            zeros = _solve_univariate(p)
+ 
+             for zero in zeros:
+-                if not zero.is_Rational:
++                if not (zero in dom):
+                     dom_zero = dom.algebraic_field(zero)
+                 else:
+                     dom_zero = dom

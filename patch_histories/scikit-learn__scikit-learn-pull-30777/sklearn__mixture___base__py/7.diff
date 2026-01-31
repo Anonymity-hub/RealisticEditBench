@@ -1,0 +1,65 @@
+diff --git a/sklearn/mixture/_base.py b/sklearn/mixture/_base.py
+--- a/sklearn/mixture/_base.py
++++ b/sklearn/mixture/_base.py
+@@ -326,8 +326,9 @@
+             Logarithm of the posterior probabilities (or responsibilities) of
+             the point of each sample in X.
+         """
+-        log_prob_norm, log_resp = self._estimate_log_prob_resp(X)
+-        return np.mean(log_prob_norm), log_resp
++        xp, _ = get_namespace(X, xp=xp)
++        log_prob_norm, log_resp = self._estimate_log_prob_resp(X, xp=xp)
++        return xp.mean(log_prob_norm), log_resp
+ 
+     @abstractmethod
+     def _m_step(self, X, log_resp):
+@@ -368,7 +369,7 @@
+         check_is_fitted(self)
+         X = validate_data(self, X, reset=False)
+ 
+-        return logsumexp(self._estimate_weighted_log_prob(X), axis=1)
++        return _logsumexp(self._estimate_weighted_log_prob(X), axis=1)
+ 
+     def score(self, X, y=None):
+         """Compute the per-sample average log-likelihood of the given data X.
+@@ -387,7 +388,8 @@
+         log_likelihood : float
+             Log-likelihood of `X` under the Gaussian mixture model.
+         """
+-        return self.score_samples(X).mean()
++        xp, _ = get_namespace(X)
++        return float(xp.mean(self.score_samples(X)))
+ 
+     def predict(self, X):
+         """Predict the labels for the data samples in X using trained model.
+@@ -404,8 +406,9 @@
+             Component labels.
+         """
+         check_is_fitted(self)
++        xp, _ = get_namespace(X)
+         X = validate_data(self, X, reset=False)
+-        return self._estimate_weighted_log_prob(X).argmax(axis=1)
++        return xp.argmax(self._estimate_weighted_log_prob(X), axis=1)
+ 
+     def predict_proba(self, X):
+         """Evaluate the components' density for each sample.
+@@ -423,8 +426,9 @@
+         """
+         check_is_fitted(self)
+         X = validate_data(self, X, reset=False)
+-        _, log_resp = self._estimate_log_prob_resp(X)
+-        return np.exp(log_resp)
++        xp, _ = get_namespace(X)
++        _, log_resp = self._estimate_log_prob_resp(X, xp=xp)
++        return xp.exp(log_resp)
+ 
+     def sample(self, n_samples=1):
+         """Generate random samples from the fitted Gaussian distribution.
+@@ -443,6 +447,7 @@
+             Component labels.
+         """
+         check_is_fitted(self)
++        xp, _, device_ = get_namespace_and_device(self.means_)
+ 
+         if n_samples < 1:
+             raise ValueError(

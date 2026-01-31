@@ -1,0 +1,11 @@
+diff --git a/sklearn/utils/_tags.py b/sklearn/utils/_tags.py
+--- a/sklearn/utils/_tags.py
++++ b/sklearn/utils/_tags.py
+@@ -359,7 +359,7 @@ def _find_tags_provider(estimator, warn=True):
+             "`sklearn.base.ClassifierMixin`, `sklearn.base.RegressorMixin`, and "
+             "`sklearn.base.OutlierMixin`. From scikit-learn 1.7, not defining "
+             "`__sklearn_tags__` will raise an error.",
+-            category=FutureWarning,
++            category=DeprecationWarning,
+         )
+     return tag_provider

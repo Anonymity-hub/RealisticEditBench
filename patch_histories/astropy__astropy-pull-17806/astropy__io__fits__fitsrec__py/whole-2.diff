@@ -1,0 +1,11 @@
+diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py
+--- a/astropy/io/fits/fitsrec.py
++++ b/astropy/io/fits/fitsrec.py
+@@ -1044,7 +1044,6 @@ def _get_heap_data(self):
+             else:
+                 return np.array([], dtype=np.ubyte)
+ 
+-
+     def _get_raw_data(self):
+         """
+         Returns the base array of self that "raw data array" that is the

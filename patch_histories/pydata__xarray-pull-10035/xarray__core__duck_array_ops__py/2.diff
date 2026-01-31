@@ -1,0 +1,12 @@
+diff --git a/xarray/core/duck_array_ops.py b/xarray/core/duck_array_ops.py
+--- a/xarray/core/duck_array_ops.py
++++ b/xarray/core/duck_array_ops.py
+@@ -566,7 +566,7 @@
+     assert dtypes.is_datetime_like(dtype)
+     # (NaT).astype(float) does not produce NaN...
+     array = where(pandas_isnull(array), np.nan, array.astype(float))
+-    array = min(array, skipna=True)
++    array = func(array, skipna=True)
+     if isinstance(array, float):
+         array = np.array(array)
+     # ...but (NaN).astype("M8") does produce NaT

@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -3309,6 +3309,7 @@
+         sx = x.sum()
+ 
+         if sx == 0:
++            raise ValueError('All wedge sizes are zero')
+ 
+         if normalize:
+             x = x / sx

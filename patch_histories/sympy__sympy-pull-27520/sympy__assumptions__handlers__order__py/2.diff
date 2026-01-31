@@ -1,0 +1,12 @@
+diff --git a/sympy/assumptions/handlers/order.py b/sympy/assumptions/handlers/order.py
+--- a/sympy/assumptions/handlers/order.py
++++ b/sympy/assumptions/handlers/order.py
+@@ -23,6 +23,8 @@
+ 
+ def _NegativePredicate_number(expr, assumptions):
+     r, i = expr.as_real_imag()
++
++    if r == S.
+     # If the imaginary part can symbolically be shown to be zero then
+     # we just evaluate the real part; otherwise we evaluate the imaginary
+     # part to see if it actually evaluates to zero and if it does then

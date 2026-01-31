@@ -1,0 +1,19 @@
+diff --git a/sklearn/preprocessing/_data.py b/sklearn/preprocessing/_data.py
+--- a/sklearn/preprocessing/_data.py
++++ b/sklearn/preprocessing/_data.py
+@@ -1370,6 +1370,15 @@
+         else:
+             X /= self.scale_
+             if self.clip:
++                device_ = device(X)
++                X = _modify_in_place_if_numpy(
++                    xp,
++                    xp.clip,
++                    X,
++                    xp.asarray(-1.0, dtype=X.dtype, device=device_),
++                    xp.asarray(1.0, dtype=X.dtype, device=device_),
++                    out=X,
++                )
+         return X
+ 
+     def inverse_transform(self, X):

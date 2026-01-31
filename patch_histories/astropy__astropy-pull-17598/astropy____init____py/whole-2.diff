@@ -1,0 +1,11 @@
+diff --git a/astropy/__init__.py b/astropy/__init__.py
+--- a/astropy/__init__.py
++++ b/astropy/__init__.py
+@@ -26,6 +26,7 @@
+     "samp",
+     "stats",
+     "table",
++    "tests",
+     "time",
+     "timeseries",
+     "uncertainty",

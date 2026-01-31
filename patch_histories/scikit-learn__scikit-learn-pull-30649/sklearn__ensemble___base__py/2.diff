@@ -1,0 +1,13 @@
+diff --git a/sklearn/ensemble/_base.py b/sklearn/ensemble/_base.py
+--- a/sklearn/ensemble/_base.py
++++ b/sklearn/ensemble/_base.py
+@@ -212,7 +212,8 @@
+ 
+     def _validate_estimators(self):
+         if len(self.estimators) == 0 or not all(
+-
++            for item in self.estimators
++        ):
+             raise ValueError(
+                 "Invalid 'estimators' attribute, 'estimators' should be a "
+                 "non-empty list of (string, estimator) tuples."

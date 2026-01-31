@@ -1,0 +1,18 @@
+diff --git a/astropy/modeling/core.py b/astropy/modeling/core.py
+--- a/astropy/modeling/core.py
++++ b/astropy/modeling/core.py
+@@ -3378,12 +3378,12 @@
+             rightval = self.right.evaluate(*right_inputs, *right_params).ravel()
+ 
+             if op == "*":
+-                return (
++                return np.array(
+                     [rightval * dparam for dparam in left_deriv] +
+                     [leftval * dparam for dparam in right_deriv]
+                 )  # fmt: skip
+             if op == "/":
+-                return (
++                return np.array(
+                     [dparam / rightval for dparam in left_deriv] +
+                     [-leftval * (dparam / rightval**2) for dparam in right_deriv]
+                 )  # fmt: skip

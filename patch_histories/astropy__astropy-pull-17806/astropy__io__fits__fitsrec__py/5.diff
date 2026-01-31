@@ -1,0 +1,14 @@
+diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py
+--- a/astropy/io/fits/fitsrec.py
++++ b/astropy/io/fits/fitsrec.py
+@@ -1039,6 +1039,10 @@
+                     if len(row) > 0:
+                         data.append(row.view(type=np.ndarray, dtype=np.ubyte))
+ 
++            if data:
++                return np.concatenate(data)
++            else:
++                return np.array([], dtype=np.ubyte)
+ 
+     def _get_raw_data(self):
+         """

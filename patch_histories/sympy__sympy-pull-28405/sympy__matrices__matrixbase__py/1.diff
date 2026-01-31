@@ -1,0 +1,15 @@
+diff --git a/sympy/matrices/matrixbase.py b/sympy/matrices/matrixbase.py
+--- a/sympy/matrices/matrixbase.py
++++ b/sympy/matrices/matrixbase.py
+@@ -717,11 +717,8 @@ def diagonal(self, k: int = 0) -> Self:
+         diag
+         """
+         k = as_int(k)
+-        if -self.rows < k < self.cols:
+             rv = [self[r, r+k] for r in range(max(0, -k), min(self.rows, self.cols - k))]
+             return self._new(1, len(rv), rv)
+-        else:
+-            raise ValueError("Diagonal does not exist")
+ 
+     def row(self, i: int, /) -> Self:
+         """Elementary row selector.

@@ -1,0 +1,25 @@
+diff --git a/pylint/lint/expand_modules.py b/pylint/lint/expand_modules.py
+--- a/pylint/lint/expand_modules.py
++++ b/pylint/lint/expand_modules.py
+@@ -162,6 +162,14 @@
+                 if _is_in_ignore_list_re(
+                     os.path.basename(subfilepath), ignore_list_re
+                 ) or _is_in_ignore_list_re(subfilepath, ignore_list_paths_re):
++                    result[subfilepath] = {
++                        "path": subfilepath,
++                        "name": "",
++                        "isarg": False,
++                        "basepath": subfilepath,
++                        "basename": "",
++                        "isignored": True,
++                    }
+                     continue
+ 
+                 modpath = _modpath_from_file(
+@@ -176,5 +184,6 @@
+                     "isarg": isarg,
+                     "basepath": filepath,
+                     "basename": modname,
++                    "isignored": False,
+                 }
+     return result, errors

@@ -1,0 +1,18 @@
+diff --git a/lib/matplotlib/ticker.py b/lib/matplotlib/ticker.py
+--- a/lib/matplotlib/ticker.py
++++ b/lib/matplotlib/ticker.py
+@@ -2403,6 +2403,14 @@ def __call__(self):
+         vmin, vmax = self.axis.get_view_interval()
+         return self.tick_values(vmin, vmax)
+ 
++    def _log_b(self, x):
++        # Use specialized logs if possible, as they can be more accurate; e.g.
++        # log(.001) / log(10) = -2.999... (whether math.log or np.log) due to
++        # floating point error.
++        return (np.log10(x) if self._base == 10 else
++                np.log2(x) if self._base == 2 else
++                np.log(x) / np.log(self._base))
++
+     def tick_values(self, vmin, vmax):
+         if self.numticks == 'auto':
+             if self.axis is not None:

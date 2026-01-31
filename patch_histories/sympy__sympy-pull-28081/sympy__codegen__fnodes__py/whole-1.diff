@@ -1,0 +1,12 @@
+diff --git a/sympy/codegen/fnodes.py b/sympy/codegen/fnodes.py
+--- a/sympy/codegen/fnodes.py
++++ b/sympy/codegen/fnodes.py
+@@ -502,7 +502,7 @@ def reshape(source, shape, pad=None, order=None):
+         'reshape',
+         [_printable(source), _printable(shape)] +
+         ([_printable(pad)] if pad else []) +
+-        ([_printable(order)] if pad else [])
++        ([_printable(order)] if order else [])
+     )
+ 
+ 

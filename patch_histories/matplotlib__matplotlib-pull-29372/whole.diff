@@ -1,0 +1,62 @@
+diff --git a/galleries/examples/lines_bars_and_markers/fill_between_alpha.py b/galleries/examples/lines_bars_and_markers/fill_between_alpha.py
+--- a/galleries/examples/lines_bars_and_markers/fill_between_alpha.py
++++ b/galleries/examples/lines_bars_and_markers/fill_between_alpha.py
+@@ -44,7 +44,7 @@
+ # regions can overlap and alpha allows you to see both.  Note that the
+ # postscript format does not support alpha (this is a postscript
+ # limitation, not a matplotlib limitation), so when using alpha save
+-# your figures in PNG, PDF or SVG.
++# your figures in GIF, PNG, PDF or SVG.
+ #
+ # Our next example computes two populations of random walkers with a
+ # different mean and standard deviation of the normal distributions from
+diff --git a/lib/matplotlib/backend_bases.py b/lib/matplotlib/backend_bases.py
+--- a/lib/matplotlib/backend_bases.py
++++ b/lib/matplotlib/backend_bases.py
+@@ -62,6 +62,7 @@
+ _log = logging.getLogger(__name__)
+ _default_filetypes = {
+     'eps': 'Encapsulated Postscript',
++    'gif': 'Graphics Interchange Format',
+     'jpg': 'Joint Photographic Experts Group',
+     'jpeg': 'Joint Photographic Experts Group',
+     'pdf': 'Portable Document Format',
+@@ -78,6 +79,7 @@
+ }
+ _default_backends = {
+     'eps': 'matplotlib.backends.backend_ps',
++    'gif': 'matplotlib.backends.backend_agg',
+     'jpg': 'matplotlib.backends.backend_agg',
+     'jpeg': 'matplotlib.backends.backend_agg',
+     'pdf': 'matplotlib.backends.backend_pdf',
+diff --git a/lib/matplotlib/backends/backend_agg.py b/lib/matplotlib/backends/backend_agg.py
+--- a/lib/matplotlib/backends/backend_agg.py
++++ b/lib/matplotlib/backends/backend_agg.py
+@@ -490,6 +490,9 @@ def print_to_buffer(self):
+     # print_figure(), and the latter ensures that `self.figure.dpi` already
+     # matches the dpi kwarg (if any).
+ 
++    def print_gif(self, filename_or_obj, *, metadata=None, pil_kwargs=None):
++        self._print_pil(filename_or_obj, "gif", pil_kwargs, metadata)
++
+     def print_jpg(self, filename_or_obj, *, metadata=None, pil_kwargs=None):
+         # savefig() has already applied savefig.facecolor; we now set it to
+         # white to make imsave() blend semi-transparent figures against an
+@@ -507,7 +510,7 @@ def print_tif(self, filename_or_obj, *, metadata=None, pil_kwargs=None):
+     def print_webp(self, filename_or_obj, *, metadata=None, pil_kwargs=None):
+         self._print_pil(filename_or_obj, "webp", pil_kwargs, metadata)
+ 
+-    print_jpg.__doc__, print_tif.__doc__, print_webp.__doc__ = map(
++    print_gif.__doc__, print_jpg.__doc__, print_tif.__doc__, print_webp.__doc__ = map(
+         """
+         Write the figure to a {} file.
+ 
+@@ -518,7 +521,7 @@ def print_webp(self, filename_or_obj, *, metadata=None, pil_kwargs=None):
+         pil_kwargs : dict, optional
+             Additional keyword arguments that are passed to
+             `PIL.Image.Image.save` when saving the figure.
+-        """.format, ["JPEG", "TIFF", "WebP"])
++        """.format, ["GIF", "JPEG", "TIFF", "WebP"])
+ 
+ 
+ @_Backend.export

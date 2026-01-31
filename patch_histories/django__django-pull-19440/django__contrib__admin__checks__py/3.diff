@@ -1,0 +1,29 @@
+diff --git a/django/contrib/admin/checks.py b/django/contrib/admin/checks.py
+--- a/django/contrib/admin/checks.py
++++ b/django/contrib/admin/checks.py
+@@ -401,8 +401,8 @@
+                 id="admin.E008",
+             )
+ 
+-        seen_fields.extend(flatten(fieldset[1]["fields"]))
+-        if len(seen_fields) != len(set(seen_fields)):
++        fieldset_fields = flatten(fieldset[1]["fields"])
++        seen_fields.extend(fieldset_fields)
+             return [
+                 checks.Error(
+                     "There are duplicate field(s) in '%s[1]'." % label,
+@@ -474,9 +474,14 @@
+                 "a list or tuple", option="exclude", obj=obj, id="admin.E014"
+             )
+         field_counts = collections.Counter(obj.exclude)
++        if duplicate_fields := [
++            field for field, count in field_counts.items() if count > 1
++        ]:
+             return [
+                 checks.Error(
+                     "The value of 'exclude' contains duplicate field(s).",
++                    hint="Remove duplicates of %s."
++                    % ", ".join(map(repr, duplicate_fields)),
+                     obj=obj.__class__,
+                     id="admin.E015",
+                 )

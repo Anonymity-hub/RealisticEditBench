@@ -1,0 +1,27 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -824,6 +824,7 @@ def _load_object_by_name(
+             file_path=Path(file_path) if file_path is not None else None,
+             all=tuple(mod_all) if mod_all is not None else None,
+             _obj=obj,
++            _obj___module__=obj.__name__,
+         )
+     elif objtype in {'class', 'exception'}:
+         if isinstance(obj, NewType | TypeVar):
+@@ -842,6 +843,7 @@ def _load_object_by_name(
+             docstring_lines=(),
+             bases=getattr(obj, '__bases__', None),
+             _obj=obj,
++            _obj___module__=get_attr(obj, '__module__', None),
+             _obj___name__=getattr(obj, '__name__', None),
+         )
+     elif objtype in {'function', 'decorator'}:
+@@ -857,6 +859,7 @@ def _load_object_by_name(
+             docstring_lines=(),
+             properties=frozenset(obj_properties),
+             _obj=obj,
++            _obj___module__=get_attr(obj, '__module__', None),
+         )
+     elif objtype == 'method':
+         # to distinguish classmethod/staticmethod

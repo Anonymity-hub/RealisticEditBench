@@ -1,0 +1,17 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -796,12 +796,8 @@
+         self._for_write = True
+         fields = [f for f in opts.concrete_fields if not f.generated]
+         objs = list(objs)
+-        self._prepare_for_bulk_create(objs)
++        objs_with_pk, objs_without_pk = self._prepare_for_bulk_create(objs)
+         with transaction.atomic(using=self.db, savepoint=False):
+-            objs_without_pk, objs_with_pk = partition(
+-                lambda o: o._is_pk_set() and not isinstance(o.pk, DatabaseDefault),
+-                objs,
+-            )
+             if objs_with_pk:
+                 returned_columns = self._batched_insert(
+                     objs_with_pk,

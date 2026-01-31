@@ -1,0 +1,33 @@
+diff --git a/sphinx/builders/linkcheck.py b/sphinx/builders/linkcheck.py
+--- a/sphinx/builders/linkcheck.py
++++ b/sphinx/builders/linkcheck.py
+@@ -749,19 +749,25 @@
+ 
+ def compile_linkcheck_allowed_redirects(app: Sphinx, config: Config) -> None:
+     """Compile patterns to the regexp objects."""
++    if config.linkcheck_allowed_redirects is _sentinel_lar:
++        config.linkcheck_allowed_redirects = None
++        return
++    if not isinstance(config.linkcheck_allowed_redirects, dict):
++        raise ConfigError
+     allowed_redirects = {}
+     for url, pattern in config.linkcheck_allowed_redirects.items():
+         try:
+-            linkcheck_allowed_redirects[re.compile(url)] = re.compile(pattern)
++            allowed_redirects[re.compile(url)] = re.compile(pattern)
+         except re.error as exc:
+             logger.warning(
+                 __('Failed to compile regex in linkcheck_allowed_redirects: %r %s'),
+                 exc.pattern,
+                 exc.msg,
+             )
+-        finally:
+-            # Remove the original regexp-string
+-            linkcheck_allowed_redirects.pop(url)
++    config.linkcheck_allowed_redirects = allowed_redirects
++
++
++_sentinel_lar = object()
+ 
+ 
+ def setup(app: Sphinx) -> ExtensionMetadata:

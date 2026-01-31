@@ -1,0 +1,11 @@
+diff --git a/django/utils/html.py b/django/utils/html.py
+--- a/django/utils/html.py
++++ b/django/utils/html.py
+@@ -9,7 +9,6 @@
+ 
+ from django.core.exceptions import SuspiciousOperation, ValidationError
+ from django.core.validators import EmailValidator
+-from django.utils.encoding import punycode
+ from django.utils.functional import Promise, cached_property, keep_lazy, keep_lazy_text
+ from django.utils.http import RFC3986_GENDELIMS, RFC3986_SUBDELIMS
+ from django.utils.regex_helper import _lazy_re_compile

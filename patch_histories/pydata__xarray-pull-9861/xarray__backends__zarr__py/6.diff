@@ -1,0 +1,19 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -635,6 +635,7 @@
+         zarr_format=None,
+         use_zarr_fill_value_as_mask=None,
+         write_empty: bool | None = None,
++        cache_members: bool = True,
+     ):
+         (
+             zarr_group,
+@@ -666,6 +667,7 @@
+                 write_empty,
+                 close_store_on_close,
+                 use_zarr_fill_value_as_mask,
++                cache_members=cache_members,
+             )
+             for group in group_paths
+         }

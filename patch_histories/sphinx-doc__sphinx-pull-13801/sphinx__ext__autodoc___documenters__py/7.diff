@@ -1,0 +1,49 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -2369,13 +2369,13 @@
+ 
+     def get_attribute_comment(self, parent: Any, attrname: str) -> list[str] | None:
+         return _get_attribute_comment(
+-            parent=parent, obj_path=self.objpath, attrname=attrname
++            parent=parent, obj_path=self.props.parts, attrname=attrname
+         )
+ 
+     def get_doc(self) -> list[list[str]] | None:
+         # Check the attribute has a docstring-comment
+         comment = _get_attribute_comment(
+-            parent=self.parent, obj_path=self.objpath, attrname=self.objpath[-1]
++            parent=self.parent, obj_path=self.props.parts, attrname=self.props.parts[-1]
+         )
+         if comment:
+             return [comment]
+@@ -2392,7 +2392,7 @@
+                 try:
+                     parent___slots__ = inspect.getslots(self.parent)
+                     if parent___slots__ and (
+-                        docstring := parent___slots__.get(self.objpath[-1])
++                        docstring := parent___slots__.get(self.props.name)
+                     ):
+                         docstring = prepare_docstring(docstring)
+                         return [docstring]
+@@ -2409,7 +2409,7 @@
+             if (
+                 self.object is RUNTIME_INSTANCE_ATTRIBUTE
+                 and _is_runtime_instance_attribute_not_commented(
+-                    parent=self.parent, obj_path=self.objpath
++                    parent=self.parent, obj_path=self.props.parts
+                 )
+             ):
+                 return None
+@@ -2507,9 +2507,8 @@
+                 )
+                 self.add_line('   :type: ' + objrepr, sourcename)
+         except TypeError as exc:
+-            logger.warning(
+-                __('Failed to get a function signature for %s: %s'), self.fullname, exc
+-            )
++            msg = __('Failed to get a function signature for %s: %s')
++            logger.warning(msg, self.props.full_name, exc)
+             pass
+         except ValueError:
+             pass

@@ -1,0 +1,21 @@
+diff --git a/sympy/core/mod.py b/sympy/core/mod.py
+--- a/sympy/core/mod.py
++++ b/sympy/core/mod.py
+@@ -5,6 +5,7 @@
+ from .logic import fuzzy_and, fuzzy_not
+ from .mul import Mul
+ from .numbers import equal_valued
++from .relational import is_le, is_lt, is_ge, is_gt
+ from .singleton import S
+ 
+ 
+@@ -99,6 +100,9 @@
+             if q.is_positive:
+                 comp1, comp2 = is_le, is_lt
+             elif q.is_negative:
++                comp1, comp2 = is_ge, is_gt
++            else:
++                return
+ 
+         rv = number_eval(p, q)
+         if rv is not None:

@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -1401,6 +1401,8 @@
+             and OPTIONS["use_flox"]
+             and contains_only_chunked_or_numpy(self._obj)
+         ):
++            import flox.xrdtypes
++
+             result = self._flox_reduce(
+                 dim=None,
+                 func=op,

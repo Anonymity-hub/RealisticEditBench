@@ -1,0 +1,18 @@
+diff --git a/django/core/validators.py b/django/core/validators.py
+--- a/django/core/validators.py
++++ b/django/core/validators.py
+@@ -255,14 +255,6 @@
+         if domain_part not in self.domain_allowlist and not self.validate_domain_part(
+             domain_part
+         ):
+-            # Try for possible IDN domain-part
+-            try:
+-                domain_part = punycode(domain_part)
+-            except UnicodeError:
+-                pass
+-            else:
+-                if self.validate_domain_part(domain_part):
+-                    return
+             raise ValidationError(self.message, code=self.code, params={"value": value})
+ 
+     def validate_domain_part(self, domain_part):

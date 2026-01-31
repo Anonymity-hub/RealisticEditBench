@@ -1,0 +1,22 @@
+diff --git a/lib/matplotlib/contour.py b/lib/matplotlib/contour.py
+--- a/lib/matplotlib/contour.py
++++ b/lib/matplotlib/contour.py
+@@ -602,7 +602,7 @@ def __init__(self, ax, *args,
+                  hatches=(None,), alpha=None, origin=None, extent=None,
+                  cmap=None, colors=None, norm=None, vmin=None, vmax=None,
+                  colorizer=None, extend='neither', antialiased=None, nchunk=0,
+-                 locator=None, transform=None, negative_linestyles=None, clip_path=None,
++                 locator=None, transform=None, negative_linestyles=None,
+                  **kwargs):
+         """
+         Draw contour lines or filled regions, depending on
+@@ -672,6 +672,9 @@ def __init__(self, ax, *args,
+         self.nchunk = nchunk
+         self.locator = locator
+ 
++        if "color" in kwargs:
++            raise _api.kwarg_error("ContourSet.__init__", "color")
++
+         if colorizer:
+             self._set_colorizer_check_keywords(colorizer, cmap=cmap,
+                                                norm=norm, vmin=vmin,

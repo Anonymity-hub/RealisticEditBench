@@ -1,0 +1,13 @@
+diff --git a/astropy/units/scripts/typestubs_for_units.py b/astropy/units/scripts/typestubs_for_units.py
+--- a/astropy/units/scripts/typestubs_for_units.py
++++ b/astropy/units/scripts/typestubs_for_units.py
+@@ -35,9 +35,6 @@
+     "required_by_vounit",
+ ]
+ 
+-# ignore deprecation warnings triggered by accessing units in deprecated.py
+-warnings.simplefilter("ignore", AstropyDeprecationWarning)
+-
+ 
+ def main():
+     args = _parse_args()

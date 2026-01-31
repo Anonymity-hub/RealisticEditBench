@@ -1,0 +1,14 @@
+diff --git a/sklearn/linear_model/_coordinate_descent.py b/sklearn/linear_model/_coordinate_descent.py
+--- a/sklearn/linear_model/_coordinate_descent.py
++++ b/sklearn/linear_model/_coordinate_descent.py
+@@ -1521,8 +1521,8 @@
+     def __init__(
+         self,
+         eps=1e-3,
+-        n_alphas=100,
+-        alphas=None,
++        n_alphas="deprecated",
++        alphas="warn",
+         fit_intercept=True,
+         precompute="auto",
+         max_iter=1000,

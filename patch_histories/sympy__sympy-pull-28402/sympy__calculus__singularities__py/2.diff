@@ -1,0 +1,11 @@
+diff --git a/sympy/calculus/singularities.py b/sympy/calculus/singularities.py
+--- a/sympy/calculus/singularities.py
++++ b/sympy/calculus/singularities.py
+@@ -98,6 +98,7 @@
+         e = expression.rewrite([sec, csc, cot, tan], cos)
+         e = e.rewrite([sech, csch, coth, tanh], cosh)
+         for i in e.atoms(Pow):
++            if i.base == S.Zero:
+             if i.exp.is_infinite:
+                 raise NotImplementedError
+             if i.exp.is_negative:

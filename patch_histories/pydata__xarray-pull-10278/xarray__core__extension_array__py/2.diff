@@ -1,0 +1,12 @@
+diff --git a/xarray/core/extension_array.py b/xarray/core/extension_array.py
+--- a/xarray/core/extension_array.py
++++ b/xarray/core/extension_array.py
+@@ -2,7 +2,7 @@
+ 
+ from collections.abc import Callable, Sequence
+ from dataclasses import dataclass
+-from typing import Generic, cast
++from typing import Any, Generic, cast
+ 
+ import numpy as np
+ import pandas as pd

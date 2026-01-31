@@ -1,0 +1,14 @@
+diff --git a/django/db/migrations/operations/models.py b/django/db/migrations/operations/models.py
+--- a/django/db/migrations/operations/models.py
++++ b/django/db/migrations/operations/models.py
+@@ -716,8 +716,8 @@
+             alter_together = getattr(schema_editor, "alter_%s" % self.option_name)
+             alter_together(
+                 new_model,
+-                getattr(old_model._meta, self.option_name, set()),
+-                getattr(new_model._meta, self.option_name, set()),
++                from_model_state.options.get(self.option_name) or set(),
++                to_model_state.options.get(self.option_name) or set(),
+             )
+ 
+     def database_backwards(self, app_label, schema_editor, from_state, to_state):

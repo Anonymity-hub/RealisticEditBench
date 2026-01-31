@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -6231,7 +6231,8 @@
+         collection._check_exclusionary_keywords(colorizer, vmin=vmin, vmax=vmax)
+         collection._scale_norm(norm, vmin, vmax)
+ 
+-        coords =
++        coords = coords.reshape(-1, 2)  # flatten the grid structure; keep x, y
++        self._update_pcolor_lims(collection, coords)
+         return collection
+ 
+     @_preprocess_data()

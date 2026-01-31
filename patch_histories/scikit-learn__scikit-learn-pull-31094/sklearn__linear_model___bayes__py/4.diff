@@ -1,0 +1,17 @@
+diff --git a/sklearn/linear_model/_bayes.py b/sklearn/linear_model/_bayes.py
+--- a/sklearn/linear_model/_bayes.py
++++ b/sklearn/linear_model/_bayes.py
+@@ -364,11 +364,9 @@
+             self.scores_.append(s)
+             self.scores_ = np.array(self.scores_)
+
+-        # posterior covariance is given by 1/alpha_ * scaled_sigma_
+-        scaled_sigma_ = np.dot(
+-            Vh.T, Vh / (eigen_vals_ + lambda_ / alpha_)[:, np.newaxis]
++        # posterior covariance
++        self.sigma_ =
+         )
+-        self.sigma_ = (1.0 / alpha_) * scaled_sigma_
+ 
+         self._set_intercept(X_offset_, y_offset_, X_scale_)
+ 

@@ -1,0 +1,33 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1810,17 +1810,20 @@ def as_sql(self):
+             on_conflict=self.query.on_conflict,
+         )
+         result = ["%s %s" % (insert_statement, qn(opts.db_table))]
+-        fields = self.query.fields or [opts.pk]
+-        result.append("(%s)" % ", ".join(qn(f.column) for f in fields))
+ 
+-        if self.query.fields:
+-            value_rows = [
+-                [
+-                    self.prepare_value(field, self.pre_save_val(field, obj))
+-                    for field in fields
++        if fields := list(self.query.fields):
++            from django.db.models.expressions import DatabaseDefault
++
++            supports_default_keyword_in_bulk_insert = (
++                self.connection.features.supports_default_keyword_in_bulk_insert
++            )
++            value_cols = []
++            for field in list(fields):
++                field_prepare = partial(self.prepare_value, field)
++                field_pre_save = partial(self.pre_save_val, field)
++                field_values = [
++                    field_prepare(field_pre_save(obj)) for obj in self.query.objs
+                 ]
+-                for obj in self.query.objs
+-            ]
+         else:
+             # An empty object.
+             value_rows = [

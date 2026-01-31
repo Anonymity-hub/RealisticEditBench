@@ -1,0 +1,17 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -1372,7 +1372,12 @@
+                 isinstance(field.remote_field, ForeignObjectRel)
+                 and field not in meta.local_concrete_fields
+             ):
+-                value =
++                value = tuple(
++                    getattr(self, from_field) for from_field in field.from_fields
++                )
++                if len(value) == 1:
++                    value = value[0]
++            elif
+             value = getattr(self, field.attname)
+             if not value or not hasattr(value, "resolve_expression"):
+                 value = Value(value, field)

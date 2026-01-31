@@ -1,0 +1,13 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -129,7 +129,8 @@
+             return namespace
+ 
+         amount = len(namespace)
+-        msg = f"{amount} objects imported automatically"
++        objects_str = "objects" if amount != 1 else "object"
++        msg = f"{amount} {objects_str} imported automatically"
+ 
+         if verbosity < 2:
+             self.stdout.write(f"{msg} (use -v 2 for details).", self.style.SUCCESS)

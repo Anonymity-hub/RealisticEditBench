@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/backend_bases.py b/lib/matplotlib/backend_bases.py
+--- a/lib/matplotlib/backend_bases.py
++++ b/lib/matplotlib/backend_bases.py
+@@ -2220,7 +2220,7 @@ def get_default_filename(self):
+         # Characters to be avoided in a NT path:
+         # https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx#naming_conventions
+         # plus ' '
+-        removed_chars = r'<>:"/\|?*\0 '
++        removed_chars = '<>:"/\\|?*\0 '
+         default_basename = default_basename.translate(
+             {ord(c): "_" for c in removed_chars})
+         default_filetype = self.get_default_filetype()

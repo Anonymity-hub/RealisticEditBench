@@ -1,0 +1,12 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -155,6 +155,8 @@
+ 
+ def _numpy_dtype_to_netcdf_timeunit(dtype: np.dtype) -> str:
+     unit, _ = np.datetime_data(dtype)
++    unit = cast(NPDatetimeUnitOptions, unit)
++    return _numpy_to_netcdf_timeunit(unit)
+ 
+ 
+ def _ensure_padded_year(ref_date: str) -> str:

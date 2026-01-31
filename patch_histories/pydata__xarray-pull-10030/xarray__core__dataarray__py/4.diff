@@ -1,0 +1,10 @@
+diff --git a/xarray/core/dataarray.py b/xarray/core/dataarray.py
+--- a/xarray/core/dataarray.py
++++ b/xarray/core/dataarray.py
+@@ -1,5 +1,6 @@
+ from __future__ import annotations
+ 
++import copy
+ import datetime
+ import warnings
+ from collections.abc import (

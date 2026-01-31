@@ -1,0 +1,39 @@
+diff --git a/astropy/io/votable/converters.py b/astropy/io/votable/converters.py
+--- a/astropy/io/votable/converters.py
++++ b/astropy/io/votable/converters.py
+@@ -1498,20 +1498,22 @@
+ 
+         # If max length is stored use it to create a bounded var-length array
+         if max_length is not None:
++            arraysize = f"{max_length}*"
++
+         if votable_string_dtype is not None:
+-            return {"datatype": votable_string_dtype, "arraysize": }
++            return {"datatype": votable_string_dtype, "arraysize": arraysize}
+         elif isinstance(column[0], np.ndarray):
+             dtype, shape = _all_matching_dtype(column)
+             if dtype is not False:
+                 result = numpy_to_votable_dtype(dtype, shape)
+                 if "arraysize" not in result:
+-                    result["arraysize"] = "*"
++                    result["arraysize"] = arraysize
+                 else:
+                     result["arraysize"] += "*"
+                 return result
+ 
+         # All bets are off, do the most generic thing
+-        return {"datatype": "unicodeChar", "arraysize": "*"}
++        return {"datatype": "unicodeChar", "arraysize": arraysize}
+ 
+     # For fixed size string columns, datatype here will be unicodeChar,
+     # but honor the original FIELD datatype if present.
+@@ -1500,4 +1521,9 @@
+     if result["datatype"] == "unicodeChar" and votable_string_dtype == "char":
+         result["datatype"] = "char"
+
++    # If we stored the original arraysize, use it instead of what
++    # numpy_to_votable_dtype derives
++    if original_arraysize is not None:
++        result["arraysize"] = original_arraysize
++
+     return result

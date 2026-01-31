@@ -1,0 +1,13 @@
+diff --git a/astropy/io/votable/tree.py b/astropy/io/votable/tree.py
+--- a/astropy/io/votable/tree.py
++++ b/astropy/io/votable/tree.py
+@@ -4190,8 +4190,7 @@ def version(self, version):
+         if version not in self._version_namespace_map:
+             allowed_from_map = "', '".join(self._version_namespace_map)
+             raise ValueError(
+-                "astropy.io.votable version should be in"
+-                f" ('{allowed_from_map}')."
++                f"astropy.io.votable version should be in ('{allowed_from_map}')."
+             )
+         self._version = version
+         # Force config update.

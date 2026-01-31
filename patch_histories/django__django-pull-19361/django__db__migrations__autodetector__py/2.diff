@@ -1,0 +1,20 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -531,6 +531,16 @@
+             )
+         # Field is removed and part of an index/constraint.
+         elif (
++            dependency.field_name is not None
++            and dependency.type == OperationDependency.Type.REMOVE_INDEX_OR_CONSTRAINT
++        ):
++            return (
++                isinstance(
++                    operation,
++                    (operations.RemoveIndex, operations.RemoveConstraint),
++                )
++                and operation.model_name_lower == dependency.model_name_lower
++            )
+         # Unknown dependency. Raise an error.
+         else:
+             raise ValueError("Can't handle dependency %r" % (dependency,))

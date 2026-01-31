@@ -1,0 +1,13 @@
+diff --git a/astropy/io/fits/convenience.py b/astropy/io/fits/convenience.py
+--- a/astropy/io/fits/convenience.py
++++ b/astropy/io/fits/convenience.py
+@@ -561,6 +561,9 @@
+         table_hdu = BinTableHDU.from_columns(
+             tarray, header=hdr, character_as_bytes=character_as_bytes
+         )
++
++    if name is not None:
++        table_hdu.name = name
+ 
+     # Set units and format display for output HDU
+     for col in table_hdu.columns:

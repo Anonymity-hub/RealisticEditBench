@@ -1,0 +1,33 @@
+diff --git a/lib/matplotlib/streamplot.py b/lib/matplotlib/streamplot.py
+--- a/lib/matplotlib/streamplot.py
++++ b/lib/matplotlib/streamplot.py
+@@ -116,6 +116,18 @@
+     mask = StreamMask(density)
+     dmap = DomainMap(grid, mask)
+ 
++    if integration_max_step_scale <= 0.0:
++        raise ValueError(
++            "The value of integration_max_step_scale must be > 0, " +
++            f"got {integration_max_step_scale}"
++        )
++
++    if integration_max_error_scale <= 0.0:
++        raise ValueError(
++            "The value of integration_max_error_scale must be > 0, " +
++            f"got {integration_max_error_scale}"
++        )
++
+     if num_arrows < 0:
+         raise ValueError(f"The value of num_arrows must be >= 0, got {num_arrows=}")
+ 
+@@ -178,7 +190,9 @@
+         for xm, ym in _gen_starting_points(mask.shape):
+             if mask[ym, xm] == 0:
+                 xg, yg = dmap.mask2grid(xm, ym)
+-                t = integrate(xg, yg, broken_streamlines)
++                t = integrate(xg, yg, broken_streamlines,
++                              integration_max_step_scale,
++                              integration_max_error_scale)
+                 if t is not None:
+                     trajectories.append(t)
+     else:

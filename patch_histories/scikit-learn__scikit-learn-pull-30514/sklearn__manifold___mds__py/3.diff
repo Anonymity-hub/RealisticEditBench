@@ -1,0 +1,38 @@
+diff --git a/sklearn/manifold/_mds.py b/sklearn/manifold/_mds.py
+--- a/sklearn/manifold/_mds.py
++++ b/sklearn/manifold/_mds.py
+@@ -133,19 +133,25 @@
+     old_stress = None
+     for it in range(max_iter):
+         # Compute distance and monotonic regression
+-        dis = euclidean_distances(X)
+-
+         if metric:
+             disparities = dissimilarities
+         else:
+-            dis_flat = dis.ravel()
++            distances_flat = distances.ravel()
+             # dissimilarities with 0 are considered as missing values
+-            dis_flat_w = dis_flat[sim_flat != 0]
+-
+-            # Compute the disparities using a monotonic regression
+-            disparities_flat = ir.fit_transform(sim_flat_w, dis_flat_w)
+-            disparities = dis_flat.copy()
+-            disparities[sim_flat != 0] = disparities_flat
++            distances_flat_w = distances_flat[dissimilarities_flat != 0]
++
++            # Compute the disparities using isotonic regression.
++            # For the first SMACOF iteration, use scaled original dissimilarities.
++            # (This choice follows the R implementation described in this paper:
++            # https://www.jstatsoft.org/article/view/v102i10)
++            if it < 1:
++                disparities_flat = dissimilarities_flat_w
++            else:
++                disparities_flat = ir.fit_transform(
++                    dissimilarities_flat_w, distances_flat_w
++                )
++            disparities = np.zeros_like(distances_flat)
++            disparities[dissimilarities_flat != 0] = disparities_flat
+             disparities = disparities.reshape((n_samples, n_samples))
+             disparities *= np.sqrt(
+                 (n_samples * (n_samples - 1) / 2) / (disparities**2).sum()

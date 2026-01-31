@@ -1,0 +1,38 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -141,7 +141,7 @@
+             B.append(a//q_l*gamma)
+         b = sum(B)
+         g = SievePolynomial(a, b, N)
+-        for fb in factor_base:
++        for fb in factor_base[1:]:
+             if a % fb.prime == 0:
+                 fb.soln1 = None
+                 continue
+@@ -158,7 +158,7 @@
+             b = g.b + 2*neg_pow*B[v]
+             a = g.a
+             g = SievePolynomial(a, b, N)
+-            for fb in factor_base:
++            for fb in factor_base[1:]:
+                 if fb.soln1 is None:
+                     continue
+                 fb.soln1 = (fb.soln1 - neg_pow*fb.b_ainv[v]) % fb.prime
+@@ -188,13 +188,9 @@
+     for factor in factor_base[1:]:
+         if factor.soln1 is None: #The prime does not divides a
+             continue
+-        for idx in range((M + factor.soln1) % factor.prime, 2*M, factor.prime):
+-            sieve_array[idx] += factor.log_p
+-        if factor.prime == 2:
+-            continue
+-        #if prime is 2 then sieve only with soln_1_p
+-        for idx in range((M + factor.soln2) % factor.prime, 2*M, factor.prime):
+-            sieve_array[idx] += factor.log_p
++        for s in [factor.soln1, factor.soln2]:
++            for idx in range((M + s) % factor.prime, 2*M, factor.prime):
++                sieve_array[idx] += factor.log_p
+     return sieve_array
+ 
+ 

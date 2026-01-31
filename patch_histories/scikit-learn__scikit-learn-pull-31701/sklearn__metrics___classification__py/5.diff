@@ -1,0 +1,25 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -208,6 +208,9 @@
+         raise ValueError(f"y_prob contains values lower than 0: {y_prob.min()}")
+ 
+     check_consistent_length(y_prob, y_true, sample_weight)
++    if sample_weight is not None:
++        _check_sample_weight(sample_weight, y_true, force_float_dtype=False)
++
+     lb = LabelBinarizer()
+ 
+     if labels is not None:
+@@ -364,8 +367,9 @@
+     xp, _, device = get_namespace_and_device(y_true, y_pred, sample_weight)
+     # Compute accuracy for each possible representation
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+-    check_consistent_length(y_true, y_pred, sample_weight)
++    y_type, y_true, y_pred, sample_weight = _check_targets(
++        y_true, y_pred, sample_weight
++    )
+ 
+     if y_type.startswith("multilabel"):
+         differing_labels = _count_nonzero(y_true - y_pred, xp=xp, device=device, axis=1)

@@ -1,0 +1,19 @@
+diff --git a/astropy/utils/data.py b/astropy/utils/data.py
+--- a/astropy/utils/data.py
++++ b/astropy/utils/data.py
+@@ -426,6 +426,7 @@
+             fileobj_new.seek(0)
+             close_fds.append(fileobj_new)
+             fileobj = fileobj_new
++    elif signature[:6] == b"\xfd7zXZ\x00":  # xz
+         if not HAS_LZMA:
+             for fd in close_fds:
+                 fd.close()
+@@ -437,7 +438,6 @@
+         try:
+             fileobj_new = lzma.LZMAFile(fileobj, mode="rb")
+             fileobj_new.read(1)  # need to check that the file is really xz
+-        except (OSError, EOFError):  # invalid xz file
+             fileobj.seek(0)
+             fileobj_new.close()
+             # should we propagate this to the caller to signal bad content?

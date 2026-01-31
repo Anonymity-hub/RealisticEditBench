@@ -1,0 +1,12 @@
+diff --git a/astropy/units/docgen.py b/astropy/units/docgen.py
+--- a/astropy/units/docgen.py
++++ b/astropy/units/docgen.py
+@@ -139,7 +139,7 @@
+         for name, value in namespace.items()
+         if (
+             isinstance(value, UnitBase)
+-            and
++            and name.isidentifier()
+             and name == unicodedata.normalize("NFKC", name)
+         )
+     ]

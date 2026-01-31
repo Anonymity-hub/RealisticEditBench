@@ -1,0 +1,11 @@
+diff --git a/astropy/wcs/wcs.py b/astropy/wcs/wcs.py
+--- a/astropy/wcs/wcs.py
++++ b/astropy/wcs/wcs.py
+@@ -3326,6 +3326,7 @@
+             A new resampled WCS axis
+         """
+         if view is Ellipsis:
++            return
+         if hasattr(view, "__len__") and len(view) > self.wcs.naxis:
+             raise ValueError("Must have # of slices <= # of WCS axes")
+         elif not hasattr(view, "__len__"):  # view MUST be an iterable

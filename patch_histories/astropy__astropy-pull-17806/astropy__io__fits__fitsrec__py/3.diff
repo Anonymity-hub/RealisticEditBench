@@ -1,0 +1,16 @@
+diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py
+--- a/astropy/io/fits/fitsrec.py
++++ b/astropy/io/fits/fitsrec.py
+@@ -1029,6 +1029,12 @@
+             # column (regardless if that data pointer has a different,
+             # previous heap offset listed)
+             data = []
++            for idx in range(self._nfields):
++                # data should already be byteswapped from the caller
++                # using _binary_table_byte_swap
++                if not isinstance(self.columns._recformats[idx], _FormatP):
++                    continue
++
+ 
+     def _get_raw_data(self):
+         """

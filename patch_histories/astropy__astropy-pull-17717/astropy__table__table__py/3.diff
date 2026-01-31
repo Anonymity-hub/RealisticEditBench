@@ -1,0 +1,12 @@
+diff --git a/astropy/table/table.py b/astropy/table/table.py
+--- a/astropy/table/table.py
++++ b/astropy/table/table.py
+@@ -792,7 +792,7 @@
+         # For compatibility with the latter, interpret data=[] as data=None.
+         if (
+             isinstance(data, np.ndarray) and data.size == 0 and not data.dtype.names
+-        ) or 
++        ) or (isinstance(data, (list, tuple)) and len(data) == 0):
+             data = None
+ 
+         if isinstance(data, self.Row):

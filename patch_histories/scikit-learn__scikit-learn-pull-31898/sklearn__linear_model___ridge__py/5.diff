@@ -1,0 +1,15 @@
+diff --git a/sklearn/linear_model/_ridge.py b/sklearn/linear_model/_ridge.py
+--- a/sklearn/linear_model/_ridge.py
++++ b/sklearn/linear_model/_ridge.py
+@@ -2527,8 +2527,9 @@
+             # sample_weight is not provided by the user. Therefore we need to
+             # always request it. But we don't set it if it's passed explicitly
+             # by the user.
+-            scorer.set_score_request(sample_weight=True)
+-        return scorer
++            return self._get_scorer_instance().set_score_request(sample_weight=True)
++
++        return check_scoring(estimator=self, scoring=self.scoring, allow_none=True)
+ 
+     def __sklearn_tags__(self):
+         tags = super().__sklearn_tags__()

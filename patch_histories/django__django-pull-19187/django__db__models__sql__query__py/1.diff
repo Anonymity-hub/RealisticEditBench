@@ -1,0 +1,22 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -48,6 +48,10 @@
+ 
+ __all__ = ["Query", "RawQuery"]
+ 
++# RemovedInDjango70Warning: When the deprecation ends, replace with:
++# Quotation marks ('"`[]), whitespace characters, semicolons, percent signs
++# or inline SQL comments are forbidden in column aliases.
++# FORBIDDEN_ALIAS_PATTERN = _lazy_re_compile(r"['`\"\]\[;\s]|%|--|/\*|\*/")
+ # Quotation marks ('"`[]), whitespace characters, semicolons, or inline
+ # SQL comments are forbidden in column aliases.
+ FORBIDDEN_ALIAS_PATTERN = _lazy_re_compile(r"['`\"\]\[;\s]|--|/\*|\*/")
+@@ -1206,6 +1210,7 @@ def join_parent_model(self, opts, model, alias, seen):
+         return alias or seen[None]
+ 
+     def check_alias(self, alias):
++        # RemovedInDjango70Warning: When the deprecation ends, remove.
+         if FORBIDDEN_ALIAS_PATTERN.search(alias):
+             raise ValueError(
+                 "Column aliases cannot contain whitespace characters, quotation marks, "

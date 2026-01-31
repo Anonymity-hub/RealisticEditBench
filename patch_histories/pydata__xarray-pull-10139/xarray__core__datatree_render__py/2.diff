@@ -1,0 +1,52 @@
+diff --git a/xarray/core/datatree_render.py b/xarray/core/datatree_render.py
+--- a/xarray/core/datatree_render.py
++++ b/xarray/core/datatree_render.py
+@@ -169,24 +169,44 @@ def __init__(
+         self.style = style
+         self.childiter = childiter
+         self.maxlevel = maxlevel
++        self.maxchildren = maxchildren
+ 
+     def __iter__(self) -> Iterator[Row]:
+         return self.__next(self.node, tuple())
+ 
+     def __next(
+-        self, node: DataTree, continues: tuple[bool, ...], level: int = 0
++        self,
++        node: DataTree,
++        continues: tuple[bool, ...],
++        level: int = 0,
+     ) -> Iterator[Row]:
+         yield RenderDataTree.__item(node, continues, self.style)
+         children = node.children.values()
+         level += 1
+         if children and (self.maxlevel is None or level < self.maxlevel):
++            nchildren = len(children)
+             children = self.childiter(children)
+-            for child, is_last in _is_last(children):
+-                yield from self.__next(child, continues + (not is_last,), level=level)
++            for i, (child, is_last) in enumerate(_is_last(children)):
++                if (
++                    self.maxchildren is None
++                    or i < ceil(self.maxchildren / 2)
++                    or i >= ceil(nchildren - self.maxchildren / 2)
++                ):
++                    yield from self.__next(
++                        child,
++                        continues + (not is_last,),
++                        level=level,
++                    )
++                if (
++                    self.maxchildren is not None
++                    and nchildren > self.maxchildren
++                    and i == ceil(self.maxchildren / 2)
++                ):
++                    yield RenderDataTree.__item("...", continues, self.style)
+ 
+     @staticmethod
+     def __item(
+-        node: DataTree, continues: tuple[bool, ...], style: AbstractStyle
++        node: DataTree | str, continues: tuple[bool, ...], style: AbstractStyle
+     ) -> Row:
+         if not continues:
+             return Row("", "", node)

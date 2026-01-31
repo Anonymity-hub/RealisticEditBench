@@ -1,0 +1,12 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -4185,7 +4185,7 @@ def _validate_interp_indexer(x, new_x):
+             }
+ 
+         variables: dict[Hashable, Variable] = {}
+-        reindex: bool = False
++        reindex_vars: list[Hashable] = []
+         for name, var in obj._variables.items():
+             if name in indexers:
+                 continue

@@ -1,0 +1,12 @@
+diff --git a/sphinx/builders/html/__init__.py b/sphinx/builders/html/__init__.py
+--- a/sphinx/builders/html/__init__.py
++++ b/sphinx/builders/html/__init__.py
+@@ -1122,7 +1122,7 @@
+         ctx['hasdoc'] = hasdoc
+ 
+         ctx['toctree'] = lambda **kwargs: self._get_local_toctree(pagename, **kwargs)
+-        self.add_sidebars(pagename, ctx)
++        ctx['sidebars'] = list(self._get_sidebars(pagename))
+         ctx.update(addctx)
+ 
+         # 'blah.html' should have content_root = './' not ''.

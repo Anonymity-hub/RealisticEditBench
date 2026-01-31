@@ -1,0 +1,21 @@
+diff --git a/sklearn/cluster/_hdbscan/hdbscan.py b/sklearn/cluster/_hdbscan/hdbscan.py
+--- a/sklearn/cluster/_hdbscan/hdbscan.py
++++ b/sklearn/cluster/_hdbscan/hdbscan.py
+@@ -836,7 +836,7 @@
+ 
+             if self.algorithm == "brute":
+                 mst_func = _hdbscan_brute
+-                kwargs["copy"] = self.copy
++                kwargs["copy"] = _copy
+             elif self.algorithm == "kd_tree":
+                 mst_func = _hdbscan_prims
+                 kwargs["algo"] = "kd_tree"
+@@ -849,7 +849,7 @@
+             if issparse(X) or self.metric not in FAST_METRICS:
+                 # We can't do much with sparse matrices ...
+                 mst_func = _hdbscan_brute
+-                kwargs["copy"] = self.copy
++                kwargs["copy"] = _copy
+             elif self.metric in KDTree.valid_metrics:
+                 # TODO: Benchmark KD vs Ball Tree efficiency
+                 mst_func = _hdbscan_prims

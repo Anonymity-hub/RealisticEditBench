@@ -1,0 +1,22 @@
+diff --git a/sphinx/util/inspect.py b/sphinx/util/inspect.py
+--- a/sphinx/util/inspect.py
++++ b/sphinx/util/inspect.py
+@@ -955,11 +955,15 @@
+     * inherited docstring
+     * inherited decorated methods
+     """
+-    if cls and name and isclassmethod(obj, cls, name):
++    if cls and name and is_classmethod_like(obj, cls, name):
+         for basecls in getmro(cls):
+             meth = basecls.__dict__.get(name)
+-            if meth and hasattr(meth, '__func__'):
+-                doc: str | None = getdoc(meth.__func__)
++            if not meth:
++                continue
++            # Built-in class methods do not have '__func__'
++            # but they may have a docstring.
++            if hasattr(meth, '__func__') or is_classmethod_descriptor(meth):
++                doc: str | None = getdoc(getattr(meth, '__func__', meth))
+                 if doc is not None or not allow_inherited:
+                     return doc
+ 

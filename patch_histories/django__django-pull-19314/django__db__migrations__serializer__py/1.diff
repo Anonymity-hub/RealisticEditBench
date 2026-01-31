@@ -1,0 +1,11 @@
+diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py
+--- a/django/db/migrations/serializer.py
++++ b/django/db/migrations/serializer.py
+@@ -334,6 +334,7 @@ def serialize(self):
+         return "uuid.%s" % repr(self.value), {"import uuid"}
+ 
+ 
++class ZoneInfoSerializer(BaseSerializer):
+ class Serializer:
+     _registry = {
+         # Some of these are order-dependent.

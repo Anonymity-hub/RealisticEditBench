@@ -1,0 +1,12 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -673,7 +673,7 @@
+     )
+     pd_timedeltas = pd.to_timedelta(ravel(timedeltas))
+ 
+-    if np.isnat(timedeltas).all():
++    if not is_empty_array and np.isnat(timedeltas).all():
+         empirical_unit = time_unit
+     else:
+         empirical_unit = pd_timedeltas.unit

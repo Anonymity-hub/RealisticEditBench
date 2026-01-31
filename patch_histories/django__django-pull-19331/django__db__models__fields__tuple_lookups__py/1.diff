@@ -1,0 +1,12 @@
+diff --git a/django/db/models/fields/tuple_lookups.py b/django/db/models/fields/tuple_lookups.py
+--- a/django/db/models/fields/tuple_lookups.py
++++ b/django/db/models/fields/tuple_lookups.py
+@@ -329,6 +329,8 @@ def process_rhs(self, compiler, connection):
+         lhs = self.lhs
+ 
+         for vals in rhs:
++            # Remove any tuple containing None from the list as NULL is never
++            # equal to anything.
+             result.append(
+                 Tuple(
+                     *[

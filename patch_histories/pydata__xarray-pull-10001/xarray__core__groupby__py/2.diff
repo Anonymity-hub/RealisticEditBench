@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -1396,7 +1396,7 @@
+ 
+     def last(self, skipna: bool | None = None, keep_attrs: bool | None = None):
+         """Return the last element of each group along the group dimension"""
+-        return self._first_or_last("last", skipna, keep_attrs)
++        return self._first_or_last(duck_array_ops.last, skipna, keep_attrs)
+ 
+     def assign_coords(self, coords=None, **coords_kwargs):
+         """Assign coordinates by group.

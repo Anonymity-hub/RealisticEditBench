@@ -1,0 +1,22 @@
+diff --git a/sympy/calculus/singularities.py b/sympy/calculus/singularities.py
+--- a/sympy/calculus/singularities.py
++++ b/sympy/calculus/singularities.py
+@@ -45,7 +45,8 @@ def singularities(expression, symbol, domain=None):
+     Set
+         A set of values for ``symbol`` for which ``expression`` has a
+         singularity. An ``EmptySet`` is returned if ``expression`` has no
+-        singularities for any given value of ``Symbol``.
++        singularities for any given value of ``Symbol``. An ``Interval`` is returned
++        if ``expression`` has uncountably many singularities.
+ 
+     Raises
+     ======
+@@ -84,6 +85,8 @@ def singularities(expression, symbol, domain=None):
+     {-1, 1/2 - sqrt(3)*I/2, 1/2 + sqrt(3)*I/2}
+     >>> singularities(log(x), x)
+     {0}
++    >>> singularities(0**x, x)
++    Interval.open(-oo, 0)
+ 
+     """
+     from sympy.solvers.solveset import solveset

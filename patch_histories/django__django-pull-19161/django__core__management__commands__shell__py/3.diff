@@ -1,0 +1,14 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -59,9 +59,7 @@
+     def bpython(self, options):
+         import bpython
+ 
+-        bpython.embed(
+-            self.get_and_report_namespace(options["verbosity"], options["no_imports"])
+-        )
++        bpython.embed(self.get_and_report_namespace(**options))
+ 
+     def python(self, options):
+         import code

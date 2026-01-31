@@ -1,0 +1,80 @@
+diff --git a/sphinx/builders/__init__.py b/sphinx/builders/__init__.py
+--- a/sphinx/builders/__init__.py
++++ b/sphinx/builders/__init__.py
+@@ -617,7 +617,7 @@
+ 
+         def merge(docs: list[str], otherenv: bytes) -> None:
+             env = pickle.loads(otherenv)
+-            self.env.merge_info_from(docs, env, self.app)
++            self.env.merge_info_from(docs, env, self._app)
+ 
+             next(progress)
+ 
+@@ -641,8 +641,8 @@
+             env.note_dependency(docutils_conf)
+ 
+         filename = str(env.doc2path(docname))
+-        filetype = get_filetype(self.app.config.source_suffix, filename)
+-        publisher = self.env._registry.get_publisher(self.app, filetype)
++        filetype = get_filetype(self._app.config.source_suffix, filename)
++        publisher = self.env._registry.get_publisher(self._app, filetype)
+         self.env.current_document._parser = publisher.parser
+         # record_dependencies is mutable even though it is in settings,
+         # explicitly re-initialise for each document
+@@ -755,14 +755,14 @@
+         if self.parallel_ok:
+             # number of subprocesses is parallel-1 because the main process
+             # is busy loading doctrees and doing write_doc_serialized()
+-            self._write_parallel(sorted_docnames, nproc=self.app.parallel - 1)
++            self._write_parallel(sorted_docnames, nproc=self._app.parallel - 1)
+         else:
+             self._write_serial(sorted_docnames)
+ 
+     def _write_serial(self, docnames: Sequence[str]) -> None:
+         with (
+             nullcontext()
+-            if self.app._exception_on_warning
++            if self._app._exception_on_warning
+             else logging.pending_warnings()
+         ):
+             for docname in status_iterator(
+@@ -770,19 +770,19 @@
+                 __('writing output... '),
+                 'darkgreen',
+                 len(docnames),
+-                self.app.verbosity,
++                self._app.verbosity,
+             ):
+-                _write_docname(docname, app=self.app, env=self.env, builder=self)
++                _write_docname(docname, app=self._app, env=self.env, builder=self)
+ 
+     def _write_parallel(self, docnames: Sequence[str], nproc: int) -> None:
+         def write_process(docs: list[tuple[str, nodes.document]]) -> None:
+-            self.app.phase = BuildPhase.WRITING
++            self._app.phase = BuildPhase.WRITING
+             for docname, doctree in docs:
+                 self.write_doc(docname, doctree)
+ 
+         # warm up caches/compile templates using the first document
+         firstname, docnames = docnames[0], docnames[1:]
+-        _write_docname(firstname, app=self.app, env=self.env, builder=self)
++        _write_docname(firstname, app=self._app, env=self.env, builder=self)
+ 
+         tasks = ParallelTasks(nproc)
+         chunks = make_chunks(docnames, nproc)
+@@ -794,13 +794,13 @@
+             __('writing output... '),
+             'darkgreen',
+             len(chunks),
+-            self.app.verbosity,
++            self._app.verbosity,
+         )
+ 
+         def on_chunk_done(args: list[tuple[str, nodes.document]], result: None) -> None:
+             next(progress)
+ 
+-        self.app.phase = BuildPhase.RESOLVING
++        self._app.phase = BuildPhase.RESOLVING
+         for chunk in chunks:
+             arg = []
+             for docname in chunk:

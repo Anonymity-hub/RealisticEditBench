@@ -1,0 +1,11 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -1707,6 +1707,7 @@ def _check_relationship_model(self, from_model=None, **kwargs):
+                             and getattr(field.remote_field, "model", None)
+                             == related_model
+                         ):
++                            related_object_name = (
+                             errors.append(
+                                 checks.Error(
+                                     "'%s.%s' is not a foreign key to '%s'."

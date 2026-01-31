@@ -1,0 +1,20 @@
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -943,6 +943,16 @@ def _set_extremes(self):
+             self._lut[self._i_over] = self._lut[self.N - 1]
+         self._lut[self._i_bad] = self._rgba_bad
+ 
++    def with_alpha(self, alpha):
++        """
++        Return a copy of the colormap with a new uniform transparency.
++
++        Parameters
++        ----------
++        alpha : float
++             The alpha blending value, between 0 (transparent) and 1 (opaque).
++        """
++
+     def _init(self):
+         """Generate the lookup table, ``self._lut``."""
+         raise NotImplementedError("Abstract class only")

@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/axes/_secondary_axes.py b/lib/matplotlib/axes/_secondary_axes.py
+--- a/lib/matplotlib/axes/_secondary_axes.py
++++ b/lib/matplotlib/axes/_secondary_axes.py
+@@ -164,8 +164,7 @@
+ 
+     @functools.wraps(Axis.set_ticks)
+     def set_ticks(self, *args, **kwargs):
+-        ret = self._axis.set_ticks(ticks, labels, minor=minor, **kwargs)
+-        self.stale = True
++        ret = self._axis.set_ticks(*args, **kwargs)
+         self._ticks_set = True
+         return ret
+ 

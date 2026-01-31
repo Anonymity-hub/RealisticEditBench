@@ -1,0 +1,29 @@
+diff --git a/django/db/models/fields/related_descriptors.py b/django/db/models/fields/related_descriptors.py
+--- a/django/db/models/fields/related_descriptors.py
++++ b/django/db/models/fields/related_descriptors.py
+@@ -118,6 +118,17 @@
+ 
+ 
+ def _traverse_ancestors(model, starting_instance):
++    current_instance = starting_instance
++    while current_instance is not None:
++        ancestor_link = current_instance._meta.get_ancestor_link(model)
++        if not ancestor_link:
++            yield current_instance, None
++            break
++        ancestor = ancestor_link.get_cached_value(current_instance, None)
++        yield current_instance, ancestor
++        current_instance = ancestor
++
++
+ class ForwardManyToOneDescriptor:
+     """
+     Accessor to the related object on the forward side of a many-to-one or
+@@ -229,6 +240,7 @@
+         try:
+             rel_obj = self.field.get_cached_value(instance)
+         except KeyError:
++            rel_obj = None
+             has_value = None not in self.field.get_local_related_value(instance)
+             if rel_obj is None and has_value:
+                 rel_obj = self.get_object(instance)

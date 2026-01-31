@@ -1,0 +1,27 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -859,6 +859,7 @@ def save(
+             not force_insert
+             and deferred_non_generated_fields
+             and using == self._state.db
++            and self._is_pk_set()
+         ):
+             field_names = set()
+             pk_fields = self._meta.pk_fields
+diff --git a/django/db/models/query_utils.py b/django/db/models/query_utils.py
+--- a/django/db/models/query_utils.py
++++ b/django/db/models/query_utils.py
+@@ -220,9 +220,10 @@ def __get__(self, instance, cls=None):
+             # might be able to reuse the already loaded value. Refs #18343.
+             val = self._check_parent_chain(instance)
+             if val is None:
+-                if not instance._is_pk_set() and self.field.generated:
++                if not instance._is_pk_set():
+                     raise AttributeError(
+-                        "Cannot read a generated field from an unsaved model."
++                        f"Cannot retrieve deferred field {field_name!r} "
++                        "from an unsaved model."
+                     )
+                 instance.refresh_from_db(fields=[field_name])
+             else:

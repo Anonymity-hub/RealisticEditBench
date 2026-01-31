@@ -1,0 +1,14 @@
+diff --git a/django/db/models/fields/tuple_lookups.py b/django/db/models/fields/tuple_lookups.py
+--- a/django/db/models/fields/tuple_lookups.py
++++ b/django/db/models/fields/tuple_lookups.py
+@@ -342,6 +342,9 @@
+                 )
+             )
+ 
++        if not result:
++            raise EmptyResultSet
++
+         return compiler.compile(Tuple(*result))
+ 
+     def get_fallback_sql(self, compiler, connection):
+ 

@@ -1,0 +1,11 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -1708,6 +1708,7 @@
+                             == related_model
+                         ):
+                             related_object_name = (
++                                if isinstance(related_model, str)
+                             errors.append(
+                                 checks.Error(
+                                     "'%s.%s' is not a foreign key to '%s'."

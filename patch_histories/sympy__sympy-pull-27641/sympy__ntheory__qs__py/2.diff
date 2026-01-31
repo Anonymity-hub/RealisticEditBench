@@ -1,0 +1,31 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -21,21 +21,12 @@
+         """
+         self.a = a
+         self.b = b
+-
+-    def eval(self, x):
+-        """
+-        Compute the value of the sieve polynomial at point x.
+-
+-        Parameters
+-        ==========
+-
+-        x : Integer parameter for sieve polynomial
+-        """
+-        ans = 0
+-        for coeff in self.modified_coeff:
+-            ans *= x
+-            ans += coeff
+-        return ans
++        self.a2 = a**2
++        self.ab = 2*a*b
++        self.b2 = b**2 - N
++
++    def eval_u(self, x):
++        return
+ 
+ 
+ class FactorBaseElem:

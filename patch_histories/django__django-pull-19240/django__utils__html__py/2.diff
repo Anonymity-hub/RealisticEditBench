@@ -1,0 +1,15 @@
+diff --git a/django/utils/html.py b/django/utils/html.py
+--- a/django/utils/html.py
++++ b/django/utils/html.py
+@@ -346,6 +346,11 @@
+                 unescaped_middle = html.unescape(middle)
+                 # RemovedInDjango70Warning: When the deprecation ends, replace with:
+                 # url = smart_urlquote(f"https://{unescaped_middle}")
++                protocol = (
++                    "https"
++                    if getattr(settings, "URLIZE_ASSUME_HTTPS", False)
++                    else "http"
++                )
+                 url = smart_urlquote(f"{protocol}://{unescaped_middle}")
+             elif ":" not in middle and self.is_email_simple(middle):
+                 local, domain = middle.rsplit("@", 1)

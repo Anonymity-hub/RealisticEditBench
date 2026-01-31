@@ -1,0 +1,11 @@
+diff --git a/sklearn/naive_bayes.py b/sklearn/naive_bayes.py
+--- a/sklearn/naive_bayes.py
++++ b/sklearn/naive_bayes.py
+@@ -1433,6 +1433,7 @@ def partial_fit(self, X, y, classes=None, sample_weight=None):
+ 
+     def __sklearn_tags__(self):
+         tags = super().__sklearn_tags__()
++        tags.input_tags.categorical = True
+         tags.input_tags.sparse = False
+         tags.input_tags.positive_only = True
+         return tags

@@ -1,0 +1,20 @@
+diff --git a/lib/matplotlib/lines.py b/lib/matplotlib/lines.py
+--- a/lib/matplotlib/lines.py
++++ b/lib/matplotlib/lines.py
+@@ -62,6 +62,16 @@
+ 
+ def _get_dash_patterns(styles):
+     """Convert linestyle or sequence of linestyles to list of dash patterns."""
++    try:
++        patterns = [_get_dash_pattern(styles)]
++    except ValueError:
++        try:
++            patterns = [_get_dash_pattern(x) for x in styles]
++        except ValueError as err:
++            emsg = f'Do not know how to convert {styles!r} to dashes'
++            raise ValueError(emsg) from err
++
++    return patterns
+ 
+ 
+ def _get_inverse_dash_pattern(offset, dashes):

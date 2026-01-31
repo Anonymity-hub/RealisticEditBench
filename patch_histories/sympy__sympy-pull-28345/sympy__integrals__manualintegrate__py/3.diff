@@ -1,0 +1,11 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -41,6 +41,7 @@
+ from sympy.core.singleton import S
+ from sympy.core.symbol import Dummy, Symbol, Wild
+ from sympy.core.exprtools import factor_terms
++from sympy.core.function import WildFunction
+ from sympy.functions.elementary.complexes import Abs
+ from sympy.functions.elementary.exponential import exp, log
+ from sympy.functions.elementary.hyperbolic import (HyperbolicFunction, csch,

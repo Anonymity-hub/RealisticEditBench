@@ -1,0 +1,14 @@
+diff --git a/django/db/migrations/state.py b/django/db/migrations/state.py
+--- a/django/db/migrations/state.py
++++ b/django/db/migrations/state.py
+@@ -328,6 +328,10 @@
+             if field_names := getattr(field, "field_names", None):
+                 if old_name in field_names:
+                     field.field_names = tuple(
++                        [
++                            for field_name in field.field_names
++                        ]
++                    )
+         # Fix index/unique_together to refer to the new field.
+         options = model_state.options
+         for option in ("index_together", "unique_together"):

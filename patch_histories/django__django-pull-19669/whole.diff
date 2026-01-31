@@ -1,0 +1,15 @@
+diff --git a/django/template/defaultfilters.py b/django/template/defaultfilters.py
+--- a/django/template/defaultfilters.py
++++ b/django/template/defaultfilters.py
+@@ -432,7 +432,10 @@ def rjust(value, arg):
+ @stringfilter
+ def center(value, arg):
+     """Center the value in a field of a given width."""
+-    return value.center(int(arg))
++    width = int(arg)
++    if width <= 0:
++        return value
++    return f"{value:^{width}}"
+ 
+ 
+ @register.filter

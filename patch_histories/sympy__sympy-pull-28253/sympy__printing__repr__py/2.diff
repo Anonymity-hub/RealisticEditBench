@@ -1,0 +1,12 @@
+diff --git a/sympy/printing/repr.py b/sympy/printing/repr.py
+--- a/sympy/printing/repr.py
++++ b/sympy/printing/repr.py
+@@ -48,7 +48,7 @@
+             return str(expr)
+ 
+     def _print_Add(self, expr, order=None):
+-        args = self._as_ordered_terms(expr, order=order)
++        args = Add.make_args(expr)
+         args = map(self._print, args)
+         clsname = type(expr).__name__
+         return clsname + "(%s)" % ", ".join(args)

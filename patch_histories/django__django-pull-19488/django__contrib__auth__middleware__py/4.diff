@@ -1,0 +1,21 @@
+diff --git a/django/contrib/auth/middleware.py b/django/contrib/auth/middleware.py
+--- a/django/contrib/auth/middleware.py
++++ b/django/contrib/auth/middleware.py
+@@ -2,7 +2,7 @@
+ from functools import partial
+ from urllib.parse import urlsplit
+ 
+-from asgiref.sync import iscoroutinefunction, markcoroutinefunction
++from asgiref.sync import iscoroutinefunction, markcoroutinefunction, sync_to_async
+ 
+ from django.conf import settings
+ from django.contrib import auth
+@@ -11,7 +11,7 @@
+ from django.contrib.auth.views import redirect_to_login
+ from django.core.exceptions import ImproperlyConfigured
+ from django.shortcuts import resolve_url
+-from django.utils.deprecation import MiddlewareMixin
++from django.utils.deprecation import MiddlewareMixin, RemovedInDjango61Warning
+ from django.utils.functional import SimpleLazyObject
+ 
+ 

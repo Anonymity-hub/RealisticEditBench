@@ -1,0 +1,14 @@
+diff --git a/sklearn/utils/parallel.py b/sklearn/utils/parallel.py
+--- a/sklearn/utils/parallel.py
++++ b/sklearn/utils/parallel.py
+@@ -118,8 +118,9 @@ def __init__(self, function):
+         self.function = function
+         update_wrapper(self, self.function)
+ 
+-    def with_config(self, config):
++    def with_config_and_warning_filters(self, config, warning_filters):
+         self.config = config
++        self.warning_filters = warning_filters
+         return self
+ 
+     def __call__(self, *args, **kwargs):

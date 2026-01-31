@@ -1,0 +1,11 @@
+diff --git a/astropy/wcs/wcs.py b/astropy/wcs/wcs.py
+--- a/astropy/wcs/wcs.py
++++ b/astropy/wcs/wcs.py
+@@ -3325,7 +3325,6 @@ def slice(self, view, numpy_order=True):
+         wcs_new : `~astropy.wcs.WCS`
+             A new resampled WCS axis
+         """
+-
+         if view is Ellipsis:
+             return self.deepcopy()
+ 

@@ -1,0 +1,50 @@
+diff --git a/sphinx/util/rst.py b/sphinx/util/rst.py
+--- a/sphinx/util/rst.py
++++ b/sphinx/util/rst.py
+@@ -77,27 +77,28 @@
+     docutils.unregister_role('')
+ 
+ 
+-def prepend_prolog(content: StringList, prolog: str) -> None:
+-    """Prepend a string to content body as prolog."""
+-    if prolog:
+-        pos = 0
+-        for line in content:
+-            if FIELD_NAME_RE.match(line):
+-                pos += 1
+-            else:
+-                break
++def _prepend_prologue(content: StringList, prologue: str) -> None:
++    """Prepend a string to content body as a prologue."""
++    if not prologue:
++        return
++    pos = 0
++    for line in content:
++        if _FIELD_NAME_RE.match(line):
++            pos += 1
++        else:
++            break
+ 
+-        if pos > 0:
+-            # insert a blank line after docinfo
+-            content.insert(pos, '', '<generated>', 0)
+-            pos += 1
++    if pos > 0:
++        # insert a blank line after docinfo
++        content.insert(pos, '', '<generated>', 0)
++        pos += 1
+ 
+-        # insert prolog (after docinfo if exists)
+-        lineno = 0
+-        for lineno, line in enumerate(prolog.splitlines()):
+-            content.insert(pos + lineno, line, '<rst_prolog>', lineno)
++    # insert prologue (after docinfo if exists)
++    lineno = 0
++    for lineno, line in enumerate(prologue.splitlines()):
++        content.insert(pos + lineno, line, '<rst_prologue>', lineno)
+ 
+-        content.insert(pos + lineno + 1, '', '<generated>', 0)
++    content.insert(pos + lineno + 1, '', '<generated>', 0)
+ 
+ 
+ def append_epilog(content: StringList, epilog: str) -> None:

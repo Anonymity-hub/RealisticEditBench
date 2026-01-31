@@ -1,0 +1,12 @@
+diff --git a/astropy/config/paths.py b/astropy/config/paths.py
+--- a/astropy/config/paths.py
++++ b/astropy/config/paths.py
+@@ -30,7 +30,7 @@
+ 
+     if (
+         (xdg_dir := os.getenv(f"XDG_{fallback.upper()}_HOME")) is not None
+-        and (xch := Path()).exists()
++        and (xch := Path(xdg_dir)).exists()
+         and not (xchpth := xch / rootname).is_symlink()
+     ):
+         if xchpth.exists():

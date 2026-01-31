@@ -1,0 +1,12 @@
+diff --git a/xarray/core/datatree_io.py b/xarray/core/datatree_io.py
+--- a/xarray/core/datatree_io.py
++++ b/xarray/core/datatree_io.py
+@@ -7,7 +7,7 @@
+ from xarray.core.datatree import DataTree
+ from xarray.core.types import NetcdfWriteModes, ZarrWriteModes
+ 
+-T_DataTreeNetcdfEngine = Literal["netcdf4", "h5netcdf"]
++T_DataTreeNetcdfEngine = Literal["netcdf4", "h5netcdf", "pydap"]
+ T_DataTreeNetcdfTypes = Literal["NETCDF4"]
+ 
+ if TYPE_CHECKING:

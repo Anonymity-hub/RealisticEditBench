@@ -1,0 +1,50 @@
+diff --git a/pylint/pyreverse/diadefslib.py b/pylint/pyreverse/diadefslib.py
+--- a/pylint/pyreverse/diadefslib.py
++++ b/pylint/pyreverse/diadefslib.py
+@@ -33,6 +33,23 @@
+         self._set_default_options()
+         self.linker = linker
+         self.classdiagram: ClassDiagram  # defined by subclasses
++        # Only pre-calculate depths if user has requested a max_depth
++        if handler.config.max_depth is not None:
++            # Detect which of the args are leaf nodes
++            leaf_nodes = self.get_leaf_nodes()
++
++            # Emit a warning if any of the args are not leaf nodes
++            diff = set(self.args).difference(set(leaf_nodes))
++            if len(diff) > 0:
++                warnings.warn(
++                    "Detected nested names within the specified packages. "
++                    f"The following packages: {sorted(diff)} will be ignored for "
++                    f"depth calculations, using only: {sorted(leaf_nodes)} as the base for limiting "
++                    "package depth.",
++                    stacklevel=2,
++                )
++
++            self.args_depths = {module: module.count(".") for module in leaf_nodes}
+ 
+     def get_title(self, node: nodes.ClassDef) -> str:
+         """Get title for objects."""
+@@ -40,6 +57,22 @@
+         if self.module_names:
+             title = f"{node.root().name}.{title}"
+         return title  # type: ignore[no-any-return]
++
++    def get_leaf_nodes(self) -> list[str]:
++        """
++        Get the leaf nodes from the list of args in the generator.
++
++        A leaf node is one that is not a prefix (with an extra dot) of any other node.
++        """
++        leaf_nodes = [
++            module
++            for module in self.args
++            if not any(
++                other != module and other.startswith(module + ".")
++                for other in self.args
++            )
++        ]
++        return leaf_nodes
+ 
+     def _set_option(self, option: bool | None) -> bool:
+         """Activate some options if not explicitly deactivated."""

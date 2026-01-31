@@ -1,0 +1,13 @@
+diff --git a/sympy/core/mod.py b/sympy/core/mod.py
+--- a/sympy/core/mod.py
++++ b/sympy/core/mod.py
+@@ -105,6 +105,9 @@
+                 return
+             ls = -2*q
+             r = p - q
++            for _ in range(4):
++                if not comp1(ls, p):
++                    return
+ 
+         rv = number_eval(p, q)
+         if rv is not None:

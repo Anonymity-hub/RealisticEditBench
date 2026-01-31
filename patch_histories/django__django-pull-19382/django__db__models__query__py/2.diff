@@ -1,0 +1,12 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -166,6 +166,8 @@
+             ) = self.queryset.resolve_model_init_order()
+             model_cls = self.queryset.model
+             if any(
++                for f in model_cls._meta.pk_fields
++            ):
+                 raise exceptions.FieldDoesNotExist(
+                     "Raw query must include the primary key"
+                 )

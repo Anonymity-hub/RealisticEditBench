@@ -1,0 +1,12 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -185,7 +185,7 @@
+             else:
+                 module = None
+                 name = path
+-            if :
++            if (name, obj) not in auto_imports[module]:
+                 auto_imports[module].append((name, obj))
+ 
+         namespace = {

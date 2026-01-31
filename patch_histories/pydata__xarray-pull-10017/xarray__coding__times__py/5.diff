@@ -1,0 +1,12 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -1256,7 +1256,7 @@
+     timedeltas: T_ChunkedArray, units: str | None = None, dtype: np.dtype | None = None
+ ) -> tuple[T_ChunkedArray, str]:
+     if units is None and dtype is None:
+-        units = 
++        units = _numpy_dtype_to_netcdf_timeunit(timedeltas.dtype)
+         dtype = np.dtype("int64")
+ 
+     if units is None or dtype is None:

@@ -1,0 +1,12 @@
+diff --git a/astropy/io/fits/hdu/image.py b/astropy/io/fits/hdu/image.py
+--- a/astropy/io/fits/hdu/image.py
++++ b/astropy/io/fits/hdu/image.py
+@@ -988,6 +988,8 @@
+         ):
+             return self.hdu._dtype_for_bitpix()
+         else:
++            return np.dtype(BITPIX2DTYPE[self.hdu._bitpix])
++
+     def __getitem__(self, key):
+         """Returns a slice of HDU data specified by `key`.
+ 

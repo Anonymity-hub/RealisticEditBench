@@ -1,0 +1,15 @@
+diff --git a/lib/matplotlib/rcsetup.py b/lib/matplotlib/rcsetup.py
+--- a/lib/matplotlib/rcsetup.py
++++ b/lib/matplotlib/rcsetup.py
+@@ -103,9 +103,8 @@ def f(s):
+                        if v.strip()]
+             except Exception:
+                 if allow_stringlist:
+-                    # Sometimes, a list of colors might be a single string
+-                    # of single-letter colornames. So give that a shot.
+-                    val = [scalar_validator(v.strip()) for v in s if v.strip()]
++                    # Special handling for colors
++                    val = _single_string_color_list(s, scalar_validator)
+                 else:
+                     raise
+         # Allow any ordered sequence type -- generators, np.ndarray, pd.Series

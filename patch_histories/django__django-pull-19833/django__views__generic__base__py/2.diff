@@ -1,0 +1,9 @@
+diff --git a/django/views/generic/base.py b/django/views/generic/base.py
+--- a/django/views/generic/base.py
++++ b/django/views/generic/base.py
+@@ -1,4 +1,5 @@
+ import logging
++from urllib.parse import urlparse
+ 
+ from asgiref.sync import iscoroutinefunction, markcoroutinefunction
+ 

@@ -1,0 +1,41 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -270,26 +270,15 @@
+     partial_relations : stores partial relations with one large prime
+     ERROR_TERM : error term for accumulated_val
+     """
+-    sqrt_n = isqrt(N)
+-    accumulated_val = log(M * sqrt_n)*2**10 - ERROR_TERM
++    accumulated_val = (log(M) + log(N)/2 - ERROR_TERM) * 2**10
+     smooth_relations = []
+     proper_factor = set()
+     partial_relation_upper_bound = 128*factor_base[-1].prime
+-    for idx, val in enumerate(sieve_array):
++    for x, val in enumerate(sieve_array, -M):
+         if val < accumulated_val:
+             continue
+-        x = idx - M
+         v = sieve_poly.eval_v(x)
+-        vec, is_smooth = _check_smoothness(v, factor_base)
+-        if is_smooth is None:#Neither smooth nor partial
+-            continue
+-        u = sieve_poly.eval_u(x)
+-        # Update the partial relation
+-        # If 2 partial relation with same large prime is found then generate smooth relation
+-        if is_smooth is False:#partial relation found
+-            large_prime = vec
+-            #Consider the large_primes under 128*F
+-            if large_prime > partial_relation_upper_bound:
++        vec, num = _check_smoothness(v, factor_base)
+                 continue
+             if large_prime not in partial_relations:
+                 partial_relations[large_prime] = (u, v)
+@@ -441,7 +430,6 @@
+     """
+     if N < 2:
+         raise ValueError("N should be greater than 1")
+-    ERROR_TERM*=2**10
+     factors = {}
+     smooth_relations = []
+     ith_poly = 0

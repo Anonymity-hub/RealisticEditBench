@@ -1,0 +1,16 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -1171,7 +1171,11 @@
+             super().__repr__(),
+             self.width, self.height,
+             self.depth, self.shift_amount,
+-            ', '.join([repr(x) for x in self.children]))
++            "\n" + textwrap.indent(
++                "\n".join(map("{!r},".format, self.children)),
++                "  ") + "\n"
++            if self.children else ""
++        )
+ 
+     def _set_glue(self, x: float, sign: int, totals: list[float],
+                   error_type: str) -> None:

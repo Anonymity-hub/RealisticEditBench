@@ -1,0 +1,22 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -372,11 +372,15 @@
+         if isinstance(applied_indexer, slice):
+             indexer = slice_slice(old_indexer, applied_indexer, size)
+         elif isinstance(applied_indexer, integer_types):
+-            indexer = range(*old_indexer.indices(size))[applied_indexer]  # type: ignore[assignment]
++            indexer = range(*old_indexer.indices(size))[applied_indexer]
+         else:
+-            indexer = _expand_slice(old_indexer, size)[applied_indexer]
++            indexer = slice_slice_by_array(old_indexer, applied_indexer, size)
++    elif isinstance(old_indexer, np.ndarray):
++        indexer = old_indexer[applied_indexer]
+     else:
+-        indexer = old_indexer[applied_indexer]
++        # should be unreachable
++        raise ValueError("cannot index integers. Please open an issuec-")
++
+     return indexer
+ 
+ 

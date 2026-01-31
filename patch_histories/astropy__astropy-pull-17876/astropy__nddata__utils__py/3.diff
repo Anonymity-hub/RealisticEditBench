@@ -1,0 +1,59 @@
+diff --git a/astropy/nddata/utils.py b/astropy/nddata/utils.py
+--- a/astropy/nddata/utils.py
++++ b/astropy/nddata/utils.py
+@@ -121,13 +121,17 @@
+     # define the min/max pixel indices
+     # round according to the limit_rounding_method
+     try:
+-    indices_min = [
+-        int(np.ceil(pos - (small_shape / 2.0)))
+-        for (pos, small_shape) in zip(position, small_array_shape)
+-    ]
++        indices_min = [
++            int(limit_rounding_method(pos - (small_shape / 2.0)))
++            for (pos, small_shape) in zip(position, small_array_shape)
++        ]
++    except (TypeError, ValueError) as exc:
++        raise ValueError(
++            "Limit rounding method must accept a single number as input and return a single number."
++        ) from exc
+     indices_max = [
+-        int(np.ceil(pos + (small_shape / 2.0)))
+-        for (pos, small_shape) in zip(position, small_array_shape)
++        int(idx_min + small_shape)
++        for (idx_min, small_shape) in zip(indices_min, small_array_shape)
+     ]
+ 
+     for e_max in indices_max:
+@@ -217,6 +221,10 @@
+     return_position : bool, optional
+         If `True`, return the coordinates of ``position`` in the
+         coordinate system of the returned array.
++    limit_rounding_method : callable
++        The rounding method when calculating the minimum and maximum pixel indices.
++        This must be a callable function. Examples: `~numpy.ceil`, `~numpy.floor`,
++        `~numpy.round`. Default is `~numpy.ceil`.
+ 
+     Returns
+     -------
+@@ -252,6 +260,11 @@
+         raise ValueError("Valid modes are 'partial', 'trim', and 'strict'.")
+ 
+     large_slices, small_slices = overlap_slices(
++        array_large.shape,
++        shape,
++        position,
++        mode=mode,
++        limit_rounding_method=limit_rounding_method,
+     )
+     extracted_array = array_large[large_slices]
+     if return_position:
+@@ -281,7 +294,7 @@
+         return extracted_array
+ 
+ 
+-def add_array(array_large, array_small, position):
++def add_array(array_large, array_small, position, *, limit_rounding_method=np.ceil):
+     """
+     Add a smaller array at a given position in a larger array.
+ 

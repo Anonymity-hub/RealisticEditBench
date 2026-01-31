@@ -1,0 +1,23 @@
+diff --git a/astropy/io/fits/file.py b/astropy/io/fits/file.py
+--- a/astropy/io/fits/file.py
++++ b/astropy/io/fits/file.py
+@@ -605,7 +605,7 @@
+             # means that the current file position is at the end of the file.
+             if mode in ["ostream", "append"]:
+                 self._file.seek(0)
+-            magic = self._file.read(4)
++            magic = self._file.read()
+             # No matter whether the underlying file was opened with 'ab' or
+             # 'ab+', we need to return to the beginning of the file in order
+             # to properly process the FITS header (and handle the possibility
+@@ -678,6 +678,10 @@
+         # Make certain we're back at the beginning of the file
+         # BZ2File does not support seek when the file is open for writing, but
+         # when opening a file for write, bz2.BZ2File always truncates anyway.
++        if not (
++            (_is_bz2file(self._file) or (_is_lzmafile(self._file)))
++            and mode == "ostream"
++        ):
+             self._file.seek(0)
+ 
+     @classproperty(lazy=True)

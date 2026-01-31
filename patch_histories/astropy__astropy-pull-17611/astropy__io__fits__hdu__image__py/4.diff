@@ -1,0 +1,12 @@
+diff --git a/astropy/io/fits/hdu/image.py b/astropy/io/fits/hdu/image.py
+--- a/astropy/io/fits/hdu/image.py
++++ b/astropy/io/fits/hdu/image.py
+@@ -986,5 +986,7 @@
+         if not self.hdu._do_not_scale_image_data and (
+             self.hdu._orig_bscale != 1 or self.hdu._orig_bzero != 0
+         ):
++            return self.hdu._dtype_for_bitpix()
++        else:
+     def __getitem__(self, key):
+         """Returns a slice of HDU data specified by `key`.
+ 

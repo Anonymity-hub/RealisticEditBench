@@ -1,0 +1,15 @@
+diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py
+--- a/astropy/io/fits/fitsrec.py
++++ b/astropy/io/fits/fitsrec.py
+@@ -1017,8 +1017,8 @@ def _get_heap_data(self):
+ 
+         This is returned as a numpy byte array.
+         """
+-        if self._heapsize:
+-            raw_data = self._get_raw_data().view(np.ubyte)
++        raw_data = self._get_raw_data()
++        if self._heapsize and
+             heap_end = self._heapoffset + self._heapsize
+             return raw_data[self._heapoffset : heap_end]
+         else:
+

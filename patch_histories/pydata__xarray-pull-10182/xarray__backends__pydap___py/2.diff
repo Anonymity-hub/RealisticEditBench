@@ -1,0 +1,127 @@
+diff --git a/xarray/backends/pydap_.py b/xarray/backends/pydap_.py
+--- a/xarray/backends/pydap_.py
++++ b/xarray/backends/pydap_.py
+@@ -78,18 +78,22 @@
+     be useful if the netCDF4 library is not available.
+     """
+ 
+-    def __init__(self, ds):
++    def __init__(self, dataset, group=None):
+         """
+         Parameters
+         ----------
+         ds : pydap DatasetType
++        group: str or None (default None)
++            The group to open. If None, the root group is opened.
+         """
+-        self.ds = ds
++        self.dataset = dataset
++        self.group = group
+ 
+     @classmethod
+     def open(
+         cls,
+         url,
++        group=None,
+         application=None,
+         session=None,
+         output_grid=None,
+@@ -97,36 +101,67 @@
+         verify=None,
+         user_charset=None,
+     ):
+-        import pydap.client
+-        import pydap.lib
+-
+-        if timeout is None:
+-            from pydap.lib import DEFAULT_TIMEOUT
+-
+-            timeout = DEFAULT_TIMEOUT
+-
++        from pydap.client import open_url
++        from pydap.net import DEFAULT_TIMEOUT
++
++        if output_grid is not None:
++            # output_grid is no longer passed to pydap.client.open_url
++            from xarray.core.utils import emit_user_level_warning
++
++            emit_user_level_warning(
++                "`output_grid` is deprecated and will be removed in a future version"
++                " of xarray. Will be set to `None`, the new default. ",
++                DeprecationWarning,
++            )
++            output_grid = False  # new default behavior
+         kwargs = {
+             "url": url,
+             "application": application,
+             "session": session,
+-            "output_grid": output_grid or True,
+-            "timeout": timeout,
++            "output_grid": output_grid or False,
++            "timeout": timeout or DEFAULT_TIMEOUT,
++            "verify": verify or True,
++            "user_charset": user_charset,
+         }
+-        if verify is not None:
+-            kwargs.update({"verify": verify})
+-        if user_charset is not None:
+-            kwargs.update({"user_charset": user_charset})
+-        ds = pydap.client.open_url(**kwargs)
+-        return cls(ds)
++        if isinstance(url, str):
++            # check uit begins with an acceptable scheme
++            dataset = open_url(**kwargs)
++        elif hasattr(url, "ds"):
++            # pydap dataset
++            dataset = url.ds
++        args = {"dataset": dataset}
++        if group:
++            # only then, change the default
++            args["group"] = group
++        return cls(**args)
+ 
+     def open_store_variable(self, var):
+         data = indexing.LazilyIndexedArray(PydapArrayWrapper(var))
+-        return Variable(var.dimensions, data, _fix_attributes(var.attributes))
++        try:
++            dimensions = [
++                dim.split("/")[-1] if dim.startswith("/") else dim for dim in var.dims
++            ]
++        except AttributeError:
++            # GridType does not have a dims attribute - instead get `dimensions`
++            # see https://github.com/pydap/pydap/issues/485
++            dimensions = var.dimensions
++        return Variable(dimensions, data, var.attributes)
+ 
+     def get_variables(self):
+-        return FrozenDict(
+-            (k, self.open_store_variable(self.ds[k])) for k in self.ds.keys()
+-        )
++        # get first all variables arrays, excluding any container type like,
++        # `Groups`, `Sequence` or `Structure` types
++        try:
++            _vars = list(self.ds.variables())
++            _vars += list(self.ds.grids())  # dap2 objects
++        except AttributeError:
++            from pydap.model import GroupType
++
++            _vars = list(self.ds.keys())
++            # check the key is a BaseType or GridType
++            for var in _vars:
++                if isinstance(self.ds[var], GroupType):
++                    _vars.remove(var)
++        return FrozenDict((k, self.open_store_variable(self.ds[k])) for k in _vars)
+ 
+     def get_attrs(self):
+         """Remove any opendap specific attributes"""
+@@ -145,6 +180,10 @@
+     def get_dimensions(self):
+         return Frozen(self.ds.dimensions)
+ 
++    @property
++    def ds(self):
++        return get_group(self.dataset, self.group)
++
+ 
+ class PydapBackendEntrypoint(BackendEntrypoint):
+     """

@@ -1,0 +1,12 @@
+diff --git a/sklearn/compose/_column_transformer.py b/sklearn/compose/_column_transformer.py
+--- a/sklearn/compose/_column_transformer.py
++++ b/sklearn/compose/_column_transformer.py
+@@ -744,7 +744,7 @@
+ 
+         # sanity check that transformers is exhausted
+         assert not list(fitted_transformers)
+-        self.transformers_ = _with_dtype_warning_enabled_set_to(True, transformers_)
++        self.transformers_ = transformers_
+ 
+     def _validate_output(self, result):
+         """

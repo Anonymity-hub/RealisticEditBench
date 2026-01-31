@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -387,7 +387,7 @@
+ ) -> tuple[ResolvedGrouper, ...]:
+     from xarray.core.dataarray import DataArray
+     from xarray.core.variable import Variable
+-    from xarray.groupers import UniqueGrouper
++    from xarray.groupers import Grouper, UniqueGrouper
+ 
+     if group is not None and groupers:
+         raise ValueError(

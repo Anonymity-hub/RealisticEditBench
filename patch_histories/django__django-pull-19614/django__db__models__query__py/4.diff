@@ -1,0 +1,17 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1931,7 +1931,10 @@
+         )
+         batches = [objs[i : i + batch_size] for i in range(0, len(objs), batch_size)]
+         if len(batches) > 1:
+-            context =
++            context = transaction.atomic(using=self.db, savepoint=False)
++        else:
++            context = nullcontext()
++        with context:
+                 inserted_rows.extend(
+                     self._insert(
+                         item,
+
+ 

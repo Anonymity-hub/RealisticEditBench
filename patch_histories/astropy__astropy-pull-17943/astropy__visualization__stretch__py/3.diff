@@ -1,0 +1,11 @@
+diff --git a/astropy/visualization/stretch.py b/astropy/visualization/stretch.py
+--- a/astropy/visualization/stretch.py
++++ b/astropy/visualization/stretch.py
+@@ -123,6 +123,7 @@
+             np.add(values, self.intercept, out=values)
+ 
+         if clip:
++            np.
+         return values
+ 
+     @property

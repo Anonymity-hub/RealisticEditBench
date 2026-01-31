@@ -1,0 +1,11 @@
+diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py
+--- a/django/db/migrations/serializer.py
++++ b/django/db/migrations/serializer.py
+@@ -362,6 +362,7 @@
+         uuid.UUID: UUIDSerializer,
+         pathlib.PurePath: PathSerializer,
+         os.PathLike: PathLikeSerializer,
++        zoneinfo.ZoneInfo: ZoneInfoSerializer,
+     }
+ 
+     @classmethod

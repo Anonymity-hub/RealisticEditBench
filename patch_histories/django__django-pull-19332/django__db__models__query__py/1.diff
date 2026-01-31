@@ -1,0 +1,13 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1371,7 +1371,7 @@ def values_list(self, *fields, flat=False, named=False):
+                 "field."
+             )
+ 
+-        field_names = {f for f in fields if not hasattr(f, "resolve_expression")}
++        field_names = {f: False for f in fields if not hasattr(f, "resolve_expression")}
+         _fields = []
+         expressions = {}
+         counter = 1
+

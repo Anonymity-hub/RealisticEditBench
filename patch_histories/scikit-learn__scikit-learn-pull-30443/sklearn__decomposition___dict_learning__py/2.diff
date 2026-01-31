@@ -1,0 +1,20 @@
+diff --git a/sklearn/decomposition/_dict_learning.py b/sklearn/decomposition/_dict_learning.py
+--- a/sklearn/decomposition/_dict_learning.py
++++ b/sklearn/decomposition/_dict_learning.py
+@@ -1146,6 +1146,16 @@
+         """Private method allowing to accommodate both DictionaryLearning and
+         SparseCoder."""
+         code = check_array(code)
++        # compute number of expected features in code
++        expected_n_components = dictionary.shape[0]
++        if self.split_sign:
++            expected_n_components += expected_n_components
++        if not code.shape[1] == expected_n_components:
++            raise ValueError(
++                "The number of components in the code is different from the "
++                "number of components in the dictionary."
++                f"Expected {expected_n_components}, got {code.shape[1]}."
++            )
+ 
+ class SparseCoder(_BaseSparseCoding, BaseEstimator):
+     """Sparse coding.

@@ -1,0 +1,14 @@
+diff --git a/lib/mpl_toolkits/mplot3d/proj3d.py b/lib/mpl_toolkits/mplot3d/proj3d.py
+--- a/lib/mpl_toolkits/mplot3d/proj3d.py
++++ b/lib/mpl_toolkits/mplot3d/proj3d.py
+@@ -140,7 +140,9 @@ def _proj_transform_vec(vec, M):
+ 
+ 
+ def _proj_transform_vectors(vecs, M):
+-    """Vectorized version of ``_proj_transform_vec``.
++    """
++    Vectorized version of ``_proj_transform_vec``.
++
+     Parameters
+     ----------
+     vecs : ... x 3 np.ndarray

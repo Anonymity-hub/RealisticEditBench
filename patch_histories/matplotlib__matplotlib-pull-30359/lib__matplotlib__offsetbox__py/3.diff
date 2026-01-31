@@ -1,0 +1,20 @@
+diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py
+--- a/lib/matplotlib/offsetbox.py
++++ b/lib/matplotlib/offsetbox.py
+@@ -1059,8 +1059,14 @@
+     @_compat_get_offset
+     def get_offset(self, bbox, renderer):
+         # docstring inherited
+-        pad = (self.borderpad
+-               * renderer.points_to_pixels(self.prop.get_size_in_points()))
++        fontsize_in_pixels = renderer.points_to_pixels(self.prop.get_size_in_points())
++        try:
++            borderpad_x, borderpad_y = self.borderpad
++        except TypeError:
++            borderpad_x = self.borderpad
++            borderpad_y = self.borderpad
++        pad_x_pixels = borderpad_x * fontsize_in_pixels
++        pad_y_pixels = borderpad_y * fontsize_in_pixels
+         bbox_to_anchor = self.get_bbox_to_anchor()
+         x0, y0 = _get_anchored_bbox(
+             self.loc, Bbox.from_bounds(0, 0, bbox.width, bbox.height),

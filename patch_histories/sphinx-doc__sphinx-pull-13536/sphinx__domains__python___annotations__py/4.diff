@@ -1,0 +1,22 @@
+diff --git a/sphinx/domains/python/_annotations.py b/sphinx/domains/python/_annotations.py
+--- a/sphinx/domains/python/_annotations.py
++++ b/sphinx/domains/python/_annotations.py
+@@ -552,8 +552,10 @@
+ def _pseudo_parse_arglist(
+     signode: desc_signature,
+     arglist: str,
++    *,
+     multi_line_parameter_list: bool = False,
+     trailing_comma: bool = True,
++    env: BuildEnvironment,
+ ) -> None:
+     """'Parse' a list of arguments separated by commas.
+ 
+@@ -561,6 +563,7 @@
+     brackets.  Currently, this will split at any comma, even if it's inside a
+     string literal (e.g. default argument value).
+     """
++    # TODO: decompose 'env' parameter into only the required bits
+     paramlist = addnodes.desc_parameterlist()
+     paramlist['multi_line_parameter_list'] = multi_line_parameter_list
+     paramlist['multi_line_trailing_comma'] = trailing_comma

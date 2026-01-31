@@ -1,0 +1,32 @@
+diff --git a/xarray/backends/api.py b/xarray/backends/api.py
+--- a/xarray/backends/api.py
++++ b/xarray/backends/api.py
+@@ -1459,6 +1459,28 @@
+     return groups
+ 
+ 
++_FLike = TypeVar("_FLike", bound=Union[str, ReadBuffer])
++
++
++def _remove_path(
++    paths: NestedSequence[_FLike], paths_to_remove: set[_FLike]
++) -> NestedSequence[_FLike]:
++    # Initialize an empty list to store the result
++    result: list[Union[_FLike, NestedSequence[_FLike]]] = []
++
++    for item in paths:
++        if isinstance(item, list):
++            # If the current item is a list, recursively call remove_elements on it
++            nested_result = _remove_path(item, paths_to_remove)
++            if nested_result:  # Only add non-empty lists to avoid adding empty lists
++                result.append(nested_result)
++        elif item not in paths_to_remove:
++            # Add the item to the result if it is not in the set of elements to remove
++            result.append(item)
++
++    return result
++
++
+ def open_mfdataset(
+     paths: str
+     | os.PathLike

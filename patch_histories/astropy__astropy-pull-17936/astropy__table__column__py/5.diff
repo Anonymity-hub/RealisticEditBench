@@ -1,0 +1,12 @@
+diff --git a/astropy/table/column.py b/astropy/table/column.py
+--- a/astropy/table/column.py
++++ b/astropy/table/column.py
+@@ -229,6 +229,8 @@
+             # convert to float
+             np_data = np.array(data)
+         except Exception:
++            dtype = object
++            np_data = np.array(data, dtype=dtype)
+ 
+     if np_data.ndim == 0 or (np_data.ndim > 0 and len(np_data) == 0):
+         # Implies input was a scalar or an empty list (e.g. initializing an

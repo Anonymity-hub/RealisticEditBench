@@ -1,0 +1,11 @@
+diff --git a/xarray/core/datatree.py b/xarray/core/datatree.py
+--- a/xarray/core/datatree.py
++++ b/xarray/core/datatree.py
+@@ -428,6 +428,7 @@
+             k: maybe_wrap_array(v, func(v, *args, **kwargs))
+             for k, v in self.data_vars.items()
+         }
++        if keep_attrs:
+         # return type(self)(variables, attrs=attrs)
+         return Dataset(variables)
+

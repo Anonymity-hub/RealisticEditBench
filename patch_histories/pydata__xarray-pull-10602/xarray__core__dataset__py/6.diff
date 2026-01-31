@@ -1,0 +1,12 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -6944,7 +6944,7 @@
+                 v._copy_attrs_from(self.coords[k])
+ 
+         attrs = self.attrs if keep_attrs else None
+-        return type(self)(variables, attrs=attrs)
++        return type(self)(variables, coords=coords, attrs=attrs)
+ 
+     def apply(
+         self,

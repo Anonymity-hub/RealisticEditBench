@@ -1,0 +1,17 @@
+diff --git a/lib/matplotlib/backend_bases.py b/lib/matplotlib/backend_bases.py
+--- a/lib/matplotlib/backend_bases.py
++++ b/lib/matplotlib/backend_bases.py
+@@ -2730,11 +2730,8 @@
+         """For GUI backends, resize the window (in physical pixels)."""
+ 
+     def get_window_title(self):
+-        """
+-        Return the title text of the window containing the figure, or None
+-        if there is no window (e.g., a PS backend).
+-        """
+-        return 'image'
++        """Return the title text of the window containing the figure."""
++        return self._window_title
+ 
+     def set_window_title(self, title):
+         """

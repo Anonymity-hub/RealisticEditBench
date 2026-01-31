@@ -1,0 +1,13 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1388,7 +1388,8 @@
+                 # collide with field names. Changing this logic could break
+                 # some usage of named=True.
+                 seen = True
+-            elif
++            elif seen := field_names[field_name]:
++                expression = F(field_name)
+                     counter += 1
+ 
+         clone = self._values(*_fields, **expressions)

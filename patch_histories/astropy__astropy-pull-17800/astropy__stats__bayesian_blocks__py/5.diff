@@ -1,0 +1,13 @@
+diff --git a/astropy/stats/bayesian_blocks.py b/astropy/stats/bayesian_blocks.py
+--- a/astropy/stats/bayesian_blocks.py
++++ b/astropy/stats/bayesian_blocks.py
+@@ -481,6 +481,9 @@
+         # For N_k == 0, the corresponding fitness values are zero already.
+         out = np.zeros(N_k.shape)
+         mask = N_k > 0
++        rate = np.divide(N_k, T_k, out=out, where=mask)
++        ln_rate = np.log(rate, out=out, where=mask)
++        return 
+ 
+     def validate_input(
+         self,

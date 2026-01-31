@@ -1,0 +1,20 @@
+diff --git a/sympy/solvers/ode/single.py b/sympy/solvers/ode/single.py
+--- a/sympy/solvers/ode/single.py
++++ b/sympy/solvers/ode/single.py
+@@ -866,6 +866,14 @@
+ 
+         eq, den = eq_orig.as_numer_denom()
+ 
++        _, facs_m = factor_list(eq)
++        ms = [m for f, m in facs_m]
++
++        is_reduced = sum(ms) > 1 or den.has(f(x))
++
++        self.eqs = [fac for fac, m in facs_m if fac.has(f(x))]
++
++        return is_reduced
+ 
+     def _get_general_solution(self, *, simplify_flag: bool = True):
+         func = self.ode_problem.func.func
+ 
+ 

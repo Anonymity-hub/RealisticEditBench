@@ -1,0 +1,12 @@
+diff --git a/django/contrib/auth/__init__.py b/django/contrib/auth/__init__.py
+--- a/django/contrib/auth/__init__.py
++++ b/django/contrib/auth/__init__.py
+@@ -273,7 +273,7 @@
+         user = None
+     await user_logged_out.asend(sender=user.__class__, request=request, user=user)
+     await request.session.aflush()
+-    if hasattr(request, "user"):
++    if hasattr(request, "auser"):
+         from django.contrib.auth.models import AnonymousUser
+ 
+         request.user = AnonymousUser()

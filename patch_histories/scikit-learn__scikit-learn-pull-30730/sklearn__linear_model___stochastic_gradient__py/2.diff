@@ -1,0 +1,13 @@
+diff --git a/sklearn/linear_model/_stochastic_gradient.py b/sklearn/linear_model/_stochastic_gradient.py
+--- a/sklearn/linear_model/_stochastic_gradient.py
++++ b/sklearn/linear_model/_stochastic_gradient.py
+@@ -154,6 +154,8 @@
+                 "learning_rate is 'optimal'. alpha is used "
+                 "to compute the optimal learning rate."
+             )
++        if self.penalty == "elasticnet" and self.l1_ratio is None:
++            raise ValueError("l1_ratio must be set when penalty is 'elasticnet'")
+ 
+         # raises ValueError if not registered
+         self._get_penalty_type(self.penalty)
+

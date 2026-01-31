@@ -1,0 +1,30 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -761,6 +761,26 @@
+             self._members = self._fetch_members()
+ 
+     @property
++    def members(self) -> dict[str, ZarrArray]:
++        """
++        Model the arrays and groups contained in self.zarr_group as a dict. If `self._cache_members`
++        is true, the dict is cached. Otherwise, it is retrieved from storage.
++        """
++        if not self._cache_members:
++            return self._fetch_members()
++        else:
++            return self._members
++
++    def _fetch_members(self) -> dict[str, ZarrArray]:
++        """
++        Get the arrays and groups defined in the zarr group modelled by this Store
++        """
++        import zarr
++
++        if zarr.__version__ >= "3":
++            return dict(self.zarr_group.members())
++        else:
++            return dict(self.zarr_group.items())
+     def ds(self):
+         # TODO: consider deprecating this in favor of zarr_group
+         return self.zarr_group

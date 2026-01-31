@@ -1,0 +1,12 @@
+diff --git a/sklearn/inspection/_partial_dependence.py b/sklearn/inspection/_partial_dependence.py
+--- a/sklearn/inspection/_partial_dependence.py
++++ b/sklearn/inspection/_partial_dependence.py
+@@ -704,6 +704,8 @@
+         if is_cat:
+             continue
+ 
++        if _safe_indexing(X, feature_idx, axis=1).dtype.kind in "iu":
++            # TODO(1.8): raise a ValueError instead.
+ 
+     X_subset = _safe_indexing(X, features_indices, axis=1)
+ 

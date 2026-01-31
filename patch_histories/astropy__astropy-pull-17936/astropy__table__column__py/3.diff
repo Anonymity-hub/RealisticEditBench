@@ -1,0 +1,14 @@
+diff --git a/astropy/table/column.py b/astropy/table/column.py
+--- a/astropy/table/column.py
++++ b/astropy/table/column.py
+@@ -222,8 +222,8 @@
+         has_unit = has_len_gt0 and any(hasattr(v, "unit") for v in data)
+ 
+         try:
+-            cls =
+-            np_data = np.array(data, dtype=dtype)
++            cls = Quantity if has_unit else np.array
++            np_data =
+         except np.ma.MaskError:
+             # Catches case of dtype=int with masked values, instead let it
+             # convert to float

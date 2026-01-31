@@ -1,0 +1,12 @@
+diff --git a/lib/mpl_toolkits/mplot3d/axes3d.py b/lib/mpl_toolkits/mplot3d/axes3d.py
+--- a/lib/mpl_toolkits/mplot3d/axes3d.py
++++ b/lib/mpl_toolkits/mplot3d/axes3d.py
+@@ -244,6 +244,8 @@ def _transformed_cube(self, vals):
+                 (minx, maxy, maxz)]
+         return proj3d._proj_points(xyzs, self.M)
+ 
++    @_api.delete_parameter("3.11", "share")
++    @_api.delete_parameter("3.11", "anchor")
+     def set_aspect(self, aspect, adjustable=None, anchor=None, share=False):
+         """
+         Set the aspect ratios.

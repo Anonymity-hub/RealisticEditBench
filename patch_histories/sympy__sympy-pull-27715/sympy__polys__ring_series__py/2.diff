@@ -1,0 +1,15 @@
+diff --git a/sympy/polys/ring_series.py b/sympy/polys/ring_series.py
+--- a/sympy/polys/ring_series.py
++++ b/sympy/polys/ring_series.py
+@@ -1721,9 +1721,8 @@
+         return rs_puiseux(rs_tanh, p, x, prec)
+     R = p.ring
+     const = 0
+-    if _has_constant_term(p, x):
+-        zm = R.zero_monom
+-        c = p[zm]
++    c = _get_constant_term(p, x)
++    if c:
+         if R.domain is EX:
+             c_expr = c.as_expr()
+             const = tanh(c_expr)

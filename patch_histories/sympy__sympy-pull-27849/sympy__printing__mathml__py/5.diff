@@ -1,0 +1,42 @@
+diff --git a/sympy/printing/mathml.py b/sympy/printing/mathml.py
+--- a/sympy/printing/mathml.py
++++ b/sympy/printing/mathml.py
+@@ -38,6 +38,7 @@ class MathMLPrinterBase(Printer):
+         "root_notation": True,
+         "symbol_names": {},
+         "mul_symbol_mathml_numbers": '&#xB7;',
++        "disable_split_super_sub": False,
+     }
+ 
+     def __init__(self, settings=None):
+@@ -73,6 +74,12 @@ def doprint(self, expr):
+         res = xmlbstr.decode()
+         return res
+ 
++    def _split_super_sub(self, name):
++        if self._settings["disable_split_super_sub"]:
++            return (name, [], [])
++        else:
++            return split_super_sub(name)
++
+ 
+ class MathMLContentPrinter(MathMLPrinterBase):
+     """Prints an expression to the Content MathML markup language.
+@@ -373,7 +380,7 @@ def translate(s):
+             else:
+                 return s
+ 
+-        name, supers, subs = split_super_sub(sym.name)
++        name, supers, subs = self._split_super_sub(sym.name)
+         name = translate(name)
+         supers = [translate(sup) for sup in supers]
+         subs = [translate(sub) for sub in subs]
+@@ -997,7 +1004,7 @@ def translate(s):
+             else:
+                 return s
+ 
+-        name, supers, subs = split_super_sub(sym.name)
++        name, supers, subs = self._split_super_sub(sym.name)
+         name = translate(name)
+         supers = [translate(sup) for sup in supers]
+         subs = [translate(sub) for sub in subs]

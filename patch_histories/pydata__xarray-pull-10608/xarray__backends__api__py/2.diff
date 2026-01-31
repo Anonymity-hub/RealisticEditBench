@@ -1,0 +1,15 @@
+diff --git a/xarray/backends/api.py b/xarray/backends/api.py
+--- a/xarray/backends/api.py
++++ b/xarray/backends/api.py
+@@ -249,6 +249,11 @@
+     if unlimited_dims is None:
+         unlimited_dims = dataset.encoding.get("unlimited_dims", None)
+         msg_origin = "dataset.encoding"
++    if unlimited_dims is not None:
++        if isinstance(unlimited_dims, str) or not isinstance(unlimited_dims, Iterable):
++            unlimited_dims = [unlimited_dims]
++        else:
++            unlimited_dims = list(unlimited_dims)
+ 
+ 
+ def _resolve_decoders_kwargs(decode_cf, open_backend_dataset_parameters, **decoders):

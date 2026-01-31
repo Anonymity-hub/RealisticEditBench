@@ -1,0 +1,12 @@
+diff --git a/astropy/units/function/core.py b/astropy/units/function/core.py
+--- a/astropy/units/function/core.py
++++ b/astropy/units/function/core.py
+@@ -422,7 +422,7 @@
+             # Add the physical unit with parentheses, removing its latex
+             # initialization stuff ("$\mathrm{" and "}$").
+             # For self_str, remove trailing "}$" and put it back at the end.
+-            self_str += rf"$\mathrm{{\left( {pu_str[1:-1]} \right)}}$"
++            self_str = rf"{self_str[:-2]}\left({pu_str[9:-2]}\right)}}$"
+         else:
+             pu_lines = pu_str.splitlines()
+             if len(pu_lines) == 1:

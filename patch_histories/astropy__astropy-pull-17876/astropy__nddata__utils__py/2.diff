@@ -1,0 +1,44 @@
+diff --git a/astropy/nddata/utils.py b/astropy/nddata/utils.py
+--- a/astropy/nddata/utils.py
++++ b/astropy/nddata/utils.py
+@@ -76,6 +76,10 @@
+         otherwise an `~astropy.nddata.utils.PartialOverlapError` is
+         raised.  In all modes, non-overlapping arrays will raise a
+         `~astropy.nddata.utils.NoOverlapError`.
++    limit_rounding_method : callable
++        The rounding method when calculating the minimum and maximum pixel indices.
++        This must be a callable function. Examples: `~numpy.ceil`, `~numpy.floor`,
++        `~numpy.round`. Default is `~numpy.ceil`.
+ 
+     Returns
+     -------
+@@ -111,7 +115,12 @@
+             '"position" must have the same number of dimensions as "small_array_shape".'
+         )
+ 
++    if not callable(limit_rounding_method):
++        raise ValueError("Limit rounding method must be a callable function.")
++
+     # define the min/max pixel indices
++    # round according to the limit_rounding_method
++    try:
+     indices_min = [
+         int(np.ceil(pos - (small_shape / 2.0)))
+         for (pos, small_shape) in zip(position, small_array_shape)
+@@ -166,6 +175,8 @@
+     mode="partial",
+     fill_value=np.nan,
+     return_position=False,
++    *,
++    limit_rounding_method=np.ceil,
+ ):
+     """
+     Extract a smaller array of the given shape and position from a
+@@ -241,7 +252,6 @@
+         raise ValueError("Valid modes are 'partial', 'trim', and 'strict'.")
+ 
+     large_slices, small_slices = overlap_slices(
+-        array_large.shape, shape, position, mode=mode
+     )
+     extracted_array = array_large[large_slices]
+     if return_position:

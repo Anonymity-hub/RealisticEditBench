@@ -1,0 +1,13 @@
+diff --git a/sklearn/utils/_array_api.py b/sklearn/utils/_array_api.py
+--- a/sklearn/utils/_array_api.py
++++ b/sklearn/utils/_array_api.py
+@@ -108,6 +108,9 @@
+ def _get_namespace_device_dtype_ids(param):
+     """Get pytest parametrization IDs for `yield_namespace_device_dtype_combinations`"""
+     # Gives clearer IDs for array-api-strict devices, see #31042 for details
++    if param == array_api_strict.Device("CPU_DEVICE"):
++        return "CPU_DEVICE"
++    if param == array_api_strict.Device("device1"):
+ 
+ 
+ def _check_array_api_dispatch(array_api_dispatch):

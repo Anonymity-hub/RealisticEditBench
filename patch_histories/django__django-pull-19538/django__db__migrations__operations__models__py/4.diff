@@ -1,0 +1,12 @@
+diff --git a/django/db/migrations/operations/models.py b/django/db/migrations/operations/models.py
+--- a/django/db/migrations/operations/models.py
++++ b/django/db/migrations/operations/models.py
+@@ -352,6 +352,8 @@
+                     for constraint in self.options.get("constraints", [])
+                     if constraint.name != operation.name
+                 ] + [operation.constraint]
++                return [
++                    replace(
+             elif isinstance(operation, RemoveConstraint):
+                 options_constraints = [
+                     constraint

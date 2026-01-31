@@ -1,0 +1,12 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -166,7 +166,7 @@
+             yield g
+ 
+ 
+-def _gen_sieve_array(M, factor_base):
++def _gen_sieve_array(M, factor_base, g):
+     """Sieve Stage of the Quadratic Sieve. For every prime in the factor_base
+     that does not divide the coefficient `a` we add log_p over the sieve_array
+     such that ``-M <= soln1 + i*p <=  M`` and ``-M <= soln2 + i*p <=  M`` where `i`

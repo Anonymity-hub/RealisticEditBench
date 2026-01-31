@@ -1,0 +1,42 @@
+diff --git a/astropy/nddata/utils.py b/astropy/nddata/utils.py
+--- a/astropy/nddata/utils.py
++++ b/astropy/nddata/utils.py
+@@ -583,7 +583,16 @@
+     """
+ 
+     def __init__(
+-        self, data, position, size, wcs=None, mode="trim", fill_value=np.nan, copy=False
++        self,
++        data,
++        position,
++        size,
++        wcs=None,
++        mode="trim",
++        fill_value=np.nan,
++        copy=False,
++        *,
++        limit_rounding_method=np.ceil,
+     ):
+         if wcs is None:
+             wcs = getattr(data, "wcs", None)
+@@ -645,6 +654,7 @@
+             mode=mode,
+             fill_value=fill_value,
+             return_position=True,
++            limit_rounding_method=limit_rounding_method,
+         )
+         if copy:
+             cutout_data = np.copy(cutout_data)
+@@ -652,7 +662,11 @@
+ 
+         self.input_position_cutout = input_position_cutout[::-1]  # (x, y)
+         slices_original, slices_cutout = overlap_slices(
+-            data.shape, shape, pos_yx, mode=mode
++            data.shape,
++            shape,
++            pos_yx,
++            mode=mode,
++            limit_rounding_method=limit_rounding_method,
+         )
+ 
+         self.slices_original = slices_original

@@ -1,0 +1,16 @@
+diff --git a/sympy/matrices/repmatrix.py b/sympy/matrices/repmatrix.py
+--- a/sympy/matrices/repmatrix.py
++++ b/sympy/matrices/repmatrix.py
+@@ -451,11 +451,7 @@ def inv_mod(M, m):
+         except CoercionFailed:
+             raise ValueError("inv_mod: matrix entries must be integers")
+ 
+-        try:
+-            dMi = dM.inv()
+-        except DMNonInvertibleMatrixError as exc:
+-            msg = f'Matrix is not invertible (mod {m})'
+-            raise NonInvertibleMatrixError(msg) from exc
++        if K.is_Field:
+ 
+         return dMi.to_Matrix()
+ 

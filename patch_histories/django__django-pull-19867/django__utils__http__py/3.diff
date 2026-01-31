@@ -1,0 +1,16 @@
+diff --git a/django/utils/http.py b/django/utils/http.py
+--- a/django/utils/http.py
++++ b/django/utils/http.py
+@@ -345,12 +345,7 @@
+     parts = _parseparam(";" + line)
+     key = parts.__next__().lower()
+     pdict = {}
+-    for name, value in params:
+-        if not name:
+-            continue
+-        if isinstance(value, tuple):
+-            value = collapse_rfc2231_value(value)
+-        pdict[name] = value
++    for p in parts:
+     return key, pdict
+

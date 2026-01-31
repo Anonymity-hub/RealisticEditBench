@@ -1,0 +1,24 @@
+diff --git a/xarray/backends/api.py b/xarray/backends/api.py
+--- a/xarray/backends/api.py
++++ b/xarray/backends/api.py
+@@ -1487,6 +1487,7 @@ def open_mfdataset(
+     join: JoinOptions | CombineKwargDefault = _JOIN_DEFAULT,
+     attrs_file: str | os.PathLike | None = None,
+     combine_attrs: CombineAttrsOptions = "override",
++    errors: ErrorOptionsWithWarn = "raise",
+     **kwargs,
+ ) -> Dataset:
+     """Open multiple files as a single dataset.
+@@ -1613,6 +1614,12 @@ def open_mfdataset(
+ 
+         If a callable, it must expect a sequence of ``attrs`` dicts and a context object
+         as its only parameters.
++    errors : {"raise", "warn", "ignore"}, default: "raise"
++        String indicating how to handle errors in opening dataset.
++
++        - "raise": invalid dataset will raise an exception.
++        - "warn": a warning will be issued for each invalid dataset.
++        - "ignore": invalid dataset will be ignored.
+     **kwargs : optional
+         Additional arguments passed on to :py:func:`xarray.open_dataset`. For an
+         overview of some of the possible options, see the documentation of

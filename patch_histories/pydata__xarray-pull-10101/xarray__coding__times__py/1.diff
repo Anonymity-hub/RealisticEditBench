@@ -1,0 +1,28 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -92,6 +92,12 @@
+ )
+ 
+ 
++_INVALID_LITERAL_TIMEDELTA64_ENCODING_KEYS = [
++    "add_offset",
++    "scale_factor",
++]
++
++
+ def _is_standard_calendar(calendar: str) -> bool:
+     return calendar.lower() in _STANDARD_CALENDARS
+ 
+@@ -1403,6 +1409,11 @@ def decode(self, variable: Variable, name: T_Name = None) -> Variable:
+             return variable
+ 
+ 
++def has_timedelta64_encoding_dtype(attrs_or_encoding: dict) -> bool:
++    dtype = attrs_or_encoding.get("dtype", None)
++    return isinstance(dtype, str) and dtype.startswith("timedelta64")
++
++
+ class CFTimedeltaCoder(VariableCoder):
+     """Coder for CF Timedelta coding.
+ 

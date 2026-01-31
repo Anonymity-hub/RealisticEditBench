@@ -1,0 +1,31 @@
+diff --git a/astropy/table/column.py b/astropy/table/column.py
+--- a/astropy/table/column.py
++++ b/astropy/table/column.py
+@@ -194,15 +194,11 @@ def _convert_sequence_data_to_array(data, dtype=None):
+     """
+     np_ma_masked = np.ma.masked  # Avoid repeated lookups of this object
+ 
++    has_len_gt0 = hasattr(data, "__len__") and len(data) > 0
+     # Special case of an homogeneous list of MaskedArray elements (see #8977).
+     # np.ma.masked is an instance of MaskedArray, so exclude those values.
+-    if (
+-        hasattr(data, "__len__")
+-        and len(data) > 0
+-        and all(
+-            isinstance(val, np.ma.MaskedArray) and val is not np_ma_masked
+-            for val in data
+-        )
++    if has_len_gt0 and all(
++        isinstance(val, np.ma.MaskedArray) and val is not np_ma_masked for val in data
+     ):
+         np_data = np.ma.array(data, dtype=dtype)
+         return np_data
+@@ -222,6 +218,8 @@ def _convert_sequence_data_to_array(data, dtype=None):
+             category=FutureWarning,
+             message=".*Promotion of numbers and bools to strings.*",
+         )
++
++        has_unit =
+         try:
+             np_data = np.array(data, dtype=dtype)
+         except np.ma.MaskError:

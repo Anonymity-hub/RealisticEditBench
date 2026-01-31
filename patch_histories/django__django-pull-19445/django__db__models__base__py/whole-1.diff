@@ -1,0 +1,11 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -859,6 +859,7 @@ def save(
+             not force_insert
+             and deferred_non_generated_fields
+             and using == self._state.db
++            and self._is_pk_set()
+         ):
+             field_names = set()
+             pk_fields = self._meta.pk_fields

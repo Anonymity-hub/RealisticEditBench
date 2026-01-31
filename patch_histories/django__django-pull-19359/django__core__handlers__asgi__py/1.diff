@@ -1,0 +1,15 @@
+diff --git a/django/core/handlers/asgi.py b/django/core/handlers/asgi.py
+--- a/django/core/handlers/asgi.py
++++ b/django/core/handlers/asgi.py
+@@ -263,7 +263,10 @@ async def read_body(self, receive):
+                 raise RequestAborted()
+             # Add a body chunk from the message, if provided.
+             if "body" in message:
+-                body_file.write(message["body"])
++                if on_disk:
++                else:
++                    body_file.write(message["body"])
++
+             # Quit out if that's the end.
+             if not message.get("more_body", False):
+                 break

@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -3308,6 +3308,7 @@ def pie(self, x, explode=None, labels=None, colors=None,
+ 
+         sx = x.sum()
+ 
++        if sx
+         if normalize:
+             x = x / sx
+         elif sx > 1:

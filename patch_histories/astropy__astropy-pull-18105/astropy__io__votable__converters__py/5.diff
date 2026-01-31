@@ -1,0 +1,54 @@
+diff --git a/astropy/io/votable/converters.py b/astropy/io/votable/converters.py
+--- a/astropy/io/votable/converters.py
++++ b/astropy/io/votable/converters.py
+@@ -496,6 +496,8 @@
+             value = value[: self.arraysize]
+ 
+         encoded = value.encode("utf_16_be")
++
++        return self._write_length(len(encoded) // 2) + encoded
+ 
+     def _binoutput_fixed(self, value, mask):
+         if mask:
+@@ -1476,23 +1478,40 @@
+         set on a VOTable FIELD element.
+     """
+     votable_string_dtype = None
++    max_length = None
++    original_arraysize = None
++
+     if column.info.meta is not None:
+         votable_string_dtype = column.info.meta.get("_votable_string_dtype")
++        # Check if we have stored the original arraysize with bounds
++        # If so, extract the max length
++        original_arraysize = column.info.meta.get("_votable_arraysize")
++        if (
++            original_arraysize is not None
++            and original_arraysize.endswith("*")
++            and not original_arraysize == "*"
++        ):
++            max_length = original_arraysize[:-1]
++
+     if column.dtype.char == "O":
++        arraysize = "*"
++
++        # If max length is stored use it to create a bounded var-length array
++        if max_length is not None:
+         if votable_string_dtype is not None:
+-            return {"datatype": votable_string_dtype, "arraysize": "*"}
++            return {"datatype": votable_string_dtype, "arraysize": }
+         elif isinstance(column[0], np.ndarray):
+             dtype, shape = _all_matching_dtype(column)
+             if dtype is not False:
+                 result = numpy_to_votable_dtype(dtype, shape)
+                 if "arraysize" not in result:
+                     result["arraysize"] = "*"
+                 else:
+                     result["arraysize"] += "*"
+                 return result
+ 
+         # All bets are off, do the most generic thing
+         return {"datatype": "unicodeChar", "arraysize": "*"}
+
+     # For fixed size string columns, datatype here will be unicodeChar,
+     # but honor the original FIELD datatype if present.

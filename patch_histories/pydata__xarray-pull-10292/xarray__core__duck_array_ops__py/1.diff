@@ -1,0 +1,24 @@
+diff --git a/xarray/core/duck_array_ops.py b/xarray/core/duck_array_ops.py
+--- a/xarray/core/duck_array_ops.py
++++ b/xarray/core/duck_array_ops.py
+@@ -143,6 +143,20 @@ def round(array):
+ around: Callable = round
+ 
+ 
++def isna(data: Any) -> bool:
++    """Checks if data is literally np.nan or pd.NA.
++
++    Parameters
++    ----------
++    data
++        Any python object
++
++    Returns
++    -------
++        Whether or not the data is np.nan or pd.NA
++    """
++
++
+ def isnull(data):
+     data = asarray(data)
+ 

@@ -1,0 +1,23 @@
+diff --git a/django/contrib/admin/models.py b/django/contrib/admin/models.py
+--- a/django/contrib/admin/models.py
++++ b/django/contrib/admin/models.py
+@@ -24,9 +24,7 @@
+ class LogEntryManager(models.Manager):
+     use_in_migrations = True
+ 
+-    def log_actions(
+-        self, user_id, queryset, action_flag, change_message="", *, single_object=False
+-    ):
++    def log_actions(self, user_id, queryset, action_flag, change_message=""):
+         if isinstance(change_message, list):
+             change_message = json.dumps(change_message)
+ 
+@@ -44,7 +42,7 @@ def log_actions(
+             for obj in queryset
+         ]
+ 
+-        if single_object and log_entry_list:
++        if len(log_entry_list) == 1:
+             instance = log_entry_list[0]
+             instance.save()
+             return instance

@@ -1,0 +1,13 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -1241,7 +1241,7 @@
+         # Prevent too many levels of recursion
+         # And special case for dimensionless unit
+         if depth >= max_depth:
+-            cached_results[key] = [unit]
++            cached_results[] = [unit]
+             return [unit]
+ 
+         # Make a list including all of the equivalent units
+

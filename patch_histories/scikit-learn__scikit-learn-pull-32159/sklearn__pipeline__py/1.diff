@@ -1,0 +1,37 @@
+diff --git a/sklearn/pipeline.py b/sklearn/pipeline.py
+--- a/sklearn/pipeline.py
++++ b/sklearn/pipeline.py
+@@ -776,22 +776,19 @@ def predict(self, X, **params):
+         y_pred : ndarray
+             Result of calling `predict` on the final estimator.
+         """
+-        # TODO(1.8): Remove the context manager and use check_is_fitted(self)
+-        with _raise_or_warn_if_not_fitted(self):
+-            Xt = X
+-
+-            if not _routing_enabled():
+-                for _, name, transform in self._iter(with_final=False):
+-                    Xt = transform.transform(Xt)
+-                return self.steps[-1][1].predict(Xt, **params)
++        check_is_fitted(self)
++        Xt = X
+ 
+-            # metadata routing enabled
+-            routed_params = process_routing(self, "predict", **params)
++        if not _routing_enabled():
+             for _, name, transform in self._iter(with_final=False):
+-                Xt = transform.transform(Xt, **routed_params[name].transform)
+-            return self.steps[-1][1].predict(
+-                Xt, **routed_params[self.steps[-1][0]].predict
+-            )
++                Xt = transform.transform(Xt)
++            return self.steps[-1][1].predict(Xt, **params)
++
++        # metadata routing enabled
++        routed_params = process_routing(self, "predict", **params)
++        for _, name, transform in self._iter(with_final=False):
++            Xt = transform.transform(Xt, **routed_params[name].transform)
++        return self.steps[-1][1].predict(Xt, **routed_params[self.steps[-1][0]].predict)
+ 
+     @available_if(_final_estimator_has("fit_predict"))
+     @_fit_context(

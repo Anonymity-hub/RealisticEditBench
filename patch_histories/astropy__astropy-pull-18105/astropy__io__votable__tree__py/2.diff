@@ -1,0 +1,15 @@
+diff --git a/astropy/io/votable/tree.py b/astropy/io/votable/tree.py
+--- a/astropy/io/votable/tree.py
++++ b/astropy/io/votable/tree.py
+@@ -1719,9 +1719,11 @@
+         elif isinstance(self.converter, converters.Char):
+             column.info.meta["_votable_string_dtype"] = "char"
+             if self.arraysize is not None and self.arraysize.endswith("*"):
++                column.info.meta["_votable_arraysize"] = self.arraysize
+         elif isinstance(self.converter, converters.UnicodeChar):
+             column.info.meta["_votable_string_dtype"] = "unicodeChar"
+             if self.arraysize is not None and self.arraysize.endswith("*"):
++                column.info.meta["_votable_arraysize"] = self.arraysize
+ 
+     @classmethod
+     def from_table_column(cls, votable, column):

@@ -1,0 +1,19 @@
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -995,6 +1009,15 @@
+         if not self.import_object():
+             return
+ 
++        self._generate(more_content, real_modname, check_module, all_members)
++
++    def _generate(
++        self,
++        more_content: StringList | None = None,
++        real_modname: str | None = None,
++        check_module: bool = False,
++        all_members: bool = False,
++    ) -> None:
+         # If there is no real module defined, figure out which to use.
+         # The real module is used in the module analyzer to look up the module
+         # where the attribute documentation would actually be found in.

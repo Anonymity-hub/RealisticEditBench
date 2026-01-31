@@ -1,0 +1,13 @@
+diff --git a/django/core/management/commands/inspectdb.py b/django/core/management/commands/inspectdb.py
+--- a/django/core/management/commands/inspectdb.py
++++ b/django/core/management/commands/inspectdb.py
+@@ -109,6 +109,9 @@
+                         or []
+                     )
+                     primary_key_column = (
++                        primary_key_columns[0]
++                        if len(primary_key_columns) == 1
++                        else None
+                     )
+                     unique_columns = [
+                         c["columns"][0]

@@ -1,0 +1,24 @@
+diff --git a/sphinx/util/inventory.py b/sphinx/util/inventory.py
+--- a/sphinx/util/inventory.py
++++ b/sphinx/util/inventory.py
+@@ -225,6 +225,20 @@
+             return NotImplemented
+         return self.data == other.data
+ 
++    def __hash__(self) -> int:
++        return hash(self.data)
++
++    def __getitem__(self, item: tuple[str, str]) -> _InventoryItem:
++        obj_type, name = item
++        return self.data.setdefault(obj_type, {})[name]
++
++    def __setitem__(self, item: tuple[str, str], value: _InventoryItem) -> None:
++        obj_type, name = item
++        self.data.setdefault(obj_type, {})[name] = value
++
++    def __contains__(self, item: tuple[str, str]) -> bool:
++        obj_type, name = item
++        return obj_type in self.data and name in self.data[obj_type]
+ 
+ 
+ class _InventoryItem:

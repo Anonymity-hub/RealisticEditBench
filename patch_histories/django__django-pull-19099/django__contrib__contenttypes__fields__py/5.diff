@@ -1,0 +1,12 @@
+diff --git a/django/contrib/contenttypes/fields.py b/django/contrib/contenttypes/fields.py
+--- a/django/contrib/contenttypes/fields.py
++++ b/django/contrib/contenttypes/fields.py
+@@ -399,7 +399,7 @@
+
+             for foreign_field, val in zip(
+                 self.foreign_related_fields,
+-                self.get_instance_value_for_fields(
++                self.get_instance_value_for_fields(instance, self.local_related_fields),
+             )
+         )
+ 

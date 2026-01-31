@@ -1,0 +1,17 @@
+diff --git a/sklearn/utils/_array_api.py b/sklearn/utils/_array_api.py
+--- a/sklearn/utils/_array_api.py
++++ b/sklearn/utils/_array_api.py
+@@ -133,7 +133,12 @@
+     if (
+         isinstance(array, (numpy.ndarray, numpy.generic))
+         or not hasattr(array, "device")
+-        or
++        # When array API dispatch is disabled, we expect the scikit-learn code
++        # to use np.asarray so that the resulting NumPy array will implicitly use the
++        # CPU. In this case, scikit-learn should stay as device neutral as possible,
++        # hence the use of `device=None` which is accepted by all libraries, before
++        # and after the expected conversion to NumPy via np.asarray.
++        or not get_config()["array_api_dispatch"]
+     ):
+         return None
+     else:

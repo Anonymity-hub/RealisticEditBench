@@ -1,0 +1,12 @@
+diff --git a/sympy/physics/quantum/tensorproduct.py b/sympy/physics/quantum/tensorproduct.py
+--- a/sympy/physics/quantum/tensorproduct.py
++++ b/sympy/physics/quantum/tensorproduct.py
+@@ -22,7 +22,7 @@
+     scipy_sparse_matrix,
+     matrix_tensor_product
+ )
+-from sympy.physics.quantum.state import Ket, Bra
++from sympy.physics.quantum.state import Ket, Bra, KetBase, BraBase
+ from sympy.physics.quantum.trace import Tr
+ 
+ 

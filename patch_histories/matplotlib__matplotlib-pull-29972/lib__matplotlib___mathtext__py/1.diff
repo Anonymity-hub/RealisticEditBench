@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -1604,7 +1604,7 @@ def clamp(value: float) -> float:
+         return -1e9 if value < -1e9 else +1e9 if value > +1e9 else value
+ 
+     def hlist_out(box: Hlist) -> None:
+-        nonlocal cur_v, cur_h, off_h, off_v
++        nonlocal cur_v, cur_h
+ 
+         cur_g = 0
+         cur_glue = 0.

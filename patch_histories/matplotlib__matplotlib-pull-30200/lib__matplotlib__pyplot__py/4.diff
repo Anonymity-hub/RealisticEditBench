@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py
+--- a/lib/matplotlib/pyplot.py
++++ b/lib/matplotlib/pyplot.py
+@@ -50,7 +50,7 @@
+ import sys
+ import threading
+ import time
+-from typing import TYPE_CHECKING, cast, overload
++from typing import IO, TYPE_CHECKING, cast, overload
+ 
+ from cycler import cycler  # noqa: F401
+ import matplotlib
+ 

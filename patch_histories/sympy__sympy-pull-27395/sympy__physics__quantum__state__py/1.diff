@@ -1,0 +1,14 @@
+diff --git a/sympy/physics/quantum/state.py b/sympy/physics/quantum/state.py
+--- a/sympy/physics/quantum/state.py
++++ b/sympy/physics/quantum/state.py
+@@ -826,10 +826,6 @@ def _eval_conjugate(self):
+     def _eval_transpose(self):
+         return self
+ 
+-    @property
+-    def free_symbols(self):
+-        return self.expr.free_symbols
+-
+     @property
+     def is_commutative(self):
+         """

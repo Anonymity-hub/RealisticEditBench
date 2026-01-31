@@ -1,0 +1,27 @@
+diff --git a/sklearn/utils/parallel.py b/sklearn/utils/parallel.py
+--- a/sklearn/utils/parallel.py
++++ b/sklearn/utils/parallel.py
+@@ -124,8 +124,9 @@
+         return self
+ 
+     def __call__(self, *args, **kwargs):
+-        config = getattr(self, "config", None)
+-        if config is None:
++        config = getattr(self, "config", {})
++        warning_filters = getattr(self, "warning_filters", [])
++        if not config or not warning_filters:
+             warnings.warn(
+                 (
+                     "`sklearn.utils.parallel.delayed` should be used with"
+@@ -135,8 +136,9 @@
+                 ),
+                 UserWarning,
+             )
+-            config = {}
+-        with config_context(**config):
++
++        with config_context(**config), warnings.catch_warnings():
++            warnings.filters = warning_filters
+             return self.function(*args, **kwargs)
+ 
+ 

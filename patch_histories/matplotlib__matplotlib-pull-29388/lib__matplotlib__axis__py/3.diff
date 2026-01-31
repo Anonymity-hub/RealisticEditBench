@@ -1,0 +1,20 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -20,6 +20,7 @@
+ import matplotlib.ticker as mticker
+ import matplotlib.transforms as mtransforms
+ import matplotlib.units as munits
++from matplotlib.ticker import NullLocator
+ 
+ _log = logging.getLogger(__name__)
+ 
+@@ -2290,6 +2291,8 @@
+         representative_ticks = []
+         if not isinstance(self.get_major_locator(), NullLocator):
+             representative_ticks.append(self.majorTicks[0])
++        if not isinstance(self.get_minor_locator(), NullLocator):
++            representative_ticks.append(self.minorTicks[0])
+ 
+         if all(tick.tick1line.get_visible()
+                and not tick.tick2line.get_visible()

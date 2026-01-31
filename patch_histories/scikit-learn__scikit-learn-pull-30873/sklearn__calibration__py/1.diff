@@ -1,0 +1,34 @@
+diff --git a/sklearn/calibration.py b/sklearn/calibration.py
+--- a/sklearn/calibration.py
++++ b/sklearn/calibration.py
+@@ -318,9 +318,6 @@ def fit(self, X, y, sample_weight=None, **fit_params):
+         """
+         check_classification_targets(y)
+         X, y = indexable(X, y)
+-        if sample_weight is not None:
+-            sample_weight = _check_sample_weight(sample_weight, X)
+-
+         estimator = self._get_estimator()
+ 
+         _ensemble = self.ensemble
+@@ -333,7 +330,8 @@ def fit(self, X, y, sample_weight=None, **fit_params):
+             warnings.warn(
+                 "The `cv='prefit'` option is deprecated in 1.6 and will be removed in"
+                 " 1.8. You can use CalibratedClassifierCV(FrozenEstimator(estimator))"
+-                " instead."
++                " instead.",
++                category=FutureWarning,
+             )
+             # `classes_` should be consistent with that of estimator
+             check_is_fitted(self.estimator, attributes=["classes_"])
+@@ -348,6 +346,10 @@ def fit(self, X, y, sample_weight=None, **fit_params):
+                 # Reshape binary output from `(n_samples,)` to `(n_samples, 1)`
+                 predictions = predictions.reshape(-1, 1)
+ 
++            if sample_weight is not None:
++                # Check that the sample_weight dtype is consistent with the predictions
++                # to avoid unintentional upcasts.
++
+             calibrated_classifier = _fit_calibrator(
+                 estimator,
+                 predictions,

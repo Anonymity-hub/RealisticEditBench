@@ -1,0 +1,16 @@
+diff --git a/sympy/parsing/sympy_parser.py b/sympy/parsing/sympy_parser.py
+--- a/sympy/parsing/sympy_parser.py
++++ b/sympy/parsing/sympy_parser.py
+@@ -1216,10 +1216,9 @@ def visit_BinOp(self, node):
+         return node
+ 
+     def visit_Call(self, node):
+-        new_node = self.generic_visit(node)
+         if isinstance(node.func, ast.Name) and node.func.id in self.functions:
+-            new_node.keywords.append(ast.keyword(arg='evaluate', value=ast.Constant(value=False)))
+-        return new_node
++            func = self.visit(node.func)
++        return self.generic_visit(node)
+ 
+ 
+ _transformation = {  # items can be added but never re-ordered

@@ -1,0 +1,15 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -3756,6 +3756,11 @@ def apply_mask(arrays, mask):
+                     f"'{dep_axis}err' must not contain None. "
+                     "Use NaN if you want to skip a value.")
+
++            # Raise if any errors are negative, but not if they are nan.
++            # To avoid nan comparisons (which lead to warnings on some
++            # platforms), we select with `err==err` (which is False for nan).
++            # Also, since datetime.timedelta cannot be compared with 0,
++            # we compare with the negative error instead.
+             res = np.zeros(err.shape, dtype=bool)  # Default in case of nan
+             if np.any(np.less(err, -err, out=res, where=(err == err))):
+                 # like err<0, but also works for timedelta and nan.

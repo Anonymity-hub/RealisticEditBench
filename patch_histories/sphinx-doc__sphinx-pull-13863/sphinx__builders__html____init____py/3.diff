@@ -1,0 +1,12 @@
+diff --git a/sphinx/builders/html/__init__.py b/sphinx/builders/html/__init__.py
+--- a/sphinx/builders/html/__init__.py
++++ b/sphinx/builders/html/__init__.py
+@@ -1044,7 +1044,7 @@
+         matched = None
+ 
+         # default sidebars settings for selected theme
+-        sidebars = list(self.theme.sidebar_templates)
++        sidebars = self.theme.sidebar_templates
+ 
+         # user sidebar settings
+         html_sidebars = self.get_builder_config('sidebars', 'html')

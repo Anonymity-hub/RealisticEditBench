@@ -1,0 +1,61 @@
+diff --git a/sympy/physics/control/lti.py b/sympy/physics/control/lti.py
+--- a/sympy/physics/control/lti.py
++++ b/sympy/physics/control/lti.py
+@@ -4987,6 +4987,57 @@
+         return M.T.nullspace()
+ 
+     def apply_similarity_transform(self, transform_matrix):
++        r"""
++        Returns an algebrically equivalent state space model, based on the
++        transformation matrix `T` such that:
++
++        .. math::
++            \begin{cases}
++            \bar A=T^{-1}AT\\
++            \bar B=T^{-1}B\\
++            \bar C=CT\\
++            \bar D=D\end{cases}
++
++        Parameters
++        ==========
++
++        transform_matrix : Matrix
++            The transformation matrix `T` to be applied to the state space
++            model.
++            The transformation matrix must be invertible and have the same
++            dimensions as the state matrix `A`.
++
++        Returns
++        =======
++
++        StateSpace
++            The transformed state space model.
++
++        Examples
++        ========
++
++        >>> from sympy import Matrix, Rational
++        >>> from sympy.physics.control import StateSpace
++        >>> A = Matrix([[5, -2, 2], [0, 1, -4], [0, 0, -3]])
++        >>> B = Matrix([1,0,0])
++        >>> C = Matrix([1, 0, 0]).T
++        >>> ss = StateSpace(A, B, C)
++        >>> T = Matrix([[0, Rational(1, 2), 1], [1, 1, 0], [1, 0, 0]])
++        >>> ss.apply_similarity_transform(T).A
++            Matrix([
++            [-3, 0, 0],
++            [ 0, 1, 0],
++            [ 0, 0, 5]])
++
++        """
++        T_inv = transform_matrix.inv()
++        A_decomp = T_inv * self._A * transform_matrix
++        B_decomp = T_inv * self._B
++        C_decomp = self._C * transform_matrix
++
++        return StateSpace(A_decomp, B_decomp, C_decomp, self._D)
++
++    def to_observable_form(self):
+     def observability_matrix(self):
+         """
+         Returns the observability matrix of the state space model:

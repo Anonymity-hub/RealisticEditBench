@@ -1,0 +1,29 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -97,10 +97,14 @@
+ 
+     sample_weight : array or None
+     """
+-    xp, _ = get_namespace(y_true, y_pred)
+-    check_consistent_length(y_true, y_pred)
++    xp, _ = get_namespace(y_true, y_pred, sample_weight)
++    check_consistent_length(y_true, y_pred, sample_weight)
+     type_true = type_of_target(y_true, input_name="y_true")
+     type_pred = type_of_target(y_pred, input_name="y_pred")
++    if sample_weight is not None:
++        sample_weight = _check_sample_weight(
++            sample_weight, y_true, force_float_dtype=False
++        )
+ 
+     y_type = {type_true, type_pred}
+     if y_type == {"binary", "multiclass"}:
+@@ -152,7 +156,7 @@
+             y_pred = csr_matrix(y_pred)
+         y_type = "multilabel-indicator"
+ 
+-    return y_type, y_true, y_pred
++    return y_type, y_true, y_pred, sample_weight
+ 
+ 
+ def _validate_multiclass_probabilistic_prediction(

@@ -1,0 +1,11 @@
+diff --git a/django/db/models/fields/related_descriptors.py b/django/db/models/fields/related_descriptors.py
+--- a/django/db/models/fields/related_descriptors.py
++++ b/django/db/models/fields/related_descriptors.py
+@@ -171,6 +171,7 @@
+         instances_dict = {instance_attr(inst): inst for inst in instances}
+         remote_field = self.field.remote_field
+         related_fields = [
++            queryset.
+             for field in self.field.foreign_related_fields
+         ]
+         queryset = queryset.filter(

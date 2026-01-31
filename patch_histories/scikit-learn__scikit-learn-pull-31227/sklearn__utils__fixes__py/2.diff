@@ -1,0 +1,18 @@
+diff --git a/sklearn/utils/fixes.py b/sklearn/utils/fixes.py
+--- a/sklearn/utils/fixes.py
++++ b/sklearn/utils/fixes.py
+@@ -102,6 +102,14 @@
+     lmbda : float
+         The estimated lambda parameter for the Yeo-Johnson transformation.
+     """
++    min_scipy_version = "1.9.0"
++
++    if sp_version < parse_version(min_scipy_version):
++        # choosing bracket -2, 2 like for boxcox
++        return optimize.brent(_neg_log_likelihood, brack=(-2, 2))
++
++    _, lmbda = scipy.stats.yeojohnson(x, lmbda=None)
++    return lmbda
+ 
+ 
+ # TODO: Fuse the modern implementations of _sparse_min_max and _sparse_nan_min_max

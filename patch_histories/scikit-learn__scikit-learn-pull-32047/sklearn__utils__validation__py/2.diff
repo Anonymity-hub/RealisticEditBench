@@ -1,0 +1,24 @@
+diff --git a/sklearn/utils/validation.py b/sklearn/utils/validation.py
+--- a/sklearn/utils/validation.py
++++ b/sklearn/utils/validation.py
+@@ -1440,6 +1440,11 @@
+ 
+         .. versionadded:: 1.2
+ 
++    input_name : str, default="y"
++        The data name used to construct the error message.
++
++        .. versionadded:: 1.8
++
+     warn : bool, default=False
+        To control display of warnings.
+ 
+@@ -1470,7 +1475,7 @@
+         y,
+         ensure_2d=False,
+         dtype=dtype,
+-        input_name="y",
++        input_name=input_name,
+         ensure_all_finite=False,
+         ensure_min_samples=0,
+     )

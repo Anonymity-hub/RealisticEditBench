@@ -1,0 +1,45 @@
+diff --git a/astropy/table/index.py b/astropy/table/index.py
+--- a/astropy/table/index.py
++++ b/astropy/table/index.py
+@@ -894,13 +894,13 @@
+             If a tuple is provided, the first element must be
+             an index to use instead of the primary key, and the
+             second element must be as above.
+-        """
+-        rows = self.
+-
+-        if len(rows) == 0:  # no matches found
+-            raise KeyError(f"No matches found for key {item}")
+-        elif len(rows) == 1:  # single row
+-            return self.table[rows[0]]
++
++        Returns
++        -------
++        Table | Row
++            A table slice or Row corresponding to the input item.
++        """
++        rows = self._get_row_idxs_as_list_or_int(item)
+         return self.table[rows]
+ 
+     def __setitem__(self, key, value):
+@@ -919,17 +919,12 @@
+         value : New values of the row elements.
+                 Can be a list of tuples/lists to update the row.
+         """
+-        rows = self._get_rows(key)
+-        if len(rows) == 0:  # no matches found
+-            raise KeyError(f"No matches found for key {key}")
+-        elif len(rows) == 1:  # single row
+-            self.table[rows[0]] = value
+-        else:  # multiple rows
++        rows = self._get_row_idxs_as_list_or_int(key)
+             if len(rows) == len(value):
+                 for row, val in zip(rows, value):
+                     self.table[row] = val
+             else:
+                 raise ValueError(f"Right side should contain {len(rows)} values")
+ 
+ 
+ class TableLocIndices(TableLoc):
+ 
+ 

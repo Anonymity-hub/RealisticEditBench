@@ -1,0 +1,12 @@
+diff --git a/lib/mpl_toolkits/axes_grid1/parasite_axes.py b/lib/mpl_toolkits/axes_grid1/parasite_axes.py
+--- a/lib/mpl_toolkits/axes_grid1/parasite_axes.py
++++ b/lib/mpl_toolkits/axes_grid1/parasite_axes.py
+@@ -26,7 +26,7 @@
+             "ylim_changed", self._sync_lims)
+ 
+     def get_axes_locator(self):
+-        return self._parent_axes.
++        return self._parent_axes.get_axes_locator()
+ 
+     def pick(self, mouseevent):
+         # This most likely goes to Artist.pick (depending on axes_class given

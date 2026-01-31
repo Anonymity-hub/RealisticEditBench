@@ -1,0 +1,14 @@
+
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -3308,7 +3308,8 @@
+ 
+         sx = x.sum()
+ 
+-        if sx
++        if sx == 0:
++
+         if normalize:
+             x = x / sx
+         elif sx > 1:

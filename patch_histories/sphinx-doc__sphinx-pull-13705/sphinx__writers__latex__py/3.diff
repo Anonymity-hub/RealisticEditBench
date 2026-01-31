@@ -1,0 +1,57 @@
+diff --git a/sphinx/writers/latex.py b/sphinx/writers/latex.py
+--- a/sphinx/writers/latex.py
++++ b/sphinx/writers/latex.py
+@@ -1449,8 +1449,6 @@
+     def visit_bullet_list(self, node: Element) -> None:
+         if not self.compact_list:
+             self.body.append(r'\begin{itemize}' + CR)
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def depart_bullet_list(self, node: Element) -> None:
+         if not self.compact_list:
+@@ -1488,8 +1486,6 @@
+         )
+         if 'start' in node:
+             self.body.append(r'\setcounter{%s}{%d}' % (enum, node['start'] - 1) + CR)
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def depart_enumerated_list(self, node: Element) -> None:
+         self.body.append(r'\end{enumerate}' + CR)
+@@ -1504,8 +1500,6 @@
+ 
+     def visit_definition_list(self, node: Element) -> None:
+         self.body.append(r'\begin{description}' + CR)
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def depart_definition_list(self, node: Element) -> None:
+         self.body.append(r'\end{description}' + CR)
+@@ -1545,8 +1539,6 @@
+ 
+     def visit_field_list(self, node: Element) -> None:
+         self.body.append(r'\begin{quote}\begin{description}' + CR)
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def depart_field_list(self, node: Element) -> None:
+         self.body.append(r'\end{description}\end{quote}' + CR)
+@@ -1588,8 +1580,6 @@
+ 
+     def visit_centered(self, node: Element) -> None:
+         self.body.append(CR + r'\begin{center}')
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def depart_centered(self, node: Element) -> None:
+         self.body.append(CR + r'\end{center}')
+@@ -1604,8 +1594,6 @@
+             r'\begin{itemize}\setlength{\itemsep}{0pt}'
+             r'\setlength{\parskip}{0pt}' + CR
+         )
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def depart_hlist(self, node: Element) -> None:
+         self.compact_list -= 1

@@ -1,0 +1,30 @@
+diff --git a/astropy/io/fits/connect.py b/astropy/io/fits/connect.py
+--- a/astropy/io/fits/connect.py
++++ b/astropy/io/fits/connect.py
+@@ -293,22 +293,18 @@
+             masked = True
+             fill_value = col.null
+         elif mask_invalid and issubclass(coltype, np.inexact):
+-            mask = np.isnan(data[col.name])
++            mask = np.isnan(arr)
+             fill_value = np.nan
+         elif mask_invalid and issubclass(coltype, np.character):
+-            mask = col.array == b""
++            mask = arr == b""
+             fill_value = b""
+ 
+         if masked or np.any(mask):
+             column = MaskedColumn(
+-                data=data[col.name],
+-                name=col.name,
+-                mask=mask,
+-                copy=False,
+-                fill_value=fill_value,
++                data=arr, name=col.name, mask=mask, copy=False, fill_value=fill_value
+             )
+         else:
+-            column = Column(data=data[col.name], name=col.name, copy=False)
++            column = Column(data=arr, name=col.name, copy=False)
+ 
+         # Copy over units
+         if col.unit is not None:

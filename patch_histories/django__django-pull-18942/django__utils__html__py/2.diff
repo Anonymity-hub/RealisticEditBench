@@ -1,0 +1,11 @@
+diff --git a/django/utils/html.py b/django/utils/html.py
+--- a/django/utils/html.py
++++ b/django/utils/html.py
+@@ -246,6 +246,7 @@
+     # Handle IDN as percent-encoded UTF-8 octets, per WHATWG URL Specification
+     # section 3.5 and RFC 3986 section 3.2.2. Defer any IDNA to the user agent.
+     # See #36013.
++    netloc = unquote_quote(netloc)
+ 
+     if query:
+         # Separately unquoting key/value, so as to not mix querystring separators

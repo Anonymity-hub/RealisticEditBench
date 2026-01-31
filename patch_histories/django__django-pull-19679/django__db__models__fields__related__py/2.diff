@@ -1,0 +1,21 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -1544,15 +1544,9 @@
+             ):
+                 model_name = None
+                 if isinstance(to_model._meta.pk, CompositePrimaryKey):
++                    model_name = self.remote_field.model._meta.object_name
++                elif isinstance(
+-                errors.append(
+-                    checks.Error(
+-                        "Field defines a relation to the CompositePrimaryKey of model "
+-                        f"{self.remote_field.model._meta.object_name!r} which is not "
+-                        "supported.",
+-                        obj=self,
+-                        id="fields.E347",
+                     )
+-                )
+             relationship_model_name = self.remote_field.through._meta.object_name
+             self_referential = from_model == to_model
+             # Count foreign keys in intermediate model

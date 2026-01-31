@@ -1,0 +1,18 @@
+diff --git a/django/db/models/fields/tuple_lookups.py b/django/db/models/fields/tuple_lookups.py
+--- a/django/db/models/fields/tuple_lookups.py
++++ b/django/db/models/fields/tuple_lookups.py
+@@ -2,7 +2,13 @@
+ 
+ from django.core.exceptions import EmptyResultSet
+ from django.db.models import Field
+-from django.db.models.expressions import ColPairs, Func, ResolvedOuterRef, Value
++from django.db.models.expressions import (
++    ColPairs,
++    Func,
++    ResolvedOuterRef,
++    Subquery,
++    Value,
++)
+ from django.db.models.lookups import (
+     Exact,
+     GreaterThan,

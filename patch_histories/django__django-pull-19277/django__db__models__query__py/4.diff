@@ -1,0 +1,16 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -674,8 +674,11 @@
+         for obj in objs:
+             if isinstance(obj.pk, DatabaseDefault):
+                 objs_without_pk.append(obj)
+-            elif
++            elif obj._is_pk_set():
++                objs_with_pk.append(obj)
++            else:
+                 obj.pk = obj._meta.pk.get_pk_value_on_save(obj)
++                if obj._is_pk_set():
+             obj._prepare_related_fields_for_save(operation_name="bulk_create")
+ 
+     def _check_bulk_create_options(

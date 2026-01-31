@@ -1,0 +1,12 @@
+diff --git a/xarray/backends/common.py b/xarray/backends/common.py
+--- a/xarray/backends/common.py
++++ b/xarray/backends/common.py
+@@ -595,7 +595,7 @@
+                     "Unable to update size for existing dimension"
+                     f"{dim!r} ({length} != {existing_dims[dim]})"
+                 )
+-            elif dim not in existing_dims:
++            elif dim not in existing_dims and length != parent_dims.get(dim):
+                 is_unlimited = dim in unlimited_dims
+                 self.set_dimension(dim, length, is_unlimited)
+ 

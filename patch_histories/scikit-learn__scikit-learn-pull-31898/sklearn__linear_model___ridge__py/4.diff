@@ -1,0 +1,26 @@
+diff --git a/sklearn/linear_model/_ridge.py b/sklearn/linear_model/_ridge.py
+--- a/sklearn/linear_model/_ridge.py
++++ b/sklearn/linear_model/_ridge.py
+@@ -2505,7 +2505,7 @@
+             MetadataRouter(owner=self.__class__.__name__)
+             .add_self_request(self)
+             .add(
+-                scorer=self.scoring,
++                scorer=self._get_scorer(),
+                 method_mapping=MethodMapping().add(caller="fit", callee="score"),
+             )
+             .add(
+@@ -2516,7 +2516,12 @@
+         return router
+ 
+     def _get_scorer(self):
+-        scorer = check_scoring(estimator=self, scoring=self.scoring, allow_none=True)
++        """Make sure the scorer is weighted if necessary.
++
++        This uses `self._get_scorer_instance()` implemented in child objects to get the
++        raw scorer instance of the estimator, which will be ignored if `self.scoring` is
++        not None.
++        """
+         if _routing_enabled() and self.scoring is None:
+             # This estimator passes an array of 1s as sample_weight even if
+             # sample_weight is not provided by the user. Therefore we need to

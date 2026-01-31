@@ -1,0 +1,19 @@
+diff --git a/sklearn/linear_model/_base.py b/sklearn/linear_model/_base.py
+--- a/sklearn/linear_model/_base.py
++++ b/sklearn/linear_model/_base.py
+@@ -811,6 +811,15 @@
+         # copy was done in fit if necessary
+         rescale_with_sw = True
+ 
++    X, y, X_offset, y_offset, X_scale, _ = _preprocess_data(
++        X,
++        y,
++        fit_intercept=fit_intercept,
++        copy=copy,
++        sample_weight=sample_weight,
++        check_input=check_input,
++        rescale_with_sw=rescale_with_sw,
++    )
+ 
+     if hasattr(precompute, "__array__"):
+         if fit_intercept and not np.allclose(X_offset, np.zeros(n_features)):

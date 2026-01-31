@@ -1,0 +1,24 @@
+diff --git a/astropy/visualization/wcsaxes/wcsapi.py b/astropy/visualization/wcsaxes/wcsapi.py
+--- a/astropy/visualization/wcsaxes/wcsapi.py
++++ b/astropy/visualization/wcsaxes/wcsapi.py
+@@ -1,4 +1,5 @@
+ # Functions/classes for WCSAxes related to APE14 WCSes
++from __future__ import annotations
+ 
+ from contextlib import contextmanager
+ 
+@@ -101,10 +102,11 @@ def custom_ucd_coord_meta_mapping(mapping, *, overwrite=False):
+     <BLANKLINE>
+     >
+     """
++    added_keys = []
++    overwritten = {}
+     for k, v in mapping.items():
+         k = k.removeprefix("custom:")
+-        if not overwrite and k in CUSTOM_UCD_COORD_META_MAPPING:
++        if k in CUSTOM_UCD_COORD_META_MAPPING:
+-            raise ValueError(f"UCD metadata mapping {k} already exists.")
+         CUSTOM_UCD_COORD_META_MAPPING[k] = v
+ 
+     yield
+

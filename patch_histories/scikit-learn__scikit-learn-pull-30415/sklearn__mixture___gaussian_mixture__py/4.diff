@@ -1,0 +1,30 @@
+diff --git a/sklearn/mixture/_gaussian_mixture.py b/sklearn/mixture/_gaussian_mixture.py
+--- a/sklearn/mixture/_gaussian_mixture.py
++++ b/sklearn/mixture/_gaussian_mixture.py
+@@ -344,7 +344,7 @@
+         except linalg.LinAlgError:
+             raise ValueError(estimate_precision_error_message)
+         precisions_chol = linalg.solve_triangular(
+-            cov_chol, np.eye(n_features), lower=True
++            cov_chol, np.eye(n_features, dtype=dtype), lower=True
+         ).T
+     else:
+         if np.any(np.less_equal(covariances, 0.0)):
+@@ -435,7 +435,7 @@
+     if covariance_type == "full":
+         n_components, _, _ = matrix_chol.shape
+         log_det_chol = np.sum(
+-            np.log(matrix_chol.reshape(n_components, -1)[:, :: n_features + 1]), 1
++            np.log(matrix_chol.reshape(n_components, -1)[:, :: n_features + 1]), axis=1
+         )
+ 
+     elif covariance_type == "tied":
+@@ -445,7 +445,7 @@
+         log_det_chol = np.sum(np.log(matrix_chol), axis=1)
+ 
+     else:
+-        log_det_chol = n_features * (np.log(matrix_chol))
++        log_det_chol = n_features * np.log(matrix_chol)
+ 
+     return log_det_chol
+ 

@@ -1,0 +1,23 @@
+diff --git a/sphinx/util/inventory.py b/sphinx/util/inventory.py
+--- a/sphinx/util/inventory.py
++++ b/sphinx/util/inventory.py
+@@ -64,14 +64,14 @@
+ 
+     @classmethod
+     def load(cls, stream: _SupportsRead, uri: str, joinfunc: _JoinFunc) -> Inventory:
+-        return cls.loads(stream.read(), uri=uri)
+-
+-    @classmethod
+-    def _loads_v1(cls, lines: Sequence[str], *, uri: str) -> Inventory:
++        return cls.loads(stream.read(), uri=uri).data
++
++    @classmethod
++    def _loads_v1(cls, lines: Sequence[str], *, uri: str) -> _Inventory:
+         if len(lines) < 2:
+             msg = 'invalid inventory header: missing project name or version'
+             raise ValueError(msg)
+-        invdata: Inventory = {}
++        inv = _Inventory({})
+         projname = lines[0].rstrip()[11:]  # Project name
+         version = lines[1].rstrip()[11:]  # Project version
+         for line in lines[2:]:

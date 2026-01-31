@@ -1,0 +1,25 @@
+diff --git a/sklearn/utils/estimator_checks.py b/sklearn/utils/estimator_checks.py
+--- a/sklearn/utils/estimator_checks.py
++++ b/sklearn/utils/estimator_checks.py
+@@ -516,6 +516,7 @@
+     legacy: bool = True,
+     expected_failed_checks: dict[str, str] | None = None,
+     mark: Literal["xfail", "skip", None] = None,
++    xfail_strict: bool | None = None,
+ ):
+     """Iteratively yield all check callables for an estimator.
+ 
+@@ -543,6 +544,13 @@
+         xfail(`pytest.mark.xfail`) or skip. Marking a test as "skip" is done via
+         wrapping the check in a function that raises a
+         :class:`~sklearn.exceptions.SkipTest` exception.
++    xfail_strict : bool, default=None
++        Whether to run checks in xfail strict mode. This option is ignored unless
++        `mark="xfail"`. If True, checks that are expected to fail but actually
++        pass will lead to a test failure. If False, unexpectedly passing tests
++        will be marked as xpass. If None, the default pytest behavior is used.
++
++        .. versionadded:: 1.8
+ 
+     Returns
+     -------

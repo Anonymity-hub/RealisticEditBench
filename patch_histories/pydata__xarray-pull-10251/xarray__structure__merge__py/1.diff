@@ -1,0 +1,12 @@
+diff --git a/xarray/structure/merge.py b/xarray/structure/merge.py
+--- a/xarray/structure/merge.py
++++ b/xarray/structure/merge.py
+@@ -942,7 +942,7 @@ def merge(
+     >>> xr.merge([x, y, z], join="exact")
+     Traceback (most recent call last):
+     ...
+-    ValueError: cannot align objects with join='exact' where ...
++    xarray.structure.alignment.AlignmentError: cannot align objects with join='exact' where ...
+ 
+     Raises
+     ------

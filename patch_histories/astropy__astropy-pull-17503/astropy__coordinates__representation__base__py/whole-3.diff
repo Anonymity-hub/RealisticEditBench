@@ -1,0 +1,18 @@
+diff --git a/astropy/coordinates/representation/base.py b/astropy/coordinates/representation/base.py
+--- a/astropy/coordinates/representation/base.py
++++ b/astropy/coordinates/representation/base.py
+@@ -264,12 +264,12 @@ def __init__(self, *args, **kwargs):
+ 
+     # -----------------------------------------------------------------
+ 
+-    @deprecated("v6.1", alternative="name")
++    @deprecated("v7.1", alternative="name")
+     @classmethod
+     def get_name(cls):
+         """Name of the representation or differential.
+ 
+-        See `name` for details.
++        Returns the ``.name`` attribute.
+         """
+         return cls.name
+ 

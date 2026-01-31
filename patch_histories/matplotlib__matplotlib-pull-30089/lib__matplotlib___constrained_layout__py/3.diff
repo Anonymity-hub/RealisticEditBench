@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/_constrained_layout.py b/lib/matplotlib/_constrained_layout.py
+--- a/lib/matplotlib/_constrained_layout.py
++++ b/lib/matplotlib/_constrained_layout.py
+@@ -527,6 +527,7 @@
+ 
+     axs = [a for a in fig.get_axes()
+            if (a.get_subplotspec() is not None and a.get_in_layout() and
++               a not in axsdone)]
+ 
+     for ax1 in axs:
+         ss1 = ax1.get_subplotspec()

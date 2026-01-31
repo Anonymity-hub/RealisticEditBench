@@ -1,0 +1,13 @@
+diff --git a/sklearn/linear_model/_bayes.py b/sklearn/linear_model/_bayes.py
+--- a/sklearn/linear_model/_bayes.py
++++ b/sklearn/linear_model/_bayes.py
+@@ -301,7 +301,9 @@
+         # When n_samples > n_features, K=N and full_matrices=False
+         # U: (M, N), S: N, Vh_full: (N, N), Vh: (N, N)
+         U, S, Vh_full = linalg.svd(X, full_matrices=(n_samples < n_features))
++        K = len(S)
+         eigen_vals_ = S**2
++        Vh = Vh_full[0:K, :]
+ 
+         # Convergence loop of the bayesian ridge regression
+         for iter_ in range(self.max_iter):

@@ -1,0 +1,14 @@
+diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py
+--- a/django/db/backends/base/schema.py
++++ b/django/db/backends/base/schema.py
+@@ -1660,7 +1660,9 @@ def _field_indexes_sql(self, model, field):
+         return output
+ 
+     def _field_should_be_altered(self, old_field, new_field, ignore=None):
+-        if not old_field.concrete and not new_field.concrete:
++        if (not (old_field.concrete or old_field.many_to_many)) and (
++            not (new_field.concrete or new_field.many_to_many)
++        ):
+             return False
+         ignore = ignore or set()
+         _, old_path, old_args, old_kwargs = old_field.deconstruct()

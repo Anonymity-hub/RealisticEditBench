@@ -1,0 +1,52 @@
+diff --git a/sklearn/ensemble/_bagging.py b/sklearn/ensemble/_bagging.py
+--- a/sklearn/ensemble/_bagging.py
++++ b/sklearn/ensemble/_bagging.py
+@@ -72,6 +72,7 @@ def _generate_bagging_indices(
+     n_samples,
+     max_features,
+     max_samples,
++    sample_weight,
+ ):
+     """Randomly draw feature and sample indices."""
+     # Get valid random state
+@@ -81,18 +82,37 @@ def _generate_bagging_indices(
+     feature_indices = _generate_indices(
+         random_state, bootstrap_features, n_features, max_features
+     )
+-    sample_indices = _generate_indices(
+-        random_state, bootstrap_samples, n_samples, max_samples
+-    )
++    if sample_weight is None:
++        sample_indices = _generate_indices(
++            random_state, bootstrap_samples, n_samples, max_samples
++        )
++    else:
++        normalized_sample_weight = sample_weight / np.sum(sample_weight)
++        sample_indices = random_state.choice(
++            n_samples,
++            max_samples,
++            replace=bootstrap_samples,
++            p=normalized_sample_weight,
++        )
+ 
+     return feature_indices, sample_indices
+ 
+ 
++def _consumes_sample_weight(estimator):
++    if _routing_enabled():
++        request_or_router = get_routing_for_object(estimator)
++        consumes_sample_weight = request_or_router.consumes("fit", ("sample_weight",))
++    else:
++        consumes_sample_weight = has_fit_parameter(estimator, "sample_weight")
++    return consumes_sample_weight
++
++
+ def _parallel_build_estimators(
+     n_estimators,
+     ensemble,
+     X,
+     y,
++    sample_weight,
+     seeds,
+     total_n_estimators,
+     verbose,

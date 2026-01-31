@@ -1,0 +1,12 @@
+diff --git a/astropy/utils/data.py b/astropy/utils/data.py
+--- a/astropy/utils/data.py
++++ b/astropy/utils/data.py
+@@ -384,7 +384,7 @@ def get_readable_fileobj(
+             fileobj = io.BytesIO(fileobj.read())
+ 
+     # Now read enough bytes to look at signature
+-    signature = fileobj.read(4)
++    signature = fileobj.read()
+     fileobj.seek(0)
+ 
+     if signature[:3] == b"\x1f\x8b\x08":  # gzip

@@ -1,0 +1,21 @@
+diff --git a/sklearn/neural_network/_base.py b/sklearn/neural_network/_base.py
+--- a/sklearn/neural_network/_base.py
++++ b/sklearn/neural_network/_base.py
+@@ -20,6 +20,17 @@ def inplace_identity(X):
+     # Nothing to do
+ 
+ 
++def inplace_exp(X):
++    """Compute the exponential inplace.
++
++    Parameters
++    ----------
++    X : {array-like, sparse matrix}, shape (n_samples, n_features)
++        The input data.
++    """
++    np.exp(X, out=X)
++
++
+ def inplace_logistic(X):
+     """Compute the logistic function inplace.
+ 

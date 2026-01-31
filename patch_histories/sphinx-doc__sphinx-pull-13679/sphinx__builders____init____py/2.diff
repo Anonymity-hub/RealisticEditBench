@@ -1,0 +1,19 @@
+diff --git a/sphinx/builders/__init__.py b/sphinx/builders/__init__.py
+--- a/sphinx/builders/__init__.py
++++ b/sphinx/builders/__init__.py
+@@ -905,11 +905,11 @@
+ 
+     def __call__(self, error: UnicodeDecodeError) -> tuple[str, int]:
+         obj = error.object
+-        line_start = error.object.rfind(b'\n', 0, error.start)
+-        line_end = error.object.find(b'\n', error.start)
++        line_start = obj.rfind(b'\n', 0, error.start)
++        line_end = obj.find(b'\n', error.start)
+         if line_end == -1:
+-            line_end = len(error.object)
+-        line_num = error.object.count(b'\n', 0, error.start) + 1
++            line_end = len(obj)
++        line_num = obj.count(b'\n', 0, error.start) + 1
+         logger.warning(
+             __('undecodable source characters, replacing with "?": %r'),
+             (

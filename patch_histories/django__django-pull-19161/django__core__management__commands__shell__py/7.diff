@@ -1,0 +1,19 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -166,9 +166,12 @@
+         else:
+             import_string = isort.code(import_string)
+ 
+-        self.stdout.write(
+-            f"{msg}, including:\n\n{import_string}", self.style.SUCCESS, ending="\n\n"
+-        )
++        if import_string:
++            msg = f"{msg}, including:\n\n{import_string}"
++        else:
++            msg = f"{msg}."
++
++        self.stdout.write(msg, self.style.SUCCESS, ending="\n\n")
+ 
+         return namespace
+ 

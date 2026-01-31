@@ -1,0 +1,29 @@
+diff --git a/sphinx/io.py b/sphinx/io.py
+--- a/sphinx/io.py
++++ b/sphinx/io.py
+@@ -114,21 +114,11 @@
+         super().__init__(*args, **kwargs)
+ 
+ 
+-def create_publisher(app: Sphinx, filetype: str) -> Publisher:
++def _create_publisher(
++    *, env: BuildEnvironment, parser: Parser, transforms: list[type[Transform]]
++) -> Publisher:
+     reader = SphinxStandaloneReader()
+-    reader._setup_transforms(registry=app.registry)
+-
+-    parser = app.registry.create_source_parser(filetype, config=app.config, env=app.env)
+-    if parser.__class__.__name__ == 'CommonMarkParser' and parser.settings_spec == ():
+-        # a workaround for recommonmark
+-        #   If recommonmark.AutoStrictify is enabled, the parser invokes reST parser
+-        #   internally.  But recommonmark-0.4.0 does not provide settings_spec for reST
+-        #   parser.  As a workaround, this copies settings_spec for RSTParser to the
+-        #   CommonMarkParser.
+-        from docutils.parsers.rst import Parser as RSTParser
+-
+-        parser.settings_spec = RSTParser.settings_spec  # type: ignore[misc]
+-
++    reader._setup_transforms(transforms)
+     pub = Publisher(
+         reader=reader,
+         parser=parser,

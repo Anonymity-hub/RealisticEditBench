@@ -1,0 +1,12 @@
+diff --git a/sympy/assumptions/handlers/sets.py b/sympy/assumptions/handlers/sets.py
+--- a/sympy/assumptions/handlers/sets.py
++++ b/sympy/assumptions/handlers/sets.py
+@@ -94,7 +94,7 @@ def _(expr, assumptions):
+ 
+ @IntegerPredicate.register(Abs)
+ def _(expr, assumptions):
+-    return ask(Q.integer(expr.args[0]), assumptions)
++    if ask(Q.integer(expr.args[0]), assumptions):
+ 
+ @IntegerPredicate.register_many(Determinant, MatrixElement, Trace)
+ def _(expr, assumptions):

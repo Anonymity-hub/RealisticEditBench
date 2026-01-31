@@ -1,0 +1,17 @@
+diff --git a/sympy/logic/boolalg.py b/sympy/logic/boolalg.py
+--- a/sympy/logic/boolalg.py
++++ b/sympy/logic/boolalg.py
+@@ -1310,7 +1310,12 @@
+     True
+ 
+     """
+-    def __new__(cls, *args, **options):
++    def __new__(cls, *args, evaluate=None, **kwargs):
++        if evaluate is None:
++            evaluate = global_parameters.evaluate
++        if not evaluate:
++            return super().__new__(cls, *args, evaluate=evaluate, **kwargs)
++
+         from sympy.core.relational import Relational
+         args = [_sympify(arg) for arg in args]
+ 

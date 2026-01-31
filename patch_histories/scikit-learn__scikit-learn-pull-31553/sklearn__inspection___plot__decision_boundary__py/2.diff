@@ -1,0 +1,20 @@
+diff --git a/sklearn/inspection/_plot/decision_boundary.py b/sklearn/inspection/_plot/decision_boundary.py
+--- a/sklearn/inspection/_plot/decision_boundary.py
++++ b/sklearn/inspection/_plot/decision_boundary.py
+@@ -233,13 +233,10 @@
+             if self.multiclass_colors is None or isinstance(
+                 self.multiclass_colors, str
+             ):
+-                if isinstance(self.multiclass_colors, str):
++                if self.multiclass_colors is None:
++                    cmap = "tab10" if n_responses <= 10 else "gist_rainbow"
++                else:
+                     cmap = self.multiclass_colors
+-                else:
+-                    if n_responses <= 10:
+-                        cmap = "tab10"
+-                    else:
+-                        cmap = "gist_rainbow"
+ 
+                 # Special case for the tab10 and tab20 colormaps that encode a
+                 # discrete set of colors that are easily distinguishable

@@ -1,0 +1,33 @@
+diff --git a/sympy/solvers/polysys.py b/sympy/solvers/polysys.py
+--- a/sympy/solvers/polysys.py
++++ b/sympy/solvers/polysys.py
+@@ -395,6 +395,13 @@
+     >>> solve_triangulated(F, x, y, z)
+     [(0, 0, 1), (0, 1, 0), (1, 0, 0)]
+ 
++    Using extension for algebraic solutions.
++
++    >>> solve_triangulated(F, x, y, z, extension=True) #doctest: +NORMALIZE_WHITESPACE
++    [(0, 0, 1), (0, 1, 0), (1, 0, 0),
++     (CRootOf(x**2 + 2*x - 1, 0), CRootOf(x**2 + 2*x - 1, 0), CRootOf(x**2 + 2*x - 1, 0)),
++     (CRootOf(x**2 + 2*x - 1, 1), CRootOf(x**2 + 2*x - 1, 1), CRootOf(x**2 + 2*x - 1, 1))]
++
+     References
+     ==========
+ 
+@@ -409,10 +416,10 @@
+     G = list(reversed(G))
+ 
+     extension = opt.get('extension', False)
+-
+-    if domain is not None:
+-        for i, g in enumerate(G):
+-            G[i] = g.set_domain(domain)
++    if extension:
++        def _solve_univariate(f):
++            return [r for r, _ in f.all_roots(multiple=False, radicals=False)]
++    else:
+ 
+     f, G = G[0].ltrim(-1), G[1:]
+     dom = f.get_domain()
+ 

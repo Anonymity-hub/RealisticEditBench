@@ -1,0 +1,15 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -2678,7 +2678,10 @@ def __init__(self, klass_info, select, db):
+             )
+ 
+         self.model_cls = klass_info["model"]
+-        self.pk_idx = self.init_list.index(self.model_cls._meta.pk.attname)
++        # A primary key must have all of its constituents not-NULL as
++        # NULL != NULL and thus NULL cannot be referenced through a foreign
++        # relationship. Therefore checking for a single member of the primary
++        # key is enough to determine if the referenced object exists or not.
+         self.related_populators = get_related_populators(klass_info, select, self.db)
+         self.local_setter = klass_info["local_setter"]
+         self.remote_setter = klass_info["remote_setter"]

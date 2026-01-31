@@ -1,0 +1,28 @@
+diff --git a/xarray/backends/pydap_.py b/xarray/backends/pydap_.py
+--- a/xarray/backends/pydap_.py
++++ b/xarray/backends/pydap_.py
+@@ -10,6 +10,8 @@
+     AbstractDataStore,
+     BackendArray,
+     BackendEntrypoint,
++    _normalize_path,
++    datatree_from_dict_with_io_cleanup,
+     robust_getitem,
+ )
+ from xarray.backends.store import StoreBackendEntrypoint
+@@ -18,7 +20,6 @@
+     Frozen,
+     FrozenDict,
+     close_on_error,
+-    is_dict_like,
+     is_remote_uri,
+ )
+ from xarray.core.variable import Variable
+@@ -28,6 +29,7 @@
+     import os
+ 
+     from xarray.core.dataset import Dataset
++    from xarray.core.datatree import DataTree
+     from xarray.core.types import ReadBuffer
+ 
+ 

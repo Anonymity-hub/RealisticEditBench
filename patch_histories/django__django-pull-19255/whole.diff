@@ -1,0 +1,23 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -1707,13 +1707,18 @@ def _check_relationship_model(self, from_model=None, **kwargs):
+                             and getattr(field.remote_field, "model", None)
+                             == related_model
+                         ):
++                            related_object_name = (
++                                related_model
++                                if isinstance(related_model, str)
++                                else related_model._meta.object_name
++                            )
+                             errors.append(
+                                 checks.Error(
+                                     "'%s.%s' is not a foreign key to '%s'."
+                                     % (
+                                         through._meta.object_name,
+                                         field_name,
+-                                        related_model._meta.object_name,
++                                        related_object_name,
+                                     ),
+                                     hint=hint,
+                                     obj=self,

@@ -1,0 +1,12 @@
+diff --git a/sympy/matrices/expressions/blockmatrix.py b/sympy/matrices/expressions/blockmatrix.py
+--- a/sympy/matrices/expressions/blockmatrix.py
++++ b/sympy/matrices/expressions/blockmatrix.py
+@@ -584,7 +584,7 @@ class BlockDiagMatrix(BlockMatrix):
+     sympy.matrices.dense.diag
+     """
+     def __new__(cls, *mats):
+-        return Basic.__new__(BlockDiagMatrix, *[_sympify(m) for m in mats])
++        mats = [_sympify(m) for m in mats]
+ 
+     @property
+     def diag(self):

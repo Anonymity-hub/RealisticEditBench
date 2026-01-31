@@ -1,0 +1,26 @@
+diff --git a/sklearn/decomposition/_dict_learning.py b/sklearn/decomposition/_dict_learning.py
+--- a/sklearn/decomposition/_dict_learning.py
++++ b/sklearn/decomposition/_dict_learning.py
+@@ -1163,6 +1163,22 @@
+ 
+         return code @ dictionary
+ 
++    def inverse_transform(self, X):
++        """Transform data back to its original space.
++
++        Parameters
++        ----------
++        X : array-like of shape (n_samples, n_components)
++            Data to be transformed back. Must have the same number of
++            components as the data used to train the model.
++
++        Returns
++        -------
++        X_new : ndarray of shape (n_samples, n_features)
++            Transformed data.
++        """
++
++
+ class SparseCoder(_BaseSparseCoding, BaseEstimator):
+     """Sparse coding.
+ 

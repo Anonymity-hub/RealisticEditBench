@@ -1,0 +1,148 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -1258,15 +1258,23 @@
+                     dispatchfunc = self.annotate_to_first_argument(func, typ)
+                     if dispatchfunc:
+                         documenter = FunctionDocumenter(self.directive, '')
++                        documenter.props = _FunctionDefProperties(
++                            obj_type='function',
++                            module_name='',
++                            parts=('',),
++                            docstring_lines=(),
++                            _obj=dispatchfunc,
++                            _obj___module__=None,
++                            properties=frozenset(),
++                        )
+                         documenter.object = dispatchfunc
+-                        documenter.objpath = ['']
+                         sigs.append(documenter.format_signature())
+         if overloaded and self.analyzer is not None:
+             actual = inspect.signature(
+                 self.object, type_aliases=self.config.autodoc_type_aliases
+             )
+             __globals__ = safe_getattr(self.object, '__globals__', {})
+-            for overload in self.analyzer.overloads['.'.join(self.objpath)]:
++            for overload in self.analyzer.overloads[self.props.dotted_parts]:
+                 overload = self.merge_default_value(actual, overload)
+                 overload = evaluate_signature(
+                     overload, __globals__, self.config.autodoc_type_aliases
+@@ -1294,9 +1302,8 @@
+         try:
+             sig = inspect.signature(func, type_aliases=self.config.autodoc_type_aliases)
+         except TypeError as exc:
+-            logger.warning(
+-                __('Failed to get a function signature for %s: %s'), self.fullname, exc
+-            )
++            msg = __('Failed to get a function signature for %s: %s')
++            logger.warning(msg, self.props.full_name, exc)
+             return None
+         except ValueError:
+             return None
+@@ -1511,11 +1518,8 @@
+             self._signature_class, _signature_method_name, sig = self._get_signature()
+         except TypeError as exc:
+             # __signature__ attribute contained junk
+-            logger.warning(
+-                __('Failed to get a constructor signature for %s: %s'),
+-                self.fullname,
+-                exc,
+-            )
++            msg = __('Failed to get a constructor signature for %s: %s')
++            logger.warning(msg, self.props.full_name, exc)
+             return ''
+         self._signature_method_name = _signature_method_name or ''
+ 
+@@ -1594,7 +1598,7 @@
+         return []
+ 
+     def get_canonical_fullname(self) -> str | None:
+-        __modname__ = safe_getattr(self.object, '__module__', self.modname)
++        __modname__ = safe_getattr(self.object, '__module__', self.props.module_name)
+         __qualname__ = safe_getattr(self.object, '__qualname__', None)
+         if __qualname__ is None:
+             __qualname__ = safe_getattr(self.object, '__name__', None)
+@@ -1625,7 +1629,7 @@
+             not self.props.doc_as_attr
+             and not isinstance(self.object, NewType)
+             and canonical_fullname
+-            and self.fullname != canonical_fullname
++            and self.props.full_name != canonical_fullname
+         ):
+             self.add_line('   :canonical: %s' % canonical_fullname, sourcename)
+ 
+@@ -1642,7 +1646,11 @@
+                 bases = []
+ 
+             self._events.emit(
+-                'autodoc-process-bases', self.fullname, self.object, self.options, bases
++                'autodoc-process-bases',
++                self.props.full_name,
++                self.object,
++                self.options,
++                bases,
+             )
+ 
+             mode = _get_render_mode(self.config.autodoc_typehints_format)
+@@ -1655,7 +1663,7 @@
+     def get_object_members(self, want_all: bool) -> tuple[bool, list[ObjectMember]]:
+         members = get_class_members(
+             self.object,
+-            self.objpath,
++            self.props.parts,
+             self.get_attr,
+             self.config.autodoc_inherit_docstrings,
+         )
+@@ -1669,12 +1677,8 @@
+                 if name in members:
+                     selected.append(members[name])
+                 else:
+-                    logger.warning(
+-                        __('missing attribute %s in object %s'),
+-                        name,
+-                        self.fullname,
+-                        type='autodoc',
+-                    )
++                    msg = __('missing attribute %s in object %s')
++                    logger.warning(msg, name, self.props.full_name, type='autodoc')
+             return False, selected
+         elif self.options.inherited_members:
+             return False, list(members.values())
+@@ -1787,12 +1791,12 @@
+             more_content = StringList(
+                 [_('alias of TypeVar(%s)') % ', '.join(attrs), ''], source=''
+             )
+-        if self.props.doc_as_attr and self.modname != (
++        if self.props.doc_as_attr and self.props.module_name != (
+             self.props._obj___module__ or self.props.module_name
+         ):
+             try:
+                 # override analyzer to obtain doccomment around its definition.
+-                self.analyzer = ModuleAnalyzer.for_module(self.modname)
++                self.analyzer = ModuleAnalyzer.for_module(self.props.module_name)
+                 self.analyzer.analyze()
+             except PycodeError:
+                 pass
+@@ -1884,7 +1888,7 @@
+         parent.__annotations__ = annotations
+ 
+         try:
+-            analyzer = ModuleAnalyzer.for_module(self.modname)
++            analyzer = ModuleAnalyzer.for_module(self.props.module_name)
+             analyzer.analyze()
+             for (classname, attrname), annotation in analyzer.annotations.items():
+                 if not classname and attrname not in annotations:
+@@ -1921,11 +1925,11 @@
+                     self.config.autodoc_type_aliases,
+                     include_extras=True,
+                 )
+-                if self.objpath[-1] in annotations:
++                if self.props.name in annotations:
+                     mode = _get_render_mode(self.config.autodoc_typehints_format)
+                     short_literals = self.config.python_display_short_literal_types
+                     objrepr = stringify_annotation(
+-                        annotations.get(self.objpath[-1]),
++                        annotations.get(self.props.name),
+                         mode,
+                         short_literals=short_literals,
+                     )

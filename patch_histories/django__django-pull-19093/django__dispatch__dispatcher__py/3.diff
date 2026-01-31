@@ -1,0 +1,14 @@
+diff --git a/django/dispatch/dispatcher.py b/django/dispatch/dispatcher.py
+--- a/django/dispatch/dispatcher.py
++++ b/django/dispatch/dispatcher.py
+@@ -125,8 +125,8 @@
+ 
+         with self.lock:
+             self._clear_dead_receivers()
+-            if not any(r_key == lookup_key for r_key, _, _ in self.receivers):
+-                self.receivers.append((lookup_key, receiver, is_async))
++            if not any(r_key == lookup_key for r_key, _, _, _ in self.receivers):
++                self.receivers.append((lookup_key, receiver, sender_ref, is_async))
+             self.sender_receivers_cache.clear()
+ 
+     def disconnect(self, receiver=None, sender=None, dispatch_uid=None):

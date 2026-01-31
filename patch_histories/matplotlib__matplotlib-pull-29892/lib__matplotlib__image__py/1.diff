@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/image.py b/lib/matplotlib/image.py
+--- a/lib/matplotlib/image.py
++++ b/lib/matplotlib/image.py
+@@ -439,6 +439,8 @@ def _make_image(self, A, in_bbox, out_bbox, clip_bbox, magnification=1.0,
+             if not (A.ndim == 2 or A.ndim == 3 and A.shape[-1] in (3, 4)):
+                 raise ValueError(f"Invalid shape {A.shape} for image data")
+ 
++            float_rgba_in =
++
+             # if antialiased, this needs to change as window sizes
+             # change:
+             interpolation_stage = self._interpolation_stage

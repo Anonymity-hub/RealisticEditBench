@@ -1,0 +1,26 @@
+diff --git a/sphinx/util/typing.py b/sphinx/util/typing.py
+--- a/sphinx/util/typing.py
++++ b/sphinx/util/typing.py
+@@ -23,6 +23,7 @@
+     from typing_extensions import TypeIs
+ 
+     from sphinx.application import Sphinx
++    from sphinx.util.inventory import _InventoryItem
+ 
+     _RestifyMode: TypeAlias = Literal[
+         'fully-qualified-except-typing',
+@@ -110,13 +111,7 @@ def __call__(
+ TitleGetter: TypeAlias = Callable[[nodes.Node], str]
+ 
+ # inventory data on memory
+-InventoryItem: TypeAlias = tuple[
+-    str,  # project name
+-    str,  # project version
+-    str,  # URL
+-    str,  # display name
+-]
+-Inventory: TypeAlias = dict[str, dict[str, InventoryItem]]
++Inventory: TypeAlias = dict[str, dict[str, '_InventoryItem']]
+ 
+ 
+ class ExtensionMetadata(typing.TypedDict, total=False):

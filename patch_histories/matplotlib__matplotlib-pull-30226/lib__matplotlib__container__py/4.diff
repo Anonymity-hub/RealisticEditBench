@@ -1,0 +1,17 @@
+diff --git a/lib/matplotlib/container.py b/lib/matplotlib/container.py
+--- a/lib/matplotlib/container.py
++++ b/lib/matplotlib/container.py
+@@ -108,6 +108,13 @@
+ 
+         .. versionadded:: 3.11
+         """
++        if self.orientation == 'vertical':
++            return [p.get_x() + p.get_width() / 2 for p in self.patches]
++        elif self.orientation == 'horizontal':
++            return [p.get_y() + p.get_height() / 2 for p in self.patches]
++        else:
++            raise ValueError("orientation must be 'vertical' or 'horizontal'.")
++
+ 
+ class ErrorbarContainer(Container):
+     """

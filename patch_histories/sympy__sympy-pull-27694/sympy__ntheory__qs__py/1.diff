@@ -1,0 +1,16 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -312,9 +312,9 @@ def _trial_division_stage(N, M, factor_base, sieve_array, sieve_poly, partial_re
+                 except ZeroDivisionError:#if large_prime divides N
+                     proper_factor.add(large_prime)
+                     continue
+-                u = u*u_prev*large_prime_inv
+-                v = v*v_prev // (large_prime*large_prime)
+-                vec, is_smooth = _check_smoothness(v, factor_base)
++                u = (u*u_prev*large_prime_inv) % N
++                v = v*v_prev // large_prime**2
++                vec, _ = _check_smoothness(v, factor_base)
+         #assert u*u % N == v % N
+         smooth_relations.append((u, v, vec))
+     return smooth_relations, proper_factor

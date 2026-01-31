@@ -1,0 +1,44 @@
+diff --git a/sklearn/linear_model/_coordinate_descent.py b/sklearn/linear_model/_coordinate_descent.py
+--- a/sklearn/linear_model/_coordinate_descent.py
++++ b/sklearn/linear_model/_coordinate_descent.py
+@@ -1604,6 +1604,40 @@
+         """
+         _raise_for_params(params, self, "fit")
+ 
++        # TODO(1.9): remove n_alphas and alphas={"warn", None}; set alphas=100 by
++        # default. Remove these deprecations messages and use self.alphas directly
++        # instead of self._alphas.
++        if self.n_alphas == "deprecated":
++            self._alphas = 100
++        else:
++            warnings.warn(
++                "'n_alphas' was deprecated in 1.7 and will be removed in 1.9. "
++                "'alphas' now accepts an integer value which removes the need to pass "
++                "'n_alphas'. The default value of 'alphas' will change from None to "
++                "100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' "
++                "to its default value to silence this warning.",
++                FutureWarning,
++            )
++            self._alphas = self.n_alphas
++
++        if isinstance(self.alphas, str) and self.alphas == "warn":
++            # - If self.n_alphas == "deprecated", both are left to their default values
++            #   so we don't warn since the future default behavior will be the same as
++            #   the current default behavior.
++            # - If self.n_alphas != "deprecated", then we already warned about it
++            #   and the warning message mentions the future self.alphas default, so
++            #   no need to warn a second time.
++            pass
++        elif self.alphas is None:
++            warnings.warn(
++                "'alphas=None' is deprecated and will be removed in 1.9, at which "
++                "point the default value will be set to 100. Set 'alphas=100' "
++                "to silence this warning.",
++                FutureWarning,
++            )
++        else:
++            self._alphas = self.alphas
++
+         # This makes sure that there is no duplication in memory.
+         # Dealing right with copy_X is important in the following:
+         # Multiple functions touch X and subsamples of X and can induce a

@@ -1,0 +1,24 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1079,6 +1079,12 @@
+             c.source_expressions[pos] = arg.resolve_expression(
+                 query, allow_joins, reuse, summarize, for_save
+             )
++        if not self.allows_composite_expressions and any(
++            isinstance(expr, ColPairs) for expr in c.get_source_expressions()
++        ):
++            raise ValueError(
++                f"{self.__class__.__name__} does not support composite primary keys."
++            )
+         return c
+ 
+     def as_sql(
+@@ -1829,6 +1835,7 @@
+     template = "%(expression)s %(ordering)s"
+     conditional = False
+     constraint_validation_compatible = False
++    allows_composite_expressions = True
+ 
+     def __init__(self, expression, descending=False, nulls_first=None, nulls_last=None):
+         if nulls_first and nulls_last:

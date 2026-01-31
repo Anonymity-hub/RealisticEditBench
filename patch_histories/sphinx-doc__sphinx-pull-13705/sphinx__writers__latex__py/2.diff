@@ -1,0 +1,24 @@
+diff --git a/sphinx/writers/latex.py b/sphinx/writers/latex.py
+--- a/sphinx/writers/latex.py
++++ b/sphinx/writers/latex.py
+@@ -1403,14 +1403,12 @@
+ 
+     def depart_entry(self, node: Element) -> None:
+         assert self.table is not None
+-        if self.table.entry_needs_linetrimming:
+-            self.table.entry_needs_linetrimming = 0
+-            body = self.popbody()
+-
+-            # Remove empty lines from top of merged cell
+-            while body and body[0] == CR:
+-                body.pop(0)
+-            self.body.extend(body)
++        body = self.popbody()
++
++        # Remove empty lines from top of merged cell
++        while body and body[0] == CR:
++            body.pop(0)
++        self.body.extend(body)
+ 
+         self.body.append(self.context.pop())
+ 

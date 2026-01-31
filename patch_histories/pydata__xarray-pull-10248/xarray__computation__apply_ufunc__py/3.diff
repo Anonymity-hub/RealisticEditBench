@@ -1,0 +1,11 @@
+diff --git a/xarray/computation/apply_ufunc.py b/xarray/computation/apply_ufunc.py
+--- a/xarray/computation/apply_ufunc.py
++++ b/xarray/computation/apply_ufunc.py
+@@ -1210,6 +1210,7 @@
+ 
+     if kwargs:
+         if "where" in kwargs and isinstance(kwargs["where"], DataArray):
++            kwargs["where"] = kwargs["where"].data  # type:ignore[index]
+         func = functools.partial(func, **kwargs)
+ 
+     if keep_attrs is None:

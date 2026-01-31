@@ -1,0 +1,58 @@
+diff --git a/sklearn/metrics/_plot/roc_curve.py b/sklearn/metrics/_plot/roc_curve.py
+--- a/sklearn/metrics/_plot/roc_curve.py
++++ b/sklearn/metrics/_plot/roc_curve.py
+@@ -743,3 +743,54 @@
+         <...>
+         >>> plt.show()
+         """
++        pos_label_ = cls._validate_from_cv_results_params(
++            cv_results,
++            X,
++            y,
++            sample_weight=sample_weight,
++            pos_label=pos_label,
++        )
++
++        fpr_folds, tpr_folds, auc_folds = [], [], []
++        for estimator, test_indices in zip(
++            cv_results["estimator"], cv_results["indices"]["test"]
++        ):
++            y_true = _safe_indexing(y, test_indices)
++            y_pred, _ = _get_response_values_binary(
++                estimator,
++                _safe_indexing(X, test_indices),
++                response_method=response_method,
++                pos_label=pos_label_,
++            )
++            sample_weight_fold = (
++                None
++                if sample_weight is None
++                else _safe_indexing(sample_weight, test_indices)
++            )
++            fpr, tpr, _ = roc_curve(
++                y_true,
++                y_pred,
++                pos_label=pos_label_,
++                sample_weight=sample_weight_fold,
++                drop_intermediate=drop_intermediate,
++            )
++            roc_auc = auc(fpr, tpr)
++
++            fpr_folds.append(fpr)
++            tpr_folds.append(tpr)
++            auc_folds.append(roc_auc)
++
++        viz = cls(
++            fpr=fpr_folds,
++            tpr=tpr_folds,
++            name=name,
++            roc_auc=auc_folds,
++            pos_label=pos_label_,
++        )
++        return viz.plot(
++            ax=ax,
++            curve_kwargs=curve_kwargs,
++            plot_chance_level=plot_chance_level,
++            chance_level_kw=chance_level_kwargs,
++            despine=despine,
++        )

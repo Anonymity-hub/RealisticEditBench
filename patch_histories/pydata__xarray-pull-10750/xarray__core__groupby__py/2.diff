@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -828,7 +828,7 @@
+             self._groups = dict(
+                 zip(
+                     self.encoded.unique_coord.data,
+-                    tuple(self.encoded.group_indices),
++                    tuple(g for g in self.encoded.group_indices if g),
+                     strict=True,
+                 )
+             )

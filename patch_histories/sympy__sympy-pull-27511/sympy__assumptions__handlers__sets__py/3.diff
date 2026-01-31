@@ -1,0 +1,13 @@
+diff --git a/sympy/assumptions/handlers/sets.py b/sympy/assumptions/handlers/sets.py
+--- a/sympy/assumptions/handlers/sets.py
++++ b/sympy/assumptions/handlers/sets.py
+@@ -747,6 +747,9 @@
+     exp_rational = ask(Q.rational(expr.exp), assumptions)
+     base_algebraic = ask(Q.algebraic(expr.base), assumptions)
+     exp_algebraic = ask(Q.algebraic(expr.exp),assumptions)
++    if base_algebraic and exp_algebraic:
++        if exp_rational:
++            return True
+ 
+ @AlgebraicPredicate.register(Rational) # type:ignore
+ def _(expr, assumptions):

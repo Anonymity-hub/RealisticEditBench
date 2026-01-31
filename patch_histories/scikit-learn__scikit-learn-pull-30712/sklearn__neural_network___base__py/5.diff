@@ -1,0 +1,11 @@
+diff --git a/sklearn/neural_network/_base.py b/sklearn/neural_network/_base.py
+--- a/sklearn/neural_network/_base.py
++++ b/sklearn/neural_network/_base.py
+@@ -281,6 +281,7 @@
+ 
+ LOSS_FUNCTIONS = {
+     "squared_error": squared_loss,
++    "poisson": poisson_loss,
+     "log_loss": log_loss,
+     "binary_log_loss": binary_log_loss,
+ }

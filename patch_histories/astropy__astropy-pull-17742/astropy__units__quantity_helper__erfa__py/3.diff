@@ -1,0 +1,12 @@
+diff --git a/astropy/units/quantity_helper/erfa.py b/astropy/units/quantity_helper/erfa.py
+--- a/astropy/units/quantity_helper/erfa.py
++++ b/astropy/units/quantity_helper/erfa.py
+@@ -342,7 +342,7 @@
+         get_converter(unit_xp, radian),
+         get_converter(unit_yp, radian),
+         get_converter(unit_refa, radian),
+-        get_converter(unit_xp, radian),
++        get_converter(unit_refb, radian),
+     ], astrom_unit()
+ 
+ 

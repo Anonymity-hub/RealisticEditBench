@@ -1,0 +1,13 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1802,6 +1802,9 @@
+             # complexifies the lookup's right-hand-side introspection.
+             try:
+                 self.output_field
++            except AttributeError:
++                return resolved.query
++            if self.output_field and
+     def copy(self):
+         clone = super().copy()
+         clone.query = clone.query.clone()

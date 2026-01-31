@@ -1,0 +1,47 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -1408,6 +1408,43 @@
+ def has_timedelta64_encoding_dtype(attrs_or_encoding: dict) -> bool:
+     dtype = attrs_or_encoding.get("dtype")
+     return isinstance(dtype, str) and dtype.startswith("timedelta64")
++
++
++def resolve_time_unit_from_attrs_dtype(
++    attrs_dtype: str, name: T_Name
++) -> PDDatetimeUnitOptions:
++    dtype = np.dtype(attrs_dtype)
++    resolution, _ = np.datetime_data(dtype)
++    resolution = cast(NPDatetimeUnitOptions, resolution)
++    if np.timedelta64(1, resolution) > np.timedelta64(1, "s"):
++        time_unit = cast(PDDatetimeUnitOptions, "s")
++        message = (
++            f"Following pandas, xarray only supports decoding to timedelta64 "
++            f"values with a resolution of 's', 'ms', 'us', or 'ns'. Encoded "
++            f"values for variable {name!r} have a resolution of "
++            f"{resolution!r}. Attempting to decode to a resolution of 's'. "
++            f"Note, depending on the encoded values, this may lead to an "
++            f"OverflowError. Additionally, data will not be identically round "
++            f"tripped; xarray will choose an encoding dtype of "
++            f"'timedelta64[s]' when re-encoding."
++        )
++        emit_user_level_warning(message)
++    elif np.timedelta64(1, resolution) < np.timedelta64(1, "ns"):
++        time_unit = cast(PDDatetimeUnitOptions, "ns")
++        message = (
++            f"Following pandas, xarray only supports decoding to timedelta64 "
++            f"values with a resolution of 's', 'ms', 'us', or 'ns'. Encoded "
++            f"values for variable {name!r} have a resolution of "
++            f"{resolution!r}. Attempting to decode to a resolution of 'ns'. "
++            f"Note, depending on the encoded values, this may lead to loss of "
++            f"precision. Additionally, data will not be identically round "
++            f"tripped; xarray will choose an encoding dtype of "
++            f"'timedelta64[ns]' when re-encoding."
++        )
++        emit_user_level_warning(message)
++    else:
++        time_unit = cast(PDDatetimeUnitOptions, resolution)
++    return time_unit
+ 
+ 
+ class CFTimedeltaCoder(VariableCoder):

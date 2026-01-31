@@ -1,0 +1,34 @@
+diff --git a/sphinx/domains/python/__init__.py b/sphinx/domains/python/__init__.py
+--- a/sphinx/domains/python/__init__.py
++++ b/sphinx/domains/python/__init__.py
+@@ -594,23 +594,14 @@ def process_link(
+ 
+ 
+ class _PyDecoXRefRole(PyXRefRole):
+-    def __init__(
++    def process_link(
+         self,
+-        fix_parens: bool = False,
+-        lowercase: bool = False,
+-        nodeclass: type[Element] | None = None,
+-        innernodeclass: type[TextElement] | None = None,
+-        warn_dangling: bool = False,
+-    ) -> None:
+-        super().__init__(
+-            fix_parens=True,
+-            lowercase=lowercase,
+-            nodeclass=nodeclass,
+-            innernodeclass=innernodeclass,
+-            warn_dangling=warn_dangling,
++        env: BuildEnvironment,
++        refnode: Element,
++        has_explicit_title: bool,
++        title: str,
++        target: str,
++    ) -> tuple[str, str]:
+-        )
+-
+-    def update_title_and_target(self, title: str, target: str) -> tuple[str, str]:
+         return f'@{title}', target
+ 
+ 

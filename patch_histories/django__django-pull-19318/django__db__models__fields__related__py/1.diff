@@ -1,0 +1,11 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -580,6 +580,7 @@ def check(self, **kwargs):
+             *self._check_to_fields_exist(),
+             *self._check_to_fields_composite_pk(),
+             *self._check_unique_target(),
++            *self._check_conflict_with_managers(),
+         ]
+ 
+     def _check_to_fields_exist(self):

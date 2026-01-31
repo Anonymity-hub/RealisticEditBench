@@ -1,0 +1,13 @@
+diff --git a/django/contrib/contenttypes/fields.py b/django/contrib/contenttypes/fields.py
+--- a/django/contrib/contenttypes/fields.py
++++ b/django/contrib/contenttypes/fields.py
+@@ -389,6 +389,9 @@ def resolve_related_fields(self):
+             )
+         ]
+ 
++    def get_local_related_value(self, instance):
++        return self.get_instance_value_for_fields(instance, self.foreign_related_fields)
++
+     def _get_path_info_with_parent(self, filtered_relation):
+         """
+         Return the path that joins the current model through any parent models.

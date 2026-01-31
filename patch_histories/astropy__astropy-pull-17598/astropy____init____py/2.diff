@@ -1,0 +1,13 @@
+diff --git a/astropy/__init__.py b/astropy/__init__.py
+--- a/astropy/__init__.py
++++ b/astropy/__init__.py
+@@ -45,6 +45,9 @@
+     "astronomical_constants",
+     "system_info",
+ ]
++
++
++def __getattr__(attr):
+ from .version import version as __version__
+ 
+ # The location of the online documentation for astropy

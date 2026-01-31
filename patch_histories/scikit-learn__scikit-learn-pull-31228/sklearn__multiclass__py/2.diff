@@ -1,0 +1,11 @@
+diff --git a/sklearn/multiclass.py b/sklearn/multiclass.py
+--- a/sklearn/multiclass.py
++++ b/sklearn/multiclass.py
+@@ -554,6 +554,7 @@
+ 
+         if not self.multilabel_:
+             # Then, (nonzero) sample probability distributions should be normalized.
++            row_sums = np.sum(Y, axis=1)[:, np.newaxis]
+ 
+         return Y
+ 

@@ -1,0 +1,12 @@
+diff --git a/sympy/printing/rust.py b/sympy/printing/rust.py
+--- a/sympy/printing/rust.py
++++ b/sympy/printing/rust.py
+@@ -95,7 +95,7 @@ def _eval_is_integer(self):
+     # "": "trunc",
+     # "": "fract",
+     "Abs": "abs",
+-    "sign": "signum",
++    # "": "signum",
+     # "": "is_sign_positive",
+     # "": "is_sign_negative",
+     # "": "mul_add",

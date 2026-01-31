@@ -1,0 +1,28 @@
+diff --git a/django/contrib/auth/middleware.py b/django/contrib/auth/middleware.py
+--- a/django/contrib/auth/middleware.py
++++ b/django/contrib/auth/middleware.py
+@@ -1,3 +1,4 @@
++import warnings
+ from functools import partial
+ from urllib.parse import urlsplit
+
+@@ -176,6 +177,19 @@
+             self.__class__.process_request is not RemoteUserMiddleware.process_request
+             and self.__class__.aprocess_request is RemoteUserMiddleware.aprocess_request
+         ):
++            warnings.warn(
++                "Support for subclasses of RemoteUserMiddleware that override "
++                "process_request() without overriding aprocess_request() is "
++                "deprecated.",
++                category=RemovedInDjango61Warning,
++                stacklevel=2,
++            )
++            await sync_to_async(self.process_request, thread_sensitive=True)(request)
++            return await self.get_response(request)
++        await self.aprocess_request(request)
++        return await self.get_response(request)
++
++    async def aprocess_request(self, request):
+         # AuthenticationMiddleware is required so that request.user exists.
+         if not hasattr(request, "user"):
+             raise ImproperlyConfigured(

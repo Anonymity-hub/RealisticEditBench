@@ -1,0 +1,11 @@
+diff --git a/django/contrib/auth/middleware.py b/django/contrib/auth/middleware.py
+--- a/django/contrib/auth/middleware.py
++++ b/django/contrib/auth/middleware.py
+@@ -54,6 +54,7 @@
+         if not getattr(view_func, "login_required", True):
+             return None
+ 
++        if request.user.is_authenticated:
+             return None
+ 
+         return self.handle_no_permission(request, view_func)

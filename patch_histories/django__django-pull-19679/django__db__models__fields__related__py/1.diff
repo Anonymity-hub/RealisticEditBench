@@ -1,0 +1,33 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -626,9 +626,10 @@ def _check_to_fields_composite_pk(self):
+                 if isinstance(field, CompositePrimaryKey):
+                     errors.append(
+                         checks.Error(
+-                            "Field defines a relation to the CompositePrimaryKey of "
+-                            f"model {self.remote_field.model._meta.object_name!r} "
+-                            "which is not supported.",
++                            "Field defines a relation involving model "
++                            f"{self.remote_field.model._meta.object_name!r} which has "
++                            "a CompositePrimaryKey and such relations are not "
++                            "supported.",
+                             obj=self,
+                             id="fields.E347",
+                         )
+@@ -1538,11 +1539,11 @@ def _check_relationship_model(self, from_model=None, **kwargs):
+                 to_model_name = to_model
+             else:
+                 to_model_name = to_model._meta.object_name
+-            if (
+-                self.remote_field.through_fields is None
+-                and not isinstance(to_model, str)
+-                and isinstance(to_model._meta.pk, CompositePrimaryKey)
++            if self.remote_field.through_fields is None and not isinstance(
++                to_model, str
+             ):
++                model_name = None
++                if isinstance(to_model._meta.pk, CompositePrimaryKey):
+                 errors.append(
+                     checks.Error(
+                         "Field defines a relation to the CompositePrimaryKey of model "

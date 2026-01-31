@@ -1,0 +1,17 @@
+diff --git a/astropy/visualization/interval.py b/astropy/visualization/interval.py
+--- a/astropy/visualization/interval.py
++++ b/astropy/visualization/interval.py
+@@ -66,6 +66,12 @@
+         result : 1D ndarray
+             The processed values.
+         """
++        data, mask = get_data_and_mask(np.asanyarray(values))
++        ok = np.isfinite(data)
++        if mask is not None:
++            ok &= ~mask
++
++        return data[ok]
+ 
+     def __call__(self, values, clip=True, out=None):
+         """
+

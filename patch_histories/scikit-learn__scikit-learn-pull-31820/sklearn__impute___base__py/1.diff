@@ -1,0 +1,18 @@
+diff --git a/sklearn/impute/_base.py b/sklearn/impute/_base.py
+--- a/sklearn/impute/_base.py
++++ b/sklearn/impute/_base.py
+@@ -38,6 +38,14 @@ def _check_inputs_dtype(X, missing_values):
+         )
+ 
+ 
++def _safe_min(items):
++    """Compute the minimum of a list of potentially non-comparable values.
++
++    If values cannot be directly compared due to type incompatibility, the object with
++    the lowest string representation is returned.
++    """
++
++
+ def _most_frequent(array, extra_value, n_repeat):
+     """Compute the most frequent value in a 1d array extended with
+     [extra_value] * n_repeat, where extra_value is assumed to be not part

@@ -1,0 +1,13 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -917,6 +917,9 @@
+         for transform in transforms:
+             transform_class = replacement.get_transform(transform)
+             if transform_class is None:
++                return self
++            replacement = transform_class(replacement)
++        return replacement
+ 
+     def asc(self, **kwargs):
+         return OrderBy(self, **kwargs)

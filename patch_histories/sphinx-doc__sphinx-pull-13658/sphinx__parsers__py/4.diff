@@ -1,0 +1,16 @@
+diff --git a/sphinx/parsers.py b/sphinx/parsers.py
+--- a/sphinx/parsers.py
++++ b/sphinx/parsers.py
+@@ -100,9 +100,9 @@ def parse(self, inputstring: str | StringList, document: nodes.document) -> None
+         self.finish_parse()
+ 
+     def decorate(self, content: StringList) -> None:
+-        """Preprocess reST content before parsing."""
+-        prepend_prolog(content, self.config.rst_prolog)
+-        append_epilog(content, self.config.rst_epilog)
++        """Preprocess reStructuredText content before parsing."""
++        _prepend_prologue(content, self._config.rst_prolog)
++        _append_epilogue(content, self._config.rst_epilog)
+ 
+ 
+ def setup(app: Sphinx) -> ExtensionMetadata:

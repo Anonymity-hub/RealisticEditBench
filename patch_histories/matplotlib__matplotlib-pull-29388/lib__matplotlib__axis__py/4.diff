@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -2298,7 +2298,7 @@
+                and not tick.tick2line.get_visible()
+                and tick.label1.get_visible()
+                and not tick.label2.get_visible()
+-               for tick in [major, minor]):
++               for tick in representative_ticks):
+             return 1
+         elif all(tick.tick2line.get_visible()
+                  and not tick.tick1line.get_visible()

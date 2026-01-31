@@ -1,0 +1,14 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -3693,7 +3693,9 @@
+     # If labels is passed, augment y_true to ensure that all labels are represented
+     # Use 0 weight for the new samples to not affect the counts
+     y_true_, weights_ = (
+-
++
++        if labels is not None
++        else (y_true, weights)
+     )
+ 
+     _, y_value_indices = np.unique(y_true_, return_inverse=True)

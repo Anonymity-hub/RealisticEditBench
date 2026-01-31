@@ -1,0 +1,24 @@
+diff --git a/lib/matplotlib/container.py b/lib/matplotlib/container.py
+--- a/lib/matplotlib/container.py
++++ b/lib/matplotlib/container.py
+@@ -94,6 +94,20 @@
+ 
+         .. versionadded:: 3.11
+         """
++        if self.orientation == 'vertical':
++            return [p.get_y() + p.get_height() for p in self.patches]
++        elif self.orientation == 'horizontal':
++            return [p.get_x() + p.get_width() for p in self.patches]
++        else:
++            raise ValueError("orientation must be 'vertical' or 'horizontal'.")
++
++    @property
++    def position_centers(self):
++        """
++        Return the centers of bar positions.
++
++        .. versionadded:: 3.11
++        """
+ 
+ class ErrorbarContainer(Container):
+     """

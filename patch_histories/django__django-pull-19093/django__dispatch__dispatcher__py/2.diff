@@ -1,0 +1,21 @@
+diff --git a/django/dispatch/dispatcher.py b/django/dispatch/dispatcher.py
+--- a/django/dispatch/dispatcher.py
++++ b/django/dispatch/dispatcher.py
+@@ -112,6 +112,17 @@
+             receiver = ref(receiver)
+             weakref.finalize(receiver_object, self._flag_dead_receivers)
+ 
++        # Keep a weakref to sender if possible to ensure associated receivers
++        # are cleared if it gets garbage collected. This ensures there is no
++        # id(sender) collisions for distinct senders with non-overlapping
++        # lifetimes.
++        sender_ref = None
++        if sender is not None:
++            try:
++                sender_ref = weakref.ref(sender, self._flag_dead_receivers)
++            except TypeError:
++                pass
++
+         with self.lock:
+             self._clear_dead_receivers()
+             if not any(r_key == lookup_key for r_key, _, _ in self.receivers):

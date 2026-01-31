@@ -1,0 +1,30 @@
+diff --git a/astropy/units/deprecated.py b/astropy/units/deprecated.py
+--- a/astropy/units/deprecated.py
++++ b/astropy/units/deprecated.py
+@@ -38,9 +38,20 @@
+ if __doc__ is not None:
+     # This generates a docstring for this module that describes all of the
+     # standard units defined here.
++    __doc__ += generate_unit_summary(local_units)
++    __doc__ += generate_prefixonly_unit_summary(local_units)
+ 
+ 
+ def __getattr__(name):
++    if unit := local_units.get(name):
++        warnings.warn(
++            f"{name!r} is deprecated since version 7.1", AstropyDeprecationWarning
++        )
++        return unit
++    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
++
++
++@deprecated(since="7.1")
+ def enable():
+     """
+     Enable deprecated units so they appear in results of
+@@ -50,4 +61,4 @@
+     This may be used with the ``with`` statement to enable deprecated
+     units only temporarily.
+     """
+-    return add_enabled_units(globals())
++    return add_enabled_units()

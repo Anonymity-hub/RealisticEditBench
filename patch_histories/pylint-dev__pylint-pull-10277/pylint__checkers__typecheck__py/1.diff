@@ -1,0 +1,13 @@
+diff --git a/pylint/checkers/typecheck.py b/pylint/checkers/typecheck.py
+--- a/pylint/checkers/typecheck.py
++++ b/pylint/checkers/typecheck.py
+@@ -182,6 +182,9 @@ def _similar_names(
+     possible_names: list[tuple[str, int]] = []
+     names = _node_names(owner)
+ 
++    attr_str = attrname or ""
++    attr_len = len(attr_str)
++
+     for name in names:
+         if name == attrname:
+             continue

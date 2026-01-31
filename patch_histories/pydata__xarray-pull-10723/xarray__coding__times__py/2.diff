@@ -1,0 +1,12 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -1067,7 +1067,7 @@
+         assert np.issubdtype(dates.dtype, "datetime64")
+         if (
+             calendar in ["standard", "gregorian"]
+-            and
++            and dates.size > 0
+             and np.nanmin(dates).astype("=M8[us]").astype(datetime)
+             < datetime(1582, 10, 15)
+         ):

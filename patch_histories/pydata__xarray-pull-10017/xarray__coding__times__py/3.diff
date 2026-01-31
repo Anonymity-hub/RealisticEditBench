@@ -1,0 +1,13 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -1149,7 +1149,8 @@
+             units = "microseconds since 1970-01-01"
+             dtype = np.dtype("int64")
+         else:
+-            units = "nanoseconds since 1970-01-01"
++            netcdf_unit = _numpy_dtype_to_netcdf_timeunit(dates.dtype)
++            units = f"{netcdf_unit} since 1970-01-01"
+             dtype = np.dtype("int64")
+ 
+     if units is None or dtype is None:

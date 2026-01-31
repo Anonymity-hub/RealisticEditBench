@@ -1,0 +1,16 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -2938,6 +2938,12 @@
+ 
+         annotations = []
+
++        if np.iterable(padding):
++            # if padding iterable, check length
++            padding = np.asarray(padding)
++            if len(padding) != len(bars):
++                raise ValueError(
++                    f"padding must be of length {len(bars)} when passed as a sequence")
+         for bar, err, dat, lbl in itertools.zip_longest(
+                 bars, errs, datavalues, labels
+         ):

@@ -1,0 +1,54 @@
+diff --git a/sklearn/linear_model/_base.py b/sklearn/linear_model/_base.py
+--- a/sklearn/linear_model/_base.py
++++ b/sklearn/linear_model/_base.py
+@@ -643,21 +643,13 @@
+         # sparse matrix. Therefore, let's not copy X when it is sparse.
+         copy_X_in_preprocess_data = self.copy_X and not sp.issparse(X)
+ 
+-        X, y, X_offset, y_offset, X_scale = _preprocess_data(
++        X, y, X_offset, y_offset, _, sample_weight_sqrt = _preprocess_data(
+             X,
+             y,
+             fit_intercept=self.fit_intercept,
+             copy=copy_X_in_preprocess_data,
+             sample_weight=sample_weight,
+         )
+-
+-        if has_sw:
+-            # Sample weight can be implemented via a simple rescaling. Note
+-            # that we safely do inplace rescaling when _preprocess_data has
+-            # already made a copy if requested.
+-            X, y, sample_weight_sqrt = _rescale_data(
+-                X, y, sample_weight, inplace=copy_X_in_preprocess_data
+-            )
+ 
+         if self.positive:
+             if y.ndim < 2:
+@@ -669,23 +661,21 @@
+                 )
+                 self.coef_ = np.vstack([out[0] for out in outs])
+         elif sp.issparse(X):
+-            X_offset_scale = X_offset / X_scale
+-
+             if has_sw:
+ 
+                 def matvec(b):
+-                    return X.dot(b) - sample_weight_sqrt * b.dot(X_offset_scale)
++                    return X.dot(b) - sample_weight_sqrt * b.dot(X_offset)
+ 
+                 def rmatvec(b):
+-                    return X.T.dot(b) - X_offset_scale * b.dot(sample_weight_sqrt)
++                    return X.T.dot(b) - X_offset * b.dot(sample_weight_sqrt)
+ 
+             else:
+ 
+                 def matvec(b):
+-                    return X.dot(b) - b.dot(X_offset_scale)
++                    return X.dot(b) - b.dot(X_offset)
+ 
+                 def rmatvec(b):
+-                    return X.T.dot(b) - X_offset_scale * b.sum()
++                    return X.T.dot(b) - X_offset * b.sum()
+ 
+             X_centered = sparse.linalg.LinearOperator(
+                 shape=X.shape, matvec=matvec, rmatvec=rmatvec

@@ -1,0 +1,20 @@
+diff --git a/xarray/core/coordinates.py b/xarray/core/coordinates.py
+--- a/xarray/core/coordinates.py
++++ b/xarray/core/coordinates.py
+@@ -1,6 +1,6 @@
+ from __future__ import annotations
+ 
+-from collections.abc import Hashable, Iterator, Mapping, Sequence
++from collections.abc import Callable, Hashable, Iterable, Iterator, Mapping, Sequence
+ from contextlib import contextmanager
+ from typing import (
+     TYPE_CHECKING,
+@@ -21,7 +21,7 @@
+     assert_no_index_corrupted,
+     create_default_index_implicit,
+ )
+-from xarray.core.types import DataVars, Self, T_DataArray, T_Xarray
++from xarray.core.types import DataVars, ErrorOptions, Self, T_DataArray, T_Xarray
+ from xarray.core.utils import (
+     Frozen,
+     ReprObject,

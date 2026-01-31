@@ -1,0 +1,14 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -816,10 +816,6 @@ def open_store_variable(self, name):
+         )
+         attributes = dict(attributes)
+ 
+-        # TODO: this should not be needed once
+-        # https://github.com/zarr-developers/zarr-python/issues/1269 is resolved.
+-        attributes.pop("filters", None)
+-
+         encoding = {
+             "chunks": zarr_array.chunks,
+             "preferred_chunks": dict(zip(dimensions, zarr_array.chunks, strict=True)),

@@ -1,0 +1,14 @@
+diff --git a/sympy/matrices/matrixbase.py b/sympy/matrices/matrixbase.py
+--- a/sympy/matrices/matrixbase.py
++++ b/sympy/matrices/matrixbase.py
+@@ -717,8 +717,8 @@
+         diag
+         """
+         k = as_int(k)
+-            rv = [self[r, r+k] for r in range(max(0, -k), min(self.rows, self.cols - k))]
+-            return self._new(1, len(rv), rv)
++        rv = [self[r, r+k] for r in range(max(0, -k), min(self.rows, self.cols - k))]
++        return self._new(1, len(rv), rv)
+ 
+     def row(self, i: int, /) -> Self:
+         """Elementary row selector.

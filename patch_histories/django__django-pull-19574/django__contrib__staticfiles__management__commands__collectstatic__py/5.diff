@@ -1,0 +1,15 @@
+diff --git a/django/contrib/staticfiles/management/commands/collectstatic.py b/django/contrib/staticfiles/management/commands/collectstatic.py
+--- a/django/contrib/staticfiles/management/commands/collectstatic.py
++++ b/django/contrib/staticfiles/management/commands/collectstatic.py
+@@ -235,6 +235,11 @@
+                     collected["post_processed"]
+                     and ", %s post-processed" % post_processed_count
+                     or ""
++                ),
++                "skipped": (
++                    ", %s skipped due to conflict" % skipped_count
++                    if collected["skipped"]
++                    else ""
+                 ),
+             }
+ 

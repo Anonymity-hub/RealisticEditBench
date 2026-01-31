@@ -1,0 +1,14 @@
+diff --git a/django/middleware/cache.py b/django/middleware/cache.py
+--- a/django/middleware/cache.py
++++ b/django/middleware/cache.py
+@@ -104,6 +104,10 @@
+         # private, no-cache, or no-store.
+         cache_control = response.get("Cache-Control", ())
+         if any(
++            directive in cache_control
++            for directive in (
++            )
++        ):
+             return response
+ 
+         # Page timeout takes precedence over the "max-age" and the default

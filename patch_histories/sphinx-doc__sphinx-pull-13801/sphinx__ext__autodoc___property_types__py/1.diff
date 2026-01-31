@@ -1,0 +1,14 @@
+diff --git a/sphinx/ext/autodoc/_property_types.py b/sphinx/ext/autodoc/_property_types.py
+--- a/sphinx/ext/autodoc/_property_types.py
++++ b/sphinx/ext/autodoc/_property_types.py
+@@ -64,6 +64,10 @@ def full_name(self) -> str:
+     def parent_names(self) -> tuple[str, ...]:
+         return self.parts[:-1]
+ 
++    @property
++    def dotted_parts(self) -> str:
++        return '.'.join(self.parts)
++
+ 
+ @dataclasses.dataclass(frozen=False, kw_only=True, slots=True)
+ class _ModuleProperties(_ItemProperties):

@@ -1,0 +1,13 @@
+diff --git a/sklearn/pipeline.py b/sklearn/pipeline.py
+--- a/sklearn/pipeline.py
++++ b/sklearn/pipeline.py
+@@ -2051,6 +2051,9 @@
+             return adapter.hstack(Xs)
+ 
+         if any(sparse.issparse(f) for f in Xs):
++            return sparse.hstack(Xs).tocsr()
++
++        return np.hstack(Xs)
+ 
+     def _update_transformer_list(self, transformers):
+         transformers = iter(transformers)

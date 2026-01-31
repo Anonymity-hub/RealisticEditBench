@@ -1,0 +1,11 @@
+diff --git a/sympy/assumptions/handlers/ntheory.py b/sympy/assumptions/handlers/ntheory.py
+--- a/sympy/assumptions/handlers/ntheory.py
++++ b/sympy/assumptions/handlers/ntheory.py
+@@ -110,6 +110,7 @@
+             if _is_one:
+                 return False
+             if _is_one is None:
++                return None
+             return not _prime
+         else:
+             return _integer

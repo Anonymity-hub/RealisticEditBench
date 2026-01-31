@@ -1,0 +1,128 @@
+diff --git a/sphinx/domains/javascript.py b/sphinx/domains/javascript.py
+--- a/sphinx/domains/javascript.py
++++ b/sphinx/domains/javascript.py
+@@ -155,8 +155,8 @@ def _object_hierarchy_parts(self, sig_node: desc_signature) -> tuple[str, ...]:
+     def add_target_and_index(
+         self, name_obj: tuple[str, str], sig: str, signode: desc_signature
+     ) -> None:
+-        mod_name = self.env.ref_context.get('js:module')
+-        fullname = (mod_name + '.' if mod_name else '') + name_obj[0]
++        mod_name = self.env.ref_context.get('js:module', '')
++        fullname = (f'{mod_name}.' if mod_name else '') + name_obj[0]
+         node_id = make_id(self.env, self.state.document, '', fullname)
+         signode['ids'].append(node_id)
+         self.state.document.note_explicit_target(signode)
+@@ -165,11 +165,10 @@ def add_target_and_index(
+         domain.note_object(fullname, self.objtype, node_id, location=signode)
+ 
+         if 'no-index-entry' not in self.options:
+-            indextext = self.get_index_text(mod_name, name_obj)  # type: ignore[arg-type]
+-            if indextext:
++            if index_text := self.get_index_text(mod_name, name_obj):
+                 self.indexnode['entries'].append((
+                     'single',
+-                    indextext,
++                    index_text,
+                     node_id,
+                     '',
+                     None,
+@@ -333,6 +332,7 @@ class JSModule(SphinxDirective):
+     final_argument_whitespace = False
+     option_spec: ClassVar[OptionSpec] = {
+         'no-index': directives.flag,
++        'no-index-entry': directives.flag,
+         'no-contents-entry': directives.flag,
+         'no-typesetting': directives.flag,
+         'noindex': directives.flag,
+@@ -365,9 +365,12 @@ def run(self) -> list[Node]:
+             )
+ 
+             # The node order is: index node first, then target node
+-            indextext = _('%s (module)') % mod_name
+-            inode = addnodes.index(entries=[('single', indextext, node_id, '', None)])
+-            ret.append(inode)
++            if 'no-index-entry' not in self.options:
++                index_text = _('%s (module)') % mod_name
++                inode = addnodes.index(
++                    entries=[('single', index_text, node_id, '', None)]
++                )
++                ret.append(inode)
+             target = nodes.target('', '', ids=[node_id], ismod=True)
+             self.state.document.note_explicit_target(target)
+             ret.append(target)
+diff --git a/sphinx/domains/python/__init__.py b/sphinx/domains/python/__init__.py
+--- a/sphinx/domains/python/__init__.py
++++ b/sphinx/domains/python/__init__.py
+@@ -479,6 +479,7 @@ class PyModule(SphinxDirective):
+         'platform': lambda x: x,
+         'synopsis': lambda x: x,
+         'no-index': directives.flag,
++        'no-index-entry': directives.flag,
+         'no-contents-entry': directives.flag,
+         'no-typesetting': directives.flag,
+         'noindex': directives.flag,
+@@ -520,10 +521,15 @@ def run(self) -> list[Node]:
+ 
+             # the platform and synopsis aren't printed; in fact, they are only
+             # used in the modindex currently
+-            indextext = f'module; {modname}'
+-            inode = addnodes.index(entries=[('pair', indextext, node_id, '', None)])
+-            # The node order is: index node first, then target node.
+-            ret.extend((inode, target))
++
++            if 'no-index-entry' not in self.options:
++                index_text = f'module; {modname}'
++                inode = addnodes.index(
++                    entries=[('pair', index_text, node_id, '', None)]
++                )
++                # The node order is: index node first, then target node.
++                ret.append(inode)
++            ret.append(target)
+         ret.extend(content_nodes)
+         return ret
+ 
+diff --git a/sphinx/domains/python/_object.py b/sphinx/domains/python/_object.py
+--- a/sphinx/domains/python/_object.py
++++ b/sphinx/domains/python/_object.py
+@@ -409,8 +409,8 @@ def get_index_text(self, modname: str, name: tuple[str, str]) -> str:
+     def add_target_and_index(
+         self, name_cls: tuple[str, str], sig: str, signode: desc_signature
+     ) -> None:
+-        modname = self.options.get('module', self.env.ref_context.get('py:module'))
+-        fullname = (f'{modname}.' if modname else '') + name_cls[0]
++        mod_name = self.options.get('module', self.env.ref_context.get('py:module'))
++        fullname = (f'{mod_name}.' if mod_name else '') + name_cls[0]
+         node_id = make_id(self.env, self.state.document, '', fullname)
+         signode['ids'].append(node_id)
+         self.state.document.note_explicit_target(signode)
+@@ -425,11 +425,10 @@ def add_target_and_index(
+             )
+ 
+         if 'no-index-entry' not in self.options:
+-            indextext = self.get_index_text(modname, name_cls)
+-            if indextext:
++            if index_text := self.get_index_text(mod_name, name_cls):
+                 self.indexnode['entries'].append((
+                     'single',
+-                    indextext,
++                    index_text,
+                     node_id,
+                     '',
+                     None,
+diff --git a/sphinx/domains/rst.py b/sphinx/domains/rst.py
+--- a/sphinx/domains/rst.py
++++ b/sphinx/domains/rst.py
+@@ -57,11 +57,10 @@ def add_target_and_index(
+         domain.note_object(self.objtype, name, node_id, location=signode)
+ 
+         if 'no-index-entry' not in self.options:
+-            indextext = self.get_index_text(self.objtype, name)
+-            if indextext:
++            if index_text := self.get_index_text(self.objtype, name):
+                 self.indexnode['entries'].append((
+                     'single',
+-                    indextext,
++                    index_text,
+                     node_id,
+                     '',
+                     None,

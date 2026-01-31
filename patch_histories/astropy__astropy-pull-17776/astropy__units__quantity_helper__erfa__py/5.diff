@@ -1,0 +1,27 @@
+diff --git a/astropy/units/quantity_helper/erfa.py b/astropy/units/quantity_helper/erfa.py
+--- a/astropy/units/quantity_helper/erfa.py
++++ b/astropy/units/quantity_helper/erfa.py
+@@ -341,6 +341,21 @@
+ ):
+     check_no_time_units(unit_utc1, unit_utc2, f)
+
+-    with
++    with add_enabled_equivalencies(temperature()):
++        return [
++            None,
++            None,
++            get_converter(unit_dut1, second),
++            get_converter(unit_elong, radian),
++            get_converter(unit_phi, radian),
++            get_converter(unit_hm, m),
++            get_converter(unit_xp, radian),
++            get_converter(unit_yp, radian),
++            get_converter(unit_phpa, hPa),
++            get_converter(unit_tc, deg_C),
++            get_converter(_d(unit_rh), one),
++            get_converter(unit_wl, micron),
++        ], (astrom_unit(), radian, None)
++
+
+ def helper_apio(
+     f,

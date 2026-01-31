@@ -1,0 +1,12 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -908,6 +908,8 @@
+         # Avoid unnecessarily looking up replacements with field_name again as
+         # in the vast majority of cases F instances won't be composed of any
+         # lookups.
++        if not transforms:
++            return self
+ 
+     def asc(self, **kwargs):
+         return OrderBy(self, **kwargs)

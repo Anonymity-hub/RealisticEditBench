@@ -1,0 +1,12 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -33,7 +33,7 @@
+     resolve_callables,
+ )
+ from django.utils import timezone
+-from django.utils.functional import cached_property, partition
++from django.utils.functional import cached_property
+ 
+ # The maximum number of results to fetch in a get() query.
+ MAX_GET_RESULTS = 21

@@ -1,0 +1,14 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -317,6 +317,10 @@
+     >>> normalize_array(np.array([-5, 3, 5, -1, 8]), 12)
+     array([ 7,  3,  5, 11,  8])
+     """
++    if np.issubdtype(array.dtype, np.unsignedinteger):
++        return array
++
++    return np.where(array >= 0, array, array + size)
+
+ def _index_indexer_1d(old_indexer, applied_indexer, size: int):
+     if isinstance(applied_indexer, slice) and applied_indexer == slice(None):

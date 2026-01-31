@@ -1,0 +1,24 @@
+diff --git a/lib/matplotlib/scale.py b/lib/matplotlib/scale.py
+--- a/lib/matplotlib/scale.py
++++ b/lib/matplotlib/scale.py
+@@ -801,6 +801,20 @@ def limit_range_for_scale(self, vmin, vmax, minpos):
+     'functionlog': FuncScaleLog,
+     }
+ 
++# caching of signature info
++# For backward compatibility, the built-in scales will keep the *axis* parameter
++# in their constructors until matplotlib 3.15, i.e. as long as the *axis* parameter
++# is still supported.
++_scale_has_axis_parameter = {
++    'linear': True,
++    'log': True,
++    'symlog': True,
++    'asinh': True,
++    'logit': True,
++    'function': True,
++    'functionlog': True,
++}
++
+ 
+ def get_scale_names():
+     """Return the names of the available scales."""

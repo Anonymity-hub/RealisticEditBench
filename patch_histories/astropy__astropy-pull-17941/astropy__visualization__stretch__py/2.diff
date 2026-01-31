@@ -1,0 +1,15 @@
+diff --git a/astropy/visualization/stretch.py b/astropy/visualization/stretch.py
+--- a/astropy/visualization/stretch.py
++++ b/astropy/visualization/stretch.py
+@@ -290,8 +290,8 @@
+     """
+ 
+     def __init__(self, a=1000.0):
+-        if a < 0 or a == 1:  # singularity
+-            raise ValueError("a must be >= 0, but cannot be set to 1")
++        if a <= 0 or a == 1:  # singularity
++            raise ValueError("a must be > 0, but cannot be set to 1")
+         super().__init__()
+         self.a = a
+ 
+ 

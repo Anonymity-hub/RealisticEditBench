@@ -1,0 +1,14 @@
+diff --git a/sympy/polys/ring_series.py b/sympy/polys/ring_series.py
+--- a/sympy/polys/ring_series.py
++++ b/sympy/polys/ring_series.py
+@@ -506,7 +506,9 @@
+     if _has_constant_term(p - c, x):
+         raise ValueError("p cannot contain a constant term depending on "
+                          "parameters")
+-    if not
++    if not R.domain.is_unit(c):
++        raise ValueError(f"Constant term {c} must be a unit in {R.domain}")
++
+     one = R(1)
+     if R.domain is EX:
+         one = 1

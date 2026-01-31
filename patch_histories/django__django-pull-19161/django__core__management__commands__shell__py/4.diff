@@ -1,0 +1,14 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -65,9 +65,7 @@
+         import code
+ 
+         # Set up a dictionary to serve as the environment for the shell.
+-        imported_objects = self.get_and_report_namespace(
+-            options["verbosity"], options["no_imports"]
+-        )
++        imported_objects = self.get_and_report_namespace(**options)
+ 
+         # We want to honor both $PYTHONSTARTUP and .pythonrc.py, so follow system
+         # conventions and get $PYTHONSTARTUP first then .pythonrc.py.

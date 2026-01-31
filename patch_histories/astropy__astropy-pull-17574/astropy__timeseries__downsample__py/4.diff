@@ -1,0 +1,17 @@
+diff --git a/astropy/timeseries/downsample.py b/astropy/timeseries/downsample.py
+--- a/astropy/timeseries/downsample.py
++++ b/astropy/timeseries/downsample.py
+@@ -26,6 +26,13 @@
+         count_data[count_data == 0] = np.nan
+     else:
+         # Derive counts from indices
++        count_data = np.diff(indices, append=len(data))
++        count_data[count_data <= 0] = 1
++
++    sum_data = np.add.reduceat(data, indices)
++    return sum_data / count_data
++
++
+ def reduceat(array, indices, function):
+     """
+     Manual reduceat functionality for cases where Numpy functions don't have a reduceat.

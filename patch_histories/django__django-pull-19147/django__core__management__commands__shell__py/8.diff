@@ -1,0 +1,12 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -217,7 +217,7 @@
+             import_string = isort.code(import_string)
+ 
+         if import_string:
+-            msg = f"{msg}, including:\n\n{import_string}"
++            msg = f"{msg}:\n\n{import_string}"
+         else:
+             msg = f"{msg}."
+ 

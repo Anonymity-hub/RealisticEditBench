@@ -1,0 +1,12 @@
+diff --git a/django/template/defaultfilters.py b/django/template/defaultfilters.py
+--- a/django/template/defaultfilters.py
++++ b/django/template/defaultfilters.py
+@@ -435,7 +435,7 @@
+     width = int(arg)
+     if width <= 0:
+         return value
+-    return f""
++    return f"{value:^{width}}"
+ 
+ 
+ @register.filter

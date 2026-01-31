@@ -1,0 +1,37 @@
+diff --git a/sphinx/ext/intersphinx/_load.py b/sphinx/ext/intersphinx/_load.py
+--- a/sphinx/ext/intersphinx/_load.py
++++ b/sphinx/ext/intersphinx/_load.py
+@@ -3,6 +3,7 @@
+ from __future__ import annotations
+ 
+ import concurrent.futures
++import dataclasses
+ import io
+ import os.path
+ import posixpath
+@@ -201,6 +203,25 @@ def load_mappings(app: Sphinx) -> None:
+                 inventories.main_inventory.setdefault(objtype, {}).update(objects)
+ 
+ 
++@dataclasses.dataclass(frozen=True, kw_only=True, slots=True)
++class _InvConfig:
++    intersphinx_cache_limit: int
++    intersphinx_timeout: int | float | None
++    tls_verify: bool
++    tls_cacerts: str | dict[str, str] | None
++    user_agent: str
++
++    @classmethod
++    def from_config(cls, config: Config) -> _InvConfig:
++        return cls(
++            intersphinx_cache_limit=config.intersphinx_cache_limit,
++            intersphinx_timeout=config.intersphinx_timeout,
++            tls_verify=config.tls_verify,
++            tls_cacerts=config.tls_cacerts,
++            user_agent=config.user_agent,
++        )
++
++
+ def _fetch_inventory_group(
+     *,
+     project: _IntersphinxProject,

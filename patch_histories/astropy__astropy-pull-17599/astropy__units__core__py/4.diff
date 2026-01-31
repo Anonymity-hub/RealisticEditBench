@@ -1,0 +1,25 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -747,6 +747,11 @@
+ 
+         try:
+             return get_format(format).to_string(self, **kwargs)
++        except (TypeError, ValueError) as err:
++            from .format import known_formats
++
++            err.add_note(known_formats())
++            raise err
+ 
+     def __format__(self, format_spec: str) -> str:
+         try:
+@@ -2020,6 +2025,7 @@
+ 
+             from .format import Generic, get_format
+ 
+-            f = get_format(format)
++            try:
++                f = get_format(format)
+             if isinstance(s, bytes):
+                 s = s.decode("ascii")
+ 

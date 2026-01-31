@@ -1,0 +1,199 @@
+diff --git a/xarray/core/common.py b/xarray/core/common.py
+--- a/xarray/core/common.py
++++ b/xarray/core/common.py
+@@ -1118,7 +1118,7 @@ def _resample(
+                 f"Received {type(freq)} instead."
+             )
+ 
+-        rgrouper = ResolvedGrouper(grouper, group, self, eagerly_compute_group=False)
++        rgrouper = ResolvedGrouper(grouper, group, self)
+ 
+         return resample_cls(
+             self,
+diff --git a/xarray/core/dataarray.py b/xarray/core/dataarray.py
+--- a/xarray/core/dataarray.py
++++ b/xarray/core/dataarray.py
+@@ -6813,7 +6813,7 @@ def groupby(
+         *,
+         squeeze: Literal[False] = False,
+         restore_coord_dims: bool = False,
+-        eagerly_compute_group: bool = True,
++        eagerly_compute_group: Literal[False] | None = None,
+         **groupers: Grouper,
+     ) -> DataArrayGroupBy:
+         """Returns a DataArrayGroupBy object for performing grouped operations.
+@@ -6829,11 +6829,8 @@ def groupby(
+         restore_coord_dims : bool, default: False
+             If True, also restore the dimension order of multi-dimensional
+             coordinates.
+-        eagerly_compute_group: bool
+-            Whether to eagerly compute ``group`` when it is a chunked array.
+-            This option is to maintain backwards compatibility. Set to False
+-            to opt-in to future behaviour, where ``group`` is not automatically loaded
+-            into memory.
++        eagerly_compute_group: bool, optional
++            This argument is deprecated.
+         **groupers : Mapping of str to Grouper or Resampler
+             Mapping of variable name to group by to :py:class:`Grouper` or :py:class:`Resampler` object.
+             One of ``group`` or ``groupers`` must be provided.
+@@ -6965,7 +6962,7 @@ def groupby_bins(
+         squeeze: Literal[False] = False,
+         restore_coord_dims: bool = False,
+         duplicates: Literal["raise", "drop"] = "raise",
+-        eagerly_compute_group: bool = True,
++        eagerly_compute_group: Literal[False] | None = None,
+     ) -> DataArrayGroupBy:
+         """Returns a DataArrayGroupBy object for performing grouped operations.
+ 
+@@ -7002,11 +6999,8 @@ def groupby_bins(
+             coordinates.
+         duplicates : {"raise", "drop"}, default: "raise"
+             If bin edges are not unique, raise ValueError or drop non-uniques.
+-        eagerly_compute_group: bool
+-            Whether to eagerly compute ``group`` when it is a chunked array.
+-            This option is to maintain backwards compatibility. Set to False
+-            to opt-in to future behaviour, where ``group`` is not automatically loaded
+-            into memory.
++        eagerly_compute_group: bool, optional
++            This argument is deprecated.
+ 
+         Returns
+         -------
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -9847,7 +9847,7 @@ def groupby(
+         *,
+         squeeze: Literal[False] = False,
+         restore_coord_dims: bool = False,
+-        eagerly_compute_group: bool = True,
++        eagerly_compute_group: Literal[False] | None = None,
+         **groupers: Grouper,
+     ) -> DatasetGroupBy:
+         """Returns a DatasetGroupBy object for performing grouped operations.
+@@ -9863,11 +9863,8 @@ def groupby(
+         restore_coord_dims : bool, default: False
+             If True, also restore the dimension order of multi-dimensional
+             coordinates.
+-        eagerly_compute_group: bool
+-            Whether to eagerly compute ``group`` when it is a chunked array.
+-            This option is to maintain backwards compatibility. Set to False
+-            to opt-in to future behaviour, where ``group`` is not automatically loaded
+-            into memory.
++        eagerly_compute_group: False, optional
++            This argument is deprecated.
+         **groupers : Mapping of str to Grouper or Resampler
+             Mapping of variable name to group by to :py:class:`Grouper` or :py:class:`Resampler` object.
+             One of ``group`` or ``groupers`` must be provided.
+@@ -9968,7 +9965,7 @@ def groupby_bins(
+         squeeze: Literal[False] = False,
+         restore_coord_dims: bool = False,
+         duplicates: Literal["raise", "drop"] = "raise",
+-        eagerly_compute_group: bool = True,
++        eagerly_compute_group: Literal[False] | None = None,
+     ) -> DatasetGroupBy:
+         """Returns a DatasetGroupBy object for performing grouped operations.
+ 
+@@ -10005,11 +10002,8 @@ def groupby_bins(
+             coordinates.
+         duplicates : {"raise", "drop"}, default: "raise"
+             If bin edges are not unique, raise ValueError or drop non-uniques.
+-        eagerly_compute_group: bool
+-            Whether to eagerly compute ``group`` when it is a chunked array.
+-            This option is to maintain backwards compatibility. Set to False
+-            to opt-in to future behaviour, where ``group`` is not automatically loaded
+-            into memory.
++        eagerly_compute_group: False, optional
++            This argument is deprecated.
+ 
+         Returns
+         -------
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -295,7 +295,7 @@ class ResolvedGrouper(Generic[T_DataWithCoords]):
+     grouper: Grouper
+     group: T_Group
+     obj: T_DataWithCoords
+-    eagerly_compute_group: bool = field(repr=False)
++    eagerly_compute_group: Literal[False] | None = field(repr=False, default=None)
+ 
+     # returned by factorize:
+     encoded: EncodedGroups = field(init=False, repr=False)
+@@ -324,39 +324,38 @@ def __post_init__(self) -> None:
+ 
+         self.group = _resolve_group(self.obj, self.group)
+ 
++        if self.eagerly_compute_group:
++            raise ValueError(
++                f""""Eagerly computing the DataArray you're grouping by ({self.group.name!r}) "
++                has been removed.
++                Please load this array's data manually using `.compute` or `.load`.
++                To intentionally avoid eager loading, either (1) specify
++                `.groupby({self.group.name}=UniqueGrouper(labels=...))`
++                or (2) pass explicit bin edges using ``bins`` or
++                `.groupby({self.group.name}=BinGrouper(bins=...))`; as appropriate."""
++            )
++        if self.eagerly_compute_group is not None:
++            emit_user_level_warning(
++                "Passing `eagerly_compute_group` is now deprecated. It has no effect.",
++                DeprecationWarning,
++            )
++
+         if not isinstance(self.group, _DummyGroup) and is_chunked_array(
+             self.group.variable._data
+         ):
+-            if self.eagerly_compute_group is False:
+-                # This requires a pass to discover the groups present
+-                if (
+-                    isinstance(self.grouper, UniqueGrouper)
+-                    and self.grouper.labels is None
+-                ):
+-                    raise ValueError(
+-                        "Please pass `labels` to UniqueGrouper when grouping by a chunked array."
+-                    )
+-                # this requires a pass to compute the bin edges
+-                if isinstance(self.grouper, BinGrouper) and isinstance(
+-                    self.grouper.bins, int
+-                ):
+-                    raise ValueError(
+-                        "Please pass explicit bin edges to BinGrouper using the ``bins`` kwarg"
+-                        "when grouping by a chunked array."
+-                    )
+-
+-            if self.eagerly_compute_group:
+-                emit_user_level_warning(
+-                    f""""Eagerly computing the DataArray you're grouping by ({self.group.name!r}) "
+-                    is deprecated and will raise an error in v2025.05.0.
+-                    Please load this array's data manually using `.compute` or `.load`.
+-                    To intentionally avoid eager loading, either (1) specify
+-                    `.groupby({self.group.name}=UniqueGrouper(labels=...), eagerly_load_group=False)`
+-                    or (2) pass explicit bin edges using or `.groupby({self.group.name}=BinGrouper(bins=...),
+-                    eagerly_load_group=False)`; as appropriate.""",
+-                    DeprecationWarning,
++            # This requires a pass to discover the groups present
++            if isinstance(self.grouper, UniqueGrouper) and self.grouper.labels is None:
++                raise ValueError(
++                    "Please pass `labels` to UniqueGrouper when grouping by a chunked array."
++                )
++            # this requires a pass to compute the bin edges
++            if isinstance(self.grouper, BinGrouper) and isinstance(
++                self.grouper.bins, int
++            ):
++                raise ValueError(
++                    "Please pass explicit bin edges to BinGrouper using the ``bins`` kwarg"
++                    "when grouping by a chunked array."
+                 )
+-                self.group = self.group.compute()
+ 
+         self.encoded = self.grouper.factorize(self.group)
+ 
+@@ -382,7 +381,7 @@ def _parse_group_and_groupers(
+     group: GroupInput,
+     groupers: dict[str, Grouper],
+     *,
+-    eagerly_compute_group: bool,
++    eagerly_compute_group: Literal[False] | None,
+ ) -> tuple[ResolvedGrouper, ...]:
+     from xarray.core.dataarray import DataArray
+     from xarray.core.variable import Variable

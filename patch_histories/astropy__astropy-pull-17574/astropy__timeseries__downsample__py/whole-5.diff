@@ -1,0 +1,12 @@
+diff --git a/astropy/timeseries/downsample.py b/astropy/timeseries/downsample.py
+--- a/astropy/timeseries/downsample.py
++++ b/astropy/timeseries/downsample.py
+@@ -116,7 +116,7 @@ def aggregate_downsample(
+         parameter will be ignored.
+     aggregate_func : callable, optional
+         The function to use for combining points in the same bin. Defaults
+-        to an internal implementation of NumPy `nanmean` function.
++        to an internal implementation of nanmean.
+ 
+     Returns
+     -------

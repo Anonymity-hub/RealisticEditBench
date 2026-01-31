@@ -1,0 +1,18 @@
+diff --git a/django/http/request.py b/django/http/request.py
+--- a/django/http/request.py
++++ b/django/http/request.py
+@@ -731,6 +731,14 @@
+                 return False
+ 
+         if bool(self.params) == bool(other.params):
++            # If both have params or neither have params, they must be identical.
++            result = self.params == other.params
++        else:
++            # If self has params and other does not, it's a match.
++            # If other has params and self does not, don't match.
++            result = bool(self.params or not other.params)
++
++        return result
+ 
+     @cached_property
+     def quality(self):

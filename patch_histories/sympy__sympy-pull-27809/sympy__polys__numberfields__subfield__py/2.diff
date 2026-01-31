@@ -1,0 +1,12 @@
+diff --git a/sympy/polys/numberfields/subfield.py b/sympy/polys/numberfields/subfield.py
+--- a/sympy/polys/numberfields/subfield.py
++++ b/sympy/polys/numberfields/subfield.py
+@@ -346,6 +346,8 @@
+         x, cls = sympify(x), Poly
+     else:
+         x, cls = Dummy('x'), PurePoly
++
++    def _canonicalize(f):
+ 
+     if not ex:
+         gen, coeffs = extension[0], [1]

@@ -1,0 +1,25 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -1,4 +1,4 @@
+-from math import log, sqrt
++from math import exp, log
+ from sympy.core.random import _randint
+ from sympy.external.gmpy import bit_scan1, gcd, invert, sqrt as isqrt
+ from sympy.ntheory.factor_ import _perfect_power
+@@ -119,13 +119,14 @@
+     for _ in range(50):
+         a = 1
+         q = []
++        while log(a) < approx_val:
+             rand_p = 0
+             while(rand_p == 0 or rand_p in q):
+                 rand_p = randint(start, end)
+             p = factor_base[rand_p].prime
+             a *= p
+             q.append(rand_p)
+-        ratio = a / approx_val
++        ratio = exp(log(a) - approx_val)
+         if best_ratio is None or abs(ratio - 1) < abs(best_ratio - 1):
+             best_q = q
+             best_a = a

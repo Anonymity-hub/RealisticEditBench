@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/backends/backend_agg.py b/lib/matplotlib/backends/backend_agg.py
+--- a/lib/matplotlib/backends/backend_agg.py
++++ b/lib/matplotlib/backends/backend_agg.py
+@@ -521,7 +521,7 @@
+         pil_kwargs : dict, optional
+             Additional keyword arguments that are passed to
+             `PIL.Image.Image.save` when saving the figure.
+-        """.format, ["JPEG", "TIFF", "WebP"])
++        """.format, ["GIF", "JPEG", "TIFF", "WebP"])
+ 
+ 
+ @_Backend.export

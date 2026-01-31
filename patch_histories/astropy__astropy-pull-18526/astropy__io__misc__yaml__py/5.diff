@@ -1,0 +1,16 @@
+diff --git a/astropy/io/misc/yaml.py b/astropy/io/misc/yaml.py
+--- a/astropy/io/misc/yaml.py
++++ b/astropy/io/misc/yaml.py
+@@ -342,9 +342,9 @@
+ ]
+ for cls in cls_coords:
+     name = cls.__name__
+-        tag = "!astropy.coordinates." + name
+-        AstropyDumper.add_multi_representer(cls, _quantity_representer(tag))
+-        AstropyLoader.add_constructor(tag, _quantity_constructor(cls))
++    tag = "!astropy.coordinates." + name
++    AstropyDumper.add_multi_representer(cls, _quantity_representer(tag))
++    AstropyLoader.add_constructor(tag, _quantity_constructor(cls))
+ 
+ 
+ def load(stream):

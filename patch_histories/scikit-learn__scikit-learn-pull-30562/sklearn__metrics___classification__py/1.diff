@@ -1,0 +1,30 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -413,7 +413,7 @@ def confusion_matrix(
+     y_pred : array-like of shape (n_samples,)
+         Estimated targets as returned by a classifier.
+ 
+-    labels : array-like of shape (n_classes), default=None
++    labels : array-like of shape (n_classes,), default=None
+         List of labels to index the matrix. This may be used to reorder
+         or select a subset of labels.
+         If ``None`` is given, those that appear at least once
+@@ -475,10 +476,15 @@ def confusion_matrix(
+     >>> (tn, fp, fn, tp)
+     (0, 2, 1, 1)
+     """
+-    y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred, sample_weight = _check_targets(
+-        y_true, y_pred, sample_weight
++    xp, _, device_ = get_namespace_and_device(y_true, y_pred, labels, sample_weight)
++    y_true = check_array(
++        y_true,
++        dtype=None,
++        ensure_2d=False,
++        ensure_all_finite=False,
++        ensure_min_samples=0,
+     )
++
+     if y_type not in ("binary", "multiclass"):
+         raise ValueError("%s is not supported" % y_type)

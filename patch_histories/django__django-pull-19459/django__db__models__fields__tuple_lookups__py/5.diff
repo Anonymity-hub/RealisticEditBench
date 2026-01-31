@@ -1,0 +1,12 @@
+diff --git a/django/db/models/fields/tuple_lookups.py b/django/db/models/fields/tuple_lookups.py
+--- a/django/db/models/fields/tuple_lookups.py
++++ b/django/db/models/fields/tuple_lookups.py
+@@ -1,7 +1,7 @@
+ import itertools
+ 
+ from django.core.exceptions import EmptyResultSet
+-from django.db import models
++from django.db import NotSupportedError, models
+ from django.db.models.expressions import (
+     ColPairs,
+     Exists,

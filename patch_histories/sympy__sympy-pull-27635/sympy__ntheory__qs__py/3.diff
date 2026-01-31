@@ -1,0 +1,12 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -481,6 +481,8 @@
+     if N % 2 == 0:
+         proper_factor.add(2)
+         N//=2
++        while N % 2 == 0:
++            N//=2
+     idx_1000, idx_5000, factor_base = _generate_factor_base(prime_bound, N)
+     threshold = 5*len(factor_base) // 100
+     while True:

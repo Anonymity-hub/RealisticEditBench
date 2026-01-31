@@ -1,0 +1,59 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -1442,45 +1442,18 @@ def __init__(
+     def encode(self, variable: Variable, name: T_Name = None) -> Variable:
+         if np.issubdtype(variable.data.dtype, np.timedelta64):
+             dims, data, attrs, encoding = unpack_for_encoding(variable)
+-            has_timedelta_dtype = has_timedelta64_encoding_dtype(encoding)
+-            if ("units" in encoding or "dtype" in encoding) and not has_timedelta_dtype:
+-                dtype = encoding.get("dtype", None)
+-                units = encoding.pop("units", None)
++            dtype = encoding.get("dtype", None)
++            units = encoding.pop("units", None)
+ 
+-                # in the case of packed data we need to encode into
+-                # float first, the correct dtype will be established
+-                # via CFScaleOffsetCoder/CFMaskCoder
+-                if "add_offset" in encoding or "scale_factor" in encoding:
+-                    dtype = data.dtype if data.dtype.kind == "f" else "float64"
++            # in the case of packed data we need to encode into
++            # float first, the correct dtype will be established
++            # via CFScaleOffsetCoder/CFMaskCoder
++            if "add_offset" in encoding or "scale_factor" in encoding:
++                dtype = data.dtype if data.dtype.kind == "f" else "float64"
+ 
+-            else:
+-                resolution, _ = np.datetime_data(variable.dtype)
+-                dtype = np.int64
+-                attrs_dtype = f"timedelta64[{resolution}]"
+-                units = _numpy_dtype_to_netcdf_timeunit(variable.dtype)
+-                safe_setitem(attrs, "dtype", attrs_dtype, name=name)
+-                # Remove dtype encoding if it exists to prevent it from
+-                # interfering downstream in NonStringCoder.
+-                encoding.pop("dtype", None)
+-
+-                if any(
+-                    k in encoding for k in _INVALID_LITERAL_TIMEDELTA64_ENCODING_KEYS
+-                ):
+-                    raise ValueError(
+-                        f"Specifying 'add_offset' or 'scale_factor' is not "
+-                        f"supported when encoding the timedelta64 values of "
+-                        f"variable {name!r} with xarray's new default "
+-                        f"timedelta64 encoding approach. To encode {name!r} "
+-                        f"with xarray's previous timedelta64 encoding "
+-                        f"approach, which supports the 'add_offset' and "
+-                        f"'scale_factor' parameters, additionally set "
+-                        f"encoding['units'] to a unit of time, e.g. "
+-                        f"'seconds'. To proceed with encoding of {name!r} "
+-                        f"via xarray's new approach, remove any encoding "
+-                        f"entries for 'add_offset' or 'scale_factor'."
+-                    )
+-                if "_FillValue" not in encoding and "missing_value" not in encoding:
+-                    encoding["_FillValue"] = np.iinfo(np.int64).min
++            resolution, _ = np.datetime_data(variable.dtype)
++            attrs_dtype = f"timedelta64[{resolution}]"
++            safe_setitem(attrs, "dtype", attrs_dtype, name=name)
+ 
+             data, units = encode_cf_timedelta(data, units, dtype)
+             safe_setitem(attrs, "units", units, name=name)

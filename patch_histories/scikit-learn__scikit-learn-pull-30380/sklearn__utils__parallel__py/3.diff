@@ -1,0 +1,17 @@
+diff --git a/sklearn/utils/parallel.py b/sklearn/utils/parallel.py
+--- a/sklearn/utils/parallel.py
++++ b/sklearn/utils/parallel.py
+@@ -21,10 +21,10 @@
+ _threadpool_controller = None
+ 
+ 
+-def _with_config(delayed_func, config):
++def _with_config_and_warning_filters(delayed_func, config, warning_filters):
+     """Helper function that intends to attach a config to a delayed function."""
+-    if hasattr(delayed_func, "with_config"):
+-        return delayed_func.with_config(config)
++    if hasattr(delayed_func, "with_config_and_warning_filters"):
++        return delayed_func.with_config_and_warning_filters(config, warning_filters)
+     else:
+         warnings.warn(
+             (

@@ -1,0 +1,18 @@
+diff --git a/django/db/models/query_utils.py b/django/db/models/query_utils.py
+--- a/django/db/models/query_utils.py
++++ b/django/db/models/query_utils.py
+@@ -104,6 +104,14 @@
+             return self
+         clone = self.create(connector=self.connector, negated=self.negated)
+         for child in self.children:
++            child_replacement = child
++            if isinstance(child, tuple):
++                lhs, rhs = child
++                if LOOKUP_SEP in lhs:
++                    path, lookup = lhs.rsplit(LOOKUP_SEP, 1)
++                else:
++                    path = lhs
++                    lookup = None
+     def flatten(self):
+         """
+         Recursively yield this Q object and all subexpressions, in depth-first

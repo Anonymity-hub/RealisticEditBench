@@ -1,0 +1,13 @@
+diff --git a/xarray/backends/common.py b/xarray/backends/common.py
+--- a/xarray/backends/common.py
++++ b/xarray/backends/common.py
+@@ -322,6 +322,9 @@
+     def get_dimensions(self):  # pragma: no cover
+         raise NotImplementedError()
+ 
++    def get_parent_dimensions(self):  # pragma: no cover
++        return {}
++
+     def get_attrs(self):  # pragma: no cover
+         raise NotImplementedError()
+ 

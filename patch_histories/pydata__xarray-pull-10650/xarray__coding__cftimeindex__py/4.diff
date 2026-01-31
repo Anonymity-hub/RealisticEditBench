@@ -1,0 +1,23 @@
+diff --git a/xarray/coding/cftimeindex.py b/xarray/coding/cftimeindex.py
+--- a/xarray/coding/cftimeindex.py
++++ b/xarray/coding/cftimeindex.py
+@@ -707,7 +707,7 @@
+ 
+     def _round_via_method(self, freq, method):
+         """Round dates using a specified method."""
+-        from xarray.coding.cftime_offsets import CFTIME_TICKS, to_offset
++        from xarray.coding.cftime_offsets import CFTIME_TICKS, Day, to_offset
+ 
+         if not self._data.size:
+             return CFTimeIndex(np.array(self))
+@@ -716,6 +716,10 @@
+         if isinstance(offset, Day):
+             # Following pandas, "In the 'round' context, Day unambiguously
+             # means 24h, not calendar-day"
++            offset_as_timedelta = timedelta(days=offset.n)
++        elif isinstance(offset, CFTIME_TICKS):
++            offset_as_timedelta = offset.as_timedelta()
++        else:
+             raise ValueError(f"{offset} is a non-fixed frequency")
+ 
+         unit = _total_microseconds(offset.as_timedelta())

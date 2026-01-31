@@ -1,0 +1,16 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -1702,6 +1702,12 @@
+         return dependencies
+ 
+     def _get_generated_field_dependencies_for_removed_field(
++        self, app_label, model_name, field_name
++    ):
++        dependencies = []
++        model_state = self.from_state.models[app_label, model_name]
++        generated_fields = (f for f in model_state.fields.values() if f.generated)
++        for field in generated_fields:
+     def _get_dependencies_for_model(self, app_label, model_name):
+         """Return foreign key dependencies of the given model."""
+         dependencies = []

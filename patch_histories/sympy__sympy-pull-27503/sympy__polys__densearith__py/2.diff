@@ -1,0 +1,12 @@
+diff --git a/sympy/polys/densearith.py b/sympy/polys/densearith.py
+--- a/sympy/polys/densearith.py
++++ b/sympy/polys/densearith.py
+@@ -757,7 +757,7 @@
+ 
+     n = max(df, dg) + 1
+ 
+-    if n < 100 or :
++    if n < 100 or not K.:
+         h = []
+ 
+         for i in range(0, df + dg + 1):

@@ -1,0 +1,34 @@
+diff --git a/lib/matplotlib/streamplot.py b/lib/matplotlib/streamplot.py
+--- a/lib/matplotlib/streamplot.py
++++ b/lib/matplotlib/streamplot.py
+@@ -220,7 +220,8 @@
+             xg = np.clip(xg, 0, grid.nx - 1)
+             yg = np.clip(yg, 0, grid.ny - 1)
+ 
+-            t = integrate(xg, yg, broken_streamlines)
++            t = integrate(xg, yg, broken_streamlines, integration_max_step_scale,
++                          integration_max_error_scale)
+             if t is not None:
+                 trajectories.append(t)
+ 
+@@ -534,14 +535,18 @@
+             return None
+         if integration_direction in ['both', 'backward']:
+             s, xyt = _integrate_rk12(x0, y0, dmap, backward_time, maxlength,
+-                                     broken_streamlines)
++                                     broken_streamlines,
++                                     integration_max_step_scale,
++                                     integration_max_error_scale)
+             stotal += s
+             xy_traj += xyt[::-1]
+ 
+         if integration_direction in ['both', 'forward']:
+             dmap.reset_start_point(x0, y0)
+             s, xyt = _integrate_rk12(x0, y0, dmap, forward_time, maxlength,
+-                                     broken_streamlines)
++                                     broken_streamlines,
++                                     integration_max_step_scale,
++                                     integration_max_error_scale)
+             stotal += s
+             xy_traj += xyt[1:]
+ 

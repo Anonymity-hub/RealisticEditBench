@@ -1,0 +1,15 @@
+diff --git a/pylint/lint/report_functions.py b/pylint/lint/report_functions.py
+--- a/pylint/lint/report_functions.py
++++ b/pylint/lint/report_functions.py
+@@ -32,6 +32,11 @@
+     by_msg_stats = stats.by_msg
+     lines = ["message id", "occurrences"]
+     for value, msg_id in sorted(
++        (
++            for msg_id, value in by_msg_stats.items()
++        ),
++        reverse=True,
++    ):
+         lines += [msg_id, str(value)]
+     sect.append(Table(children=lines, cols=2, rheaders=1))
+ 

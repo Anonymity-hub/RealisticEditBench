@@ -1,0 +1,338 @@
+diff --git a/examples/manifold/plot_mds.py b/examples/manifold/plot_mds.py
+--- a/examples/manifold/plot_mds.py
++++ b/examples/manifold/plot_mds.py
+@@ -21,79 +21,87 @@
+ from sklearn.decomposition import PCA
+ from sklearn.metrics import euclidean_distances
+ 
++# Generate the data
+ EPSILON = np.finfo(np.float32).eps
+ n_samples = 20
+-seed = np.random.RandomState(seed=3)
+-X_true = seed.randint(0, 20, 2 * n_samples).astype(float)
++rng = np.random.RandomState(seed=3)
++X_true = rng.randint(0, 20, 2 * n_samples).astype(float)
+ X_true = X_true.reshape((n_samples, 2))
++
+ # Center the data
+ X_true -= X_true.mean()
+ 
+-similarities = euclidean_distances(X_true)
++# Compute pairwise Euclidean distances
++distances = euclidean_distances(X_true)
+ 
+-# Add noise to the similarities
+-noise = np.random.rand(n_samples, n_samples)
++# Add noise to the distances
++noise = rng.rand(n_samples, n_samples)
+ noise = noise + noise.T
+-noise[np.arange(noise.shape[0]), np.arange(noise.shape[0])] = 0
+-similarities += noise
++np.fill_diagonal(noise, 0)
++distances += noise
+ 
+ mds = manifold.MDS(
+     n_components=2,
+     max_iter=3000,
+     eps=1e-9,
+-    random_state=seed,
++    random_state=42,
+     dissimilarity="precomputed",
+     n_jobs=1,
+ )
+-pos = mds.fit(similarities).embedding_
++X_mds = mds.fit(distances).embedding_
+ 
+ nmds = manifold.MDS(
+     n_components=2,
+     metric=False,
+     max_iter=3000,
+     eps=1e-12,
+     dissimilarity="precomputed",
+-    random_state=seed,
++    random_state=42,
+     n_jobs=1,
+     n_init=1,
+ )
+-npos = nmds.fit_transform(similarities, init=pos)
++X_nmds = nmds.fit_transform(distances)
+ 
+ # Rescale the data
+-pos *= np.sqrt((X_true**2).sum()) / np.sqrt((pos**2).sum())
+-npos *= np.sqrt((X_true**2).sum()) / np.sqrt((npos**2).sum())
++X_mds *= np.sqrt((X_true**2).sum()) / np.sqrt((X_mds**2).sum())
++X_nmds *= np.sqrt((X_true**2).sum()) / np.sqrt((X_nmds**2).sum())
+ 
+ # Rotate the data
+-clf = PCA(n_components=2)
+-X_true = clf.fit_transform(X_true)
+-
+-pos = clf.fit_transform(pos)
+-
+-npos = clf.fit_transform(npos)
++pca = PCA(n_components=2)
++X_true = pca.fit_transform(X_true)
++X_mds = pca.fit_transform(X_mds)
++X_nmds = pca.fit_transform(X_nmds)
++
++# Align the sign of PCs
++for i in [0, 1]:
++    if np.corrcoef(X_mds[:, i], X_true[:, i])[0, 1] < 0:
++        X_mds[:, i] *= -1
++    if np.corrcoef(X_nmds[:, i], X_true[:, i])[0, 1] < 0:
++        X_nmds[:, i] *= -1
+ 
+ fig = plt.figure(1)
+ ax = plt.axes([0.0, 0.0, 1.0, 1.0])
+ 
+ s = 100
+ plt.scatter(X_true[:, 0], X_true[:, 1], color="navy", s=s, lw=0, label="True Position")
+-plt.scatter(pos[:, 0], pos[:, 1], color="turquoise", s=s, lw=0, label="MDS")
+-plt.scatter(npos[:, 0], npos[:, 1], color="darkorange", s=s, lw=0, label="NMDS")
++plt.scatter(X_mds[:, 0], X_mds[:, 1], color="turquoise", s=s, lw=0, label="MDS")
++plt.scatter(X_nmds[:, 0], X_nmds[:, 1], color="darkorange", s=s, lw=0, label="NMDS")
+ plt.legend(scatterpoints=1, loc="best", shadow=False)
+ 
+-similarities = similarities.max() / (similarities + EPSILON) * 100
+-np.fill_diagonal(similarities, 0)
+ # Plot the edges
+-start_idx, end_idx = np.where(pos)
++start_idx, end_idx = np.where(X_mds)
+ # a sequence of (*line0*, *line1*, *line2*), where::
+ #            linen = (x0, y0), (x1, y1), ... (xm, ym)
+ segments = [
+-    [X_true[i, :], X_true[j, :]] for i in range(len(pos)) for j in range(len(pos))
++    [X_true[i, :], X_true[j, :]] for i in range(len(X_true)) for j in range(len(X_true))
+ ]
+-values = np.abs(similarities)
++edges = distances.max() / (distances + EPSILON) * 100
++np.fill_diagonal(edges, 0)
++edges = np.abs(edges)
+ lc = LineCollection(
+-    segments, zorder=0, cmap=plt.cm.Blues, norm=plt.Normalize(0, values.max())
++    segments, zorder=0, cmap=plt.cm.Blues, norm=plt.Normalize(0, edges.max())
+ )
+-lc.set_array(similarities.flatten())
++lc.set_array(edges.flatten())
+ lc.set_linewidths(np.full(len(segments), 0.5))
+ ax.add_collection(lc)
+ 
+diff --git a/sklearn/manifold/_mds.py b/sklearn/manifold/_mds.py
+--- a/sklearn/manifold/_mds.py
++++ b/sklearn/manifold/_mds.py
+@@ -70,12 +70,14 @@ def _smacof_single(
+         See :term:`Glossary <random_state>`.
+ 
+     normalized_stress : bool, default=False
+-        Whether use and return normed stress value (Stress-1) instead of raw
+-        stress calculated by default. Only supported in non-metric MDS. The
+-        caller must ensure that if `normalized_stress=True` then `metric=False`
++        Whether use and return normalized stress value (Stress-1) instead of raw
++        stress.
+ 
+         .. versionadded:: 1.2
+ 
++        .. versionchanged:: 1.7
++           Normalized stress is now supported for metric MDS as well.
++
+     Returns
+     -------
+     X : ndarray of shape (n_samples, n_components)
+@@ -84,7 +86,7 @@ def _smacof_single(
+     stress : float
+         The final value of the stress (sum of squared distance of the
+         disparities and the distances for all constrained points).
+-        If `normalized_stress=True`, and `metric=False` returns Stress-1.
++        If `normalized_stress=True`, returns Stress-1.
+         A value of 0 indicates "perfect" fit, 0.025 excellent, 0.05 good,
+         0.1 fair, and 0.2 poor [1]_.
+ 
+@@ -107,8 +109,8 @@ def _smacof_single(
+     n_samples = dissimilarities.shape[0]
+     random_state = check_random_state(random_state)
+ 
+-    sim_flat = ((1 - np.tri(n_samples)) * dissimilarities).ravel()
+-    sim_flat_w = sim_flat[sim_flat != 0]
++    dissimilarities_flat = ((1 - np.tri(n_samples)) * dissimilarities).ravel()
++    dissimilarities_flat_w = dissimilarities_flat[dissimilarities_flat != 0]
+     if init is None:
+         # Randomly choose initial configuration
+         X = random_state.uniform(size=n_samples * n_components)
+@@ -121,49 +123,63 @@ def _smacof_single(
+                 "init matrix should be of shape (%d, %d)" % (n_samples, n_components)
+             )
+         X = init
++    distances = euclidean_distances(X)
++
++    # Out of bounds condition cannot happen because we are transforming
++    # the training set here, but does sometimes get triggered in
++    # practice due to machine precision issues. Hence "clip".
++    ir = IsotonicRegression(out_of_bounds="clip")
+ 
+     old_stress = None
+-    ir = IsotonicRegression()
+     for it in range(max_iter):
+         # Compute distance and monotonic regression
+-        dis = euclidean_distances(X)
+-
+         if metric:
+             disparities = dissimilarities
+         else:
+-            dis_flat = dis.ravel()
++            distances_flat = distances.ravel()
+             # dissimilarities with 0 are considered as missing values
+-            dis_flat_w = dis_flat[sim_flat != 0]
+-
+-            # Compute the disparities using a monotonic regression
+-            disparities_flat = ir.fit_transform(sim_flat_w, dis_flat_w)
+-            disparities = dis_flat.copy()
+-            disparities[sim_flat != 0] = disparities_flat
++            distances_flat_w = distances_flat[dissimilarities_flat != 0]
++
++            # Compute the disparities using isotonic regression.
++            # For the first SMACOF iteration, use scaled original dissimilarities.
++            # (This choice follows the R implementation described in this paper:
++            # https://www.jstatsoft.org/article/view/v102i10)
++            if it < 1:
++                disparities_flat = dissimilarities_flat_w
++            else:
++                disparities_flat = ir.fit_transform(
++                    dissimilarities_flat_w, distances_flat_w
++                )
++            disparities = np.zeros_like(distances_flat)
++            disparities[dissimilarities_flat != 0] = disparities_flat
+             disparities = disparities.reshape((n_samples, n_samples))
+             disparities *= np.sqrt(
+                 (n_samples * (n_samples - 1) / 2) / (disparities**2).sum()
+             )
++            disparities = disparities + disparities.T
+ 
+-        # Compute stress
+-        stress = ((dis.ravel() - disparities.ravel()) ** 2).sum() / 2
+-        if normalized_stress:
+-            stress = np.sqrt(stress / ((disparities.ravel() ** 2).sum() / 2))
+         # Update X using the Guttman transform
+-        dis[dis == 0] = 1e-5
+-        ratio = disparities / dis
++        distances[distances == 0] = 1e-5
++        ratio = disparities / distances
+         B = -ratio
+         B[np.arange(len(B)), np.arange(len(B))] += ratio.sum(axis=1)
+         X = 1.0 / n_samples * np.dot(B, X)
+ 
+-        dis = np.sqrt((X**2).sum(axis=1)).sum()
+-        if verbose >= 2:
+-            print("it: %d, stress %s" % (it, stress))
++        # Compute stress
++        distances = euclidean_distances(X)
++        stress = ((distances.ravel() - disparities.ravel()) ** 2).sum() / 2
++        if normalized_stress:
++            stress = np.sqrt(stress / ((disparities.ravel() ** 2).sum() / 2))
++
++        normalization = np.sqrt((X**2).sum(axis=1)).sum()
++        if verbose >= 2:  # pragma: no cover
++            print(f"Iteration {it}, stress {stress:.4f}")
+         if old_stress is not None:
+-            if (old_stress - stress / dis) < eps:
+-                if verbose:
+-                    print("breaking at iteration %d with stress %s" % (it, stress))
++            if (old_stress - stress / normalization) < eps:
++                if verbose:  # pragma: no cover
++                    print("Convergence criterion reached.")
+                 break
+-        old_stress = stress / dis
++        old_stress = stress / normalization
+ 
+     return X, stress, it + 1
+ 
+@@ -275,14 +291,18 @@ def smacof(
+         Whether or not to return the number of iterations.
+ 
+     normalized_stress : bool or "auto" default="auto"
+-        Whether use and return normed stress value (Stress-1) instead of raw
+-        stress calculated by default. Only supported in non-metric MDS.
++        Whether to return normalized stress value (Stress-1) instead of raw
++        stress. By default, metric MDS returns raw stress while non-metric MDS
++        returns normalized stress.
+ 
+         .. versionadded:: 1.2
+ 
+         .. versionchanged:: 1.4
+            The default value changed from `False` to `"auto"` in version 1.4.
+ 
++        .. versionchanged:: 1.7
++           Normalized stress is now supported for metric MDS as well.
++
+     Returns
+     -------
+     X : ndarray of shape (n_samples, n_components)
+@@ -291,7 +311,7 @@ def smacof(
+     stress : float
+         The final value of the stress (sum of squared distance of the
+         disparities and the distances for all constrained points).
+-        If `normalized_stress=True`, and `metric=False` returns Stress-1.
++        If `normalized_stress=True`, returns Stress-1.
+         A value of 0 indicates "perfect" fit, 0.025 excellent, 0.05 good,
+         0.1 fair, and 0.2 poor [1]_.
+ 
+@@ -318,12 +338,12 @@ def smacof(
+     >>> X = np.array([[0, 1, 2], [1, 0, 3],[2, 3, 0]])
+     >>> dissimilarities = euclidean_distances(X)
+     >>> mds_result, stress = smacof(dissimilarities, n_components=2, random_state=42)
+-    >>> mds_result
+-    array([[ 0.05... -1.07... ],
+-           [ 1.74..., -0.75...],
+-           [-1.79...,  1.83...]])
+-    >>> stress
+-    np.float64(0.0012...)
++    >>> np.round(mds_result, 5)
++    array([[ 0.05352, -1.07253],
++           [ 1.74231, -0.75675],
++           [-1.79583,  1.82928]])
++    >>> np.round(stress, 5).item()
++    0.00128
+     """
+ 
+     dissimilarities = check_array(dissimilarities)
+@@ -332,11 +352,6 @@ def smacof(
+     if normalized_stress == "auto":
+         normalized_stress = not metric
+ 
+-    if normalized_stress and metric:
+-        raise ValueError(
+-            "Normalized stress is not supported for metric MDS. Either set"
+-            " `normalized_stress=False` or use `metric=False`."
+-        )
+     if hasattr(init, "__array__"):
+         init = np.asarray(init).copy()
+         if not n_init == 1:
+@@ -449,14 +464,18 @@ class MDS(BaseEstimator):
+             ``fit_transform``.
+ 
+     normalized_stress : bool or "auto" default="auto"
+-        Whether use and return normed stress value (Stress-1) instead of raw
+-        stress calculated by default. Only supported in non-metric MDS.
++        Whether use and return normalized stress value (Stress-1) instead of raw
++        stress. By default, metric MDS uses raw stress while non-metric MDS uses
++        normalized stress.
+ 
+         .. versionadded:: 1.2
+ 
+         .. versionchanged:: 1.4
+            The default value changed from `False` to `"auto"` in version 1.4.
+ 
++        .. versionchanged:: 1.7
++           Normalized stress is now supported for metric MDS as well.
++
+     Attributes
+     ----------
+     embedding_ : ndarray of shape (n_samples, n_components)
+@@ -465,7 +484,7 @@ class MDS(BaseEstimator):
+     stress_ : float
+         The final value of the stress (sum of squared distance of the
+         disparities and the distances for all constrained points).
+-        If `normalized_stress=True`, and `metric=False` returns Stress-1.
++        If `normalized_stress=True`, returns Stress-1.
+         A value of 0 indicates "perfect" fit, 0.025 excellent, 0.05 good,
+         0.1 fair, and 0.2 poor [1]_.
+ 

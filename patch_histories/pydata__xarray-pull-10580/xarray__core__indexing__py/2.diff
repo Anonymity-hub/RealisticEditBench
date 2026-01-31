@@ -1,0 +1,24 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -304,6 +304,20 @@
+     return slice(start, stop, step)
+ 
+
++def normalize_array(
++    array: np.ndarray[Any, np.dtype[np.integer]], size: int
++) -> np.ndarray[Any, np.dtype[np.integer]]:
++    """
++    Ensure that the given array only contains positive values.
++
++    Examples
++    --------
++    >>> normalize_array(np.array([-1, -2, -3, -4]), 10)
++    array([9, 8, 7, 6])
++    >>> normalize_array(np.array([-5, 3, 5, -1, 8]), 12)
++    array([ 7,  3,  5, 11,  8])
++    """
++
+ def _index_indexer_1d(old_indexer, applied_indexer, size: int):
+     if isinstance(applied_indexer, slice) and applied_indexer == slice(None):
+         # shortcut for the usual case

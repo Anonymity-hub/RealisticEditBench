@@ -1,0 +1,58 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -456,18 +456,14 @@
+                         args = matched.group(1)
+                         retann = matched.group(2)
+             except Exception as exc:
+-                logger.warning(
+-                    __('error while formatting arguments for %s: %s'),
+-                    self.fullname,
+-                    exc,
+-                    type='autodoc',
+-                )
++                msg = __('error while formatting arguments for %s: %s')
++                logger.warning(msg, self.props.full_name, exc, type='autodoc')
+                 args = None
+ 
+         result = self._events.emit_firstresult(
+             'autodoc-process-signature',
+             self.objtype,
+-            self.fullname,
++            self.props.full_name,
+             self.object,
+             self.options,
+             args,
+@@ -543,7 +539,7 @@
+                 self._events.emit(
+                     'autodoc-process-docstring',
+                     self.objtype,
+-                    self.fullname,
++                    self.props.full_name,
+                     self.object,
+                     self.options,
+                     docstringlines,
+@@ -563,7 +559,7 @@
+             # to support inherited methods
+             fullname = f'{self.object.__module__}.{self.object.__qualname__}'
+         else:
+-            fullname = self.fullname
++            fullname = self.props.full_name
+ 
+         if self.analyzer:
+             return f'{self.analyzer.srcname}:docstring of {fullname}'
+@@ -979,12 +975,8 @@
+         try:
+             sig = self.format_signature()
+         except Exception as exc:
+-            logger.warning(
+-                __('error while formatting signature for %s: %s'),
+-                self.fullname,
+-                exc,
+-                type='autodoc',
+-            )
++            msg = __('error while formatting signature for %s: %s')
++            logger.warning(msg, self.props.full_name, exc, type='autodoc')
+             return
+ 
+         # generate the directive header and options, if applicable

@@ -1,0 +1,14 @@
+diff --git a/django/core/handlers/asgi.py b/django/core/handlers/asgi.py
+--- a/django/core/handlers/asgi.py
++++ b/django/core/handlers/asgi.py
+@@ -320,9 +320,7 @@ async def send_response(self, response, send):
+                 value = value.encode("latin1")
+             response_headers.append((bytes(header), bytes(value)))
+         for c in response.cookies.values():
+-            response_headers.append(
+-                (b"Set-Cookie", c.output(header="").encode("ascii").strip())
+-            )
++            response_headers.append((b"Set-Cookie", c.OutputString().encode("ascii")))
+         # Initial response message.
+         await send(
+             {

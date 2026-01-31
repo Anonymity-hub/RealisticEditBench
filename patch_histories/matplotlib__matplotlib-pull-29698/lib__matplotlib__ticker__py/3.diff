@@ -1,0 +1,28 @@
+diff --git a/lib/matplotlib/ticker.py b/lib/matplotlib/ticker.py
+--- a/lib/matplotlib/ticker.py
++++ b/lib/matplotlib/ticker.py
+@@ -2426,17 +2426,17 @@
+                 raise ValueError(
+                     "Data has no positive values, and therefore cannot be log-scaled.")
+ 
+-        _log.debug('vmin %s vmax %s', vmin, vmax)
+-
+         if vmax < vmin:
+             vmin, vmax = vmax, vmin
+-        log_vmin = math.log(vmin) / math.log(b)
+-        log_vmax = math.log(vmax) / math.log(b)
+-
+-        numdec = math.floor(log_vmax) - math.ceil(log_vmin)
++        # Min and max exponents, float and int versions; e.g., if vmin=10^0.3,
++        # vmax=10^6.9, then efmin=0.3, emin=1, emax=6, efmax=6.9, n_avail=6.
++        efmin, efmax = self._log_b([vmin, vmax])
++        emin = math.ceil(efmin)
++        emax = math.floor(efmax)
++        n_avail = emax - emin + 1  # Total number of decade ticks available.
+ 
+         if isinstance(self._subs, str):
+-            if numdec > 10 or b < 3:
++            if n_avail >= 10 or b < 3:
+                 if self._subs == 'auto':
+                     return np.array([])  # no minor or major ticks
+                 else:

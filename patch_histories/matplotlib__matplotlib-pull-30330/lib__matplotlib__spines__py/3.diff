@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/spines.py b/lib/matplotlib/spines.py
+--- a/lib/matplotlib/spines.py
++++ b/lib/matplotlib/spines.py
+@@ -434,7 +434,7 @@
+                 'set_bounds() method incompatible with circular spines')
+         if high is None and np.iterable(low):
+             low, high = low
+-        old_low, old_high = self.get_bounds() or (None, None)
++        old_low, old_high = self._get_bounds_or_viewLim()
+         if low is None:
+             low = old_low
+         if high is None:

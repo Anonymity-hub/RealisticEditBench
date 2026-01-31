@@ -1,0 +1,12 @@
+diff --git a/sympy/printing/pycode.py b/sympy/printing/pycode.py
+--- a/sympy/printing/pycode.py
++++ b/sympy/printing/pycode.py
+@@ -205,6 +205,8 @@
+         # invalid python like "((x = a) if cond else (x = b))"
+         lhs = expr.lhs
+         rhs = expr.rhs
++        if isinstance(rhs, Piecewise):
++            return f"{self._print(lhs)} = {self._print(rhs)}"
+     def _print_Mod(self, expr):
+         PREC = precedence(expr)
+         return ('{} % {}'.format(*(self.parenthesize(x, PREC) for x in expr.args)))

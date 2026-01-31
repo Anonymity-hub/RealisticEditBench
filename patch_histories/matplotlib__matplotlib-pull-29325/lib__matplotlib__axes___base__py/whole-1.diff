@@ -1,0 +1,89 @@
+diff --git a/lib/matplotlib/axes/_base.py b/lib/matplotlib/axes/_base.py
+--- a/lib/matplotlib/axes/_base.py
++++ b/lib/matplotlib/axes/_base.py
+@@ -4596,7 +4596,7 @@ def _make_twin_axes(self, *args, **kwargs):
+         self._twinned_axes.join(self, twin)
+         return twin
+ 
+-    def twinx(self):
++    def twinx(self, axes_class=None, **kwargs):
+         """
+         Create a twin Axes sharing the xaxis.
+ 
+@@ -4606,6 +4606,22 @@ def twinx(self):
+         Axes.  To ensure that the tick marks of both y-axes align, see
+         `~matplotlib.ticker.LinearLocator`.
+ 
++        Parameters
++        ----------
++        axes_class : subclass type of `~.axes.Axes`, optional
++            The `.axes.Axes` subclass that is instantiated.  This parameter
++            is incompatible with *projection* and *polar*.  See
++            :ref:`axisartist_users-guide-index` for examples.
++
++            By default, `~.axes.Axes` is used.
++
++            .. versionadded:: 3.11
++
++        kwargs : dict
++            The keyword arguments passed to `.Figure.add_subplot` or `.Figure.add_axes`.
++
++            .. versionadded:: 3.11
++
+         Returns
+         -------
+         Axes
+@@ -4616,7 +4632,9 @@ def twinx(self):
+         For those who are 'picking' artists while using twinx, pick
+         events are only called for the artists in the top-most Axes.
+         """
+-        ax2 = self._make_twin_axes(sharex=self)
++        if axes_class:
++            kwargs["axes_class"] = axes_class
++        ax2 = self._make_twin_axes(sharex=self, **kwargs)
+         ax2.yaxis.tick_right()
+         ax2.yaxis.set_label_position('right')
+         ax2.yaxis.set_offset_position('right')
+@@ -4627,7 +4645,7 @@ def twinx(self):
+         ax2.xaxis.units = self.xaxis.units
+         return ax2
+ 
+-    def twiny(self):
++    def twiny(self, axes_class=None, **kwargs):
+         """
+         Create a twin Axes sharing the yaxis.
+ 
+@@ -4637,6 +4655,22 @@ def twiny(self):
+         To ensure that the tick marks of both x-axes align, see
+         `~matplotlib.ticker.LinearLocator`.
+ 
++        Parameters
++        ----------
++        axes_class : subclass type of `~.axes.Axes`, optional
++            The `.axes.Axes` subclass that is instantiated.  This parameter
++            is incompatible with *projection* and *polar*.  See
++            :ref:`axisartist_users-guide-index` for examples.
++
++            By default, `~.axes.Axes` is used.
++
++            .. versionadded:: 3.11
++
++        kwargs : dict
++            The keyword arguments passed to `.Figure.add_subplot` or `.Figure.add_axes`.
++
++            .. versionadded:: 3.11
++
+         Returns
+         -------
+         Axes
+@@ -4647,7 +4681,9 @@ def twiny(self):
+         For those who are 'picking' artists while using twiny, pick
+         events are only called for the artists in the top-most Axes.
+         """
+-        ax2 = self._make_twin_axes(sharey=self)
++        if axes_class:
++            kwargs["axes_class"] = axes_class
++        ax2 = self._make_twin_axes(sharey=self, **kwargs)
+         ax2.xaxis.tick_top()
+         ax2.xaxis.set_label_position('top')
+         ax2.set_autoscaley_on(self.get_autoscaley_on())

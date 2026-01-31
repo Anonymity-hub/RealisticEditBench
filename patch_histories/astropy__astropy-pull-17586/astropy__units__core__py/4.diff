@@ -1,0 +1,22 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -816,6 +816,7 @@
+ 
+     def __rtruediv__(self, m):
+         if isinstance(m, (bytes, str)):
++            self._warn_about_operation_with_deprecated_type("divisions", m)
+             return Unit(m) / self
+ 
+         try:
+@@ -836,9 +837,6 @@
+             return NotImplemented
+ 
+     def __mul__(self, m):
+-        if isinstance(m, (bytes, str)):
+-            m = Unit(m)
+-
+         if isinstance(m, UnitBase):
+             if m.is_unity():
+                 return self
+

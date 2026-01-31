@@ -1,0 +1,15 @@
+diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py
+--- a/lib/matplotlib/pyplot.py
++++ b/lib/matplotlib/pyplot.py
+@@ -2663,9 +2663,8 @@
+     if fignum == 0:
+         ax = gca()
+     else:
+-        # Extract actual aspect ratio of array and make appropriately sized
+-        # figure.
+-        fig = figure(fignum, figsize=figaspect(A))
++        if fignum is not None and fignum_exists(fignum):
++            # Do not try to set a figure size.
+         ax = fig.add_axes((0.15, 0.09, 0.775, 0.775))
+     im = ax.matshow(A, **kwargs)
+     sci(im)

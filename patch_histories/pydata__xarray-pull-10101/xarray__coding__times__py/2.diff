@@ -1,0 +1,32 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -1420,14 +1420,27 @@
+     Parameters
+     ----------
+     time_unit : PDDatetimeUnitOptions
+-          Target resolution when decoding timedeltas. Defaults to "ns".
++        Target resolution when decoding timedeltas via units. Defaults to "ns".
++        When decoding via dtype, the resolution is specified in the dtype
++        attribute, so this parameter is ignored.
++    decode_via_units : bool
++        Whether to decode timedeltas based on the presence of a timedelta-like
++        units attribute, e.g. "seconds". Defaults to True, but in the future
++        will default to False.
++    decode_via_dtype : bool
++        Whether to decode timedeltas based on the presence of a np.timedelta64
++        dtype attribute, e.g. "timedelta64[s]". Defaults to True.
+     """
+ 
+     def __init__(
+         self,
+         time_unit: PDDatetimeUnitOptions = "ns",
++        decode_via_units: bool = True,
++        decode_via_dtype: bool = True,
+     ) -> None:
+         self.time_unit = time_unit
++        self.decode_via_units = decode_via_units
++        self.decode_via_dtype = decode_via_dtype
+         self._emit_decode_timedelta_future_warning = False
+ 
+     def encode(self, variable: Variable, name: T_Name = None) -> Variable:

@@ -1,0 +1,25 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -1193,7 +1193,7 @@
+                 name=field_name,
+             ),
+             # We might need to depend on the removal of an
+-            # order_with_respect_to or index/unique_together operation;
++            # order_with_respect_to or index/constraint/unique_together operation;
+             # this is safely ignored if there isn't one
+             dependencies=[
+                 OperationDependency(
+@@ -1207,6 +1207,12 @@
+                     model_name,
+                     field_name,
+                     OperationDependency.Type.ALTER_FOO_TOGETHER,
++                ),
++                OperationDependency(
++                    app_label,
++                    model_name,
++                    field_name,
++                    OperationDependency.Type.REMOVE_INDEX_OR_CONSTRAINT,
+                 ),
+             ],
+         )

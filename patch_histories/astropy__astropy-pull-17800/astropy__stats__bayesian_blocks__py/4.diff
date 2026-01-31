@@ -1,0 +1,12 @@
+diff --git a/astropy/stats/bayesian_blocks.py b/astropy/stats/bayesian_blocks.py
+--- a/astropy/stats/bayesian_blocks.py
++++ b/astropy/stats/bayesian_blocks.py
+@@ -479,6 +479,8 @@
+         # First, initialize an array of zeros to store the fitness values,
+         # then calculate the fitness values only where N_k > 0.
+         # For N_k == 0, the corresponding fitness values are zero already.
++        out = np.zeros(N_k.shape)
++        mask = N_k > 0
+ 
+     def validate_input(
+         self,

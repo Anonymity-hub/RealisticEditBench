@@ -1,0 +1,32 @@
+diff --git a/sphinx/ext/autodoc/_property_types.py b/sphinx/ext/autodoc/_property_types.py
+--- a/sphinx/ext/autodoc/_property_types.py
++++ b/sphinx/ext/autodoc/_property_types.py
+@@ -35,8 +35,6 @@
+ class _ItemProperties:
+     #: The kind of object being documented
+     obj_type: _AutodocObjType
+-    #: The name of the item
+-    name: str
+     #: The dotted module name
+     module_name: str
+     #: The fully-qualified name within the module
+@@ -46,9 +44,16 @@
+ 
+     _obj: Any
+ 
+-    # @property
+-    # def name(self) -> str:
+-    #     return self.module_name.rpartition('.')[2]
++    @property
++    def name(self) -> str:
++        """The name of the item"""
++        return self.parts[-1]
++
++    @property
++    def object_name(self) -> str:
++        if self._obj is RUNTIME_INSTANCE_ATTRIBUTE or self._obj is UNINITIALIZED_ATTR:
++            return ''
++        return self.name
+ 
+     @property
+     def full_name(self) -> str:

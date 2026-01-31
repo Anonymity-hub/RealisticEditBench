@@ -1,0 +1,199 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -129,6 +129,14 @@
+         try:
+             y_true = column_or_1d(y_true, input_name="y_true")
+             y_pred = column_or_1d(y_pred, input_name="y_pred")
++        except TypeError as e:
++            if "Sparse data was passed" in str(e):
++                raise TypeError(
++                    "Sparse input is only supported when targets are of multilabel type"
++                ) from e
++            else:
++                raise
++
+         xp, _ = get_namespace(y_true, y_pred)
+         if y_type == "binary":
+             try:
+@@ -318,10 +326,12 @@
+     Parameters
+     ----------
+     y_true : 1d array-like, or label indicator array / sparse matrix
+-        Ground truth (correct) labels.
++        Ground truth (correct) labels. Sparse matrix is only supported when
++        labels are of :term:`multilabel` type.
+ 
+     y_pred : 1d array-like, or label indicator array / sparse matrix
+-        Predicted labels, as returned by a classifier.
++        Predicted labels, as returned by a classifier. Sparse matrix is only
++        supported when labels are of :term:`multilabel` type.
+ 
+     normalize : bool, default=True
+         If ``False``, return the number of correctly classified samples.
+@@ -624,11 +634,13 @@
+     ----------
+     y_true : {array-like, sparse matrix} of shape (n_samples, n_outputs) or \
+             (n_samples,)
+-        Ground truth (correct) target values.
++        Ground truth (correct) target values. Sparse matrix is only supported when
++        labels are of :term:`multilabel` type.
+ 
+     y_pred : {array-like, sparse matrix} of shape (n_samples, n_outputs) or \
+             (n_samples,)
+-        Estimated targets as returned by a classifier.
++        Estimated targets as returned by a classifier. Sparse matrix is only
++        supported when labels are of :term:`multilabel` type.
+ 
+     sample_weight : array-like of shape (n_samples,), default=None
+         Sample weights.
+@@ -992,10 +1004,12 @@
+     Parameters
+     ----------
+     y_true : 1d array-like, or label indicator array / sparse matrix
+-        Ground truth (correct) labels.
++        Ground truth (correct) labels. Sparse matrix is only supported when
++        labels are of :term:`multilabel` type.
+ 
+     y_pred : 1d array-like, or label indicator array / sparse matrix
+-        Predicted labels, as returned by a classifier.
++        Predicted labels, as returned by a classifier. Sparse matrix is only
++        supported when labels are of :term:`multilabel` type.
+ 
+     labels : array-like of shape (n_classes,), default=None
+         The set of labels to include when `average != 'binary'`, and their
+@@ -1263,10 +1277,12 @@
+     Parameters
+     ----------
+     y_true : 1d array-like, or label indicator array / sparse matrix
+-        Ground truth (correct) labels.
++        Ground truth (correct) labels. Sparse matrix is only supported when
++        labels are of :term:`multilabel` type.
+ 
+     y_pred : 1d array-like, or label indicator array / sparse matrix
+-        Predicted labels, as returned by a classifier.
++        Predicted labels, as returned by a classifier. Sparse matrix is only
++        supported when labels are of :term:`multilabel` type.
+ 
+     normalize : bool, default=True
+         If ``False``, return the number of misclassifications.
+@@ -1387,10 +1403,12 @@
+     Parameters
+     ----------
+     y_true : 1d array-like, or label indicator array / sparse matrix
+-        Ground truth (correct) target values.
++        Ground truth (correct) target values. Sparse matrix is only supported when
++        targets are of :term:`multilabel` type.
+ 
+     y_pred : 1d array-like, or label indicator array / sparse matrix
+-        Estimated targets as returned by a classifier.
++        Estimated targets as returned by a classifier. Sparse matrix is only
++        supported when targets are of :term:`multilabel` type.
+ 
+     labels : array-like, default=None
+         The set of labels to include when `average != 'binary'`, and their
+@@ -1587,10 +1605,12 @@
+     Parameters
+     ----------
+     y_true : 1d array-like, or label indicator array / sparse matrix
+-        Ground truth (correct) target values.
++        Ground truth (correct) target values. Sparse matrix is only supported when
++        targets are of :term:`multilabel` type.
+ 
+     y_pred : 1d array-like, or label indicator array / sparse matrix
+-        Estimated targets as returned by a classifier.
++        Estimated targets as returned by a classifier. Sparse matrix is only
++        supported when targets are of :term:`multilabel` type.
+ 
+     beta : float
+         Determines the weight of recall in the combined score.
+@@ -1903,10 +1923,12 @@
+     Parameters
+     ----------
+     y_true : 1d array-like, or label indicator array / sparse matrix
+-        Ground truth (correct) target values.
++        Ground truth (correct) target values. Sparse matrix is only supported when
++        targets are of :term:`multilabel` type.
+ 
+     y_pred : 1d array-like, or label indicator array / sparse matrix
+-        Estimated targets as returned by a classifier.
++        Estimated targets as returned by a classifier. Sparse matrix is only
++        supported when targets are of :term:`multilabel` type.
+ 
+     beta : float, default=1.0
+         The strength of recall versus precision in the F-score.
+@@ -2177,10 +2199,12 @@
+     Parameters
+     ----------
+     y_true : 1d array-like, or label indicator array / sparse matrix
+-        Ground truth (correct) target values.
++        Ground truth (correct) target values. Sparse matrix is only supported when
++        targets are of :term:`multilabel` type.
+ 
+     y_pred : 1d array-like, or label indicator array / sparse matrix
+-        Estimated targets as returned by a classifier.
++        Estimated targets as returned by a classifier. Sparse matrix is only
++        supported when targets are of :term:`multilabel` type.
+ 
+     labels : array-like, default=None
+         List of labels to index the matrix. This may be used to select the
+@@ -2453,10 +2477,12 @@
+     Parameters
+     ----------
+     y_true : 1d array-like, or label indicator array / sparse matrix
+-        Ground truth (correct) target values.
++        Ground truth (correct) target values. Sparse matrix is only supported when
++        targets are of :term:`multilabel` type.
+ 
+     y_pred : 1d array-like, or label indicator array / sparse matrix
+-        Estimated targets as returned by a classifier.
++        Estimated targets as returned by a classifier. Sparse matrix is only
++        supported when targets are of :term:`multilabel` type.
+ 
+     labels : array-like, default=None
+         The set of labels to include when `average != 'binary'`, and their
+@@ -2632,10 +2658,12 @@
+     Parameters
+     ----------
+     y_true : 1d array-like, or label indicator array / sparse matrix
+-        Ground truth (correct) target values.
++        Ground truth (correct) target values. Sparse matrix is only supported when
++        targets are of :term:`multilabel` type.
+ 
+     y_pred : 1d array-like, or label indicator array / sparse matrix
+-        Estimated targets as returned by a classifier.
++        Estimated targets as returned by a classifier. Sparse matrix is only
++        supported when targets are of :term:`multilabel` type.
+ 
+     labels : array-like, default=None
+         The set of labels to include when `average != 'binary'`, and their
+@@ -2891,10 +2919,12 @@
+     Parameters
+     ----------
+     y_true : 1d array-like, or label indicator array / sparse matrix
+-        Ground truth (correct) target values.
++        Ground truth (correct) target values. Sparse matrix is only supported when
++        targets are of :term:`multilabel` type.
+ 
+     y_pred : 1d array-like, or label indicator array / sparse matrix
+-        Estimated targets as returned by a classifier.
++        Estimated targets as returned by a classifier. Sparse matrix is only
++        supported when targets are of :term:`multilabel` type.
+ 
+     labels : array-like of shape (n_labels,), default=None
+         Optional list of label indices to include in the report.
+@@ -3117,10 +3147,12 @@
+     Parameters
+     ----------
+     y_true : 1d array-like, or label indicator array / sparse matrix
+-        Ground truth (correct) labels.
++        Ground truth (correct) labels. Sparse matrix is only supported when
++        targets are of :term:`multilabel` type.
+ 
+     y_pred : 1d array-like, or label indicator array / sparse matrix
+-        Predicted labels, as returned by a classifier.
++        Predicted labels, as returned by a classifier. Sparse matrix is only
++        supported when targets are of :term:`multilabel` type.
+ 
+     sample_weight : array-like of shape (n_samples,), default=None
+         Sample weights.

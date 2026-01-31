@@ -1,0 +1,12 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -1585,7 +1585,7 @@
+     """Return False if indexer is a int, slice, a 1-dimensional list, or a 0 or
+     1-dimensional ndarray; in all other cases return True
+     """
+-    if isinstance(indexer, int | slice):
++    if isinstance(indexer, int | slice) and not isinstance(indexer, bool):
+         return False
+     if isinstance(indexer, np.ndarray):
+         return indexer.ndim > 1

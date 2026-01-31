@@ -1,0 +1,13 @@
+diff --git a/xarray/plot/facetgrid.py b/xarray/plot/facetgrid.py
+--- a/xarray/plot/facetgrid.py
++++ b/xarray/plot/facetgrid.py
+@@ -379,7 +379,8 @@
+ 
+         xlabel = label_from_attrs(self.data[x])
+         ylabel = label_from_attrs(self.data[y])
+-        self._finalize_grid(x, y)
++
++        self._finalize_grid(xlabel, ylabel)
+ 
+         if kwargs.get("add_colorbar", True):
+             self.add_colorbar(**cbar_kwargs)

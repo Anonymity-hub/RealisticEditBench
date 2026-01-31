@@ -1,0 +1,11 @@
+diff --git a/examples/cluster/plot_cluster_comparison.py b/examples/cluster/plot_cluster_comparison.py
+--- a/examples/cluster/plot_cluster_comparison.py
++++ b/examples/cluster/plot_cluster_comparison.py
+@@ -178,6 +178,7 @@
+         min_samples=params["hdbscan_min_samples"],
+         min_cluster_size=params["hdbscan_min_cluster_size"],
+         allow_single_cluster=params["allow_single_cluster"],
++        copy=True,
+     )
+     optics = cluster.OPTICS(
+         min_samples=params["min_samples"],

@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/path.py b/lib/matplotlib/path.py
+--- a/lib/matplotlib/path.py
++++ b/lib/matplotlib/path.py
+@@ -305,6 +305,7 @@
+         Path
+             A deep copy of the `Path`, but not readonly.
+         """
++        return copy.deepcopy(self, memo)
+ 
+     @classmethod
+     def make_compound_path_from_polys(cls, XY):

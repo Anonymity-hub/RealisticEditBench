@@ -1,0 +1,25 @@
+diff --git a/astropy/io/fits/connect.py b/astropy/io/fits/connect.py
+--- a/astropy/io/fits/connect.py
++++ b/astropy/io/fits/connect.py
+@@ -270,6 +270,11 @@
+         # use data[col.name] rather than col.array to make sure that the data
+         # is scaled correctly if needed.
+         arr = data[col.name]
++        coltype = col.dtype.subdtype[0].type if col.dtype.subdtype else col.dtype.type
++
++        if strip_spaces and coltype is np.bytes_:
++            arr = arr.rstrip()
++
+         # Check if column is masked. Here, we make a guess based on the
+         # presence of FITS mask values. For integer columns, this is simply
+         # the null header, for float and complex, the presence of NaN, and for
+@@ -282,7 +287,7 @@
+         masked = mask = False
+         fill_value = None
+         if col.null is not None:
+-            mask = data[col.name] == col.null
++            mask = arr == col.null
+             # Return a MaskedColumn even if no elements are masked so
+             # we roundtrip better.
+             masked = True
+

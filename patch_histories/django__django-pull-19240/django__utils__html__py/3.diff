@@ -1,0 +1,19 @@
+diff --git a/django/utils/html.py b/django/utils/html.py
+--- a/django/utils/html.py
++++ b/django/utils/html.py
+@@ -351,6 +351,15 @@
+                     if getattr(settings, "URLIZE_ASSUME_HTTPS", False)
+                     else "http"
+                 )
++                if not settings.URLIZE_ASSUME_HTTPS:
++                    warnings.warn(
++                        "The default protocol will be changed from HTTP to "
++                        "HTTPS in Django 7.0. Set the URLIZE_ASSUME_HTTPS "
++                        "transitional setting to True to opt into using HTTPS as the "
++                        "new default protocol.",
++                        RemovedInDjango70Warning,
++                        stacklevel=2,
++                    )
+                 url = smart_urlquote(f"{protocol}://{unescaped_middle}")
+             elif ":" not in middle and self.is_email_simple(middle):
+                 local, domain = middle.rsplit("@", 1)

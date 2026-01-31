@@ -1,0 +1,13 @@
+diff --git a/xarray/backends/netCDF4_.py b/xarray/backends/netCDF4_.py
+--- a/xarray/backends/netCDF4_.py
++++ b/xarray/backends/netCDF4_.py
+@@ -518,6 +518,9 @@
+ 
+     def get_dimensions(self):
+         return FrozenDict((k, len(v)) for k, v in self.ds.dimensions.items())
++
++    def get_parent_dimensions(self):
++        return FrozenDict(collect_ancestor_dimensions(self.ds))
+ 
+     def get_encoding(self):
+         return {

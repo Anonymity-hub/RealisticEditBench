@@ -1,0 +1,16 @@
+diff --git a/sphinx/parsers.py b/sphinx/parsers.py
+--- a/sphinx/parsers.py
++++ b/sphinx/parsers.py
+@@ -57,9 +57,9 @@
+         """
+         cls_module = self.__class__.__module__
+         cls_name = self.__class__.__qualname__
+-        _deprecation_warning(cls_module, f'{cls_name}.set_application', remove=(10, 0))
+-        self.config = app.config
+-        self.env = app.env
++        _deprecation_warning(cls_module, f'{cls_name}.set_application', remove=(9, 0))
++        self._config = app.config
++        self._env = app.env
+ 
+ 
+ class RSTParser(docutils.parsers.rst.Parser, Parser):

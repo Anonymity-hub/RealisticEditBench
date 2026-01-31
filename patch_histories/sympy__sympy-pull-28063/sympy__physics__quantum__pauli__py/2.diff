@@ -1,0 +1,12 @@
+diff --git a/sympy/physics/quantum/pauli.py b/sympy/physics/quantum/pauli.py
+--- a/sympy/physics/quantum/pauli.py
++++ b/sympy/physics/quantum/pauli.py
+@@ -364,6 +364,8 @@
+     [0, 0]])
+     """
+ 
++    is_annihilation = False
++
+     def __new__(cls, *args, **hints):
+         return SigmaOpBase.__new__(cls, *args)
+ 

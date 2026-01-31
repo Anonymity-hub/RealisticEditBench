@@ -1,0 +1,13 @@
+diff --git a/sphinx/builders/linkcheck.py b/sphinx/builders/linkcheck.py
+--- a/sphinx/builders/linkcheck.py
++++ b/sphinx/builders/linkcheck.py
+@@ -759,8 +759,7 @@
+ 
+ def compile_linkcheck_allowed_redirects(app: Sphinx, config: Config) -> None:
+     """Compile patterns to the regexp objects."""
+-    if config.linkcheck_allowed_redirects is _sentinel_lar:
+-        config.linkcheck_allowed_redirects = None
++    if config.linkcheck_allowed_redirects is _SENTINEL_LAR:
+         return
+     if not isinstance(config.linkcheck_allowed_redirects, dict):
+         msg = __(

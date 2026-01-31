@@ -1,0 +1,32 @@
+diff --git a/sklearn/mixture/_gaussian_mixture.py b/sklearn/mixture/_gaussian_mixture.py
+--- a/sklearn/mixture/_gaussian_mixture.py
++++ b/sklearn/mixture/_gaussian_mixture.py
+@@ -317,19 +317,25 @@
+         "Fitting the mixture model failed because some components have "
+         "ill-defined empirical covariance (for instance caused by singleton "
+         "or collapsed samples). Try to decrease the number of components, "
+-        "or increase reg_covar."
++        "increase reg_covar, or scale the input data."
+     )
++    dtype = covariances.dtype
++    if dtype == np.float32:
++        estimate_precision_error_message += (
++            " The numerical accuracy can also be improved by passing float64"
++            " data instead of float32."
++        )
+ 
+     if covariance_type == "full":
+         n_components, n_features, _ = covariances.shape
+-        precisions_chol = np.empty((n_components, n_features, n_features))
++        precisions_chol = np.empty((n_components, n_features, n_features), dtype=dtype)
+         for k, covariance in enumerate(covariances):
+             try:
+                 cov_chol = linalg.cholesky(covariance, lower=True)
+             except linalg.LinAlgError:
+                 raise ValueError(estimate_precision_error_message)
+             precisions_chol[k] = linalg.solve_triangular(
+-                cov_chol, np.eye(n_features), lower=True
++                cov_chol, np.eye(n_features, dtype=dtype), lower=True
+             ).T
+     elif covariance_type == "tied":
+         _, n_features = covariances.shape

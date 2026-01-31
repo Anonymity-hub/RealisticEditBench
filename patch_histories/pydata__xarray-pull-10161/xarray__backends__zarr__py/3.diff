@@ -1,0 +1,19 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -474,9 +474,14 @@
+ 
+     if raise_on_invalid:
+         invalid = [k for k in encoding if k not in valid_encodings]
++        if "fill_value" in invalid and zarr_format == 2:
++            msg = " Use `_FillValue` to set the Zarr array `fill_value`"
++        else:
++            msg = ""
++
+         if invalid:
+             raise ValueError(
+-                f"unexpected encoding parameters for zarr backend:  {invalid!r}"
++                f"unexpected encoding parameters for zarr backend:  {invalid!r}." + msg
+             )
+     else:
+         for k in list(encoding):

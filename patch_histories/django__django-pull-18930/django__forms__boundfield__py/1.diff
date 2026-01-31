@@ -1,0 +1,24 @@
+diff --git a/django/forms/boundfield.py b/django/forms/boundfield.py
+--- a/django/forms/boundfield.py
++++ b/django/forms/boundfield.py
+@@ -289,18 +289,8 @@ def build_widget_attrs(self, attrs, widget=None):
+             attrs["disabled"] = True
+         if not widget.is_hidden and self.errors:
+             attrs["aria-invalid"] = "true"
+-        # If a custom aria-describedby attribute is given (either via the attrs
+-        # argument or widget.attrs) and help_text is used, the custom
+-        # aria-described by is preserved so user can set the desired order.
+-        if (
+-            not attrs.get("aria-describedby")
+-            and not widget.attrs.get("aria-describedby")
+-            and self.field.help_text
+-            and not self.use_fieldset
+-            and self.auto_id
+-            and not self.is_hidden
+-        ):
+-            attrs["aria-describedby"] = f"{self.auto_id}_helptext"
++        # Preserve aria-describedby provided by the attrs argument so user
++        # can set the desired order.
+         return attrs
+
+     @property

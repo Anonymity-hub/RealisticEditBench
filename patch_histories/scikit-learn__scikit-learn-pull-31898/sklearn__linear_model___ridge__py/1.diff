@@ -1,0 +1,15 @@
+diff --git a/sklearn/linear_model/_ridge.py b/sklearn/linear_model/_ridge.py
+--- a/sklearn/linear_model/_ridge.py
++++ b/sklearn/linear_model/_ridge.py
+@@ -1359,6 +1359,11 @@ def __sklearn_tags__(self):
+         tags.classifier_tags.multi_label = True
+         return tags
+ 
++    def _get_scorer_instance(self):
++        """Return a scorer which corresponds to what's defined in ClassiferMixin
++        parent class. This is used for routing `sample_weight`.
++        """
++
+ 
+ class RidgeClassifier(_RidgeClassifierMixin, _BaseRidge):
+     """Classifier using Ridge regression.

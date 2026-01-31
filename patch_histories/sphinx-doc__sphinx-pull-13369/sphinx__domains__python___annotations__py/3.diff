@@ -1,0 +1,12 @@
+diff --git a/sphinx/domains/python/_annotations.py b/sphinx/domains/python/_annotations.py
+--- a/sphinx/domains/python/_annotations.py
++++ b/sphinx/domains/python/_annotations.py
+@@ -126,6 +126,8 @@
+             return unparse(node.value)
+         if isinstance(node, ast.Starred):
+             result = [addnodes.desc_sig_operator('', '*')]
++            result.extend(unparse(node.value))
++            return result
+         if isinstance(node, ast.Invert):
+             return [addnodes.desc_sig_punctuation('', '~')]
+         if isinstance(node, ast.USub):

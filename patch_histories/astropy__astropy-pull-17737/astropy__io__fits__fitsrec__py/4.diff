@@ -1,0 +1,11 @@
+diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py
+--- a/astropy/io/fits/fitsrec.py
++++ b/astropy/io/fits/fitsrec.py
+@@ -96,6 +96,7 @@
+             for i, val in zip(range(start, stop, step), value, strict=True):
+                 indx = self._get_index(i)
+                 self.array.field(indx)[self.row] = val
++            return
+         else:
+             indx = self._get_index(key)
+             if indx > self.array._nfields - 1:

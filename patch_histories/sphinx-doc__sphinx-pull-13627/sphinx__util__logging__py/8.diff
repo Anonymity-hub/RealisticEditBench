@@ -1,0 +1,30 @@
+diff --git a/sphinx/util/logging.py b/sphinx/util/logging.py
+--- a/sphinx/util/logging.py
++++ b/sphinx/util/logging.py
+@@ -430,23 +430,23 @@ class WarningSuppressor(logging.Filter):
+     """Filter logs by `suppress_warnings`."""
+ 
+     def __init__(self, app: Sphinx) -> None:
+-        self.app = app
++        self._app = app
+         super().__init__()
+ 
+     def filter(self, record: logging.LogRecord) -> bool:
+         type = getattr(record, 'type', '')
+         subtype = getattr(record, 'subtype', '')
+ 
+         try:
+-            suppress_warnings = self.app.config.suppress_warnings
++            suppress_warnings = self._app.config.suppress_warnings
+         except AttributeError:
+             # config is not initialized yet (ex. in conf.py)
+             suppress_warnings = ()
+ 
+         if is_suppressed_warning(type, subtype, suppress_warnings):
+             return False
+         else:
+-            self.app._warncount += 1
++            self._app._warncount += 1
+             return True
+ 
+ 

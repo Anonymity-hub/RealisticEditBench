@@ -1,0 +1,15 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -403,6 +403,11 @@
+         )
+ 
+     if isinstance(group, Grouper):
++        raise TypeError(
++            "Cannot group by a Grouper object. "
++            f"Instead use `.groupby(var_name={type(group).__name__}(...))`. "
++            "You may need to assign the variable you're grouping by as a coordinate using `assign_coords`."
++        )
+ 
+     if isinstance(group, Mapping):
+         grouper_mapping = either_dict_or_kwargs(group, groupers, "groupby")

@@ -1,0 +1,110 @@
+diff --git a/sklearn/calibration.py b/sklearn/calibration.py
+--- a/sklearn/calibration.py
++++ b/sklearn/calibration.py
+@@ -54,13 +54,14 @@
+     _check_response_method,
+     _check_sample_weight,
+     _num_samples,
++    check_array,
+     check_consistent_length,
+     check_is_fitted,
+ )
+ 
+ 
+ class CalibratedClassifierCV(ClassifierMixin, MetaEstimatorMixin, BaseEstimator):
+-    """Probability calibration with isotonic regression or logistic regression.
++    """Calibrate probabilities using isotonic, sigmoid, or temperature scaling.
+ 
+     This class uses cross-validation to both estimate the parameters of a
+     classifier and subsequently calibrate a classifier. With
+@@ -99,12 +100,33 @@
+ 
+         .. versionadded:: 1.2
+ 
+-    method : {'sigmoid', 'isotonic'}, default='sigmoid'
+-        The method to use for calibration. Can be 'sigmoid' which
+-        corresponds to Platt's method (i.e. a logistic regression model) or
+-        'isotonic' which is a non-parametric approach. It is not advised to
+-        use isotonic calibration with too few calibration samples
+-        ``(<<1000)`` since it tends to overfit.
++    method : {'sigmoid', 'isotonic', 'temperature'}, default='sigmoid'
++        The method to use for calibration. Can be:
++
++        - 'sigmoid', which corresponds to Platt's method (i.e. a binary logistic
++          regression model).
++        - 'isotonic', which is a non-parametric approach.
++        - 'temperature', temperature scaling.
++
++        Sigmoid and isotonic calibration methods natively support only binary
++        classifiers and extend to multi-class classification using a One-vs-Rest (OvR)
++        strategy with post-hoc renormalization, i.e., adjusting the probabilities after
++        calibration to ensure they sum up to 1.
++
++        In contrast, temperature scaling naturally supports multi-class calibration by
++        applying `softmax(classifier_logits/T)` with a value of `T` (temperature)
++        that optimizes the log loss.
++
++        For very uncalibrated classifiers on very imbalanced datasets, sigmoid
++        calibration might be preferred because it fits an additional intercept
++        parameter. This helps shift decision boundaries appropriately when the
++        classifier being calibrated is biased towards the majority class.
++
++        Isotonic calibration is not recommended when the number of calibration samples
++        is too low ``(≪1000)`` since it then tends to overfit.
++
++        .. versionchanged:: 1.8
++           Added option 'temperature'.
+ 
+     cv : int, cross-validation generator, or iterable, default=None
+         Determines the cross-validation splitting strategy.
+@@ -212,6 +234,11 @@
+ 
+     .. [4] Predicting Good Probabilities with Supervised Learning,
+            A. Niculescu-Mizil & R. Caruana, ICML 2005
++
++    .. [5] Chuan Guo, Geoff Pleiss, Yu Sun, Kilian Q. Weinberger. 2017.
++       :doi:`On Calibration of Modern Neural Networks<10.48550/arXiv.1706.04599>`.
++       Proceedings of the 34th International Conference on Machine Learning,
++       PMLR 70:1321-1330, 2017
+ 
+     Examples
+     --------
+@@ -257,7 +284,7 @@
+             HasMethods(["fit", "decision_function"]),
+             None,
+         ],
+-        "method": [StrOptions({"isotonic", "sigmoid"})],
++        "method": [StrOptions({"isotonic", "sigmoid", "temperature"})],
+         "cv": ["cv_object", Hidden(StrOptions({"prefit"}))],
+         "n_jobs": [Integral, None],
+         "ensemble": ["boolean", StrOptions({"auto"})],
+@@ -604,7 +631,7 @@
+     test : ndarray, shape (n_test_indices,)
+         Indices of the testing subset.
+ 
+-    method : {'sigmoid', 'isotonic'}
++    method : {'sigmoid', 'isotonic', 'temperature'}
+         Method to use for calibration.
+ 
+     classes : ndarray, shape (n_classes,)
+@@ -653,8 +680,9 @@
+     """Fit calibrator(s) and return a `_CalibratedClassifier`
+     instance.
+ 
+-    `n_classes` (i.e. `len(clf.classes_)`) calibrators are fitted.
+-    However, if `n_classes` equals 2, one calibrator is fitted.
++    A separate calibrator is fitted for each of the `n_classes`
++    (i.e. `len(clf.classes_)`). However, if `n_classes` is 2 or if
++    `method` is 'temperature', only one calibrator is fitted.
+ 
+     Parameters
+     ----------
+@@ -671,7 +699,7 @@
+     classes : ndarray, shape (n_classes,)
+         All the prediction classes.
+ 
+-    method : {'sigmoid', 'isotonic'}
++    method : {'sigmoid', 'isotonic', 'temperature'}
+         The method to use for calibration.
+ 
+     sample_weight : ndarray, shape (n_samples,), default=None

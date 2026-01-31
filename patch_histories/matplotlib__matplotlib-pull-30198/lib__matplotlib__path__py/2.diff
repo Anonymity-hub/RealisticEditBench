@@ -1,0 +1,19 @@
+diff --git a/lib/matplotlib/path.py b/lib/matplotlib/path.py
+--- a/lib/matplotlib/path.py
++++ b/lib/matplotlib/path.py
+@@ -275,13 +275,14 @@ def copy(self):
+         """
+         return copy.copy(self)
+ 
+-    def __deepcopy__(self, memo=None):
++    def __deepcopy__(self, memo):
+         """
+         Return a deepcopy of the `Path`.  The `Path` will not be
+         readonly, even if the source `Path` is.
+         """
+         # Deepcopying arrays (vertices, codes) strips the writeable=False flag.
+-        p = copy.deepcopy(super(), memo)
++        cls = type(self)
++        p = cls.__new__(cls)
+         p._readonly = False
+         return p

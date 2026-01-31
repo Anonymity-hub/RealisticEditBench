@@ -1,0 +1,19 @@
+diff --git a/sklearn/linear_model/_bayes.py b/sklearn/linear_model/_bayes.py
+--- a/sklearn/linear_model/_bayes.py
++++ b/sklearn/linear_model/_bayes.py
+@@ -293,7 +293,14 @@ def fit(self, X, y, sample_weight=None):
+         coef_old_ = None
+ 
+         XT_y = np.dot(X.T, y)
+-        U, S, Vh = linalg.svd(X, full_matrices=False)
++        # Let M, N = n_samples, n_features and K = min(M, N).
++        # The posterior covariance matrix needs Vh_full: (N, N).
++        # The full SVD is only required when n_samples < n_features.
++        # When n_samples < n_features, K=M and full_matrices=True
++        # U: (M, M), S: M, Vh_full: (N, N), Vh: (M, N)
++        # When n_samples > n_features, K=N and full_matrices=False
++        # U: (M, N), S: N, Vh_full: (N, N), Vh: (N, N)
++        U, S, Vh_full = linalg.svd(X, full_matrices=(n_samples < n_features))
+         eigen_vals_ = S**2
+ 
+         # Convergence loop of the bayesian ridge regression

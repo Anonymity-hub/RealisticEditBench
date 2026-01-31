@@ -1,0 +1,29 @@
+diff --git a/pylint/lint/pylinter.py b/pylint/lint/pylinter.py
+--- a/pylint/lint/pylinter.py
++++ b/pylint/lint/pylinter.py
+@@ -851,6 +851,7 @@
+             self.config.ignore_patterns,
+             self.config.ignore_paths,
+         ):
++            self.stats.skipped += 1
+             return
+ 
+         try:
+@@ -1102,6 +1103,7 @@
+ 
+             if self.config.reports:
+                 self.reporter.display_reports(sect)
++
+             score_value = self._report_evaluation(verbose)
+             # save results if persistent run
+             if self.config.persistent:
+@@ -1145,8 +1147,7 @@
+ 
+             if verbose:
+                 checked_files_count = self.stats.node_count["module"]
+-                unchecked_files_count = self.stats.undocumented["module"]
+-                msg += f"\nChecked {checked_files_count} files, skipped {unchecked_files_count} files"
++                msg += f"\nChecked {checked_files_count} files, skipped {self.stats.skipped} files/modules"
+ 
+         if self.config.score:
+             sect = report_nodes.EvaluationSection(msg)

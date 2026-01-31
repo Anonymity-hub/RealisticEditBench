@@ -1,0 +1,12 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -465,6 +465,8 @@
+         "cache_metadata",
+         "write_empty_chunks",
+     }
++    if zarr_format == 3:
++        valid_encodings.add("fill_value")
+ 
+     for k in safe_to_drop:
+         if k in encoding:

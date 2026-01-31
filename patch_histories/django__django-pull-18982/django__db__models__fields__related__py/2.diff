@@ -1,0 +1,18 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -606,6 +606,14 @@
+                     )
+         return errors
+
++    def _check_to_fields_composite_pk(self):
++
++        # Skip nonexistent models.
++        if isinstance(self.remote_field.model, str):
++            return []
++
++        errors = []
++        for to_field in self.to_fields:
+     def _check_unique_target(self):
+         rel_is_string = isinstance(self.remote_field.model, str)
+         if rel_is_string or not self.requires_unique_target:

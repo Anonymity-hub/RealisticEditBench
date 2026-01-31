@@ -1,0 +1,13 @@
+diff --git a/sympy/assumptions/handlers/sets.py b/sympy/assumptions/handlers/sets.py
+--- a/sympy/assumptions/handlers/sets.py
++++ b/sympy/assumptions/handlers/sets.py
+@@ -71,7 +71,8 @@
+     if ask_all(~Q.zero(expr.base), Q.finite(expr.base), Q.zero(expr.exp), assumptions=assumptions):
+         return True
+     if ask_all(Q.integer(expr.base), Q.integer(expr.exp), assumptions=assumptions):
+-
++        if ask_any(Q.positive(expr.exp), Q.nonnegative(expr.exp) & ~Q.zero(expr.base), Q.zero(expr.base-1), Q.zero(expr.base+1), assumptions=assumptions):
++            return True
+ 
+ @IntegerPredicate.register(Mul)
+ def _(expr, assumptions):

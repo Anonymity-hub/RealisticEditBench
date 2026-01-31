@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/_constrained_layout.py b/lib/matplotlib/_constrained_layout.py
+--- a/lib/matplotlib/_constrained_layout.py
++++ b/lib/matplotlib/_constrained_layout.py
+@@ -521,8 +521,9 @@ def match_submerged_margins(layoutgrids, fig):
+     See test_constrained_layout::test_constrained_layout12 for an example.
+     """
+ 
++    axsdone = []
+     for sfig in fig.subfigs:
+-        match_submerged_margins(layoutgrids, sfig)
++        axsdone += match_submerged_margins(layoutgrids, sfig)
+ 
+     axs = [a for a in fig.get_axes()
+            if a.get_subplotspec() is not None and a.get_in_layout()]

@@ -1,0 +1,12 @@
+diff --git a/sklearn/utils/validation.py b/sklearn/utils/validation.py
+--- a/sklearn/utils/validation.py
++++ b/sklearn/utils/validation.py
+@@ -1427,7 +1427,7 @@ def _check_y(y, multi_output=False, y_numeric=False, estimator=None):
+     return y
+ 
+ 
+-def column_or_1d(y, *, dtype=None, warn=False, device=None):
++def column_or_1d(y, *, dtype=None, input_name="y", warn=False, device=None):
+     """Ravel column or 1d numpy array, else raises an error.
+ 
+     Parameters

@@ -1,0 +1,24 @@
+diff --git a/astropy/modeling/optimizers.py b/astropy/modeling/optimizers.py
+--- a/astropy/modeling/optimizers.py
++++ b/astropy/modeling/optimizers.py
+@@ -26,7 +26,7 @@
+ DEFAULT_BOUNDS = (-(10**12), 10**12)
+ 
+ 
+-class Optimization(metaclass=abc.ABCMeta):
++class Optimization(ABC):
+     """
+     Base class for optimizers.
+ 
+@@ -45,7 +45,10 @@ class Optimization(metaclass=abc.ABCMeta):
+ 
+     supported_constraints = []
+ 
+-    def __init__(self, opt_method):
++    @abstractmethod
++    def __init__(self) -> None: ...
++
++    def _init_opt_method(self, opt_method):
+         self._opt_method = opt_method
+         self._maxiter = DEFAULT_MAXITER
+         self._eps = DEFAULT_EPS

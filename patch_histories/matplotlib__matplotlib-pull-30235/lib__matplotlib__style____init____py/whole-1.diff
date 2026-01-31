@@ -1,0 +1,24 @@
+diff --git a/lib/matplotlib/style/__init__.py b/lib/matplotlib/style/__init__.py
+--- a/lib/matplotlib/style/__init__.py
++++ b/lib/matplotlib/style/__init__.py
+@@ -6,7 +6,8 @@
+ ``context``
+     Context manager to use a style sheet temporarily.
+ ``available``
+-    List available style sheets.
++    List available style sheets. Underscore-prefixed names are considered private and
++    not listed, though may still be accessed directly from ``library``.
+ ``library``
+     A dictionary of style names and matplotlib settings.
+ """
+@@ -245,8 +246,8 @@ def update_nested_dict(main_dict, new_dict):
+ def reload_library():
+     """Reload the style library."""
+     library.clear()
+-    library.update(_update_user_library(_base_library))
+-    available[:] = sorted(library.keys())
++    library.update(_update_user_library(_base_library.copy()))
++    available[:] = sorted(name for name in library if not name.startswith('_'))
+ 
+ 
+ reload_library()

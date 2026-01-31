@@ -1,0 +1,84 @@
+diff --git a/sympy/physics/control/lti.py b/sympy/physics/control/lti.py
+--- a/sympy/physics/control/lti.py
++++ b/sympy/physics/control/lti.py
+@@ -4864,11 +4864,11 @@ def apply_similarity_transform(self, transform_matrix):
+         transformation matrix `T` such that:
+ 
+         .. math::
+-        $$\begin{cases}
+-        \bar A=T^{-1}AT\\
+-        \bar B=T^{-1}B\\
+-        \bar C= CT\\
+-        \bar D=D\end{cases}$$
++            \begin{cases}
++            \bar A=T^{-1}AT\\
++            \bar B=T^{-1}B\\
++            \bar C= CT\\
++            \bar D=D\end{cases}
+ 
+         """
+         T_inv = transform_matrix.inv()
+@@ -4887,22 +4887,19 @@ def to_observable_form(self):
+         and unobservable subsystems.
+ 
+         .. math::
+-
+-        \begin{bmatrix}
+-        A_{O} & 0\\ A_{O\bar O} & A_{\bar O}
+-        \end{bmatrix}
++            \begin{bmatrix}
++            A_{O} & 0\\ A_{O\bar O} & A_{\bar O}
++            \end{bmatrix}
+ 
+         .. math::
+-
+-        \begin{bmatrix}
+-        B_{O} \\ B_{\bar O}
+-        \end{bmatrix}
++            \begin{bmatrix}
++            B_{O} \\ B_{\bar O}
++            \end{bmatrix}
+ 
+         .. math::
+-
+-        \begin{bmatrix}
+-        C_{O} & 0
+-        \end{bmatrix}
++            \begin{bmatrix}
++            C_{O} & 0
++            \end{bmatrix}
+ 
+         Examples
+         ========
+@@ -4951,22 +4948,19 @@ def to_controllable_form(self):
+         and uncontrollable subsystems.
+ 
+         .. math::
+-
+-        \begin{bmatrix}
+-        A_{R} & A_{R\bar R}\\0  & A_{\bar R}
+-        \end{bmatrix}
++            \begin{bmatrix}
++            A_{R} & A_{R\bar R}\\0  & A_{\bar R}
++            \end{bmatrix}
+ 
+         .. math::
+-
+-        \begin{bmatrix}
+-        B_{R} \\ 0
+-        \end{bmatrix}
++            \begin{bmatrix}
++            B_{R} \\ 0
++            \end{bmatrix}
+ 
+         .. math::
+-
+-        \begin{bmatrix}
+-        C_{R} & C_{\bar R}
+-        \end{bmatrix}
++            \begin{bmatrix}
++            C_{R} & C_{\bar R}
++            \end{bmatrix}
+ 
+         Examples
+         ========

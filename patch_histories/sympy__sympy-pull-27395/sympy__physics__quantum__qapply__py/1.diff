@@ -1,0 +1,29 @@
+diff --git a/sympy/physics/quantum/qapply.py b/sympy/physics/quantum/qapply.py
+--- a/sympy/physics/quantum/qapply.py
++++ b/sympy/physics/quantum/qapply.py
+@@ -4,6 +4,7 @@
+ * Sometimes the final result needs to be expanded, we should do this by hand.
+ """
+ 
++from sympy.concrete import Sum
+ from sympy.core.add import Add
+ from sympy.core.mul import Mul
+ from sympy.core.power import Pow
+@@ -46,6 +47,9 @@ def qapply(e, **options):
+           (default: False).
+         * ``ip_doit``: call ``.doit()`` in inner products when they are
+           encountered (default: True).
++        * ``sum_doit``: call ``.doit()`` on sums when they are encountered
++          (default: False). This is helpful for collapsing sums over Kronecker
++          delta's that are created when calling ``qapply``.
+ 
+     Returns
+     =======
+@@ -72,6 +76,7 @@ def qapply(e, **options):
+     from sympy.physics.quantum.density import Density
+ 
+     dagger = options.get('dagger', False)
++    sum_doit = options.get('sum_doit', False)
+ 
+     if e == 0:
+         return S.Zero

@@ -1,0 +1,12 @@
+diff --git a/xarray/core/formatting.py b/xarray/core/formatting.py
+--- a/xarray/core/formatting.py
++++ b/xarray/core/formatting.py
+@@ -1045,7 +1045,7 @@
+ 
+         if not a_ds._all_compat(b_ds, compat):
+             path_str = "root node" if path == "." else f"node {path!r}"
+-            dataset_diff = diff_dataset_repr(a_ds, b_ds, compat_str)
++            dataset_diff = diff_dataset_repr(a_ds, b_ds, compat)
+             data_diff = indent(
+                 "\n".join(dataset_diff.split("\n", 1)[1:]), prefix="    "
+             )

@@ -1,0 +1,66 @@
+diff --git a/sphinx/writers/latex.py b/sphinx/writers/latex.py
+--- a/sphinx/writers/latex.py
++++ b/sphinx/writers/latex.py
+@@ -804,8 +804,6 @@
+         else:
+             self.body.append(BLANKLINE)
+             self.body.append(r'\begin{fulllineitems}' + CR)
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def depart_desc(self, node: Element) -> None:
+         if self.in_desc_signature:
+@@ -1107,8 +1105,6 @@
+             r'\begin{sphinxseealso}{%s:}' % admonitionlabels['seealso'] + CR
+         )
+         self.no_latex_floats += 1
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def depart_seealso(self, node: Element) -> None:
+         self.body.append(BLANKLINE)
+@@ -1789,8 +1785,6 @@
+     def visit_admonition(self, node: Element) -> None:
+         self.body.append(CR + r'\begin{sphinxadmonition}{note}')
+         self.no_latex_floats += 1
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def depart_admonition(self, node: Element) -> None:
+         self.body.append(r'\end{sphinxadmonition}' + CR)
+@@ -1802,8 +1796,6 @@
+             CR + r'\begin{sphinxadmonition}{%s}{%s:}' % (node.tagname, label)
+         )
+         self.no_latex_floats += 1
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def _depart_named_admonition(self, node: Element) -> None:
+         self.body.append(r'\end{sphinxadmonition}' + CR)
+@@ -2303,8 +2295,6 @@
+             self.body.append(r'\begin{DUlineblock}{\DUlineblockindent}' + CR)
+         else:
+             self.body.append(CR + r'\begin{DUlineblock}{0em}' + CR)
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def depart_line_block(self, node: Element) -> None:
+         self.body.append(r'\end{DUlineblock}' + CR)
+@@ -2320,8 +2310,6 @@
+                 done = 1
+         if not done:
+             self.body.append(r'\begin{quote}' + CR)
+-            if self.table:
+-                self.table.has_problematic = True
+ 
+     def depart_block_quote(self, node: Element) -> None:
+         done = 0
+@@ -2361,8 +2349,6 @@
+ 
+     def visit_option_list(self, node: Element) -> None:
+         self.body.append(r'\begin{optionlist}{3cm}' + CR)
+-        if self.table:
+-            self.table.has_problematic = True
+ 
+     def depart_option_list(self, node: Element) -> None:
+         self.body.append(r'\end{optionlist}' + CR)

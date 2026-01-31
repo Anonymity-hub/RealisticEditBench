@@ -1,0 +1,34 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -2957,7 +2957,9 @@
+     """
+ 
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
++    y_type, y_true, y_pred, sample_weight = _check_targets(
++        y_true, y_pred, sample_weight
++    )
+ 
+     if labels is None:
+         labels = unique_labels(y_true, y_pred)
+@@ -3146,15 +3148,15 @@
+     0.75
+     """
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+-    check_consistent_length(y_true, y_pred, sample_weight)
++    y_type, y_true, y_pred, sample_weight = _check_targets(
++        y_true, y_pred, sample_weight
++    )
+ 
+     xp, _, device = get_namespace_and_device(y_true, y_pred, sample_weight)
+ 
+     if sample_weight is None:
+         weight_average = 1.0
+     else:
+-        sample_weight = xp.asarray(sample_weight, device=device)
+         weight_average = _average(sample_weight, xp=xp)
+ 
+     if y_type.startswith("multilabel"):
+

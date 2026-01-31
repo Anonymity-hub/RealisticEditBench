@@ -1,0 +1,20 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -29,6 +29,7 @@ class Type(Enum):
+         ALTER = 2
+         REMOVE_ORDER_WRT = 3
+         ALTER_FOO_TOGETHER = 4
++        REMOVE_INDEX_OR_CONSTRAINT = 5
+ 
+     @cached_property
+     def model_name_lower(self):
+@@ -528,6 +529,8 @@ def check_dependency(self, operation, dependency):
+                 )
+                 and operation.name_lower == dependency.model_name_lower
+             )
++        # Field is removed and part of an index/constraint.
++        elif (
+         # Unknown dependency. Raise an error.
+         else:
+             raise ValueError("Can't handle dependency %r" % (dependency,))

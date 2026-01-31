@@ -1,0 +1,20 @@
+diff --git a/sklearn/utils/estimator_checks.py b/sklearn/utils/estimator_checks.py
+--- a/sklearn/utils/estimator_checks.py
++++ b/sklearn/utils/estimator_checks.py
+@@ -1137,7 +1137,15 @@
+         est_fitted_with_as_array = clone(est).fit(X_xp, y_xp)
+         # We only do a smoke test for now, in order to avoid complicating the
+         # test function even further.
+-
++        for method_name in methods:
++            method = getattr(est_fitted_with_as_array, method_name, None)
++            if method is None:
++                continue
++
++            if method_name == "score":
++                method(X_xp, y_xp)
++            else:
++                method(X_xp)
+ 
+     for method_name in methods:
+         method = getattr(est, method_name, None)

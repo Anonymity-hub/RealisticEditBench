@@ -1,0 +1,19 @@
+diff --git a/xarray/core/duck_array_ops.py b/xarray/core/duck_array_ops.py
+--- a/xarray/core/duck_array_ops.py
++++ b/xarray/core/duck_array_ops.py
+@@ -13,6 +13,7 @@
+ from collections.abc import Callable
+ from functools import partial
+ from importlib import import_module
++from typing import Any
+ 
+ import numpy as np
+ import pandas as pd
+@@ -155,6 +156,7 @@
+     -------
+         Whether or not the data is np.nan or pd.NA
+     """
++    return data is pd.NA or data is np.nan
+ 
+ 
+ def isnull(data):

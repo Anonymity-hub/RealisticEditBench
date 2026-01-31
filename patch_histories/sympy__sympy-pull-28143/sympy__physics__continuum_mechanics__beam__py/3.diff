@@ -1,0 +1,13 @@
+diff --git a/sympy/physics/continuum_mechanics/beam.py b/sympy/physics/continuum_mechanics/beam.py
+--- a/sympy/physics/continuum_mechanics/beam.py
++++ b/sympy/physics/continuum_mechanics/beam.py
+@@ -1242,7 +1242,8 @@ def point_cflexure(self):
+         # Filter out singularity terms with order < 0
+         terms = []
+         for term in bm.args:
+-            sfs = [atom for atom in term.atoms(SingularityFunction)]
++            sfs = list(term.atoms(SingularityFunction))
++
+             if not sfs:
+                 terms.append(term)
+             else:

@@ -1,0 +1,12 @@
+diff --git a/sphinx/ext/napoleon/__init__.py b/sphinx/ext/napoleon/__init__.py
+--- a/sphinx/ext/napoleon/__init__.py
++++ b/sphinx/ext/napoleon/__init__.py
+@@ -290,7 +290,7 @@
+     )
+ 
+     def __init__(self, **settings: Any) -> None:
+-        for name, (default, _rebuild) in self._config_values.items():
++        for name, default, _rebuild, _types in self._config_values:
+             setattr(self, name, default)
+         for name, value in settings.items():
+             setattr(self, name, value)

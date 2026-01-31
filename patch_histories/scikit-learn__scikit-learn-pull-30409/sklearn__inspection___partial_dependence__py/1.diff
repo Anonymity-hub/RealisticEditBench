@@ -1,0 +1,11 @@
+diff --git a/sklearn/inspection/_partial_dependence.py b/sklearn/inspection/_partial_dependence.py
+--- a/sklearn/inspection/_partial_dependence.py
++++ b/sklearn/inspection/_partial_dependence.py
+@@ -3,6 +3,7 @@
+ # Authors: The scikit-learn developers
+ # SPDX-License-Identifier: BSD-3-Clause
+ 
++import warnings
+ from collections.abc import Iterable
+ 
+ import numpy as np

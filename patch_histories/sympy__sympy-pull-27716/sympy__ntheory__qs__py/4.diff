@@ -1,0 +1,19 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -285,7 +285,15 @@
+             if N % num == 0:
+                 proper_factor.add(num)
+                 continue
++            u = sieve_poly.eval_u(x)
++            if num in partial_relations:
++                u_prev, v_prev, vec_prev = partial_relations.pop(num)
++                u = u*u_prev*invert(num, N) % N
++                v = v*v_prev // num**2
++                vec ^= vec_prev
++                smooth_relations.append((u, v, vec))
+             else:
++                partial_relations[num] = (u, v, vec)
+     return smooth_relations, proper_factor
+ 
+ 

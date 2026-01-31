@@ -1,0 +1,11 @@
+diff --git a/sympy/assumptions/handlers/sets.py b/sympy/assumptions/handlers/sets.py
+--- a/sympy/assumptions/handlers/sets.py
++++ b/sympy/assumptions/handlers/sets.py
+@@ -68,6 +68,7 @@
+ def _(expr,assumptions):
+     if expr.is_number:
+         return _IntegerPredicate_number(expr, assumptions)
++    if ask_all(
+ 
+ @IntegerPredicate.register(Mul)
+ def _(expr, assumptions):

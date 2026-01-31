@@ -1,0 +1,26 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -76,17 +76,17 @@
+     prime_bound : upper prime bound of the factor_base
+     n : integer to be factored
+     """
+-    from sympy.ntheory.generate import sieve
+-    factor_base = []
++    # 2 is always included in the `factor_base`
++    factor_base = [FactorBaseElem(2, 1, _LOG2_SHIFT)]
+     idx_1000, idx_5000 = None, None
+-    for prime in sieve.primerange(1, prime_bound):
+-        if pow(n, (prime - 1) // 2, prime) == 1:
++    for prime in primerange(3, prime_bound):
++        if jacobi(n, prime) == 1:
+             if prime > 1000 and idx_1000 is None:
+                 idx_1000 = len(factor_base) - 1
+             if prime > 5000 and idx_5000 is None:
+                 idx_5000 = len(factor_base) - 1
+             residue = _sqrt_mod_prime_power(n, prime, 1)[0]
+-            log_p = round(log(prime)*2**10)
++            log_p = round(log(prime)*_SHIFT)
+             factor_base.append(FactorBaseElem(prime, residue, log_p))
+     return idx_1000, idx_5000, factor_base
+ 

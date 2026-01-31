@@ -1,0 +1,12 @@
+diff --git a/sphinx/util/inventory.py b/sphinx/util/inventory.py
+--- a/sphinx/util/inventory.py
++++ b/sphinx/util/inventory.py
+@@ -47,7 +47,7 @@
+         content: bytes,
+         *,
+         uri: str,
+-    ) -> Inventory:
++    ) -> _Inventory:
+         format_line, _, content = content.partition(b'\n')
+         format_line = format_line.rstrip()  # remove trailing \r or spaces
+         if format_line == b'# Sphinx inventory version 2':

@@ -1,0 +1,12 @@
+diff --git a/sympy/assumptions/handlers/sets.py b/sympy/assumptions/handlers/sets.py
+--- a/sympy/assumptions/handlers/sets.py
++++ b/sympy/assumptions/handlers/sets.py
+@@ -145,7 +145,7 @@ def _(expr, assumptions):
+     if expr.base == E:
+         x = expr.exp
+         if ask(Q.rational(x), assumptions):
+-            return ask(~Q.nonzero(x), assumptions)
++            return ask(Q.zero(x), assumptions)
+         return
+ 
+     if ask(Q.integer(expr.exp), assumptions):

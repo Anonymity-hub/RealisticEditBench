@@ -1,0 +1,18 @@
+diff --git a/sklearn/inspection/_plot/decision_boundary.py b/sklearn/inspection/_plot/decision_boundary.py
+--- a/sklearn/inspection/_plot/decision_boundary.py
++++ b/sklearn/inspection/_plot/decision_boundary.py
+@@ -258,9 +258,11 @@
+                 raise ValueError("'multiclass_colors' must be a list or a str.")
+ 
+             self.multiclass_colors_ = colors
+-            multiclass_cmaps = [
+-                mpl.colors.LinearSegmentedColormap.from_list(
+-                    f"colormap_{class_idx}", [(1.0, 1.0, 1.0, 1.0), (r, g, b, 1.0)]
++            if plot_method == "contour":
++                # Plot only argmax map for contour
++                class_map = self.response.argmax(axis=2)
++                self.surface_ = plot_func(
++                    self.xx0, self.xx1, class_map, colors=colors, **kwargs
+                 )
+                 for class_idx, (r, g, b, _) in enumerate(colors)
+             ]

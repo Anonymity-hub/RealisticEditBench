@@ -1,0 +1,17 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -495,11 +495,8 @@
+                 N_copy //= p
+                 e += 1
+             factors[p] = e
+-    matrix = [s_relation[2] for s_relation in smooth_relations]
+-    dependent_row, mark, gauss_matrix = _gauss_mod_2(matrix)
+-    for index in range(len(dependent_row)):
+-        factor = _find_factor(dependent_row, mark, gauss_matrix, index, smooth_relations, N)
+-        if 1 < factor and N_copy % factor == 0:
++    for factor in _find_factor(N, smooth_relations, len(factor_base) + 1):
++        if N_copy % factor == 0:
+             e = 1
+             N_copy //= factor
+             while N_copy % factor == 0:

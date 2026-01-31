@@ -1,0 +1,11 @@
+diff --git a/xarray/backends/netCDF4_.py b/xarray/backends/netCDF4_.py
+--- a/xarray/backends/netCDF4_.py
++++ b/xarray/backends/netCDF4_.py
+@@ -16,6 +16,7 @@
+     T_PathFileOrDataStore,
+     WritableCFDataStore,
+     _normalize_path,
++    collect_ancestor_dimensions,
+     datatree_from_dict_with_io_cleanup,
+     find_root_and_group,
+     robust_getitem,

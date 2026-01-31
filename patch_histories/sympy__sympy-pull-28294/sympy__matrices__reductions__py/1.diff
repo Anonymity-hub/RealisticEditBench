@@ -1,0 +1,19 @@
+diff --git a/sympy/matrices/reductions.py b/sympy/matrices/reductions.py
+--- a/sympy/matrices/reductions.py
++++ b/sympy/matrices/reductions.py
+@@ -97,9 +97,10 @@ def cross_cancel(a, i, b, j):
+             row_swap(piv_row, pivot_offset + piv_row)
+             swaps.append((piv_row, pivot_offset + piv_row))
+ 
+-        # if we aren't normalizing last, we normalize
+-        # before we zero the other rows
+-        if normalize_last is False:
++        # if we aren't normalizing last
++        # or the pivot_val is non-commutative,
++        # we normalize before we zero the other rows
++        if normalize_last is False or not pivot_val.is_commutative:
+             i, j = piv_row, piv_col
+             mat[i*cols + j] = one
+             for p in range(i*cols + j + 1, (i + 1)*cols):
+
+ 

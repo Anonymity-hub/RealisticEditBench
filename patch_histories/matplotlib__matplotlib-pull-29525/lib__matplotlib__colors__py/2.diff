@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -952,6 +952,10 @@
+         alpha : float
+              The alpha blending value, between 0 (transparent) and 1 (opaque).
+         """
++        if not isinstance(alpha, Real):
++            raise TypeError(f"'alpha' must be numeric or None, not {type(alpha)}")
++        if not 0 <= alpha <= 1:
++            ValueError("'alpha' must be between 0 and 1, inclusive")
+ 
+     def _init(self):
+         """Generate the lookup table, ``self._lut``."""

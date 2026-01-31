@@ -1,0 +1,13 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -1160,7 +1160,8 @@
+                         returning_fields.append(field)
+                 elif (
+                     field.db_returning
+-                    and
++                    and not can_return_columns_from_insert
++                    and
+                     returning_fields.remove(field)
+             results = self._do_insert(
+                 cls._base_manager, using, insert_fields, returning_fields, raw

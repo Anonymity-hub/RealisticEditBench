@@ -1,0 +1,16 @@
+diff --git a/sklearn/neural_network/_multilayer_perceptron.py b/sklearn/neural_network/_multilayer_perceptron.py
+--- a/sklearn/neural_network/_multilayer_perceptron.py
++++ b/sklearn/neural_network/_multilayer_perceptron.py
+@@ -399,7 +399,11 @@
+ 
+         # Output for regression
+         if not is_classifier(self):
+-            self.out_activation_ = "identity"
++            if self.loss == "poisson":
++                self.out_activation_ = "exp"
++            else:
++                # loss = "squared_error"
++                self.out_activation_ = "identity"
+         # Output for multi class
+         elif self._label_binarizer.y_type_ == "multiclass":
+             self.out_activation_ = "softmax"

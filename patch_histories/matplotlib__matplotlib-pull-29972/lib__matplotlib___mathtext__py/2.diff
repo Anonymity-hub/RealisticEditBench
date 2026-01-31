@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -1667,7 +1672,7 @@
+                 cur_h += rule_width
+ 
+     def vlist_out(box: Vlist) -> None:
+-        nonlocal cur_v, cur_h, off_h, off_v
++        nonlocal cur_v, cur_h
+ 
+         cur_g = 0
+         cur_glue = 0.

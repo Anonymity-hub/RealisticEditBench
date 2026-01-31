@@ -1,0 +1,13 @@
+diff --git a/sympy/core/operations.py b/sympy/core/operations.py
+--- a/sympy/core/operations.py
++++ b/sympy/core/operations.py
+@@ -525,7 +525,7 @@ class LatticeOp(AssocOp):
+ 
+     is_commutative = True
+ 
+-    def __new__(cls, *args, **options):
++    def __new__(cls, *args, evaluate=None, **options):
+         args = (_sympify_(arg) for arg in args)
+
+         try:
+

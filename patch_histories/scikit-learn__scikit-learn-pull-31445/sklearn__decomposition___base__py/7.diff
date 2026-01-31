@@ -1,0 +1,21 @@
+diff --git a/sklearn/decomposition/_base.py b/sklearn/decomposition/_base.py
+--- a/sklearn/decomposition/_base.py
++++ b/sklearn/decomposition/_base.py
+@@ -9,7 +9,7 @@
+ from scipy import linalg
+ 
+ from ..base import BaseEstimator, ClassNamePrefixFeaturesOutMixin, TransformerMixin
+-from ..utils._array_api import _fill_or_add_to_diagonal, device, get_namespace
++from ..utils._array_api import _add_to_diagonal, device, get_namespace
+ from ..utils.validation import check_is_fitted, validate_data
+ 
+ 
+@@ -47,7 +47,7 @@ def get_covariance(self):
+             xp.asarray(0.0, device=device(exp_var), dtype=exp_var.dtype),
+         )
+         cov = (components_.T * exp_var_diff) @ components_
+-        _fill_or_add_to_diagonal(cov, self.noise_variance_, xp)
++        _add_to_diagonal(cov, self.noise_variance_, xp)
+         return cov
+ 
+     def get_precision(self):

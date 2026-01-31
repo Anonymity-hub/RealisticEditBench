@@ -1,0 +1,17 @@
+diff --git a/xarray/coding/cftime_offsets.py b/xarray/coding/cftime_offsets.py
+--- a/xarray/coding/cftime_offsets.py
++++ b/xarray/coding/cftime_offsets.py
+@@ -68,7 +68,12 @@
+ from xarray.core.utils import attempt_import, emit_user_level_warning
+ 
+ if TYPE_CHECKING:
+-    from xarray.core.types import InclusiveOptions, Self, TypeAlias
++    from xarray.core.types import (
++        InclusiveOptions,
++        PDDatetimeUnitOptions,
++        Self,
++        TypeAlias,
++    )
+ 
+ 
+ DayOption: TypeAlias = Literal["start", "end"]

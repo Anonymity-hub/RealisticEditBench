@@ -1,0 +1,39 @@
+diff --git a/django/db/backends/sqlite3/operations.py b/django/db/backends/sqlite3/operations.py
+--- a/django/db/backends/sqlite3/operations.py
++++ b/django/db/backends/sqlite3/operations.py
+@@ -32,9 +32,6 @@ def bulk_batch_size(self, fields, objs):
+         """
+         SQLite has a variable limit defined by SQLITE_LIMIT_VARIABLE_NUMBER
+         (reflected in max_query_params).
+-
+-        If there's only a single field to insert, the limit is 500
+-        (SQLITE_MAX_COMPOUND_SELECT).
+         """
+         fields = list(
+             chain.from_iterable(
+@@ -46,9 +43,7 @@ def bulk_batch_size(self, fields, objs):
+                 for field in fields
+             )
+         )
+-        if len(fields) == 1:
+-            return 500
+-        elif len(fields) > 1:
++        if fields:
+             return self.connection.features.max_query_params // len(fields)
+         else:
+             return len(objs)
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1182,10 +1182,8 @@ def in_bulk(self, id_list=None, *, field_name="pk"):
+             if not id_list:
+                 return {}
+             filter_key = "{}__in".format(field_name)
+-            max_params = connections[self.db].features.max_query_params or 0
+-            num_fields = len(opts.pk_fields) if field_name == "pk" else 1
+-            batch_size = max_params // num_fields
+             id_list = tuple(id_list)
++            batch_size = connections[self.db].ops.bulk_batch_size([opts.pk], id_list)
+             # If the database has a limit on the number of query parameters
+             # (e.g. SQLite), retrieve objects in batches if necessary.
+             if batch_size and batch_size < len(id_list):

@@ -1,0 +1,25 @@
+diff --git a/sympy/solvers/polysys.py b/sympy/solvers/polysys.py
+--- a/sympy/solvers/polysys.py
++++ b/sympy/solvers/polysys.py
+@@ -15,6 +15,7 @@
+ from sympy.logic.boolalg import Boolean
+ from sympy.polys import Poly, groebner, roots
+ from sympy.polys.domains import ZZ
++from sympy.polys.polyoptions import build_options
+ from sympy.polys.polytools import parallel_poly_from_expr, sqf_part
+ from sympy.polys.polyerrors import (
+     ComputationFailed,
+@@ -402,10 +403,12 @@ def solve_triangulated(polys, *gens, **args):
+     Algebraic Algorithms and Error-Correcting Codes, LNCS 356 247--257, 1989
+ 
+     """
++    opt = build_options(gens, args)
++
+     G = groebner(polys, gens, polys=True)
+     G = list(reversed(G))
+ 
+-    domain = args.get('domain')
++    extension = opt.get('extension', False)
+ 
+     if domain is not None:
+         for i, g in enumerate(G):

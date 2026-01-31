@@ -1,0 +1,14 @@
+diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py
+--- a/django/db/migrations/serializer.py
++++ b/django/db/migrations/serializer.py
+@@ -208,6 +208,10 @@
+ class FunctoolsPartialSerializer(BaseSerializer):
+     def serialize(self):
+         partial_name = self.value.__class__.__name__
++        return DeconstructibleSerializer.serialize_deconstructed(
++            f"functools.{partial_name}",
++            (self.value.func, *self.value.args),
++            self.value.keywords,
+         )
+ 
+ 

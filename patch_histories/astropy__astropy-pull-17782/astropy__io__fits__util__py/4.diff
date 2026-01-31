@@ -1,0 +1,28 @@
+diff --git a/astropy/io/fits/util.py b/astropy/io/fits/util.py
+--- a/astropy/io/fits/util.py
++++ b/astropy/io/fits/util.py
+@@ -734,7 +734,7 @@
+ 
+     while True:
+         try:
+-            loc = np.nonzero(blank_loc >= width + offset)[0][0]
++            loc = np.nonzero(blank_loc >= current_width + offset)[0][0]
+         except IndexError:
+             loc = len(blank_loc)
+ 
+@@ -745,13 +745,14 @@
+ 
+         # check for one word longer than strlen, break in the middle
+         if offset <= xoffset:
+-            offset = min(xoffset + width, slen)
++            offset = min(xoffset + current_width, slen)
+ 
+         # collect the pieces in a list
+         words.append(s[xoffset:offset])
+         if offset >= slen:
+             break
+         xoffset = offset
++        current_width = width
+ 
+     return words
+ 

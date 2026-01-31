@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -75,6 +75,7 @@ def __init__(
+         label2On=False,
+         major=True,
+         labelrotation=0,
++        labelrotation_mode=None,
+         grid_color=None,
+         grid_linestyle=None,
+         grid_linewidth=None,

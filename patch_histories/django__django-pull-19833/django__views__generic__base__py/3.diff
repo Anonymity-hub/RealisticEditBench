@@ -1,0 +1,12 @@
+diff --git a/django/views/generic/base.py b/django/views/generic/base.py
+--- a/django/views/generic/base.py
++++ b/django/views/generic/base.py
+@@ -254,6 +254,8 @@
+         args = self.request.META.get("QUERY_STRING", "")
+         if args and self.query_string:
+             if urlparse(url).query:
++                url = f"{url}&{args}"
++            else:
+         return url
+ 
+     def get(self, request, *args, **kwargs):

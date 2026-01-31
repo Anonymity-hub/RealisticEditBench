@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -131,6 +131,7 @@ class ColorSequenceRegistry(Mapping):
+         'Set1': _cm._Set1_data,
+         'Set2': _cm._Set2_data,
+         'Set3': _cm._Set3_data,
++        'petroff6': _cm._petroff6_data,
+         'petroff10': _cm._petroff10_data,
+     }
+ 

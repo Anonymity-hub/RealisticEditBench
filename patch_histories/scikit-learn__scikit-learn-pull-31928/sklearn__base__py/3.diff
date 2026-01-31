@@ -1,0 +1,12 @@
+diff --git a/sklearn/base.py b/sklearn/base.py
+--- a/sklearn/base.py
++++ b/sklearn/base.py
+@@ -202,7 +202,7 @@
+         # on the `available_if` decorator
+         with warnings.catch_warnings():
+             warnings.filterwarnings("ignore", category=FutureWarning)
+-            return 
++            return [attr for attr in super().__dir__() if hasattr(self, attr)]
+ 
+     _html_repr = estimator_html_repr
+ 

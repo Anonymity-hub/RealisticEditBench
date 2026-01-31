@@ -1,0 +1,12 @@
+diff --git a/django/db/models/aggregates.py b/django/db/models/aggregates.py
+--- a/django/db/models/aggregates.py
++++ b/django/db/models/aggregates.py
+@@ -95,7 +95,7 @@
+             raise TypeError(f"{self.__class__.__name__} does not allow default.")
+ 
+         self.distinct = distinct
+-        self.filter = filter and AggregateFilter(filter)
++        self.filter = None if filter is None else AggregateFilter(filter)
+         self.default = default
+         self.order_by = AggregateOrderBy.from_param(
+             f"{self.__class__.__name__}.order_by", order_by

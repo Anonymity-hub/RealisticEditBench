@@ -1,0 +1,12 @@
+diff --git a/sympy/matrices/matrixbase.py b/sympy/matrices/matrixbase.py
+--- a/sympy/matrices/matrixbase.py
++++ b/sympy/matrices/matrixbase.py
+@@ -2986,7 +2986,7 @@ def pow(self, exp, method=None):
+ 
+     @call_highest_priority('__add__')
+     def __radd__(self, other):
+-        return self + other
++        return self.__add__(other)
+ 
+     @call_highest_priority('__matmul__')
+     def __rmatmul__(self, other):

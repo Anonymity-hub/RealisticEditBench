@@ -1,0 +1,29 @@
+diff --git a/sphinx/util/docutils.py b/sphinx/util/docutils.py
+--- a/sphinx/util/docutils.py
++++ b/sphinx/util/docutils.py
+@@ -860,6 +860,25 @@
+     document = nodes.document(settings, reporter, source=str(filename))
+     document.note_source(str(filename), -1)
+ 
++    # substitute transformer
++    document.transformer = transformer = SphinxTransformer(document)
++    transformer.add_transforms(_READER_TRANSFORMS)
++    transformer.add_transforms(transforms)
++    transformer.add_transforms(parser.get_transforms())
++
++    if default_role:
++        default_role_cm = rst.default_role(env.current_document.docname, default_role)
++    else:
++        default_role_cm = nullcontext()  # type: ignore[assignment]
++    with sphinx_domains(env), default_role_cm:
++        # parse content to abstract syntax tree
++        parser.parse(content, document)
++        document.current_source = document.current_line = None
++
++        # run transforms
++        transformer.apply_transforms()
++
++    return document
+ 
+ 
+ def _get_settings(

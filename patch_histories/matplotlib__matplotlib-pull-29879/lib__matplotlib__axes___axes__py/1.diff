@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -3463,7 +3463,8 @@ def _errorevery_to_mask(x, errorevery):
+     def errorbar(self, x, y, yerr=None, xerr=None,
+                  fmt='', ecolor=None, elinewidth=None, capsize=None,
+                  barsabove=False, lolims=False, uplims=False,
+-                 xlolims=False, xuplims=False, errorevery=1, capthick=None,
++                 xlolims=False, xuplims=False, errorevery=1,
++                 capthick=None, elinestyle=None,
+                  **kwargs):
+         """
+         Plot y versus x as lines and/or markers with attached errorbars.

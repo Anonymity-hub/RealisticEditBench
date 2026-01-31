@@ -1,0 +1,23 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -1150,7 +1150,7 @@
+             returning_fields = list(meta.db_returning_fields)
+             can_return_columns_from_insert = connections[
+                 using
+-            ].
++            ].features.can_return_columns_from_insert
+             for field in insert_fields:
+                 value = (
+                     getattr(self, field.attname) if raw else field.pre_save(self, False)
+@@ -1158,7 +1158,9 @@
+                 if hasattr(value, "resolve_expression"):
+                     if field not in returning_fields:
+                         returning_fields.append(field)
+-                elif field.db_returning:
++                elif (
++                    field.db_returning
++                    and
+                     returning_fields.remove(field)
+             results = self._do_insert(
+                 cls._base_manager, using, insert_fields, returning_fields, raw

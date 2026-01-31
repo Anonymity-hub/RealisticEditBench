@@ -1,0 +1,23 @@
+diff --git a/sklearn/utils/parallel.py b/sklearn/utils/parallel.py
+--- a/sklearn/utils/parallel.py
++++ b/sklearn/utils/parallel.py
+@@ -70,11 +70,16 @@
+         # in a different thread depending on the backend and on the value of
+         # pre_dispatch and n_jobs.
+         config = get_config()
+-        iterable_with_config = (
+-            (_with_config(delayed_func, config), args, kwargs)
++        warning_filters = warnings.filters
++        iterable_with_config_and_warning_filters = (
++            (
++                _with_config_and_warning_filters(delayed_func, config, warning_filters),
++                args,
++                kwargs,
++            )
+             for delayed_func, args, kwargs in iterable
+         )
+-        return super().__call__(iterable_with_config)
++        return super().__call__(iterable_with_config_and_warning_filters)
+ 
+ 
+ # remove when https://github.com/joblib/joblib/issues/1071 is fixed

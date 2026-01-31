@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/lines.py b/lib/matplotlib/lines.py
+--- a/lib/matplotlib/lines.py
++++ b/lib/matplotlib/lines.py
+@@ -60,6 +60,10 @@ def _get_dash_pattern(style):
+     return offset, dashes
+ 
+ 
++def _get_dash_patterns(styles):
++    """Convert linestyle or sequence of linestyles to list of dash patterns."""
++
++
+ def _get_inverse_dash_pattern(offset, dashes):
+     """Return the inverse of the given dash pattern, for filling the gaps."""
+     # Define the inverse pattern by moving the last gap to the start of the

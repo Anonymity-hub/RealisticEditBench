@@ -1,0 +1,18 @@
+diff --git a/astropy/units/deprecated.py b/astropy/units/deprecated.py
+--- a/astropy/units/deprecated.py
++++ b/astropy/units/deprecated.py
+@@ -21,9 +21,11 @@
+ from .core import UnitBase, _add_prefixes, add_enabled_units, def_unit
+ from .utils import generate_prefixonly_unit_summary, generate_unit_summary
+ 
+-def_unit(["emu"], cgs.Bi, namespace=globals(), doc="Biot: CGS (EMU) unit of current")
++local_units = {}
++
++def_unit(["emu"], cgs.Bi, namespace=local_units, doc="Biot: CGS (EMU) unit of current")
+ # Add only some *prefixes* as deprecated units.
+-_add_prefixes(astrophys.jupiterMass, namespace=globals(), prefixes=True)
++_add_prefixes(astrophys.jupiterMass, namespace=local_units, prefixes=True)
+ _add_prefixes(astrophys.earthMass, namespace=globals(), prefixes=True)
+ _add_prefixes(astrophys.jupiterRad, namespace=globals(), prefixes=True)
+ _add_prefixes(astrophys.earthRad, namespace=globals(), prefixes=True)
+

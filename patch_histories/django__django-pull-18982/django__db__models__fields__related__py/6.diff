@@ -1,0 +1,12 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -1501,6 +1501,8 @@
+         return warnings
+ 
+     def _check_relationship_model(self, from_model=None, **kwargs):
++        from django.db.models.fields.composite import CompositePrimaryKey
++
+         if hasattr(self.remote_field.through, "_meta"):
+             qualified_model_name = "%s.%s" % (
+                 self.remote_field.through._meta.app_label,

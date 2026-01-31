@@ -1,0 +1,28 @@
+diff --git a/lib/matplotlib/figure.py b/lib/matplotlib/figure.py
+--- a/lib/matplotlib/figure.py
++++ b/lib/matplotlib/figure.py
+@@ -2475,8 +2475,13 @@
+         """
+         Parameters
+         ----------
+-        figsize : 2-tuple of floats, default: :rc:`figure.figsize`
+-            Figure dimension ``(width, height)`` in inches.
++        figsize : (float, float) or (float, float, str), default: :rc:`figure.figsize`
++            The figure dimensions. This can be
++
++            - a tuple ``(width, height, unit)``, where *unit* is one of "in" (inch),
++              "cm" (centimenter), "px" (pixel).
++            - a tuple ``(width, height)``, which is interpreted in inches, i.e. as
++              ``(width, height, "in")``.
+
+         dpi : float, default: :rc:`figure.dpi`
+             Dots per inch.
+@@ -2611,6 +2616,8 @@
+         facecolor = mpl._val_or_rc(facecolor, 'figure.facecolor')
+         edgecolor = mpl._val_or_rc(edgecolor, 'figure.edgecolor')
+         frameon = mpl._val_or_rc(frameon, 'figure.frameon')
++
++        figsize = _parse_figsize(figsize, dpi)
+
+         if not np.isfinite(figsize).all() or (np.array(figsize) < 0).any():
+             raise ValueError('figure size must be positive finite not '

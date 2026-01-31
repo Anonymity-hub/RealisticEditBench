@@ -1,0 +1,26 @@
+diff --git a/sklearn/utils/_array_api.py b/sklearn/utils/_array_api.py
+--- a/sklearn/utils/_array_api.py
++++ b/sklearn/utils/_array_api.py
+@@ -585,6 +585,22 @@
+ 
+     Note `array` is altered in place.
+     """
++    value, min_rows_columns = _validate_diagonal_args(array, value, xp)
++
++    if _is_numpy_namespace(xp):
++        step = array.shape[1] + 1
++        # Ensure we do not wrap
++        end = array.shape[1] * array.shape[1]
++        array.flat[:end:step] += value
++        return
++
++    # TODO: when array libraries support `reshape(copy)`, use
++    # `reshape(array, (-1,), copy=False)`, then fill with `[:end:step]` (within
++    # `try/except`). This is faster than for loop, when no copy needs to be
++    # made within `reshape`. See #31445 for details.
++    value = xp.linalg.diagonal(array) + value
++    for i in range(min_rows_columns):
++        array[i, i] = value[i]
+ 
+ 
+ def _is_xp_namespace(xp, name):

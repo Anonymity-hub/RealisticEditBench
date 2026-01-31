@@ -1,0 +1,36 @@
+diff --git a/sympy/polys/ring_series.py b/sympy/polys/ring_series.py
+--- a/sympy/polys/ring_series.py
++++ b/sympy/polys/ring_series.py
+@@ -1699,6 +1699,32 @@
+     """
+     if rs_is_puiseux(p, x):
+         return rs_puiseux(rs_cosh, p, x, prec)
++    R = p.ring
++    c = _get_constant_term(p, x)
++    if c:
++        if R.domain is EX:
++            c_expr = c.as_expr()
++            t1, t2 = sinh(c_expr), cosh(c_expr)
++        elif isinstance(c, PolyElement):
++            try:
++                c_expr = c.as_expr()
++                t1, t2 = R(sinh(c_expr)), R(cosh(c_expr))
++            except ValueError:
++                R = R.add_gens([sinh(c_expr), cosh(c_expr)])
++                p = p.set_ring(R)
++                x = x.set_ring(R)
++                c = c.set_ring(R)
++                t1, t2 = R(sinh(c_expr)), R(cosh(c_expr))
++        else:
++            try:
++                t1, t2 = R(sinh(c)), R(cosh(c))
++            except ValueError:
++                raise DomainError("The given series cannot be expanded in "
++                                  "this domain.")
++
++        p1 = p - c
++        return rs_cosh(p1, x, prec) * t2 + rs_sinh(p1, x, prec) * t1
++
+     t = rs_exp(p, x, prec)
+     t1 = rs_series_inversion(t, x, prec)
+     return (t + t1)/2

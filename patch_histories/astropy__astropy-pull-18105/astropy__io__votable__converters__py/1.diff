@@ -1,0 +1,14 @@
+diff --git a/astropy/io/votable/converters.py b/astropy/io/votable/converters.py
+--- a/astropy/io/votable/converters.py
++++ b/astropy/io/votable/converters.py
+@@ -323,7 +323,9 @@ def __init__(self, field, config=None, pos=None):
+             self.binoutput = self._binoutput_var
+             self.arraysize = "*"
+         else:
+-            field.arraysize = field.arraysize.removesuffix("*")
++            # Check if this is a bounded variable-length field
++            is_variable = field.arraysize.endswith("*")
++            numeric_part = field.arraysize.removesuffix("*")
+             try:
+                 self.arraysize = int(field.arraysize)
+             except ValueError:

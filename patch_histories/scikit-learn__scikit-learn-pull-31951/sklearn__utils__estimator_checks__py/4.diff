@@ -1,0 +1,36 @@
+diff --git a/sklearn/utils/estimator_checks.py b/sklearn/utils/estimator_checks.py
+--- a/sklearn/utils/estimator_checks.py
++++ b/sklearn/utils/estimator_checks.py
+@@ -575,6 +575,7 @@
+                 expected_failed_checks=expected_failed_checks,
+                 mark=mark,
+                 pytest=pytest,
++                xfail_strict=xfail_strict,
+             )
+ 
+ 
+@@ -583,6 +584,7 @@
+     *,
+     legacy: bool = True,
+     expected_failed_checks: Callable | None = None,
++    xfail_strict: bool | None = None,
+ ):
+     """Pytest specific decorator for parametrizing estimator checks.
+ 
+@@ -628,8 +630,15 @@
+         Where `"check_name"` is the name of the check, and `"my reason"` is why
+         the check fails. These tests will be marked as xfail if the check fails.
+ 
+-
+         .. versionadded:: 1.6
++
++    xfail_strict : bool, default=None
++        Whether to run checks in xfail strict mode. If True, checks that are
++        expected to fail but actually pass will lead to a test failure. If
++        False, unexpectedly passing tests will be marked as xpass. If None,
++        the default pytest behavior is used.
++
++        .. versionadded:: 1.8
+ 
+     Returns
+     -------

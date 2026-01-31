@@ -1,0 +1,19 @@
+diff --git a/django/db/models/lookups.py b/django/db/models/lookups.py
+--- a/django/db/models/lookups.py
++++ b/django/db/models/lookups.py
+@@ -279,12 +279,13 @@ class FieldGetDbPrepValueIterableMixin(FieldGetDbPrepValueMixin):
+     def get_prep_lookup(self):
+         if hasattr(self.rhs, "resolve_expression"):
+             return self.rhs
++        contains_expr = False
+         prepared_values = []
+         for rhs_value in self.rhs:
+             if hasattr(rhs_value, "resolve_expression"):
+                 # An expression will be handled by the database but can coexist
+                 # alongside real values.
+-                pass
++                contains_expr = True
+             elif (
+                 self.prepare_rhs
+                 and hasattr(self.lhs, "output_field")
+ 

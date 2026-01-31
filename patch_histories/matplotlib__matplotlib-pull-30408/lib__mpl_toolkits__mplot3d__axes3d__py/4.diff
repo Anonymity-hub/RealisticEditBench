@@ -1,0 +1,11 @@
+diff --git a/lib/mpl_toolkits/mplot3d/axes3d.py b/lib/mpl_toolkits/mplot3d/axes3d.py
+--- a/lib/mpl_toolkits/mplot3d/axes3d.py
++++ b/lib/mpl_toolkits/mplot3d/axes3d.py
+@@ -285,6 +285,7 @@
+         """
+         if adjustable is None:
+             adjustable = 'box'
++        _api.check_in_list(['box', 'datalim'], adjustable=adjustable)
+         _api.check_in_list(('auto', 'equal', 'equalxy', 'equalyz', 'equalxz'),
+                            aspect=aspect)
+         self._aspect = aspect

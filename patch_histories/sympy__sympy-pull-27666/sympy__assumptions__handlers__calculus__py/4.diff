@@ -1,0 +1,24 @@
+diff --git a/sympy/assumptions/handlers/calculus.py b/sympy/assumptions/handlers/calculus.py
+--- a/sympy/assumptions/handlers/calculus.py
++++ b/sympy/assumptions/handlers/calculus.py
+@@ -256,19 +256,6 @@
+     return True
+ 
+ 
+-@PositiveInfinitePredicate.register_many(NegativeInfinity, ComplexInfinity)
++@NegativeInfinitePredicate.register_many(Infinity, ComplexInfinity)
+ def _(expr, assumptions):
+     return False
+-
+-
+-# NegativeInfinitePredicate
+-
+-
+-@NegativeInfinitePredicate.register(NegativeInfinity)
+-def _(expr, assumptions):
+-    return True
+-
+-
+-@NegativeInfinitePredicate.register_many(Infinity, ComplexInfinity)
+-def _(expr, assumptions):
+-    return False

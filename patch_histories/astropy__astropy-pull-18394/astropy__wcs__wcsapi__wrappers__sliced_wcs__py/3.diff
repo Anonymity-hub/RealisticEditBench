@@ -1,0 +1,14 @@
+diff --git a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+--- a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
++++ b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+@@ -270,7 +270,8 @@
+         world_arrays_new = np.broadcast_arrays(*world_arrays_new)
+         pixel_arrays = self._wcs.world_to_pixel_values(*world_arrays_new)
+         pixel_arrays = (
+-            list(pixel_arrays) if
++            list(pixel_arrays) if self._wcs.pixel_n_dim > 1 else [pixel_arrays]
++        )
+ 
+         for ipixel in range(self._wcs.pixel_n_dim):
+             if (
+ 

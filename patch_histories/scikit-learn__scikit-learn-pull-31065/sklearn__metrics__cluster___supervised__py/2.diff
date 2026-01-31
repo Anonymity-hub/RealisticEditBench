@@ -1,0 +1,14 @@
+diff --git a/sklearn/metrics/cluster/_supervised.py b/sklearn/metrics/cluster/_supervised.py
+--- a/sklearn/metrics/cluster/_supervised.py
++++ b/sklearn/metrics/cluster/_supervised.py
+@@ -1054,8 +1054,8 @@
+         denominator = min(denominator, -np.finfo("float64").eps)
+     else:
+         denominator = max(denominator, np.finfo("float64").eps)
+-    ami = (mi - emi) / denominator
+-    return float(ami)
++    # The same applies analogously to mi and emi.
++    numerator = mi - emi
+ 
+ 
+ @validate_params(

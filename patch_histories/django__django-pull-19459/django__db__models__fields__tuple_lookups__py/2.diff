@@ -1,0 +1,15 @@
+diff --git a/django/db/models/fields/tuple_lookups.py b/django/db/models/fields/tuple_lookups.py
+--- a/django/db/models/fields/tuple_lookups.py
++++ b/django/db/models/fields/tuple_lookups.py
+@@ -130,7 +130,10 @@
+ 
+     def as_sql(self, compiler, connection):
+         if (
+-            not
++            not connection.features.supports_tuple_comparison_against_subquery
++            and isinstance(self.rhs, Query)
++            and self.rhs.subquery
++            and
+         if not connection.features.supports_tuple_lookups:
+             return self.get_fallback_sql(compiler, connection)
+         return super().as_sql(compiler, connection)

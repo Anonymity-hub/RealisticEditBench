@@ -1,0 +1,20 @@
+diff --git a/astropy/utils/data.py b/astropy/utils/data.py
+--- a/astropy/utils/data.py
++++ b/astropy/utils/data.py
+@@ -384,7 +384,7 @@
+             fileobj = io.BytesIO(fileobj.read())
+ 
+     # Now read enough bytes to look at signature
+-    signature = fileobj.read()
++    signature = fileobj.read(6)
+     fileobj.seek(0)
+ 
+     if signature[:3] == b"\x1f\x8b\x08":  # gzip
+@@ -426,7 +426,6 @@
+             fileobj_new.seek(0)
+             close_fds.append(fileobj_new)
+             fileobj = fileobj_new
+-    elif signature[:3] == b"\xfd7z":  # xz
+         if not HAS_LZMA:
+             for fd in close_fds:
+                 fd.close()

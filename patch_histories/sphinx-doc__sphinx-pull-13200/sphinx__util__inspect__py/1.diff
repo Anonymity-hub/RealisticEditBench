@@ -1,0 +1,29 @@
+diff --git a/sphinx/util/inspect.py b/sphinx/util/inspect.py
+--- a/sphinx/util/inspect.py
++++ b/sphinx/util/inspect.py
+@@ -241,6 +241,25 @@ def isclassmethod(
+     return False
+ 
+ 
++def is_classmethod_descriptor(
++    obj: Any, cls: Any = None, name: str | None = None
++) -> TypeIs[types.ClassMethodDescriptorType]:
++    """Check if the object is a :class:`~types.ClassMethodDescriptorType`.
++
++    This check is stricter than :func:`is_builtin_classmethod_like` as
++    a classmethod descriptor does not have a ``__func__`` attribute.
++    """
++    if isinstance(obj, types.ClassMethodDescriptorType):
++        return True
++    if cls and name:
++        # trace __mro__ if the method is defined in parent class
++        sentinel = object()
++        for basecls in getmro(cls):
++            meth = basecls.__dict__.get(name, sentinel)
++            if meth is not sentinel:
++                return isinstance(meth, types.ClassMethodDescriptorType)
++    return False
++
+ def isstaticmethod(
+     obj: Any,
+     cls: Any = None,

@@ -1,0 +1,18 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -7201,8 +7201,12 @@
+         else:
+             edgecolors = itertools.cycle(mcolors.to_rgba_array(ec))
+ 
+-
+-        facecolors = itertools.cycle(np.atleast_1d(kwargs.get('facecolor', colors)))
++        fc = kwargs.get('facecolor', colors)
++        if cbook._str_lower_equal(fc, 'none'):
++            facecolors = itertools.repeat(fc)
++        else:
++            facecolors = itertools.cycle(mcolors.to_rgba_array(fc))
++
+         hatches = itertools.cycle(np.atleast_1d(kwargs.get('hatch', None)))
+         linewidths = itertools.cycle(np.atleast_1d(kwargs.get('linewidth', None)))
+         linestyles = itertools.cycle(np.atleast_1d(kwargs.get('linestyle', None)))

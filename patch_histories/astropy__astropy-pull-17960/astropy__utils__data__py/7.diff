@@ -1,0 +1,25 @@
+diff --git a/astropy/utils/data.py b/astropy/utils/data.py
+--- a/astropy/utils/data.py
++++ b/astropy/utils/data.py
+@@ -456,6 +456,21 @@
+                 " compressed files (.Z extension)."
+             )
+         import uncompresspy
++
++        try:
++            fileobj_new = uncompresspy.LZWFile(fileobj)
++            fileobj_new.read(1)
++        except ValueError:
++            fileobj.seek(0)
++            fileobj_new.close()
++        else:
++            fileobj_new.seek(0)
++            close_fds.append(fileobj)
++            fileobj = fileobj_new
++
++    # By this point, we have a file, io.FileIO, gzip.GzipFile, bz2.BZ2File,
++    # lzma.LZMAFile or uncompresspy.LZWFile instance opened in binary mode (that
++    # is, read returns bytes). Now we need to, if requested, wrap it in a
+     # io.TextIOWrapper so read will return unicode based on the
+     # encoding parameter.
+ 

@@ -1,0 +1,11 @@
+diff --git a/sphinx/pycode/ast.py b/sphinx/pycode/ast.py
+--- a/sphinx/pycode/ast.py
++++ b/sphinx/pycode/ast.py
+@@ -202,5 +202,7 @@ def visit_Tuple(self, node: ast.Tuple) -> str:
+         else:
+             return '(' + ', '.join(self.visit(e) for e in node.elts) + ')'
+ 
++    def visit_Starred(self, node: ast.Starred) -> str:
++
+     def generic_visit(self, node: ast.AST) -> NoReturn:
+         raise NotImplementedError('Unable to parse %s object' % type(node).__name__)

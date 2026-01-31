@@ -1,0 +1,13 @@
+diff --git a/sklearn/metrics/cluster/_supervised.py b/sklearn/metrics/cluster/_supervised.py
+--- a/sklearn/metrics/cluster/_supervised.py
++++ b/sklearn/metrics/cluster/_supervised.py
+@@ -1033,6 +1033,9 @@ def adjusted_mutual_info_score(
+         or classes.shape[0] == clusters.shape[0] == 0
+     ):
+         return 1.0
++    # if there is only one class or one cluster return 0.0.
++    elif classes.shape[0] == 1 or clusters.shape[0] == 1:
++        return 0.0
+ 
+     contingency = contingency_matrix(labels_true, labels_pred, sparse=True)
+     # Calculate the MI for the two clusterings

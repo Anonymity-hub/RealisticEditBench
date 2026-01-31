@@ -1,0 +1,13 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -5250,7 +5250,8 @@
+         stacking_dims_list: list[Hashable] = []
+         for da in self.data_vars.values():
+             for dim in da.dims:
+-                if
++                if dim not in sample_dims and dim not in stacking_dims_list:
++                    stacking_dims_list.append(dim)
+ 
+         for key, da in self.data_vars.items():
+             missing_sample_dims = set(sample_dims) - set(da.dims)

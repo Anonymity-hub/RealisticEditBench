@@ -1,0 +1,26 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1376,19 +1376,13 @@
+         expressions = {}
+         counter = 1
+         for field in fields:
++            field_name = field
++            expression = None
+             if hasattr(field, "resolve_expression"):
+-                field_id_prefix = getattr(
++                field_name = getattr(
+                     field, "default_alias", field.__class__.__name__.lower()
+                 )
+-                while True:
+-                    field_id = field_id_prefix + str(counter)
+                     counter += 1
+-                    if field_id not in field_names:
+-                        break
+-                expressions[field_id] = field
+-                _fields.append(field_id)
+-            else:
+-                _fields.append(field)
+ 
+         clone = self._values(*_fields, **expressions)
+         clone._iterable_class = (

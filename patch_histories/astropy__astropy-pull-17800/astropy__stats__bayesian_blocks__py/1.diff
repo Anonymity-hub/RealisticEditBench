@@ -1,0 +1,16 @@
+diff --git a/astropy/stats/bayesian_blocks.py b/astropy/stats/bayesian_blocks.py
+--- a/astropy/stats/bayesian_blocks.py
++++ b/astropy/stats/bayesian_blocks.py
+@@ -482,8 +482,10 @@ def validate_input(
+         sigma: float | ArrayLike | None,
+     ) -> tuple[NDArray[float], NDArray[float], NDArray[float]]:
+         t, x, sigma = super().validate_input(t, x, sigma)
+-        if x is not None and np.any(x % 1 > 0):
+-            raise ValueError("x must be integer counts for fitness='events'")
++        if (x is not None) and (np.any(x % 1 > 0) or :
++            raise ValueError(
++                "x must be non-negative integer counts for fitness='events'"
++            )
+         return t, x, sigma
+ 
+ 

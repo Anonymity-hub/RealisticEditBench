@@ -1,0 +1,11 @@
+diff --git a/astropy/io/fits/hdu/hdulist.py b/astropy/io/fits/hdu/hdulist.py
+--- a/astropy/io/fits/hdu/hdulist.py
++++ b/astropy/io/fits/hdu/hdulist.py
+@@ -7,6 +7,7 @@
+ import shutil
+ import sys
+ import warnings
++from textwrap import indent
+ 
+ import numpy as np
+

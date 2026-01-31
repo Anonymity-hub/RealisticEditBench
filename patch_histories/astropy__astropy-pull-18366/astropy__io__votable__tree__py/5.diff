@@ -1,0 +1,43 @@
+diff --git a/astropy/io/votable/tree.py b/astropy/io/votable/tree.py
+--- a/astropy/io/votable/tree.py
++++ b/astropy/io/votable/tree.py
+@@ -4154,9 +4154,11 @@ def __init__(self, ID=None, id=None, config=None, pos=None, version="1.4"):
+ 
+         self._version = version
+ 
+-        if config is None:
+-            config = self._get_version_checks()
+-        self._config = config
++        self._config = config.copy() if config is not None else {}
++        # Ensure that the version flags match the version of this VOTableFile
++        # even if external config applied.
++        self._config["version"] = self._version
++        self._config.update(self._get_version_checks())
+         self._pos = pos
+ 
+         Element.__init__(self)
+@@ -4174,6 +4176,14 @@ def __repr__(self):
+         n_tables = len(list(self.iter_tables()))
+         return f"<VOTABLE>... {n_tables} tables ...</VOTABLE>"
+ 
++    @property
++    def config(self):
++        """
++        Configuration used to construct this object. Will always include the
++        version check values.
++        """
++        return self._config
++
+     @property
+     def version(self):
+         """
+@@ -4191,6 +4201,9 @@ def version(self, version):
+                 f" '{allowed_from_map}'"
+             )
+         self._version = version
++        # Force config update.
++        self._config.update(self._get_version_checks())
++        self._config["version"] = version
+ 
+     @property
+     def coordinate_systems(self):

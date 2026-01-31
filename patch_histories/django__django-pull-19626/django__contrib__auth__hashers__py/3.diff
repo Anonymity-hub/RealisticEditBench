@@ -1,0 +1,13 @@
+diff --git a/django/contrib/auth/hashers.py b/django/contrib/auth/hashers.py
+--- a/django/contrib/auth/hashers.py
++++ b/django/contrib/auth/hashers.py
+@@ -16,7 +16,7 @@
+     get_random_string,
+     pbkdf2,
+ )
+-from django.utils.encoding import force_str
++from django.utils.encoding import force_bytes, force_str
+ from django.utils.module_loading import import_string
+ from django.utils.translation import gettext_noop as _
+ 
+ 

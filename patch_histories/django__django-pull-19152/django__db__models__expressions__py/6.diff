@@ -1,0 +1,13 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -531,6 +531,9 @@
+             return tuple((key, cls._identity(val)) for key, val in value.items())
+         if isinstance(value, fields.Field):
+             if value.name and value.model:
++                return value.model._meta.label, value.name
++            return type(value)
++        return make_hashable(value)
+ 
+     @cached_property
+     def identity(self):

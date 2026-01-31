@@ -1,0 +1,13 @@
+diff --git a/sphinx/domains/python/__init__.py b/sphinx/domains/python/__init__.py
+--- a/sphinx/domains/python/__init__.py
++++ b/sphinx/domains/python/__init__.py
+@@ -602,6 +602,9 @@
+         title: str,
+         target: str,
+     ) -> tuple[str, str]:
++        title, target = super().process_link(
++
++        )
+         return f'@{title}', target
+ 
+ 

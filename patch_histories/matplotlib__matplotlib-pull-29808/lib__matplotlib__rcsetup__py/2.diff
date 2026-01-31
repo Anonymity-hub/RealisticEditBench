@@ -1,0 +1,17 @@
+diff --git a/lib/matplotlib/rcsetup.py b/lib/matplotlib/rcsetup.py
+--- a/lib/matplotlib/rcsetup.py
++++ b/lib/matplotlib/rcsetup.py
+@@ -91,6 +91,13 @@
+                 and s[1:-1] in self.valid):
+             msg += "; remove quotes surrounding your string"
+         raise ValueError(msg)
++
++
++def _single_string_color_list(s, scalar_validator):
++    """
++    Convert the string *s* to a list of colors interpreting it either as a
++    color sequence name, or a string containing single-letter colors.
++    """
+ 
+ 
+ @lru_cache

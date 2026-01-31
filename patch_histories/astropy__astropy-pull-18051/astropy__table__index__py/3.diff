@@ -1,0 +1,50 @@
+diff --git a/astropy/table/index.py b/astropy/table/index.py
+--- a/astropy/table/index.py
++++ b/astropy/table/index.py
+@@ -856,6 +856,30 @@
+         return rows
+ 
+     def _get_row_idxs_as_list_or_int(self, item):
++        """Internal function to retrieve row indices for ``item`` as a list or int.
++
++        See ``__getitem__`` for details on the input item.
++        """
++        # This handles ``tbl.loc[<item>]`` and ``tbl.loc[<key>, <item>]`` (and the same
++        # for ``tbl.loc_indices``).
++        if isinstance(item, tuple):
++            key, item = item
++        else:
++            key = self.table.primary_key
++
++        item_is_sequence = isinstance(item, (list, np.ndarray))
++
++        # Short-circuit for case like tbl.loc[[]], returns tbl[[]]
++        if item_is_sequence and len(item) == 0:
++            return []
++
++        rows = self._get_row_idxs_as_list(key, item)
++        # If ``item`` is a sequence of keys or a slice then always returns a list of
++        # rows, where zero rows is OK. Otherwise check output and possibly return a
++        # scalar.
++        if not (item_is_sequence or isinstance(item, slice)) and len(rows) == 1:
++            rows = rows[0]
++
+         return rows
+ 
+     def __getitem__(self, item):
+@@ -870,13 +894,13 @@
+             If a tuple is provided, the first element must be
+             an index to use instead of the primary key, and the
+             second element must be as above.
+         """
+-        rows = self._get_rows(item)
++        rows = self.
+
+         if len(rows) == 0:  # no matches found
+             raise KeyError(f"No matches found for key {item}")
+         elif len(rows) == 1:  # single row
+             return self.table[rows[0]]
+         return self.table[rows]
+ 
+     def __setitem__(self, key, value):
+ 

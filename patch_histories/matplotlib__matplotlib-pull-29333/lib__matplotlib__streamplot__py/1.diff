@@ -1,0 +1,48 @@
+diff --git a/lib/matplotlib/streamplot.py b/lib/matplotlib/streamplot.py
+--- a/lib/matplotlib/streamplot.py
++++ b/lib/matplotlib/streamplot.py
+@@ -19,7 +19,8 @@ def streamplot(axes, x, y, u, v, density=1, linewidth=None, color=None,
+                cmap=None, norm=None, arrowsize=1, arrowstyle='-|>',
+                minlength=0.1, transform=None, zorder=None, start_points=None,
+                maxlength=4.0, integration_direction='both',
+-               broken_streamlines=True, *, num_arrows=1):
++               broken_streamlines=True, *, integration_max_step_scale=1.0,
++               integration_max_error_scale=1.0, num_arrows=1):
+     """
+     Draw streamlines of a vector flow.
+ 
+@@ -73,6 +74,24 @@ def streamplot(axes, x, y, u, v, density=1, linewidth=None, color=None,
+         If False, forces streamlines to continue until they
+         leave the plot domain.  If True, they may be terminated if they
+         come too close to another streamline.
++    integration_max_step_scale : float, default: 1.0
++        Multiplier on the maximum allowable step in the streamline integration routine.
++        A value between zero and one results in a max integration step smaller than
++        the default max step, resulting in more accurate streamlines at the cost
++        of greater computation time; a value greater than one does the converse. Must be
++        greater than zero.
++
++        .. versionadded:: 3.11
++
++    integration_max_error_scale : float, default: 1.0
++        Multiplier on the maximum allowable error in the streamline integration routine.
++        A value between zero and one results in a tighter max integration error than
++        the default max error, resulting in more accurate streamlines at the cost
++        of greater computation time; a value greater than one does the converse. Must be
++        greater than zero.
++
++        .. versionadded:: 3.11
++
+     num_arrows : int
+         Number of arrows per streamline. The arrows are spaced equally along the steps
+         each streamline takes. Note that this can be different to being spaced equally
+@@ -481,7 +500,8 @@ def backward_time(xi, yi):
+         dxi, dyi = forward_time(xi, yi)
+         return -dxi, -dyi
+ 
+-    def integrate(x0, y0, broken_streamlines=True):
++    def integrate(x0, y0, broken_streamlines=True, integration_max_step_scale=1.0,
++                  integration_max_error_scale=1.0):
+         """
+         Return x, y grid-coordinates of trajectory based on starting point.
+ 

@@ -1,0 +1,40 @@
+diff --git a/sklearn/linear_model/_coordinate_descent.py b/sklearn/linear_model/_coordinate_descent.py
+--- a/sklearn/linear_model/_coordinate_descent.py
++++ b/sklearn/linear_model/_coordinate_descent.py
+@@ -3169,9 +3169,22 @@
+     n_alphas : int, default=100
+         Number of alphas along the regularization path.
+ 
+-    alphas : array-like, default=None
+-        List of alphas where to compute the models.
+-        If not provided, set automatically.
++        .. deprecated:: 1.7
++            `n_alphas` was deprecated in 1.7 and will be removed in 1.9. Use `alphas`
++            instead.
++
++    alphas : array-like or int, default=None
++        Values of alphas to test along the regularization path.
++        If int, `alphas` values are generated automatically.
++        If array-like, list of alpha values to use.
++
++        .. versionchanged:: 1.7
++            `alphas` accepts an integer value which removes the need to pass
++            `n_alphas`.
++
++        .. deprecated:: 1.7
++            `alphas=None` was deprecated in 1.7 and will be removed in 1.9, at which
++            point the default value will be set to 100.
+ 
+     fit_intercept : bool, default=True
+         Whether to calculate the intercept for this model. If set
+@@ -3311,8 +3324,8 @@
+         self,
+         *,
+         eps=1e-3,
+-        n_alphas=100,
+-        alphas=None,
++        n_alphas="deprecated",
++        alphas="warn",
+         fit_intercept=True,
+         max_iter=1000,
+         tol=1e-4,

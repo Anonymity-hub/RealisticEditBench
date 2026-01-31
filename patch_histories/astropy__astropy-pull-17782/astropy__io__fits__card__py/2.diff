@@ -1,0 +1,27 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -431,11 +431,10 @@
+         if self._comment is None:
+             self._comment = self._parse_comment() if self._image else ""
+ 
+-        if :
++        if conf.strip_header_whitespace and isinstance(self._comment, str):
+             return self._comment.rstrip()
+         else:
+-            self._comment = ""
+-            return ""
++            return self._comment
+ 
+     @comment.setter
+     def comment(self, comment):
+@@ -1030,7 +1029,7 @@
+             # try not to use CONTINUE if the string value can fit in one line.
+             # Instead, just truncate the comment
+             if isinstance(self.value, str) and len(value) > (
+-                self.length -
++                self.length - len(keyword) - 2
+             ):
+                 output = self._format_long_image()
+             else:
+

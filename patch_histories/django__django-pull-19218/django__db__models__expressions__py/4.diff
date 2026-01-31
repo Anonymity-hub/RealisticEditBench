@@ -1,0 +1,11 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -914,6 +914,7 @@
+             replacement := replacements.get(F(field_name))
+         ) is None or replacement._output_field_or_none is None:
+             return self
++        for transform in transforms:
+ 
+     def asc(self, **kwargs):
+         return OrderBy(self, **kwargs)

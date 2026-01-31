@@ -1,0 +1,19 @@
+diff --git a/django/utils/http.py b/django/utils/http.py
+--- a/django/utils/http.py
++++ b/django/utils/http.py
+@@ -346,6 +345,16 @@
+     key = parts.__next__().lower()
+     pdict = {}
+     for p in parts:
++        i = p.find("=")
++        if i >= 0:
++            has_encoding = False
++            name = p[:i].strip().lower()
++            if name.endswith("*"):
++                # Embedded lang/encoding, like "filename*=UTF-8''file.ext".
++                # https://tools.ietf.org/html/rfc2231#section-4
++                name = name[:-1]
++                if p.count("'") == 2:
++                    has_encoding = True
+     return key, pdict
+ 

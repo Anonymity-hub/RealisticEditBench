@@ -1,0 +1,13 @@
+diff --git a/django/core/handlers/asgi.py b/django/core/handlers/asgi.py
+--- a/django/core/handlers/asgi.py
++++ b/django/core/handlers/asgi.py
+@@ -267,6 +267,9 @@
+                 if on_disk:
+                     async_write = sync_to_async(
+                         body_file.write,
++                        thread_sensitive=False,
++                    )
++                    await async_write(message["body"])
+                 else:
+                     body_file.write(message["body"])
+ 

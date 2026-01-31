@@ -1,0 +1,12 @@
+diff --git a/sympy/assumptions/handlers/calculus.py b/sympy/assumptions/handlers/calculus.py
+--- a/sympy/assumptions/handlers/calculus.py
++++ b/sympy/assumptions/handlers/calculus.py
+@@ -4,7 +4,7 @@
+ """
+ 
+ from sympy.assumptions import Q, ask
+-from sympy.core import Expr,Add, Mul, Pow, Symbol
++from sympy.core import Expr, Add, Mul, Pow, Symbol
+ from sympy.core.numbers import (NegativeInfinity, GoldenRatio,
+     Infinity, Exp1, ComplexInfinity, ImaginaryUnit, NaN, Number, Pi, E,
+     TribonacciConstant)

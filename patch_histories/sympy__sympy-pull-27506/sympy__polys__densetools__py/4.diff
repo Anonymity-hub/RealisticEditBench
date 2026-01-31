@@ -1,0 +1,16 @@
+diff --git a/sympy/polys/densetools.py b/sympy/polys/densetools.py
+--- a/sympy/polys/densetools.py
++++ b/sympy/polys/densetools.py
+@@ -934,6 +934,12 @@
+     if a0:
+         n = len(f) - 1
+ 
++        for i in range(n, 0, -1):
++            for j in range(0, i):
++                afj = dmp_mul_ground(f[j], a0, u-1, K)
++                f[j + 1] = dmp_add(f[j + 1], afj, u-1, K)
++
++    return dmp_strip(f, u)
+ 
+ 
+ def dup_transform(f, p, q, K):

@@ -1,0 +1,20 @@
+whole.diffdiff --git a/astropy/modeling/core.py b/astropy/modeling/core.py
+--- a/astropy/modeling/core.py
++++ b/astropy/modeling/core.py
+@@ -3312,8 +3312,12 @@ def _calc_compound_deriv(*args, **kwargs):
+             right_params = self._get_right_params_from_args(args)
+ 
+             left_deriv = self.left.fit_deriv(*left_inputs, *left_params)
+-            if not self.left.col_fit_deriv:
+-                left_deriv = (np.asanyarray(left_deriv).T).tolist()
+             right_deriv = self.right.fit_deriv(*right_inputs, *right_params)
++
++            # Not all fit_deriv methods return consistent types, some return
++            # single arrays, some return lists of arrays, etc. We now convert
++            # this to a single array.
++            left_deriv = np.asanyarray(left_deriv)
++            right_deriv = np.asanyarray(right_deriv)
+             if not self.right.col_fit_deriv:
+                 right_deriv = (np.asanyarray(right_deriv).T).tolist()
+ 
+

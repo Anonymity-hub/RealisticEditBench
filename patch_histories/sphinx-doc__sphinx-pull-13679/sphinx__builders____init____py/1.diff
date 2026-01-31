@@ -1,0 +1,19 @@
+diff --git a/sphinx/builders/__init__.py b/sphinx/builders/__init__.py
+--- a/sphinx/builders/__init__.py
++++ b/sphinx/builders/__init__.py
+@@ -642,6 +642,7 @@ def read_doc(self, docname: str, *, _cache: bool = True) -> None:
+         filename = env.doc2path(docname)
+ 
+         # set up error_handler for the target document
++        # xref RemovedInSphinx90Warning
+         error_handler = _UnicodeDecodeErrorHandler(docname)
+         codecs.register_error('sphinx', error_handler)  # type: ignore[arg-type]
+ 
+@@ -903,6 +904,7 @@ def __init__(self, docname: str, /) -> None:
+         self.docname = docname
+ 
+     def __call__(self, error: UnicodeDecodeError) -> tuple[str, int]:
++        obj = error.object
+         line_start = error.object.rfind(b'\n', 0, error.start)
+         line_end = error.object.find(b'\n', error.start)
+         if line_end == -1:

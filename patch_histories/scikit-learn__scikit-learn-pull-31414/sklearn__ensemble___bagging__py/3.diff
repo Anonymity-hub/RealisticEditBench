@@ -1,0 +1,47 @@
+diff --git a/sklearn/ensemble/_bagging.py b/sklearn/ensemble/_bagging.py
+--- a/sklearn/ensemble/_bagging.py
++++ b/sklearn/ensemble/_bagging.py
+@@ -376,6 +376,15 @@
+             multi_output=True,
+         )
+ 
++        if sample_weight is not None:
++            sample_weight = _check_sample_weight(sample_weight, X, dtype=None)
++
++            if not self.bootstrap:
++                warn(
++                    f"When fitting {self.__class__.__name__} with sample_weight "
++                    f"it is recommended to use bootstrap=True, got {self.bootstrap}."
++                )
++
+         return self._fit(
+             X,
+             y,
+@@ -425,8 +434,6 @@
+ 
+         sample_weight : array-like of shape (n_samples,), default=None
+             Sample weights. If None, then samples are equally weighted.
+-            Note that this is supported only if the base estimator supports
+-            sample weighting.
+ 
+         **fit_params : dict, default=None
+             Parameters to pass to the :term:`fit` method of the underlying
+@@ -447,18 +454,11 @@
+         # Check parameters
+         self._validate_estimator(self._get_estimator())
+ 
+-        if sample_weight is not None:
+-            fit_params["sample_weight"] = sample_weight
+-
+         if _routing_enabled():
+             routed_params = process_routing(self, "fit", **fit_params)
+         else:
+             routed_params = Bunch()
+             routed_params.estimator = Bunch(fit=fit_params)
+-            if "sample_weight" in fit_params:
+-                routed_params.estimator.fit["sample_weight"] = fit_params[
+-                    "sample_weight"
+-                ]
+ 
+         if max_depth is not None:
+             self.estimator_.max_depth = max_depth

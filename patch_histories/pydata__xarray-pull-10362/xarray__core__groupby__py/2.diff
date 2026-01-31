@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -402,6 +402,8 @@ def _parse_group_and_groupers(
+             f"`group` must be a DataArray. Received {type(group).__name__!r} instead"
+         )
+ 
++    if isinstance(group, Grouper):
++
+     if isinstance(group, Mapping):
+         grouper_mapping = either_dict_or_kwargs(group, groupers, "groupby")
+         group = None

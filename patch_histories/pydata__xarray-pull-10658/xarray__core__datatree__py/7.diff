@@ -1,0 +1,48 @@
+diff --git a/xarray/core/datatree.py b/xarray/core/datatree.py
+--- a/xarray/core/datatree.py
++++ b/xarray/core/datatree.py
+@@ -1390,21 +1390,21 @@
+                 f"or DataTree, got {type(root_data)}"
+             )
+ 
+-        def depth(item) -> int:
+-            pathstr, _ = item
+-            return len(NodePath(pathstr).parts)
+-
+-        if d_cast:
+-            # Populate tree with children determined from data_objects mapping
++        def depth(item: tuple[NodePath, object]) -> int:
++            node_path, _ = item
++            return len(node_path.parts)
++
++        if nodes:
++            # Populate tree with children
+             # Sort keys by depth so as to insert nodes from root first (see GH issue #9276)
+-            for path, data in sorted(d_cast.items(), key=depth):
++            for path, node in sorted(nodes.items(), key=depth):
+                 # Create and set new node
+-                if isinstance(data, DataTree):
+-                    new_node = data.copy()
+-                elif isinstance(data, Dataset) or data is None:
+-                    new_node = cls(dataset=data)
++                if isinstance(node, DataTree):
++                    new_node = node.copy()
++                elif isinstance(node, Dataset) or node is None:
++                    new_node = cls(dataset=node)
+                 else:
+-                    raise TypeError(f"invalid values: {data}")
++                    raise TypeError(f"invalid values: {node}")
+                 obj._set_item(
+                     path,
+                     new_node,
+@@ -1412,9 +1412,7 @@
+                     new_nodes_along_path=True,
+                 )
+ 
+-        # TODO: figure out why mypy is raising an error here, likely something
+-        # to do with the return type of Dataset.copy()
+-        return obj  # type: ignore[return-value]
++        return obj
+ 
+     def to_dict(self, relative: bool = False) -> dict[str, Dataset]:
+         """

@@ -1,0 +1,22 @@
+diff --git a/lib/matplotlib/backend_bases.py b/lib/matplotlib/backend_bases.py
+--- a/lib/matplotlib/backend_bases.py
++++ b/lib/matplotlib/backend_bases.py
+@@ -1411,6 +1411,18 @@ def __init__(self, name, canvas, x, y, button=None, key=None,
+         self.step = step
+         self.dblclick = dblclick
+ 
++    @classmethod
++    def _from_ax_coords(cls, name, ax, xy, *args, **kwargs):
++        """
++        Generate a synthetic event at a given axes coordinate.
++
++        This method is intended for creating events during testing.  The event
++        can be emitted by calling its ``_process()`` method.
++
++        args and kwargs are mapped to `.MouseEvent.__init__` parameters,
++        starting with `button`.
++        """
++
+     def __str__(self):
+         return (f"{self.name}: "
+                 f"xy=({self.x}, {self.y}) xydata=({self.xdata}, {self.ydata}) "

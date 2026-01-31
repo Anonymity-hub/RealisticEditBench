@@ -1,0 +1,13 @@
+diff --git a/sphinx/writers/html5.py b/sphinx/writers/html5.py
+--- a/sphinx/writers/html5.py
++++ b/sphinx/writers/html5.py
+@@ -305,7 +305,7 @@ def depart_desc_optional(self, node: Element) -> None:
+             self.param_group_index += 1
+ 
+     def visit_desc_annotation(self, node: Element) -> None:
+-        self.body.append(self.starttag(node, 'em', '', CLASS='property'))
++        self.body.append(self.starttag(node, 'span', '', CLASS='property'))
+ 
+     def depart_desc_annotation(self, node: Element) -> None:
+         self.body.append('</em>')
+ 

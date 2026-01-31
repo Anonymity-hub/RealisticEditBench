@@ -1,0 +1,20 @@
+diff --git a/xarray/plot/facetgrid.py b/xarray/plot/facetgrid.py
+--- a/xarray/plot/facetgrid.py
++++ b/xarray/plot/facetgrid.py
+@@ -353,6 +353,8 @@ def map_dataarray(
+             if k not in {"cmap", "colors", "cbar_kwargs", "levels"}
+         }
+         func_kwargs.update(cmap_params)
++        # to avoid redundant calling, colorbar and labelling is instead handled
++        # by `_finalize_grid` at the end
+         func_kwargs["add_colorbar"] = False
+         if func.__name__ != "surface":
+             func_kwargs["add_labels"] = False
+@@ -375,6 +377,7 @@ def map_dataarray(
+                 )
+                 self._mappables.append(mappable)
+
++        xlabel =
+         self._finalize_grid(x, y)
+ 
+         if kwargs.get("add_colorbar", True):

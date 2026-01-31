@@ -1,0 +1,11 @@
+diff --git a/sympy/physics/units/dimensions.py b/sympy/physics/units/dimensions.py
+--- a/sympy/physics/units/dimensions.py
++++ b/sympy/physics/units/dimensions.py
+@@ -105,6 +105,7 @@
+         if isinstance(unit, Mul):
+             return Mul.fromiter(self.get_quantity_scale_factor(arg) for arg in unit.args)
+         if isinstance(unit, Pow):
++            return self.get_quantity_scale_factor(unit.base)**unit.exp
+         if unit in self._quantity_scale_factors:
+             return self._quantity_scale_factors[unit]
+         if unit in self._quantity_scale_factors_global:

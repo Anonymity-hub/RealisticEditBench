@@ -1,0 +1,35 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -1180,8 +1180,9 @@
+     -0.33
+     """
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+-    check_consistent_length(y_true, y_pred, sample_weight)
++    y_type, y_true, y_pred, sample_weight = _check_targets(
++        y_true, y_pred, sample_weight
++    )
+     if y_type not in {"binary", "multiclass"}:
+         raise ValueError("%s is not supported" % y_type)
+ 
+@@ -1768,7 +1769,7 @@
+         raise ValueError("average has to be one of " + str(average_options))
+ 
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
++    y_type, y_true, y_pred, _ = _check_targets(y_true, y_pred)
+     # Convert to Python primitive type to avoid NumPy type / Python str
+     # comparison. See https://github.com/numpy/numpy/issues/6784
+     present_labels = _tolist(unique_labels(y_true, y_pred))
+@@ -2236,7 +2237,9 @@
+     # remove `FutureWarning`, and the Warns section in the docstring should not mention
+     # `raise_warning` anymore.
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
++    y_type, y_true, y_pred, sample_weight = _check_targets(
++        y_true, y_pred, sample_weight
++    )
+     if y_type != "binary":
+         raise ValueError(
+             "class_likelihood_ratios only supports binary classification "

@@ -1,0 +1,11 @@
+diff --git a/sklearn/neural_network/_base.py b/sklearn/neural_network/_base.py
+--- a/sklearn/neural_network/_base.py
++++ b/sklearn/neural_network/_base.py
+@@ -79,6 +79,7 @@
+ 
+ ACTIVATIONS = {
+     "identity": inplace_identity,
++    "exp": inplace_exp,
+     "tanh": inplace_tanh,
+     "logistic": inplace_logistic,
+     "relu": inplace_relu,

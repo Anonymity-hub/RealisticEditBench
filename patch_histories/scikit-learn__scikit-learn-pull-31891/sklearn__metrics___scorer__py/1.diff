@@ -1,0 +1,14 @@
+diff --git a/sklearn/metrics/_scorer.py b/sklearn/metrics/_scorer.py
+--- a/sklearn/metrics/_scorer.py
++++ b/sklearn/metrics/_scorer.py
+@@ -102,6 +102,10 @@ def _cached_call(cache, estimator, response_method, *args, **kwargs):
+     return result
+ 
+ 
++def _get_func_repr_or_name(func):
++    """Returns the name of the function or repr of a partial."""
++
++
+ class _MultimetricScorer:
+     """Callable for multimetric scoring used to avoid repeated calls
+     to `predict_proba`, `predict`, and `decision_function`.

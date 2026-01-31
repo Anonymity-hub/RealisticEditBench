@@ -1,0 +1,103 @@
+diff --git a/sklearn/ensemble/_bagging.py b/sklearn/ensemble/_bagging.py
+--- a/sklearn/ensemble/_bagging.py
++++ b/sklearn/ensemble/_bagging.py
+@@ -128,21 +128,11 @@
+     bootstrap_features = ensemble.bootstrap_features
+     has_check_input = has_fit_parameter(ensemble.estimator_, "check_input")
+     requires_feature_indexing = bootstrap_features or max_features != n_features
++    consumes_sample_weight = _consumes_sample_weight(ensemble.estimator_)
+ 
+     # Build estimators
+     estimators = []
+     estimators_features = []
+-
+-    # TODO: (slep6) remove if condition for unrouted sample_weight when metadata
+-    # routing can't be disabled.
+-    support_sample_weight = has_fit_parameter(ensemble.estimator_, "sample_weight")
+-    if not _routing_enabled() and (
+-        not support_sample_weight and fit_params.get("sample_weight") is not None
+-    ):
+-        raise ValueError(
+-            "The base estimator doesn't support sample weight, but sample_weight is "
+-            "passed to the fit method."
+-        )
+ 
+     for i in range(n_estimators):
+         if verbose > 1:
+@@ -159,7 +149,8 @@
+         else:
+             estimator_fit = estimator.fit
+ 
+-        # Draw random feature, sample indices
++        # Draw random feature, sample indices (using normalized sample_weight
++        # as probabilites if provided).
+         features, indices = _generate_bagging_indices(
+             random_state,
+             bootstrap_features,
+@@ -168,45 +159,22 @@
+             n_samples,
+             max_features,
+             max_samples,
++            sample_weight,
+         )
+ 
+         fit_params_ = fit_params.copy()
+ 
+-        # TODO(SLEP6): remove if condition for unrouted sample_weight when metadata
+-        # routing can't be disabled.
+-        # 1. If routing is enabled, we will check if the routing supports sample
+-        # weight and use it if it does.
+-        # 2. If routing is not enabled, we will check if the base
+-        # estimator supports sample_weight and use it if it does.
+-
+         # Note: Row sampling can be achieved either through setting sample_weight or
+-        # by indexing. The former is more efficient. Therefore, use this method
++        # by indexing. The former is more memory efficient. Therefore, use this method
+         # if possible, otherwise use indexing.
+-        if _routing_enabled():
+-            request_or_router = get_routing_for_object(ensemble.estimator_)
+-            consumes_sample_weight = request_or_router.consumes(
+-                "fit", ("sample_weight",)
+-            )
+-        else:
+-            consumes_sample_weight = support_sample_weight
+         if consumes_sample_weight:
+-            # Draw sub samples, using sample weights, and then fit
+-            curr_sample_weight = _check_sample_weight(
+-                fit_params_.pop("sample_weight", None), X
+-            ).copy()
+-
+-            if bootstrap:
+-                sample_counts = np.bincount(indices, minlength=n_samples)
+-                curr_sample_weight *= sample_counts
+-            else:
+-                not_indices_mask = ~indices_to_mask(indices, n_samples)
+-                curr_sample_weight[not_indices_mask] = 0
+-
+-            fit_params_["sample_weight"] = curr_sample_weight
++            # Row sampling by setting sample_weight
++            indices_as_sample_weight = np.bincount(indices, minlength=n_samples)
++            fit_params_["sample_weight"] = indices_as_sample_weight
+             X_ = X[:, features] if requires_feature_indexing else X
+             estimator_fit(X_, y, **fit_params_)
+         else:
+-            # cannot use sample_weight, so use indexing
++            # Row sampling by indexing
+             y_ = _safe_indexing(y, indices)
+             X_ = _safe_indexing(X, indices)
+             fit_params_ = _check_method_params(X, params=fit_params_, indices=indices)
+@@ -374,9 +342,11 @@
+             regression).
+ 
+         sample_weight : array-like of shape (n_samples,), default=None
+-            Sample weights. If None, then samples are equally weighted.
+-            Note that this is supported only if the base estimator supports
+-            sample weighting.
++            Sample weights. If None, then samples are equally weighted. Used as
++            probabilities to sample the training set. Note that the expected
++            frequency semantics for the `sample_weight` parameter are only
++            fulfilled when sampling with replacement `bootstrap=True`.
++
+         **fit_params : dict
+             Parameters to pass to the underlying estimators.
+ 

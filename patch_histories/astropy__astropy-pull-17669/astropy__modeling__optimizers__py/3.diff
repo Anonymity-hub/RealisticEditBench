@@ -1,0 +1,21 @@
+diff --git a/astropy/modeling/optimizers.py b/astropy/modeling/optimizers.py
+--- a/astropy/modeling/optimizers.py
++++ b/astropy/modeling/optimizers.py
+@@ -116,7 +116,7 @@
+     def __init__(self):
+         from scipy.optimize import fmin_slsqp
+ 
+-        super().__init__(fmin_slsqp)
++        self._init_opt_method(fmin_slsqp)
+         self.fit_info = {
+             "final_func_val": None,
+             "numiter": None,
+@@ -208,7 +208,7 @@
+     def __init__(self):
+         from scipy.optimize import fmin as simplex
+ 
+-        super().__init__(simplex)
++        self._init_opt_method(simplex)
+         self.fit_info = {
+             "final_func_val": None,
+             "numiter": None,

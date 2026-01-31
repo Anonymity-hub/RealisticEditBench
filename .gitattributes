@@ -1,0 +1,4 @@
+crawled_data/infbench/*bm25*.jsonl filter=lfs diff=lfs merge=lfs -text
+experiment_results/**/*.jsonl filter=lfs diff=lfs merge=lfs -text
+crawled_data/infbench/*.jsonl filter=lfs diff=lfs merge=lfs -text
+crawled_data/bench/*.jsonl filter=lfs diff=lfs merge=lfs -text

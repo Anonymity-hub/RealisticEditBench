@@ -1,0 +1,26 @@
+diff --git a/xarray/coding/cftimeindex.py b/xarray/coding/cftimeindex.py
+--- a/xarray/coding/cftimeindex.py
++++ b/xarray/coding/cftimeindex.py
+@@ -606,15 +606,15 @@
+         nptimes = cftime_to_nptime(self, time_unit=time_unit)
+         calendar = infer_calendar_name(self)
+         if calendar not in _STANDARD_CALENDARS and not unsafe:
+-            warnings.warn(
++            emit_user_level_warning(
+                 "Converting a CFTimeIndex with dates from a non-standard "
+-                f"calendar, {calendar!r}, to a pandas.DatetimeIndex, which uses dates "
+-                "from the standard calendar.  This may lead to subtle errors "
+-                "in operations that depend on the length of time between "
+-                "dates.",
++                f"calendar, {calendar!r}, to a pandas.DatetimeIndex, which "
++                "uses dates from the standard calendar.  This may lead to "
++                "subtle errors in operations that depend on the length of "
++                "time between dates.",
+                 RuntimeWarning,
+-                stacklevel=2,
+-            )
++            )
++
+         return pd.DatetimeIndex(nptimes)
+ 
+     def strftime(self, date_format):

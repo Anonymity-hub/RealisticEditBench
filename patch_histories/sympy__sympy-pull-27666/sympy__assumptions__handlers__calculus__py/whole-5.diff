@@ -1,0 +1,15 @@
+diff --git a/sympy/assumptions/handlers/calculus.py b/sympy/assumptions/handlers/calculus.py
+--- a/sympy/assumptions/handlers/calculus.py
++++ b/sympy/assumptions/handlers/calculus.py
+@@ -234,7 +234,10 @@ def _(expr, assumptions):
+ 
+ @InfinitePredicate.register(Expr)
+ def _(expr, assumptions):
+-    return ask(~Q.finite(expr),assumptions)
++    is_finite = Q.finite(expr)._eval_ask(assumptions)
++    if is_finite is None:
++        return None
++    return not is_finite
+ 
+ 
+ # PositiveInfinitePredicate

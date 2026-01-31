@@ -1,0 +1,138 @@
+diff --git a/lib/matplotlib/_afm.py b/lib/matplotlib/_afm.py
+--- a/lib/matplotlib/_afm.py
++++ b/lib/matplotlib/_afm.py
+@@ -375,23 +375,21 @@
+ 
+ class AFM:
+ 
+-    def __init__(self, fh):
++    def __init__(self, fh: BinaryIO):
+         """Parse the AFM file in file object *fh*."""
+         self._header = _parse_header(fh)
+         self._metrics, self._metrics_by_name = _parse_char_metrics(fh)
+         self._kern, self._composite = _parse_optional(fh)
+ 
+-    def get_str_bbox_and_descent(self, s):
++    def get_str_bbox_and_descent(self, s: str) -> tuple[int, int, float, int, int]:
+         """Return the string bounding box and the maximal descent."""
+         if not len(s):
+             return 0, 0, 0, 0, 0
+-        total_width = 0
+-        namelast = None
+-        miny = 1e9
++        total_width = 0.0
++        namelast = ''
++        miny = 1_000_000_000
+         maxy = 0
+         left = 0
+-        if not isinstance(s, str):
+-            s = _to_str(s)
+         for c in s:
+             if c == '\n':
+                 continue
+@@ -411,11 +409,11 @@
+ 
+         return left, miny, total_width, maxy - miny, -miny
+ 
+-    def get_glyph_name(self, glyph_ind):  # For consistency with FT2Font.
++    def get_glyph_name(self, glyph_ind: int) -> str:  # For consistency with FT2Font.
+         """Get the name of the glyph, i.e., ord(';') is 'semicolon'."""
+         return self._metrics[glyph_ind].name
+ 
+-    def get_char_index(self, c):  # For consistency with FT2Font.
++    def get_char_index(self, c: int) -> int:  # For consistency with FT2Font.
+         """
+         Return the glyph index corresponding to a character code point.
+ 
+@@ -423,38 +421,38 @@
+         """
+         return c
+ 
+-    def get_width_char(self, c):
++    def get_width_char(self, c: int) -> float:
+         """Get the width of the character code from the character metric WX field."""
+         return self._metrics[c].width
+ 
+-    def get_width_from_char_name(self, name):
++    def get_width_from_char_name(self, name: str) -> float:
+         """Get the width of the character from a type1 character name."""
+         return self._metrics_by_name[name].width
+ 
+-    def get_kern_dist_from_name(self, name1, name2):
++    def get_kern_dist_from_name(self, name1: str, name2: str) -> float:
+         """
+         Return the kerning pair distance (possibly 0) for chars *name1* and *name2*.
+         """
+         return self._kern.get((name1, name2), 0)
+ 
+-    def get_fontname(self):
++    def get_fontname(self) -> str:
+         """Return the font name, e.g., 'Times-Roman'."""
+-        return self._header[b'FontName']
++        return self._header['FontName']
+ 
+     @property
+-    def postscript_name(self):  # For consistency with FT2Font.
++    def postscript_name(self) -> str:  # For consistency with FT2Font.
+         return self.get_fontname()
+ 
+-    def get_fullname(self):
++    def get_fullname(self) -> str:
+         """Return the font full name, e.g., 'Times-Roman'."""
+-        name = self._header.get(b'FullName')
++        name = self._header.get('FullName')
+         if name is None:  # use FontName as a substitute
+-            name = self._header[b'FontName']
++            name = self._header['FontName']
+         return name
+ 
+-    def get_familyname(self):
++    def get_familyname(self) -> str:
+         """Return the font family name, e.g., 'Times'."""
+-        name = self._header.get(b'FamilyName')
++        name = self._header.get('FamilyName')
+         if name is not None:
+             return name
+ 
+@@ -465,26 +463,26 @@
+         return re.sub(extras, '', name)
+ 
+     @property
+-    def family_name(self):  # For consistency with FT2Font.
++    def family_name(self) -> str:  # For consistency with FT2Font.
+         """The font family name, e.g., 'Times'."""
+         return self.get_familyname()
+ 
+-    def get_weight(self):
++    def get_weight(self) -> str:
+         """Return the font weight, e.g., 'Bold' or 'Roman'."""
+-        return self._header[b'Weight']
+-
+-    def get_angle(self):
++        return self._header['Weight']
++
++    def get_angle(self) -> float:
+         """Return the fontangle as float."""
+-        return self._header[b'ItalicAngle']
+-
+-    def get_capheight(self):
++        return self._header['ItalicAngle']
++
++    def get_capheight(self) -> float:
+         """Return the cap height as float."""
+-        return self._header[b'CapHeight']
+-
+-    def get_xheight(self):
++        return self._header['CapHeight']
++
++    def get_xheight(self) -> float:
+         """Return the xheight as float."""
+-        return self._header[b'XHeight']
+-
+-    def get_underline_thickness(self):
++        return self._header['XHeight']
++
++    def get_underline_thickness(self) -> float:
+         """Return the underline thickness as float."""
+-        return self._header[b'UnderlineThickness']
++        return self._header['UnderlineThickness']

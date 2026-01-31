@@ -1,0 +1,23 @@
+diff --git a/sklearn/cluster/_hdbscan/hdbscan.py b/sklearn/cluster/_hdbscan/hdbscan.py
+--- a/sklearn/cluster/_hdbscan/hdbscan.py
++++ b/sklearn/cluster/_hdbscan/hdbscan.py
+@@ -716,6 +716,18 @@
+         self : object
+             Returns self.
+         """
++        # TODO(1.10): remove "warn" option
++        # and leave copy to its default value where applicable in examples and doctests.
++        if self.copy == "warn":
++            warn(
++                "The default value of `copy` will change from False to True in 1.10."
++                " Explicitly set a value for `copy` to silence this warning.",
++                FutureWarning,
++            )
++            _copy = False
++        else:
++            _copy = self.copy
++
+         if self.metric == "precomputed" and self.store_centers is not None:
+             raise ValueError(
+                 "Cannot store centers when using a precomputed distance matrix."
+

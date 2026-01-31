@@ -1,0 +1,12 @@
+diff --git a/xarray/coding/cftimeindex.py b/xarray/coding/cftimeindex.py
+--- a/xarray/coding/cftimeindex.py
++++ b/xarray/coding/cftimeindex.py
+@@ -722,7 +722,7 @@
+         else:
+             raise ValueError(f"{offset} is a non-fixed frequency")
+ 
+-        unit = _total_microseconds(offset.as_timedelta())
++        unit = _total_microseconds(offset_as_timedelta)
+         values = self.asi8
+         rounded = method(values, unit)
+         return _cftimeindex_from_i8(rounded, self.date_type, self.name)

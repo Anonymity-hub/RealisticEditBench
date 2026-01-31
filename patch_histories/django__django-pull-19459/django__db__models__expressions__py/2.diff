@@ -1,0 +1,15 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1797,6 +1797,11 @@
+     def resolve_expression(self, *args, **kwargs):
+         resolved = super().resolve_expression(*args, **kwargs)
+         if type(self) is Subquery and self.template == Subquery.template:
++            resolved.query.contains_subquery = True
++            # Subquery is an unnecessary shim for a resolved query as it
++            # complexifies the lookup's right-hand-side introspection.
++            try:
++                self.output_field
+     def copy(self):
+         clone = super().copy()
+         clone.query = clone.query.clone()

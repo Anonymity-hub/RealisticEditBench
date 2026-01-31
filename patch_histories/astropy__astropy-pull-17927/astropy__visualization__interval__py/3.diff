@@ -1,0 +1,36 @@
+diff --git a/astropy/visualization/interval.py b/astropy/visualization/interval.py
+--- a/astropy/visualization/interval.py
++++ b/astropy/visualization/interval.py
+@@ -8,6 +8,8 @@
+ import abc
+
+ import numpy as np
++
++from astropy.utils.masked import get_data_and_mask
+
+ from .transform import BaseTransform
+
+@@ -48,6 +50,22 @@
+ 
+     @staticmethod
+     def _process_values(values):
++        """
++        Process the input values.
++
++        This function filters out masked and/or invalid values (inf,
++        nan) and returns a flattened 1D array.
++
++        Parameters
++        ----------
++        values : array-like
++            The input values.
++
++        Returns
++        -------
++        result : 1D ndarray
++            The processed values.
++        """
+ 
+     def __call__(self, values, clip=True, out=None):
+         """
+

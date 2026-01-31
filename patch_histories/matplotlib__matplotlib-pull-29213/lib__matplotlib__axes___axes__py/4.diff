@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -6059,7 +6059,7 @@
+                     Y = _interp_grid(Y)
+                 if nrows == Ny:
+                     X = _interp_grid(X.T).T
+-                    Y = _interp_grid(Y.T).T
++                    Y = _interp_grid(Y.T, require_monotonicity=True).T
+                 shading = 'flat'
+ 
+         C = cbook.safe_masked_invalid(C, copy=True)

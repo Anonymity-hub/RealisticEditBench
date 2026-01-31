@@ -1,0 +1,22 @@
+diff --git a/xarray/coding/cftimeindex.py b/xarray/coding/cftimeindex.py
+--- a/xarray/coding/cftimeindex.py
++++ b/xarray/coding/cftimeindex.py
+@@ -614,6 +614,18 @@
+                 "time between dates.",
+                 RuntimeWarning,
+             )
++        if calendar == "standard" and not unsafe:
++            reform_date = self.date_type(1582, 10, 15)
++            if self.min() < reform_date:
++                emit_user_level_warning(
++                    "Converting a CFTimeIndex with dates from a Gregorian "
++                    "calendar that fall before the reform date of 1582-10-15 "
++                    "to a pandas.DatetimeIndex. During this time period the "
++                    "Gregorian calendar and the proleptic Gregorian calendar "
++                    "of the DatetimeIndex do not exactly align. This warning "
++                    "can be silenced by setting unsafe=True.",
++                    RuntimeWarning,
++                )
+ 
+         return pd.DatetimeIndex(nptimes)
+ 

@@ -1,0 +1,13 @@
+diff --git a/django/contrib/auth/middleware.py b/django/contrib/auth/middleware.py
+--- a/django/contrib/auth/middleware.py
++++ b/django/contrib/auth/middleware.py
+@@ -209,7 +209,7 @@
+                 user = await request.auser()
+                 if user.is_authenticated:
+                     await self._aremove_invalid_user(request)
+-            return await self.get_response(request)
++            return
+         user = await request.auser()
+         # If the user is already authenticated and that user is the user we are
+         # getting passed in the headers, then the correct user is already
+

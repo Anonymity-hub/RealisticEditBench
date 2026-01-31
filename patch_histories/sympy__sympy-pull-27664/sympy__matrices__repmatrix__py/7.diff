@@ -1,0 +1,25 @@
+diff --git a/sympy/matrices/repmatrix.py b/sympy/matrices/repmatrix.py
+--- a/sympy/matrices/repmatrix.py
++++ b/sympy/matrices/repmatrix.py
+@@ -10,7 +10,7 @@
+ from sympy.polys.domains import ZZ, QQ, GF, EXRAW
+ from sympy.polys.matrices import DomainMatrix
+ from sympy.polys.matrices.exceptions import DMNonInvertibleMatrixError
+-from sympy.polys.polyerrors import CoercionFailed
++from sympy.polys.polyerrors import CoercionFailed, NotInvertible
+ from sympy.utilities.exceptions import sympy_deprecation_warning
+ from sympy.utilities.iterables import is_sequence
+ from sympy.utilities.misc import filldedent, as_int
+@@ -460,7 +460,11 @@
+         else:
+             dMadj, det = dM.adj_det()
+             try:
+-                detinv
++                detinv = 1 / det
++            except NotInvertible:
++                msg = f'Matrix is not invertible (mod {m})'
++                raise NonInvertibleMatrixError(msg)
++            dMi = dMadj * detinv
+ 
+         return dMi.to_Matrix()
+ 

@@ -1,0 +1,13 @@
+diff --git a/sympy/matrices/repmatrix.py b/sympy/matrices/repmatrix.py
+--- a/sympy/matrices/repmatrix.py
++++ b/sympy/matrices/repmatrix.py
+@@ -458,6 +458,9 @@
+                 msg = f'Matrix is not invertible (mod {m})'
+                 raise NonInvertibleMatrixError(msg) from exc
+         else:
++            dMadj, det = dM.adj_det()
++            try:
++                detinv
+ 
+         return dMi.to_Matrix()
+ 

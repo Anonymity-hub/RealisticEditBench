@@ -1,0 +1,12 @@
+diff --git a/sklearn/metrics/_regression.py b/sklearn/metrics/_regression.py
+--- a/sklearn/metrics/_regression.py
++++ b/sklearn/metrics/_regression.py
+@@ -28,7 +28,7 @@
+     _xlogy as xlogy,
+ )
+ from ..utils._param_validation import Interval, StrOptions, validate_params
+-from ..utils.stats import _weighted_percentile
++from ..utils.stats import _averaged_weighted_percentile, _weighted_percentile
+ from ..utils.validation import (
+     _check_sample_weight,
+     _num_samples,

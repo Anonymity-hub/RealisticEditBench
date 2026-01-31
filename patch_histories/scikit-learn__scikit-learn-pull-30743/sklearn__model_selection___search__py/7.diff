@@ -1,0 +1,18 @@
+diff --git a/sklearn/model_selection/_search.py b/sklearn/model_selection/_search.py
+--- a/sklearn/model_selection/_search.py
++++ b/sklearn/model_selection/_search.py
+@@ -910,6 +910,14 @@
+                 splitter=Bunch(split={"groups": groups}),
+                 scorer=Bunch(score={}),
+             )
++            # NOTE: sample_weight is forwarded to the scorer if sample_weight
++            # is not None and scorers accept sample_weight. For _MultimetricScorer,
++            # sample_weight is forwarded if any scorer accepts sample_weight
++            if (
++                params.get("sample_weight") is not None
++                and self._check_scorers_accept_sample_weight()
++            ):
++                routed_params.scorer.score["sample_weight"] = params["sample_weight"]
+         return routed_params
+ 
+     @_fit_context(

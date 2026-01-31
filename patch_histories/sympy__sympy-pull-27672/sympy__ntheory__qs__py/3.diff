@@ -1,0 +1,18 @@
+diff --git a/sympy/ntheory/qs.py b/sympy/ntheory/qs.py
+--- a/sympy/ntheory/qs.py
++++ b/sympy/ntheory/qs.py
+@@ -105,10 +105,9 @@
+     factor_base : factor_base primes
+     idx_1000 : index of prime number in the factor_base near 1000
+     idx_5000 : index of prime number in the factor_base near to 5000
+-    seed : Generate pseudoprime numbers
+-    """
+-    randint = _randint(seed)
+-    approx_val = sqrt(2*N) / M
++    randint : A callable that takes two integers (a, b) and returns a random integer
++              n such that a <= n <= b, similar to `random.randint`.
++    """
+     # `a` is a parameter of the sieve polynomial and `q` is the prime factors of `a`
+     # randomly search for a combination of primes whose multiplication is close to approx_val
+     # This multiplication of primes will be `a` and the primes will be `q`
+

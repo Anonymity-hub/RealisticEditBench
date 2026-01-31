@@ -1,0 +1,49 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -372,8 +372,8 @@
+         valid_names = [self.props.parts[-1]]
+         if isinstance(self, ClassDocumenter):
+             valid_names.append('__init__')
+-            if hasattr(self.object, '__mro__'):
+-                valid_names.extend(cls.__name__ for cls in self.object.__mro__)
++            if hasattr(self.props._obj, '__mro__'):
++                valid_names.extend(cls.__name__ for cls in self.props._obj.__mro__)
+ 
+         docstrings = self.get_doc()
+         if docstrings is None:
+@@ -464,7 +464,7 @@
+             'autodoc-process-signature',
+             self.objtype,
+             self.props.full_name,
+-            self.object,
++            self.props._obj,
+             self.options,
+             args,
+             retann,
+@@ -636,13 +636,13 @@
+             inherited_members = self.options.inherited_members or set()
+             seen = set()
+ 
+-            if inspect.isclass(self.object):
+-                for cls in self.object.__mro__:
++            if inspect.isclass(self.props._obj):
++                for cls in self.props._obj.__mro__:
+                     if name in cls.__dict__:
+                         seen.add(cls)
+                     if (
+                         cls.__name__ in inherited_members
+-                        and cls != self.object
++                        and cls != self.props._obj
+                         and any(
+                             issubclass(potential_child, cls) for potential_child in seen
+                         )
+@@ -681,7 +681,7 @@
+                     member,
+                     self.get_attr,
+                     self.config.autodoc_inherit_docstrings,
+-                    self.object,
++                    self.props._obj,
+                     membername,
+                 )
+                 if not isinstance(doc, str):

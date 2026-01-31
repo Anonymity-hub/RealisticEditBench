@@ -1,0 +1,11 @@
+diff --git a/django/contrib/staticfiles/management/commands/collectstatic.py b/django/contrib/staticfiles/management/commands/collectstatic.py
+--- a/django/contrib/staticfiles/management/commands/collectstatic.py
++++ b/django/contrib/staticfiles/management/commands/collectstatic.py
+@@ -25,6 +25,7 @@ def __init__(self, *args, **kwargs):
+         self.symlinked_files = []
+         self.unmodified_files = []
+         self.post_processed_files = []
++        self.skipped_files = []
+         self.storage = staticfiles_storage
+         self.style = no_style()
+ 

@@ -1,0 +1,15 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -789,7 +789,10 @@ def bulk_create(
+         objs = list(objs)
+         self._prepare_for_bulk_create(objs)
+         with transaction.atomic(using=self.db, savepoint=False):
+-            objs_without_pk, objs_with_pk = partition(lambda o: o._is_pk_set(), objs)
++            objs_without_pk, objs_with_pk = partition(
++                lambda o: o._is_pk_set() and not isinstance(o.pk, DatabaseDefault),
++                objs,
++            )
+             if objs_with_pk:
+                 returned_columns = self._batched_insert(
+                     objs_with_pk,

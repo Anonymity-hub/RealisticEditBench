@@ -1,0 +1,18 @@
+diff --git a/sympy/physics/continuum_mechanics/beam.py b/sympy/physics/continuum_mechanics/beam.py
+--- a/sympy/physics/continuum_mechanics/beam.py
++++ b/sympy/physics/continuum_mechanics/beam.py
+@@ -541,6 +541,13 @@
+         + 10*SingularityFunction(x, 20, -1)
+         """
+         loc = sympify(loc)
++
++        if type == "fixed" or type=="roller" or type=="pin":
++            pass
++        else:
++            raise ValueError(
++                "Invalid support type. Choose from 'pin', 'roller', or 'fixed'."
++            )
+ 
+         self._applied_supports.append((loc, type))
+         if type in ("pin", "roller"):
+

@@ -1,0 +1,17 @@
+diff --git a/sklearn/utils/estimator_checks.py b/sklearn/utils/estimator_checks.py
+--- a/sklearn/utils/estimator_checks.py
++++ b/sklearn/utils/estimator_checks.py
+@@ -672,7 +672,12 @@
+ 
+     def _checks_generator(estimators, legacy, expected_failed_checks):
+         for estimator in estimators:
+-            args = {"estimator": estimator, "legacy": legacy, "mark": "xfail"}
++            args = {
++                "estimator": estimator,
++                "legacy": legacy,
++                "mark": "xfail",
++                "xfail_strict": xfail_strict,
++            }
+             if callable(expected_failed_checks):
+                 args["expected_failed_checks"] = expected_failed_checks(estimator)
+             yield from estimator_checks_generator(**args)

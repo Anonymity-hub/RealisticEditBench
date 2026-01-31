@@ -1,0 +1,15 @@
+diff --git a/django/template/base.py b/django/template/base.py
+--- a/django/template/base.py
++++ b/django/template/base.py
+@@ -199,6 +199,11 @@ def compile_nodelist(self):
+         except Exception as e:
+             if self.engine.debug:
+                 e.template_debug = self.get_exception_info(e, e.token)
++            if (
++                isinstance(e, TemplateSyntaxError)
++                and self.origin.name != UNKNOWN_SOURCE
++                and e.args
++            ):
+             raise
+ 
+     def get_exception_info(self, exception, token):

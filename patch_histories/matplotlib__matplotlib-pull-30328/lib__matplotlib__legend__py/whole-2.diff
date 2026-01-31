@@ -1,0 +1,16 @@
+diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py
+--- a/lib/matplotlib/legend.py
++++ b/lib/matplotlib/legend.py
+@@ -609,10 +609,9 @@ def __init__(
+                                 text.set_color(color[0])
+                             else:
+                                 pass
+-                        elif isinstance(color, str) and str(color).lower() == 'none':
++                        elif cbook._str_lower_equal(color, 'none'):
+                             continue
+-                        elif (len(mpl.colors.to_rgba(color)) == 4
+-                              and mpl.colors.to_rgba(color)[3] == 0):
++                        elif mpl.colors.to_rgba(color)[3] == 0:
+                                 continue
+                         else:
+                             text.set_color(color)

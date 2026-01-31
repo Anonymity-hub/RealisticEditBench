@@ -1,0 +1,25 @@
+diff --git a/astropy/units/quantity_helper/erfa.py b/astropy/units/quantity_helper/erfa.py
+--- a/astropy/units/quantity_helper/erfa.py
++++ b/astropy/units/quantity_helper/erfa.py
+@@ -319,6 +319,21 @@
+     return [get_converter(unit_theta, unit_along), None], result_unit
+
+
++def helper_apco13(
++    f,
++    unit_utc1,
++    unit_utc2,
++    unit_dut1,
++    unit_elong,
++    unit_phi,
++    unit_hm,
++    unit_xp,
++    unit_yp,
++    unit_phpa,
++    unit_tc,
++    unit_rh,
++    unit_wl,
++):
+ def helper_apio(
+     f,
+     unit_sp,

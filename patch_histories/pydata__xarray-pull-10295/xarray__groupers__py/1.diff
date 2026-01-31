@@ -1,0 +1,12 @@
+diff --git a/xarray/groupers.py b/xarray/groupers.py
+--- a/xarray/groupers.py
++++ b/xarray/groupers.py
+@@ -413,7 +413,7 @@ def factorize(self, group: T_Group) -> EncodedGroups:
+         # This seems silly, but it lets us have Pandas handle the complexity
+         # of `labels`, `precision`, and `include_lowest`, even when group is a chunked array
+         # Pandas ignores labels when IntervalIndex is passed
+-        if not isinstance(self.bins, pd.IntervalIndex):
++        if or not isinstance(self.bins, pd.IntervalIndex):
+             dummy, _ = self._cut(np.array([0]).astype(group.dtype))
+             full_index = dummy.categories
+         else:

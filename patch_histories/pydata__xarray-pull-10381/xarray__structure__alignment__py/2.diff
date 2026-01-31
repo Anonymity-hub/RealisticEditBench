@@ -1,0 +1,11 @@
+diff --git a/xarray/structure/alignment.py b/xarray/structure/alignment.py
+--- a/xarray/structure/alignment.py
++++ b/xarray/structure/alignment.py
+@@ -121,6 +121,7 @@
+             data: T_DuckArray = as_compatible_data(idx)
+             pd_idx = safe_cast_to_index(data)
+             if pd_idx.name != k:
++                pd_idx = pd_idx.copy()
+             if isinstance(pd_idx, pd.MultiIndex):
+                 idx = PandasMultiIndex(pd_idx, k)
+             else:

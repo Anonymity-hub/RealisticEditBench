@@ -1,0 +1,12 @@
+diff --git a/astropy/stats/bayesian_blocks.py b/astropy/stats/bayesian_blocks.py
+--- a/astropy/stats/bayesian_blocks.py
++++ b/astropy/stats/bayesian_blocks.py
+@@ -483,7 +483,7 @@
+         mask = N_k > 0
+         rate = np.divide(N_k, T_k, out=out, where=mask)
+         ln_rate = np.log(rate, out=out, where=mask)
+-        return 
++        return np.multiply(N_k, ln_rate, out=out, where=mask)
+ 
+     def validate_input(
+         self,

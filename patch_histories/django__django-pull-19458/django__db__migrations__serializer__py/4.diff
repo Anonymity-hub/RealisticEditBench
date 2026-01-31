@@ -1,0 +1,15 @@
+diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py
+--- a/django/db/migrations/serializer.py
++++ b/django/db/migrations/serializer.py
+@@ -111,6 +111,11 @@
+             else:
+                 non_ident_kwargs[kw] = arg
+         if non_ident_kwargs:
++            # Serialize non-identifier keyword arguments as a dict.
++            kw_string, kw_imports = serializer_factory(non_ident_kwargs).serialize()
++            strings.append(f"**{kw_string}")
++            imports.update(kw_imports)
++
+         return "%s(%s)" % (name, ", ".join(strings)), imports
+ 
+     @staticmethod

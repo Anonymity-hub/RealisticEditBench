@@ -1,0 +1,37 @@
+diff --git a/sympy/solvers/ode/single.py b/sympy/solvers/ode/single.py
+--- a/sympy/solvers/ode/single.py
++++ b/sympy/solvers/ode/single.py
+@@ -864,28 +864,9 @@ def _matches(self):
+         eq_orig = self.ode_problem.eq
+         f = self.ode_problem.func.func
+         x = self.ode_problem.sym
+-        df = f(x).diff(x)
+-        self.eqs = []
+-        eq = eq_orig.collect(f(x), func = cancel)
+-        eq = fraction(factor(eq))[0]
+-        factors = Mul.make_args(factor(eq))
+-        roots = [fac.as_base_exp() for fac in factors if len(fac.args)!=0]
+-        if len(roots)>1 or roots[0][1]>1:
+-            for base, expo in roots:
+-                if base.has(f(x)):
+-                    self.eqs.append(base)
+-            if len(self.eqs)>0:
+-                return True
+-        roots = solve(eq, df)
+-        if len(roots)>0:
+-            self.eqs = [(df - root) for root in roots]
+-            # Avoid infinite recursion
+-            matches = self.eqs != [eq_orig]
+-            return matches
+-        for i in factors:
+-            if i.has(f(x)):
+-                self.eqs.append(i)
+-        return len(self.eqs)>0 and len(factors)>1
++
++        eq, den = eq_orig.as_numer_denom()
++
+ 
+     def _get_general_solution(self, *, simplify_flag: bool = True):
+         func = self.ode_problem.func.func
+
+ 

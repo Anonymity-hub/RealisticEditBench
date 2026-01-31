@@ -1,0 +1,14 @@
+diff --git a/astropy/table/table.py b/astropy/table/table.py
+--- a/astropy/table/table.py
++++ b/astropy/table/table.py
+@@ -2813,6 +2813,10 @@
+         self._replace_cols(columns)
+ 
+         if sliced:
++            # For the sliced case, re-create the indices (in order) after row removal.
++            # This will also preserve the first index as the primary key.
++            for index_colnames in indices_colnames:
++                self.add_index(index_colnames)
+ 
+         # Revert groups to default (ungrouped) state
+         if hasattr(self, "_groups"):

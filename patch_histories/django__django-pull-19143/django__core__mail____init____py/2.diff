@@ -1,0 +1,19 @@
+diff --git a/django/core/mail/__init__.py b/django/core/mail/__init__.py
+--- a/django/core/mail/__init__.py
++++ b/django/core/mail/__init__.py
+@@ -132,6 +132,15 @@
+     if not recipients:
+         return
+ 
++    # RemovedInDjango70Warning.
++    if all(isinstance(a, (list, tuple)) and len(a) == 2 for a in recipients):
++        warnings.warn(
++            f"Using (name, address) pairs in the {setting_name} setting is deprecated."
++            " Replace with a list of email address strings.",
++            RemovedInDjango70Warning,
++            stacklevel=2,
++        )
++        recipients = [a[1] for a in recipients]
+ 
+     mail = EmailMultiAlternatives(
+         subject="%s%s" % (settings.EMAIL_SUBJECT_PREFIX, subject),

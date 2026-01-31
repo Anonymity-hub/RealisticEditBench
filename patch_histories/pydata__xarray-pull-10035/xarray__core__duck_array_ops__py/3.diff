@@ -1,0 +1,12 @@
+diff --git a/xarray/core/duck_array_ops.py b/xarray/core/duck_array_ops.py
+--- a/xarray/core/duck_array_ops.py
++++ b/xarray/core/duck_array_ops.py
+@@ -601,7 +601,7 @@
+     # Set offset to minimum if not given
+     if offset is None:
+         if dtypes.is_datetime_like(array.dtype):
+-            offset = _datetime_nanmin(array)
++            offset = _datetime_nanreduce(array, min)
+         else:
+             offset = min(array)
+ 

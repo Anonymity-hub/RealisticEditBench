@@ -1,0 +1,26 @@
+diff --git a/sklearn/inspection/_plot/decision_boundary.py b/sklearn/inspection/_plot/decision_boundary.py
+--- a/sklearn/inspection/_plot/decision_boundary.py
++++ b/sklearn/inspection/_plot/decision_boundary.py
+@@ -265,6 +265,22 @@
+                     self.xx0, self.xx1, class_map, colors=colors, **kwargs
+                 )
+             else:
++                multiclass_cmaps = [
++                    mpl.colors.LinearSegmentedColormap.from_list(
++                        f"colormap_{class_idx}", [(1.0, 1.0, 1.0, 1.0), (r, g, b, 1.0)]
++                    )
++                    for class_idx, (r, g, b, _) in enumerate(colors)
++                ]
++
++                self.surface_ = []
++                for class_idx, cmap in enumerate(multiclass_cmaps):
++                    response = np.ma.array(
++                        self.response[:, :, class_idx],
++                        mask=~(self.response.argmax(axis=2) == class_idx),
++                    )
++                    self.surface_.append(
++                        plot_func(self.xx0, self.xx1, response, cmap=cmap, **kwargs)
++                    )
+ 
+         if xlabel is not None or not ax.get_xlabel():
+             xlabel = self.xlabel if xlabel is None else xlabel

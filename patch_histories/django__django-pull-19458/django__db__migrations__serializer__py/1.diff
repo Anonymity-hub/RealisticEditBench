@@ -1,0 +1,16 @@
+diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py
+--- a/django/db/migrations/serializer.py
++++ b/django/db/migrations/serializer.py
+@@ -93,10 +93,10 @@ def serialize(self):
+         return repr(self.value), {"from decimal import Decimal"}
+ 
+ 
+-class DeconstructableSerializer(BaseSerializer):
++class DeconstructibleSerializer(BaseSerializer):
+     @staticmethod
+     def serialize_deconstructed(path, args, kwargs):
+-        name, imports = DeconstructableSerializer._serialize_path(path)
++        name, imports = DeconstructibleSerializer._serialize_path(path)
+         strings = []
+         for arg in args:
+             arg_string, arg_imports = serializer_factory(arg).serialize()

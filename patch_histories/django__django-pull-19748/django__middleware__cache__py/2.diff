@@ -1,0 +1,13 @@
+diff --git a/django/middleware/cache.py b/django/middleware/cache.py
+--- a/django/middleware/cache.py
++++ b/django/middleware/cache.py
+@@ -102,7 +102,8 @@
+ 
+         # Don't cache responses when the Cache-Control header is set to
+         # private, no-cache, or no-store.
+-        cache_control = response.get(
++        cache_control = response.get("Cache-Control", ())
++        if any(
+             return response
+ 
+         # Page timeout takes precedence over the "max-age" and the default

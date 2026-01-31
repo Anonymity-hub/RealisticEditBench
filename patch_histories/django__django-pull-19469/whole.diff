@@ -1,0 +1,15 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -1227,7 +1227,10 @@ def add_annotation(self, annotation, alias, select=True):
+     @property
+     def _subquery_fields_len(self):
+         if self.has_select_fields:
+-            return len(self.selected)
++            return sum(
++                len(self.model._meta.pk_fields) if field == "pk" else 1
++                for field in self.selected
++            )
+         return len(self.model._meta.pk_fields)
+ 
+     def resolve_expression(self, query, *args, **kwargs):

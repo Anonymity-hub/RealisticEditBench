@@ -1,0 +1,18 @@
+diff --git a/sympy/core/operations.py b/sympy/core/operations.py
+--- a/sympy/core/operations.py
++++ b/sympy/core/operations.py
+@@ -528,6 +528,14 @@
+     def __new__(cls, *args, evaluate=None, **options):
+         args = (_sympify_(arg) for arg in args)
+ 
++        if evaluate is None:
++            evaluate = global_parameters.evaluate
++
++        if not evaluate:
++            obj = super().__new__(cls, *args, evaluate=False, **options)
++            obj._argset = frozenset(args)
++            return obj
++
+         try:
+             # /!\ args is a generator and _new_args_filter
+             # must be careful to handle as such; this

@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/backend_bases.py b/lib/matplotlib/backend_bases.py
+--- a/lib/matplotlib/backend_bases.py
++++ b/lib/matplotlib/backend_bases.py
+@@ -1424,6 +1424,9 @@
+         """
+         x, y = ax.transData.transform(xy)
+         event = cls(name, ax.figure.canvas, x, y, *args, **kwargs)
++        event.inaxes = ax
++        event.xdata, event.ydata = xy  # Force exact xy to avoid fp roundtrip issues.
++        return event
+ 
+     def __str__(self):
+         return (f"{self.name}: "

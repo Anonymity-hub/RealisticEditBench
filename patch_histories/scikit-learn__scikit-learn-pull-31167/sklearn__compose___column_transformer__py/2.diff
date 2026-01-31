@@ -1,0 +1,17 @@
+diff --git a/sklearn/compose/_column_transformer.py b/sklearn/compose/_column_transformer.py
+--- a/sklearn/compose/_column_transformer.py
++++ b/sklearn/compose/_column_transformer.py
+@@ -476,13 +476,6 @@
+             # add transformer tuple for remainder
+             if self._remainder[2]:
+                 transformers = chain(transformers, [self._remainder])
+-
+-        # We want the warning about the future change of the remainder
+-        # columns dtype to be shown only when a user accesses them
+-        # directly, not when they are used by the ColumnTransformer itself.
+-        # We disable warnings here; they are enabled when setting
+-        # self.transformers_.
+-        transformers = _with_dtype_warning_enabled_set_to(False, transformers)
+ 
+         get_weight = (self.transformer_weights or {}).get
+ 

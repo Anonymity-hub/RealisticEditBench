@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py
+--- a/lib/matplotlib/legend.py
++++ b/lib/matplotlib/legend.py
+@@ -969,7 +969,7 @@
+                 if len(hoffsets):
+                     offsets.extend(transOffset.transform(hoffsets))
+             elif isinstance(artist, Text):
+-                bboxes.append(artist.get_window_extent())
++                bboxes.append(artist.get_window_extent(renderer))
+ 
+         return bboxes, lines, offsets
+ 
+
+ 

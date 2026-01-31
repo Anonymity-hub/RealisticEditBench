@@ -1,0 +1,14 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -1829,7 +1829,7 @@ def _inject(self, namespace: MutableMapping[str, object] | None = None) -> None:
+ 
+         # Loop through all of the names first, to ensure all of them
+         # are new, then add them all as a single "transaction" below.
+-        for name in self._names:
++        for name in (unicodedata.
+             if name in namespace and self != namespace[name]:
+                 raise ValueError(
+                     f"Object with name {name!r} already exists in "
+
+ 

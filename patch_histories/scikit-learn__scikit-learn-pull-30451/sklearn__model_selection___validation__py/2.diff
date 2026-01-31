@@ -1,0 +1,11 @@
+diff --git a/sklearn/model_selection/_validation.py b/sklearn/model_selection/_validation.py
+--- a/sklearn/model_selection/_validation.py
++++ b/sklearn/model_selection/_validation.py
+@@ -1172,6 +1172,7 @@
+     """
+     _check_groups_routing_disabled(groups)
+     X, y = indexable(X, y)
++    params = {} if params is None else params
+ 
+     if _routing_enabled():
+         # For estimators, a MetadataRouter is created in get_metadata_routing

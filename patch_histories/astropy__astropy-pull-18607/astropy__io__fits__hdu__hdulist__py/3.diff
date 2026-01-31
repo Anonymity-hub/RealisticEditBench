@@ -1,0 +1,12 @@
+diff --git a/astropy/io/fits/hdu/hdulist.py b/astropy/io/fits/hdu/hdulist.py
+--- a/astropy/io/fits/hdu/hdulist.py
++++ b/astropy/io/fits/hdu/hdulist.py
+@@ -1369,7 +1369,7 @@
+             except (VerifyError, ValueError) as exc:
+                 warnings.warn(
+                     f"Error validating header for HDU #{len(self)} (note: Astropy "
+-                    f"uses zero-based indexing).\n{indent(str(exc))}\n"
++                    f"uses zero-based indexing).\n{indent(str(exc), 4 * ' ')}\n"
+                     "There may be extra bytes after the last HDU or the "
+                     "file is corrupted.",
+                     VerifyWarning,

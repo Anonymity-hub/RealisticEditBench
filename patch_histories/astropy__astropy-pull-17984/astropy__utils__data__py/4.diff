@@ -1,0 +1,11 @@
+diff --git a/astropy/utils/data.py b/astropy/utils/data.py
+--- a/astropy/utils/data.py
++++ b/astropy/utils/data.py
+@@ -438,6 +438,7 @@
+         try:
+             fileobj_new = lzma.LZMAFile(fileobj, mode="rb")
+             fileobj_new.read(1)  # need to check that the file is really xz
++        except lzma.LZMAError:  # invalid xz file
+             fileobj.seek(0)
+             fileobj_new.close()
+             # should we propagate this to the caller to signal bad content?

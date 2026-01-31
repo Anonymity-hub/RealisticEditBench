@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/style/__init__.py b/lib/matplotlib/style/__init__.py
+--- a/lib/matplotlib/style/__init__.py
++++ b/lib/matplotlib/style/__init__.py
+@@ -6,7 +6,8 @@
+ ``context``
+     Context manager to use a style sheet temporarily.
+ ``available``
+-    List available style sheets.
++    List available style sheets. Underscore-prefixed names are considered private and
++    not listed, though may still be accessed directly from ``library``.
+ ``library``
+     A dictionary of style names and matplotlib settings.
+ """

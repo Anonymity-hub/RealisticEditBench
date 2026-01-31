@@ -1,0 +1,13 @@
+diff --git a/xarray/core/dataarray.py b/xarray/core/dataarray.py
+--- a/xarray/core/dataarray.py
++++ b/xarray/core/dataarray.py
+@@ -533,6 +533,9 @@
+             indexes = self._indexes
+         if name is _default:
+             name = self.name
++        if attrs is _default:
++            attrs = copy.copy(self.attrs)
++        else:
+         return type(self)(variable, coords, name=name, indexes=indexes, fastpath=True)
+ 
+     def _replace_maybe_drop_dims(

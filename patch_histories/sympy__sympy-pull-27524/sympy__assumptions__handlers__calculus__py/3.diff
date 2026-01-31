@@ -1,0 +1,17 @@
+diff --git a/sympy/assumptions/handlers/calculus.py b/sympy/assumptions/handlers/calculus.py
+--- a/sympy/assumptions/handlers/calculus.py
++++ b/sympy/assumptions/handlers/calculus.py
+@@ -155,7 +155,10 @@
+     for arg in expr.args:
+         _bounded = ask(Q.finite(arg), assumptions)
+         if _bounded:
+-            if ask(Q.
++            if ask(Q.zero(arg), assumptions) is not False:
++                if result is False:
++                    return None
++                possible_zero = True
+         elif _bounded is None:
+             if result is None:
+                 return None
+
+ 

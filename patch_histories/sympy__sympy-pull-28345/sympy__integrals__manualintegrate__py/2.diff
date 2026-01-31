@@ -1,0 +1,15 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -1445,8 +1445,9 @@
+ 
+     a = Wild('a', exclude=[symbol, 0])
+     b = Wild('b', exclude=[symbol])
+-    pattern = exp(a * symbol**2 + b * symbol)
+-    if not any(term.match(pattern) for term in integrand.atoms(exp)):
++    c = Wild('c', exclude=[symbol])
++    # n = Wild('n', exclude=[symbol], properties=[lambda n: n > 0])
++    f = WildFunction('f')
+         return
+ 
+     # Replace trig and hyperbolic functions with their exponential forms

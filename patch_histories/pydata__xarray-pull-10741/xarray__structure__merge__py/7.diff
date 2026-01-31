@@ -1,0 +1,18 @@
+diff --git a/xarray/structure/merge.py b/xarray/structure/merge.py
+--- a/xarray/structure/merge.py
++++ b/xarray/structure/merge.py
+@@ -655,6 +655,14 @@
+ 
+         for attrs in variable_attrs:
+             for key, value in attrs.items():
++                if key in dropped_keys:
++                    continue
++
++                if key not in result:
++                    result[key] = value
++                elif not equivalent_attrs(result[key], value):
++                    del result[key]
++                    dropped_keys.add(key)
+ 
+         return result
+     elif combine_attrs == "identical":

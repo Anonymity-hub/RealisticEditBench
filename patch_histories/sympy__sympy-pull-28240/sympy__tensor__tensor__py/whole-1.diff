@@ -1,0 +1,12 @@
+diff --git a/sympy/tensor/tensor.py b/sympy/tensor/tensor.py
+--- a/sympy/tensor/tensor.py
++++ b/sympy/tensor/tensor.py
+@@ -2210,7 +2210,7 @@ def _contract_and_permute_with_metric(metric, array, pos, dim):
+ 
+         array = tensorcontraction(tensorproduct(metric, array), (1, 2+pos))
+         permu = list(range(dim))
+-        permu[0], permu[pos] = permu[pos], permu[0]
++        permu.insert(pos, permu.pop(0))
+         return permutedims(array, permu)
+ 
+     @staticmethod

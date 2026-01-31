@@ -1,0 +1,24 @@
+diff --git a/astropy/wcs/wcsapi/fitswcs.py b/astropy/wcs/wcsapi/fitswcs.py
+--- a/astropy/wcs/wcsapi/fitswcs.py
++++ b/astropy/wcs/wcsapi/fitswcs.py
+@@ -658,16 +658,20 @@
+             else:
+                 kwargs["unit"] = self.wcs.cunit[ispec]
+
+                 if ctype in ("VELO", "VRAD", "VOPT"):
++                    restfrq = self.wcs.restfrq
++                    restwav = self.wcs.restwav
++
++                    if
+                     if ctype == "VELO":
+                         kwargs["doppler_convention"] = "relativistic"
+                         kwargs["doppler_rest"] = self.wcs.restfrq * u.Hz
+                     elif ctype == "VRAD":
+                         kwargs["doppler_convention"] = "radio"
+                         kwargs["doppler_rest"] = self.wcs.restfrq * u.Hz
+                     elif ctype == "VOPT":
+                         kwargs["doppler_convention"] = "optical"
+                         kwargs["doppler_rest"] = self.wcs.restwav * u.m
+ 
+                 def spectralcoord_from_value(value):
+                     if isinstance(value, SpectralCoord):

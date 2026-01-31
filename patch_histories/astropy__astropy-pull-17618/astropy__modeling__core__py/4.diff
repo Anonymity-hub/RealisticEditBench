@@ -1,0 +1,21 @@
+diff --git a/astropy/modeling/core.py b/astropy/modeling/core.py
+--- a/astropy/modeling/core.py
++++ b/astropy/modeling/core.py
+@@ -3337,6 +3337,8 @@
+             # Convert the arrays back to lists over the first dimension so as to
+             # be able to concatenate them (we don't use .tolist() which would
+             # convert to a list of lists instead of a list of arrays)
++            left_deriv = list(left_deriv)
++            right_deriv = list(right_deriv)
+ 
+             # We now have to use various differentiation rules to apply the
+             # arithmetic operators to the derivatives.
+@@ -3370,7 +3372,7 @@
+                 if op == "-":
+                     right_deriv = [-x for x in right_deriv]
+ 
+-                return left_deriv + right_deriv
++                return np.array(left_deriv + right_deriv)
+
+             leftval = self.left.evaluate(*left_inputs, *left_params)
+             rightval = self.right.evaluate(*right_inputs, *right_params)

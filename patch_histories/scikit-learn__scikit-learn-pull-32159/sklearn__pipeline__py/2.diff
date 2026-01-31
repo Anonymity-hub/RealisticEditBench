@@ -1,0 +1,40 @@
+diff --git a/sklearn/pipeline.py b/sklearn/pipeline.py
+--- a/sklearn/pipeline.py
++++ b/sklearn/pipeline.py
+@@ -889,22 +889,21 @@
+         y_proba : ndarray of shape (n_samples, n_classes)
+             Result of calling `predict_proba` on the final estimator.
+         """
+-        # TODO(1.8): Remove the context manager and use check_is_fitted(self)
+-        with _raise_or_warn_if_not_fitted(self):
+-            Xt = X
+-
+-            if not _routing_enabled():
+-                for _, name, transform in self._iter(with_final=False):
+-                    Xt = transform.transform(Xt)
+-                return self.steps[-1][1].predict_proba(Xt, **params)
+-
+-            # metadata routing enabled
+-            routed_params = process_routing(self, "predict_proba", **params)
++        check_is_fitted(self)
++        Xt = X
++
++        if not _routing_enabled():
+             for _, name, transform in self._iter(with_final=False):
+-                Xt = transform.transform(Xt, **routed_params[name].transform)
+-            return self.steps[-1][1].predict_proba(
+-                Xt, **routed_params[self.steps[-1][0]].predict_proba
+-            )
++                Xt = transform.transform(Xt)
++            return self.steps[-1][1].predict_proba(Xt, **params)
++
++        # metadata routing enabled
++        routed_params = process_routing(self, "predict_proba", **params)
++        for _, name, transform in self._iter(with_final=False):
++            Xt = transform.transform(Xt, **routed_params[name].transform)
++        return self.steps[-1][1].predict_proba(
++            Xt, **routed_params[self.steps[-1][0]].predict_proba
++        )
+ 
+     @available_if(_final_estimator_has("decision_function"))
+     def decision_function(self, X, **params):

@@ -1,0 +1,34 @@
+diff --git a/django/tasks/backends/base.py b/django/tasks/backends/base.py
+--- a/django/tasks/backends/base.py
++++ b/django/tasks/backends/base.py
+@@ -4,8 +4,6 @@
+ from asgiref.sync import sync_to_async
+ 
+ from django.conf import settings
+-from django.core import checks
+-from django.db import connections
+ from django.tasks import DEFAULT_TASK_QUEUE_NAME
+ from django.tasks.base import (
+     DEFAULT_TASK_PRIORITY,
+@@ -111,20 +109,4 @@
+         )
+ 
+     def check(self, **kwargs):
+-        if self.enqueue_on_commit and not connections._settings:
+-            yield checks.Error(
+-                "ENQUEUE_ON_COMMIT cannot be used when no databases are configured.",
+-                hint="Set ENQUEUE_ON_COMMIT to False",
+-                id="tasks.E001",
+-            )
+-
+-        elif (
+-            self.enqueue_on_commit
+-            and not connections["default"].features.supports_transactions
+-        ):
+-            yield checks.Error(
+-                "ENQUEUE_ON_COMMIT cannot be used on a database which doesn't support "
+-                "transactions.",
+-                hint="Set ENQUEUE_ON_COMMIT to False",
+-                id="tasks.E002",
+-            )
++        return []

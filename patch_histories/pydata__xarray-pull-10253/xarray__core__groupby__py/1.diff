@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -295,7 +295,7 @@ class ResolvedGrouper(Generic[T_DataWithCoords]):
+     grouper: Grouper
+     group: T_Group
+     obj: T_DataWithCoords
+-    eagerly_compute_group: bool = field(repr=False)
++    eagerly_compute_group: Literal[False] | None = field(repr=False, default=None)
+ 
+     # returned by factorize:
+     encoded: EncodedGroups = field(init=False, repr=False)

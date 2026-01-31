@@ -1,0 +1,11 @@
+diff --git a/sklearn/metrics/cluster/_supervised.py b/sklearn/metrics/cluster/_supervised.py
+--- a/sklearn/metrics/cluster/_supervised.py
++++ b/sklearn/metrics/cluster/_supervised.py
+@@ -1060,6 +1060,7 @@
+         numerator = min(numerator, -np.finfo("float64").eps)
+     else:
+         numerator = max(numerator, np.finfo("float64").eps)
++    return float(numerator / denominator)
+ 
+ 
+ @validate_params(

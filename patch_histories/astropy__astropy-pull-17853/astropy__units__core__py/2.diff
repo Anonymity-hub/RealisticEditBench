@@ -1,0 +1,21 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -9,6 +9,7 @@
+ import inspect
+ import operator
+ import textwrap
++import unicodedata
+ import warnings
+ from functools import cached_property
+ from threading import RLock
+@@ -1829,7 +1830,7 @@
+ 
+         # Loop through all of the names first, to ensure all of them
+         # are new, then add them all as a single "transaction" below.
+-        for name in (unicodedata.
++        for name in (unicodedata.normalize() for name in self._names):
+             if name in namespace and self != namespace[name]:
+                 raise ValueError(
+                     f"Object with name {name!r} already exists in "
+

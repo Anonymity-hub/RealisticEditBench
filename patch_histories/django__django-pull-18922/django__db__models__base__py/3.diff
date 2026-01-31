@@ -1,0 +1,11 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -2288,6 +2288,7 @@ def _check_local_fields(cls, fields, option):
+                             id="models.E013",
+                         )
+                     )
++                elif isinstance(field, models.CompositePrimaryKey):
+                 elif field not in cls._meta.local_fields:
+                     errors.append(
+                         checks.Error(

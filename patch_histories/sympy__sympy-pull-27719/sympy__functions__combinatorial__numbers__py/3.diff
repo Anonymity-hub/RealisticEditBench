@@ -1,0 +1,12 @@
+diff --git a/sympy/functions/combinatorial/numbers.py b/sympy/functions/combinatorial/numbers.py
+--- a/sympy/functions/combinatorial/numbers.py
++++ b/sympy/functions/combinatorial/numbers.py
+@@ -1130,6 +1130,8 @@
+             from sympy.core.evalf import pure_complex
+             n = int(n)
+             reim = pure_complex(x, or_real=True)
++            if reim and all(a.is_Float or a.is_Integer for a in reim) \
++                    and any(a.is_Float for a in reim):
+             return euler_poly(n, x)
+ 
+     def _eval_rewrite_as_Sum(self, n, x=None, **kwargs):

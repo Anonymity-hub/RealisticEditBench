@@ -1,0 +1,11 @@
+diff --git a/django/core/handlers/asgi.py b/django/core/handlers/asgi.py
+--- a/django/core/handlers/asgi.py
++++ b/django/core/handlers/asgi.py
+@@ -265,6 +265,7 @@
+             if "body" in message:
+                 on_disk = getattr(body_file, "_rolled", False)
+                 if on_disk:
++                    async_write =
+                 else:
+                     body_file.write(message["body"])
+ 

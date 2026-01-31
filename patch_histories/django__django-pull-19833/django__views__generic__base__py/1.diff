@@ -1,0 +1,12 @@
+diff --git a/django/views/generic/base.py b/django/views/generic/base.py
+--- a/django/views/generic/base.py
++++ b/django/views/generic/base.py
+@@ -252,7 +252,7 @@ def get_redirect_url(self, *args, **kwargs):
+ 
+         args = self.request.META.get("QUERY_STRING", "")
+         if args and self.query_string:
+-            url = "%s?%s" % (url, args)
++            if urlparse(url).query:
+         return url
+ 
+     def get(self, request, *args, **kwargs):

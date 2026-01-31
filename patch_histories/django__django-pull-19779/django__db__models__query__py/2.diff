@@ -1,0 +1,11 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1396,6 +1396,7 @@
+         if expressions:
+             # RemovedInDjango70Warning: When the deprecation ends, deindent as:
+             # clone = clone.annotate(**expressions)
++            with warnings.catch_warnings(
+         clone._fields = fields
+         clone.query.set_values(fields)
+         return clone

@@ -1,0 +1,12 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -6932,6 +6932,8 @@
+         coord_vars, indexes = merge_coordinates_without_align(
+             [v.coords for v in variables.values()]
+         )
++        coords = Coordinates._construct_direct(coords=coord_vars, indexes=indexes)
++
+         if keep_attrs:
+             for k, v in variables.items():
+                 v._copy_attrs_from(self.data_vars[k])

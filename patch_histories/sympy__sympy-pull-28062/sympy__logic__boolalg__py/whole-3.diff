@@ -1,0 +1,12 @@
+diff --git a/sympy/logic/boolalg.py b/sympy/logic/boolalg.py
+--- a/sympy/logic/boolalg.py
++++ b/sympy/logic/boolalg.py
+@@ -1025,7 +1025,7 @@ def __new__(cls, *args, remove_true=True, evaluate=None, **kwargs):
+             return super().__new__(cls, *args, evaluate=evaluate, **kwargs)
+ 
+         argset = set()
+-        for arg in args:
++        for arg in map(_sympify, args):
+             if isinstance(arg, Number) or arg in (True, False):
+                 if arg:
+                     arg = true

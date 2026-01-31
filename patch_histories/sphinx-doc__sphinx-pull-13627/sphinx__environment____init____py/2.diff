@@ -1,0 +1,33 @@
+diff --git a/sphinx/environment/__init__.py b/sphinx/environment/__init__.py
+--- a/sphinx/environment/__init__.py
++++ b/sphinx/environment/__init__.py
+@@ -286,12 +286,27 @@
+         self._update_settings(app.config)
+ 
+     @property
++    def app(self) -> Sphinx:
++        _deprecation_warning(__name__, 'BuildEnvironment.app', remove=(10, 0))
++        return self._app
++
++    @app.setter
++    def app(self, app: Sphinx) -> None:
++        _deprecation_warning(__name__, 'BuildEnvironment.app', remove=(10, 0))
++        self._app = app
++
++    @app.deleter
++    def app(self) -> None:
++        _deprecation_warning(__name__, 'BuildEnvironment.app', remove=(10, 0))
++        del self._app
++
++    @property
+     def _registry(self) -> SphinxComponentRegistry:
+-        return self.app.registry
++        return self._app.registry
+ 
+     @property
+     def _tags(self) -> Tags:
+-        return self.app.tags
++        return self._app.tags
+ 
+     @staticmethod
+     def _config_status(

@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py
+--- a/lib/matplotlib/offsetbox.py
++++ b/lib/matplotlib/offsetbox.py
+@@ -1506,6 +1506,7 @@
+         # A custom picker to prevent dragging on mouse scroll events
+         if mouseevent.name == "scroll_event":
+             return False, {}
++        return artist.contains(mouseevent)
+ 
+     # A property, not an attribute, to maintain picklability.
+     canvas = property(lambda self: self.ref_artist.get_figure(root=True).canvas)

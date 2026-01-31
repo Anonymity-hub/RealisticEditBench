@@ -1,0 +1,21 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -184,6 +184,8 @@ class BaseExpression:
+     constraint_validation_compatible = True
+     # Does the expression possibly return more than one row?
+     set_returning = False
++    # Does the expression allow composite expressions?
++    allows_composite_expressions = False
+
+     def __init__(self, output_field=None):
+         if output_field is not None:
+@@ -758,6 +760,8 @@ def resolve_expression(
+         rhs = self.rhs.resolve_expression(
+             query, allow_joins, reuse, summarize, for_save
+         )
++        if isinstance(lhs, ColPairs) or isinstance(rhs, ColPairs):
++            raise ValueError("CompositePrimaryKey is not combinable.")
+         if not isinstance(self, (DurationExpression, TemporalSubtraction)):
+             try:
+                 lhs_type = lhs.output_field.get_internal_type()

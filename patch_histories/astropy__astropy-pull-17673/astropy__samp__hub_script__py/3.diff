@@ -1,0 +1,26 @@
+diff --git a/astropy/samp/hub_script.py b/astropy/samp/hub_script.py
+--- a/astropy/samp/hub_script.py
++++ b/astropy/samp/hub_script.py
+@@ -3,6 +3,7 @@
+ 
+ import argparse
+ import copy
++import logging
+ import sys
+ import time
+ 
+@@ -114,11 +115,12 @@
+         "--log-level",
+         dest="loglevel",
+         metavar="LEVEL",
+-        help="set the Hub instance log level (OFF, ERROR, WARNING, INFO, DEBUG).",
++        help=f"set the Hub instance log level ({', '.join(log_levels)}).",
+         type=str,
+-        choices=["OFF", "ERROR", "WARNING", "INFO", "DEBUG"],
++        choices=log_levels,
+         default="INFO",
+     )
++    del log_levels
+ 
+     log_group.add_argument(
+         "-O",

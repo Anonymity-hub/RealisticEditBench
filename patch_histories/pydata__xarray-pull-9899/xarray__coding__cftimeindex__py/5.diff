@@ -1,0 +1,19 @@
+diff --git a/xarray/coding/cftimeindex.py b/xarray/coding/cftimeindex.py
+--- a/xarray/coding/cftimeindex.py
++++ b/xarray/coding/cftimeindex.py
+@@ -42,7 +42,6 @@
+ from __future__ import annotations
+ 
+ import math
+-import re
+ import warnings
+ from datetime import timedelta
+ from typing import TYPE_CHECKING, Any
+@@ -53,6 +52,7 @@
+ 
+ from xarray.coding.times import (
+     _STANDARD_CALENDARS,
++    _parse_iso8601,
+     cftime_to_nptime,
+     infer_calendar_name,
+ )

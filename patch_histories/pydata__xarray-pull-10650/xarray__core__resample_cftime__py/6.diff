@@ -1,0 +1,28 @@
+diff --git a/xarray/core/resample_cftime.py b/xarray/core/resample_cftime.py
+--- a/xarray/core/resample_cftime.py
++++ b/xarray/core/resample_cftime.py
+@@ -45,6 +45,7 @@
+ import pandas as pd
+ 
+ from xarray.coding.cftime_offsets import (
++    CFTIME_TICKS,
+     BaseCFTimeOffset,
+     MonthEnd,
+     QuarterEnd,
+@@ -56,6 +57,7 @@
+ )
+ from xarray.coding.cftimeindex import CFTimeIndex
+ from xarray.core.types import SideOptions
++from xarray.core.utils import emit_user_level_warning
+ 
+ if typing.TYPE_CHECKING:
+     from xarray.core.types import CFTimeDatetime, ResampleCompatible
+@@ -84,6 +86,8 @@ def __init__(
+         self.freq = to_offset(freq)
+         self.origin = origin
+ 
++        if not isinstance(self.freq, CFTIME_TICKS):
++
+         if isinstance(self.freq, MonthEnd | QuarterEnd | YearEnd) or self.origin in [
+             "end",
+             "end_day",

@@ -1,0 +1,13 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -745,7 +745,8 @@ def to_string(self, format: type[Base] | str | None = None, **kwargs) -> str:
+         """
+         from .format import get_format
+ 
+-        return get_format(format).to_string(self, **kwargs)
++        try:
++            return get_format(format).to_string(self, **kwargs)
+ 
+     def __format__(self, format_spec: str) -> str:
+         try:

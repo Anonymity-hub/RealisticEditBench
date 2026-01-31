@@ -1,0 +1,12 @@
+diff --git a/astropy/visualization/mpl_normalize.py b/astropy/visualization/mpl_normalize.py
+--- a/astropy/visualization/mpl_normalize.py
++++ b/astropy/visualization/mpl_normalize.py
+@@ -9,7 +9,7 @@
+ from numpy import ma
+ 
+ from astropy.utils.compat.optional_deps import HAS_MATPLOTLIB
+-from astropy.utils.decorators import deprecated_renamed_argument
++from astropy.utils.decorators import deprecated_renamed_argument, future_keyword_only
+ 
+ from .interval import (
+     AsymmetricPercentileInterval,

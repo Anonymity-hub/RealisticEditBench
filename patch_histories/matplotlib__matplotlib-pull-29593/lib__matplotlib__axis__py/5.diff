@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -1054,7 +1054,7 @@
+             'tick1On', 'tick2On', 'label1On', 'label2On',
+             'length', 'direction', 'left', 'bottom', 'right', 'top',
+             'labelleft', 'labelbottom', 'labelright', 'labeltop',
+-            'labelrotation', 'rotation_mode',
++            'labelrotation', 'labelrotation_mode',
+             *_gridline_param_names]
+ 
+         keymap = {
+

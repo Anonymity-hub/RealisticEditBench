@@ -1,0 +1,13 @@
+diff --git a/django/db/backends/oracle/operations.py b/django/db/backends/oracle/operations.py
+--- a/django/db/backends/oracle/operations.py
++++ b/django/db/backends/oracle/operations.py
+@@ -629,9 +629,6 @@ def adapt_timefield_value(self, value):
+             1900, 1, 1, value.hour, value.minute, value.second, value.microsecond
+         )
+ 
+-    def adapt_decimalfield_value(self, value, max_digits=None, decimal_places=None):
+-        return value
+-
+     def combine_expression(self, connector, sub_expressions):
+         lhs, rhs = sub_expressions
+         if connector == "%%":

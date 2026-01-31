@@ -1,0 +1,21 @@
+diff --git a/sphinx/ext/intersphinx/_load.py b/sphinx/ext/intersphinx/_load.py
+--- a/sphinx/ext/intersphinx/_load.py
++++ b/sphinx/ext/intersphinx/_load.py
+@@ -227,7 +227,7 @@
+     project: _IntersphinxProject,
+     cache: dict[InventoryURI, InventoryCacheEntry],
+     now: int,
+-    config: Config,
++    config: _InvConfig,
+     srcdir: Path,
+ ) -> bool:
+     if config.intersphinx_cache_limit >= 0:
+@@ -304,7 +304,7 @@
+     return _fetch_inventory(
+         target_uri=uri,
+         inv_location=inv,
+-        config=app.config,
++        config=_InvConfig.from_config(app.config),
+         srcdir=app.srcdir,
+     )
+

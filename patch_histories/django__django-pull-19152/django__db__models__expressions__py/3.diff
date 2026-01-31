@@ -1,0 +1,12 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -525,6 +525,8 @@
+ 
+     @classmethod
+     def _identity(cls, value):
++        if isinstance(value, tuple):
++            return tuple(map(cls._identity, value))
+ 
+     @cached_property
+     def identity(self):

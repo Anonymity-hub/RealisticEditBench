@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -956,6 +956,9 @@
+             raise TypeError(f"'alpha' must be numeric or None, not {type(alpha)}")
+         if not 0 <= alpha <= 1:
+             ValueError("'alpha' must be between 0 and 1, inclusive")
++        new_cm = self.copy()
++        if not new_cm._isinit:
++            new_cm._init()
+ 
+     def _init(self):
+         """Generate the lookup table, ``self._lut``."""

@@ -1,0 +1,20 @@
+diff --git a/sklearn/linear_model/_base.py b/sklearn/linear_model/_base.py
+--- a/sklearn/linear_model/_base.py
++++ b/sklearn/linear_model/_base.py
+@@ -8,7 +8,7 @@
+ import numbers
+ import warnings
+ from abc import ABCMeta, abstractmethod
+-from numbers import Integral
++from numbers import Integral, Real
+ 
+ import numpy as np
+ import scipy.sparse as sp
+@@ -32,6 +32,7 @@
+     indexing_dtype,
+     supported_float_dtypes,
+ )
++from ..utils._param_validation import Interval
+ from ..utils._seq_dataset import (
+     ArrayDataset32,
+     ArrayDataset64,

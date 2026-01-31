@@ -1,0 +1,11 @@
+diff --git a/xarray/core/datatree.py b/xarray/core/datatree.py
+--- a/xarray/core/datatree.py
++++ b/xarray/core/datatree.py
+@@ -45,6 +45,7 @@
+ )
+ from xarray.core.indexes import Index, Indexes
+ from xarray.core.options import OPTIONS as XR_OPTS
++from xarray.core.options import _get_keep_attrs
+ from xarray.core.treenode import NamedNode, NodePath, zip_subtrees
+ from xarray.core.types import Self
+ from xarray.core.utils import (

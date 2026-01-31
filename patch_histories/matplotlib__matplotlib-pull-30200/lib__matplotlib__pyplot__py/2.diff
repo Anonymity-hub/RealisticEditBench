@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py
+--- a/lib/matplotlib/pyplot.py
++++ b/lib/matplotlib/pyplot.py
+@@ -339,7 +339,7 @@
+ # Ensure this appears in the pyplot docs.
+ @_copy_docstring_and_deprecators(matplotlib.set_loglevel)
+ def set_loglevel(level: str) -> None:
+-    return matplotlib.set_loglevel(*args, **kwargs)
++    return matplotlib.set_loglevel(level)
+ 
+ 
+ @_copy_docstring_and_deprecators(Artist.findobj)

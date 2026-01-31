@@ -1,0 +1,15 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -1708,6 +1708,11 @@
+         model_state = self.from_state.models[app_label, model_name]
+         generated_fields = (f for f in model_state.fields.values() if f.generated)
+         for field in generated_fields:
++            if any(
++                field_name == name
++                for name, *_ in models.Model._get_expr_references(field.expression)
++            ):
++                dependencies.append(
+     def _get_dependencies_for_model(self, app_label, model_name):
+         """Return foreign key dependencies of the given model."""
+         dependencies = []

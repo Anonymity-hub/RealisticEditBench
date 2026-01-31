@@ -1,0 +1,125 @@
+diff --git a/sklearn/linear_model/_base.py b/sklearn/linear_model/_base.py
+--- a/sklearn/linear_model/_base.py
++++ b/sklearn/linear_model/_base.py
+@@ -5,7 +5,6 @@
+ # Authors: The scikit-learn developers
+ # SPDX-License-Identifier: BSD-3-Clause
+ 
+-import numbers
+ import warnings
+ from abc import ABCMeta, abstractmethod
+ from numbers import Integral, Real
+@@ -114,12 +113,14 @@ def _preprocess_data(
+     copy_y=True,
+     sample_weight=None,
+     check_input=True,
++    rescale_with_sw=True,
+ ):
+     """Common data preprocessing for fitting linear models.
+ 
+     This helper is in charge of the following steps:
+ 
+-    - Ensure that `sample_weight` is an array or `None`.
++    - `sample_weight` is assumed to be `None` or a validated array with same dtype as
++      `X`.
+     - If `check_input=True`, perform standard input validation of `X`, `y`.
+     - Perform copies if requested to avoid side-effects in case of inplace
+       modifications of the input.
+@@ -138,6 +139,9 @@ def _preprocess_data(
+     If `fit_intercept=False`, no centering is performed and `X_offset`, `y_offset`
+     are set to zero.
+ 
++    If `rescale_with_sw` is True, then X and y are rescaled with the square root of
++    sample weights.
++
+     Returns
+     -------
+     X_out : {ndarray, sparse matrix} of shape (n_samples, n_features)
+@@ -153,16 +157,13 @@ def _preprocess_data(
+     X_scale : ndarray of shape (n_features,)
+         Always an array of ones. TODO: refactor the code base to make it
+         possible to remove this unused variable.
++    sample_weight_sqrt : ndarray of shape (n_samples, ) or None
++        `np.sqrt(sample_weight)`
+     """
+     xp, _, device_ = get_namespace_and_device(X, y, sample_weight)
+     n_samples, n_features = X.shape
+     X_is_sparse = sp.issparse(X)
+ 
+-    if isinstance(sample_weight, numbers.Number):
+-        sample_weight = None
+-    if sample_weight is not None:
+-        sample_weight = xp.asarray(sample_weight)
+-
+     if check_input:
+         X = check_array(
+             X, copy=copy, accept_sparse=["csr", "csc"], dtype=supported_float_dtypes(xp)
+@@ -199,12 +200,16 @@ def _preprocess_data(
+     # XXX: X_scale is no longer needed. It is an historic artifact from the
+     # time where linear model exposed the normalize parameter.
+     X_scale = xp.ones(n_features, dtype=X.dtype, device=device_)
+-    return X, y, X_offset, y_offset, X_scale
+ 
+-
+-# TODO: _rescale_data should be factored into _preprocess_data.
+-# Currently, the fact that sag implements its own way to deal with
+-# sample_weight makes the refactoring tricky.
++    if sample_weight is not None and rescale_with_sw:
++        # Sample weight can be implemented via a simple rescaling.
++        # For sparse X and y, it triggers copies anyway.
++        # For dense X and y that already have been copied, we safely do inplace
++        # rescaling.
++        X, y, sample_weight_sqrt = _rescale_data(X, y, sample_weight, inplace=copy)
++    else:
++        sample_weight_sqrt = None
++    return X, y, X_offset, y_offset, X_scale, sample_weight_sqrt
+ 
+ 
+ def _rescale_data(X, y, sample_weight, inplace=False):
+@@ -223,11 +228,15 @@ def _rescale_data(X, y, sample_weight, inplace=False):
+         y_rescaled = sqrt(S) y
+         X_rescaled = sqrt(S) X
+ 
++    The parameter `inplace` only takes effect for dense X and dense y.
++
+     Returns
+     -------
+     X_rescaled : {array-like, sparse matrix}
+ 
+     y_rescaled : {array-like, sparse matrix}
++
++    sample_weight_sqrt : array-like of shape (n_samples,)
+     """
+     # Assume that _validate_data and _check_sample_weight have been called by
+     # the caller.
+@@ -297,23 +306,21 @@ def predict(self, X):
+         """
+         return self._decision_function(X)
+ 
+-    def _set_intercept(self, X_offset, y_offset, X_scale):
++    def _set_intercept(self, X_offset, y_offset, X_scale=None):
+         """Set the intercept_"""
+-
+         xp, _ = get_namespace(X_offset, y_offset, X_scale)
+ 
+         if self.fit_intercept:
+             # We always want coef_.dtype=X.dtype. For instance, X.dtype can differ from
+             # coef_.dtype if warm_start=True.
+-            coef_ = xp.astype(self.coef_, X_scale.dtype, copy=False)
+-            coef_ = self.coef_ = xp.divide(coef_, X_scale)
++            self.coef_ = xp.astype(self.coef_, X_offset.dtype, copy=False)
++            if X_scale is not None:
++                self.coef_ = xp.divide(self.coef_, X_scale)
+ 
+-            if coef_.ndim == 1:
+-                intercept_ = y_offset - X_offset @ coef_
++            if self.coef_.ndim == 1:
++                self.intercept_ = y_offset - X_offset @ self.coef_
+             else:
+-                intercept_ = y_offset - X_offset @ coef_.T
+-
+-            self.intercept_ = intercept_
++                self.intercept_ = y_offset - X_offset @ self.coef_.T
+ 
+         else:
+             self.intercept_ = 0.0

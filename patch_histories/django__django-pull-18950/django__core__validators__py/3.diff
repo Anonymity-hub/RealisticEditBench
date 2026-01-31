@@ -1,0 +1,14 @@
+diff --git a/django/core/validators.py b/django/core/validators.py
+--- a/django/core/validators.py
++++ b/django/core/validators.py
+@@ -210,6 +210,10 @@
+ class EmailValidator:
+     message = _("Enter a valid email address.")
+     code = "invalid"
++    hostname_re = DomainNameValidator.hostname_re
++    domain_re = DomainNameValidator.domain_re
++    tld_no_fqdn_re = DomainNameValidator.tld_no_fqdn_re
++
+     user_regex = _lazy_re_compile(
+         # dot-atom
+         r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*\Z"

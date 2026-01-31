@@ -1,0 +1,12 @@
+diff --git a/sympy/core/mod.py b/sympy/core/mod.py
+--- a/sympy/core/mod.py
++++ b/sympy/core/mod.py
+@@ -103,6 +103,8 @@
+                 comp1, comp2 = is_ge, is_gt
+             else:
+                 return
++            ls = -2*q
++            r = p - q
+ 
+         rv = number_eval(p, q)
+         if rv is not None:

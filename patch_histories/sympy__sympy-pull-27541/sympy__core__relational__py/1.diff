@@ -1,0 +1,11 @@
+diff --git a/sympy/core/relational.py b/sympy/core/relational.py
+--- a/sympy/core/relational.py
++++ b/sympy/core/relational.py
+@@ -52,6 +52,7 @@ def _canonical_coeff(rel):
+     rel = rel.canonical
+     if not rel.is_Relational or rel.rhs.is_Boolean:
+         return rel  # Eq(x, True)
++    if not isinstance(
+     b, l = rel.lhs.as_coeff_Add(rational=True)
+     m, lhs = l.as_coeff_Mul(rational=True)
+     rhs = (rel.rhs - b)/m

@@ -1,0 +1,12 @@
+diff --git a/sympy/physics/continuum_mechanics/beam.py b/sympy/physics/continuum_mechanics/beam.py
+--- a/sympy/physics/continuum_mechanics/beam.py
++++ b/sympy/physics/continuum_mechanics/beam.py
+@@ -1315,8 +1315,6 @@ def point_cflexure(self):
+             return []
+ 
+         for i, point in enumerate(roots):
+-            if point in jumps:
+-                continue
+             if i == 0:
+                 left_mid = (0 + point) / 2
+                 right_mid = (point + roots[i + 1]) / 2

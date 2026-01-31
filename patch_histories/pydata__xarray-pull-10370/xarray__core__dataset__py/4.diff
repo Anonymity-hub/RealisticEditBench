@@ -1,0 +1,12 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -3829,7 +3829,7 @@
+                 continue
+ 
+             use_indexers = (
+-                dask_indexers if is_duck_dask_array(var.data) else validated_indexers
++                dask_indexers if is_duck_dask_array(var._data) else validated_indexers
+             )
+ 
+             dtype_kind = var.dtype.kind

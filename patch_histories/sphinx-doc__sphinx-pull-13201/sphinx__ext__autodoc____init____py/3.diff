@@ -1,0 +1,12 @@
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -907,7 +907,7 @@
+         members_check_module, members = self.get_object_members(want_all)
+ 
+         # document non-skipped members
+-        memberdocumenters: list[tuple[Documenter, bool]] = []
++        member_documenters: list[tuple[Documenter, bool]] = []
+         for mname, member, isattr in self.filter_members(members, want_all):
+             classes = [
+                 cls

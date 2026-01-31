@@ -1,0 +1,14 @@
+diff --git a/django/contrib/auth/middleware.py b/django/contrib/auth/middleware.py
+--- a/django/contrib/auth/middleware.py
++++ b/django/contrib/auth/middleware.py
+@@ -128,6 +128,10 @@ def __init__(self, get_response):
+     def __call__(self, request):
+         if self.is_async:
+             return self.__acall__(request)
++        self.process_request(request)
++        return self.get_response(request)
++
++    def process_request(self, request):
+         # AuthenticationMiddleware is required so that request.user exists.
+         if not hasattr(request, "user"):
+             raise ImproperlyConfigured(

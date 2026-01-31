@@ -1,0 +1,45 @@
+diff --git a/astropy/__init__.py b/astropy/__init__.py
+--- a/astropy/__init__.py
++++ b/astropy/__init__.py
+@@ -11,6 +11,40 @@
+ 
+ from astropy.utils.system_info import system_info
+ 
++__all__ = [  # noqa: RUF100, RUF022
++    "__version__",
++    "__bibtex__",
++    # Subpackages (mostly lazy-loaded)
++    "config",
++    "constants",
++    "convolution",
++    "coordinates",
++    "cosmology",
++    "io",
++    "modeling",
++    "nddata",
++    "samp",
++    "stats",
++    "table",
++    "tests",
++    "time",
++    "timeseries",
++    "uncertainty",
++    "units",
++    "utils",
++    "visualization",
++    "wcs",
++    # Functions
++    "test",
++    "log",
++    "find_api_page",
++    "online_help",
++    "online_docs_root",
++    "conf",
++    "physical_constants",
++    "astronomical_constants",
++    "system_info",
++]
+ from .version import version as __version__
+ 
+ # The location of the online documentation for astropy
+

@@ -1,0 +1,18 @@
+diff --git a/xarray/indexes/range_index.py b/xarray/indexes/range_index.py
+--- a/xarray/indexes/range_index.py
++++ b/xarray/indexes/range_index.py
+@@ -56,7 +56,13 @@
+ 
+     @property
+     def step(self) -> float:
+-        return (self.stop - self.start) / self.size
++        if self._step is not None:
++            return self._step
++        if self.size > 0:
++            return (self.stop - self.start) / self.size
++        else:
++            # For empty arrays, default to 1.0
++            return 1.0
+ 
+     def forward(self, dim_positions: dict[str, Any]) -> dict[Hashable, Any]:
+         positions = dim_positions[self.dim]

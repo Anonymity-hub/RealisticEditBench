@@ -1,0 +1,17 @@
+diff --git a/xarray/structure/merge.py b/xarray/structure/merge.py
+--- a/xarray/structure/merge.py
++++ b/xarray/structure/merge.py
+@@ -618,6 +618,13 @@
+     this wrapper mainly catches exceptions from comparisons that can't be
+     evaluated at all.
+     """
++    try:
++        return equivalent(a, b)
++    except (ValueError, TypeError):
++        # These exceptions indicate the comparison is truly ambiguous
++        # (e.g., nested numpy arrays that would raise "ambiguous truth value")
++        return False
++
+ 
+ def merge_attrs(variable_attrs, combine_attrs, context=None):
+     """Combine attributes from different variables according to combine_attrs"""

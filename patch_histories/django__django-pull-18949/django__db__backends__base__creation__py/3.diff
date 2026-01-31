@@ -1,0 +1,14 @@
+diff --git a/django/db/backends/base/creation.py b/django/db/backends/base/creation.py
+--- a/django/db/backends/base/creation.py
++++ b/django/db/backends/base/creation.py
+@@ -100,6 +100,10 @@
+                 stacklevel=2,
+                 category=RemovedInDjango70Warning,
+             )
++            if serialize:
++                self.connection._test_serialized_contents = (
++                    self.serialize_db_to_string()
++                )
+ 
+         call_command("createcachetable", database=self.connection.alias)
+ 

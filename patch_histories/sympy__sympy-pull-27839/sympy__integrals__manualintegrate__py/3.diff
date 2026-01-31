@@ -1,0 +1,13 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -986,6 +986,9 @@
+ 
+     if not match:
+         return
++
++    simplified = powsimp(integrand, combine='exp')
++
+ 
+ def orthogonal_poly_rule(integral):
+     orthogonal_poly_classes = {

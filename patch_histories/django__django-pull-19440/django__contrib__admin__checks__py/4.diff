@@ -1,0 +1,13 @@
+diff --git a/django/contrib/admin/checks.py b/django/contrib/admin/checks.py
+--- a/django/contrib/admin/checks.py
++++ b/django/contrib/admin/checks.py
+@@ -403,6 +403,9 @@
+ 
+         fieldset_fields = flatten(fieldset[1]["fields"])
+         seen_fields.extend(fieldset_fields)
++        field_counts = collections.Counter(seen_fields)
++        fieldset_fields_set = set(fieldset_fields)
++        if duplicate_fields
+             return [
+                 checks.Error(
+                     "There are duplicate field(s) in '%s[1]'." % label,

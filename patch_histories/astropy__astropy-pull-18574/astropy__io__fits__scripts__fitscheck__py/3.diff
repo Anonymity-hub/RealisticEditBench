@@ -1,0 +1,24 @@
+diff --git a/astropy/io/fits/scripts/fitscheck.py b/astropy/io/fits/scripts/fitscheck.py
+--- a/astropy/io/fits/scripts/fitscheck.py
++++ b/astropy/io/fits/scripts/fitscheck.py
+@@ -176,20 +176,8 @@
+             for i, hdu in enumerate(hdulist):
+                 # looping on HDUs is needed to read them and verify the
+                 # checksums
+-                if not OPTIONS.ignore_missing:
+-                    if not hdu._checksum:
+-                        log.warning(
+-                            f"MISSING {filename!r} .. Checksum not found in HDU #{i}"
+-                        )
+-                        return 1
+-                    if not hdu._datasum:
+-                        log.warning(
+-                            f"MISSING {filename!r} .. Datasum not found in HDU #{i}"
+-                        )
+-                        return 1
+-
+     log.info(f"OK {filename!r}")
+     return 0
+ 
+ 
+ def verify_compliance(filename):

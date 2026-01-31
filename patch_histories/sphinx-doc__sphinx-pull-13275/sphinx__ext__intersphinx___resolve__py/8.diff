@@ -1,0 +1,12 @@
+diff --git a/sphinx/ext/intersphinx/_resolve.py b/sphinx/ext/intersphinx/_resolve.py
+--- a/sphinx/ext/intersphinx/_resolve.py
++++ b/sphinx/ext/intersphinx/_resolve.py
+@@ -31,7 +31,7 @@
+     from sphinx.environment import BuildEnvironment
+     from sphinx.ext.intersphinx._shared import InventoryName
+     from sphinx.util.inventory import _InventoryItem
+-    from sphinx.util.typing import Inventory, RoleFunction
++    from sphinx.util.typing import RoleFunction, _Inventory
+ 
+ 
+ def _create_element_from_result(

@@ -1,0 +1,14 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -1084,6 +1084,9 @@ def _open_existing_array(self, *, name) -> ZarrArray:
+             #     - Existing variables already have their attrs included in the consolidated metadata file.
+             #     - The size of dimensions can not be expanded, that would require a call using `append_dim`
+             #        which is mutually exclusive with `region`
++            empty: dict[str, bool] | dict[str, dict[str, bool]]
++            if _zarr_v3():
++
+             zarr_array = zarr.open(
+                 store=(
+                     self.zarr_group.store if _zarr_v3() else self.zarr_group.chunk_store
+

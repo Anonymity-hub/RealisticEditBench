@@ -1,0 +1,22 @@
+diff --git a/astropy/io/votable/converters.py b/astropy/io/votable/converters.py
+--- a/astropy/io/votable/converters.py
++++ b/astropy/io/votable/converters.py
+@@ -327,12 +327,14 @@
+             is_variable = field.arraysize.endswith("*")
+             numeric_part = field.arraysize.removesuffix("*")
+             try:
+-                self.arraysize = int(field.arraysize)
++                self.arraysize = int(numeric_part)
+             except ValueError:
+-                vo_raise(E01, (field.arraysize, "char", field.ID), config)
++                vo_raise(E01, (numeric_part, "char", field.ID), config)
++
+             self.format = f"U{self.arraysize:d}"
+-            self.binparse = self._binparse_fixed
+-            self.binoutput = self._binoutput_fixed
++
++            # For bounded variable-length fields use the variable methods
++            if is_variable:
+             self._struct_format = f">{self.arraysize:d}s"
+ 
+     def supports_empty_values(self, config):

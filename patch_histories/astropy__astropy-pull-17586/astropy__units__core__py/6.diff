@@ -1,0 +1,13 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -845,6 +845,9 @@
+             return CompositeUnit(1, [self, m], [1, 1], _error_check=False)
+ 
+         if isinstance(m, (bytes, str)):
++            self._warn_about_operation_with_deprecated_type("products", m)
++            return self * Unit(m)
++
+         # Cannot handle this as Unit, re-try as Quantity.
+         try:
+             from .quantity import Quantity

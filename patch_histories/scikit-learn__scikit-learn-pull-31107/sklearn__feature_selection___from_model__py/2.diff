@@ -1,0 +1,17 @@
+diff --git a/sklearn/feature_selection/_from_model.py b/sklearn/feature_selection/_from_model.py
+--- a/sklearn/feature_selection/_from_model.py
++++ b/sklearn/feature_selection/_from_model.py
+@@ -38,7 +38,12 @@
+         is_elasticnet_l1_penalized = est_name == "ElasticNet" and (
+             hasattr(estimator, "l1_ratio") and np.isclose(estimator.l1_ratio, 1.0)
+         )
+-        if is_l1_penalized or is_lasso or is_elasticnet_l1_penalized:
++        if (
++            is_l1_penalized
++            or is_lasso
++            or is_elasticnet_l1_penalized
++            or is_elasticnetcv_l1_penalized
++        ):
+             # the natural default threshold is 0 when l1 penalty was used
+             threshold = 1e-5
+         else:

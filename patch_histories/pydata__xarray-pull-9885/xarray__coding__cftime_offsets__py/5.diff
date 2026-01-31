@@ -1,0 +1,11 @@
+diff --git a/xarray/coding/cftime_offsets.py b/xarray/coding/cftime_offsets.py
+--- a/xarray/coding/cftime_offsets.py
++++ b/xarray/coding/cftime_offsets.py
+@@ -1249,6 +1249,7 @@
+                 normalize=normalize,
+                 name=name,
+                 inclusive=inclusive,
++                unit=unit,
+             )
+         except pd.errors.OutOfBoundsDatetime as err:
+             if use_cftime is False:

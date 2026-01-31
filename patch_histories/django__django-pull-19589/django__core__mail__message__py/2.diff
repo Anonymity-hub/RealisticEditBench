@@ -1,0 +1,14 @@
+diff --git a/django/core/mail/message.py b/django/core/mail/message.py
+--- a/django/core/mail/message.py
++++ b/django/core/mail/message.py
+@@ -387,7 +387,9 @@
+         email.Message or EmailMessage object, as well as a str.
+         """
+         basetype, subtype = mimetype.split("/", 1)
+-        if basetype == "text" and
++        if basetype == "text" and isinstance(content, bytes):
++            # This duplicates logic from EmailMessage.attach() to properly
++            # handle EmailMessage.attachments not created through attach().
+         if basetype == "text":
+             encoding = self.encoding or settings.DEFAULT_CHARSET
+             attachment = SafeMIMEText(content, subtype, encoding)

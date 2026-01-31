@@ -1,0 +1,31 @@
+diff --git a/astropy/table/index.py b/astropy/table/index.py
+--- a/astropy/table/index.py
++++ b/astropy/table/index.py
+@@ -920,11 +920,14 @@
+                 Can be a list of tuples/lists to update the row.
+         """
+         rows = self._get_row_idxs_as_list_or_int(key)
++        if hasattr(rows, "__len__"):
+             if len(rows) == len(value):
+                 for row, val in zip(rows, value):
+                     self.table[row] = val
+             else:
+                 raise ValueError(f"Right side should contain {len(rows)} values")
++        else:
++            self.table[rows] = value
+ 
+ 
+ class TableLocIndices(TableLoc):
+@@ -941,11 +944,7 @@
+                an index to use instead of the primary key, and the
+                second element must be as above.
+         """
+-        rows = self._get_rows(item)
+-        if len(rows) == 0:  # no matches found
+-            raise KeyError(f"No matches found for key {item}")
+-        elif len(rows) == 1:  # single row
+-            return rows[0]
++        rows = self._get_row_idxs_as_list_or_int(item)
+         return rows
+ 
+ 

@@ -1,0 +1,20 @@
+diff --git a/lib/matplotlib/streamplot.py b/lib/matplotlib/streamplot.py
+--- a/lib/matplotlib/streamplot.py
++++ b/lib/matplotlib/streamplot.py
+@@ -591,7 +591,7 @@
+     # This error is below that needed to match the RK4 integrator. It
+     # is set for visual reasons -- too low and corners start
+     # appearing ugly and jagged. Can be tuned.
+-    maxerror = 0.003
++    maxerror = 0.003 * integration_max_error_scale
+ 
+     # This limit is important (for all integrators) to avoid the
+     # trajectory skipping some mask cells. We could relax this
+@@ -600,6 +600,7 @@
+     # nature of the interpolation, this doesn't boost speed by much
+     # for quite a bit of complexity.
+     maxds = min(1. / dmap.mask.nx, 1. / dmap.mask.ny, 0.1)
++    maxds *= integration_max_step_scale
+ 
+     ds = maxds
+     stotal = 0

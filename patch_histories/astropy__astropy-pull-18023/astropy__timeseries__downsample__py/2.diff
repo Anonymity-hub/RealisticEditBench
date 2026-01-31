@@ -1,0 +1,37 @@
+diff --git a/astropy/timeseries/downsample.py b/astropy/timeseries/downsample.py
+--- a/astropy/timeseries/downsample.py
++++ b/astropy/timeseries/downsample.py
+@@ -15,14 +15,26 @@
+ 
+ 
+ def nanmean_reduceat(data, indices):
+-    unmasked, data_mask =
++    """Calculate nanmean on pieces of data given by the reduceat-like indices.
++
++    Will skip both masked elements and those equal to nan.
++
++    The output for any fully-masked pieces is set to nan (and will be masked
++    if the input was masked).
++    """
++    unmasked, data_mask = get_data_and_mask(data)
++    mask = np.isnan(unmasked)
++    if data_mask is not None:
++        mask |= data_mask
++
++    if mask.any():  # If there are NaNs or masked elements
++        # Create a writeable copy and set masked/NaN elements to zero.
++        unmasked = unmasked.copy()
++        unmasked[mask] = 0
++        counts = np.add.reduceat(~mask, indices)
++        out_mask = counts <= 0
+     else:
+         # Derive counts from indices
+-        count_data = np.diff(indices, append=len(data))
+-        count_data[count_data <= 0] = 1
+-
+-    sum_data = np.add.reduceat(data, indices)
+-    return sum_data / count_data
+ 
+ 
+ def reduceat(array, indices, function):
+

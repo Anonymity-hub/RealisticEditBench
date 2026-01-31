@@ -1,0 +1,31 @@
+diff --git a/django/core/management/commands/shell.py b/django/core/management/commands/shell.py
+--- a/django/core/management/commands/shell.py
++++ b/django/core/management/commands/shell.py
+@@ -3,10 +3,12 @@
+ import sys
+ import traceback
+ from collections import defaultdict
++from importlib import import_module
+
+ from django.apps import apps
+ from django.core.management import BaseCommand, CommandError
+ from django.utils.datastructures import OrderedSet
++from django.utils.module_loading import import_string as import_dotted_path
+
+
+ class Command(BaseCommand):
+@@ -222,14 +224,6 @@
+ 
+         self.stdout.write(msg, self.style.SUCCESS, ending="\n\n")
+ 
+-        return namespace
+-
+-    def get_namespace(self):
+-        apps_models = apps.get_models()
+-        namespace = {}
+-        for model in reversed(apps_models):
+-            if model.__module__:
+-                namespace[model.__name__] = model
+         return namespace
+ 
+     def handle(self, **options):

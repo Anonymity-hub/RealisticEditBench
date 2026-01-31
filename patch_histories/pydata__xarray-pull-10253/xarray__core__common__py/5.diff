@@ -1,0 +1,12 @@
+diff --git a/xarray/core/common.py b/xarray/core/common.py
+--- a/xarray/core/common.py
++++ b/xarray/core/common.py
+@@ -1118,7 +1118,7 @@ def _resample(
+                 f"Received {type(freq)} instead."
+             )
+ 
+-        rgrouper = ResolvedGrouper(grouper, group, self, eagerly_compute_group=False)
++        rgrouper = ResolvedGrouper(grouper, group, self)
+ 
+         return resample_cls(
+             self,

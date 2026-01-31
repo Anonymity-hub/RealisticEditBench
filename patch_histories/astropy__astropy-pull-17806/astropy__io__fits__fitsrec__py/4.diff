@@ -1,0 +1,14 @@
+diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py
+--- a/astropy/io/fits/fitsrec.py
++++ b/astropy/io/fits/fitsrec.py
+@@ -1035,6 +1035,10 @@
+                 if not isinstance(self.columns._recformats[idx], _FormatP):
+                     continue
+ 
++                for row in self.field(idx):
++                    if len(row) > 0:
++                        data.append(row.view(type=np.ndarray, dtype=np.ubyte))
++
+ 
+     def _get_raw_data(self):
+         """

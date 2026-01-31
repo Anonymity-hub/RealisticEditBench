@@ -1,0 +1,12 @@
+diff --git a/xarray/core/resample.py b/xarray/core/resample.py
+--- a/xarray/core/resample.py
++++ b/xarray/core/resample.py
+@@ -2,7 +2,7 @@
+ 
+ import warnings
+ from collections.abc import Callable, Hashable, Iterable, Sequence
+-from typing import TYPE_CHECKING, Any, Literal
++from typing import TYPE_CHECKING, Any
+ 
+ from xarray.core._aggregations import (
+     DataArrayResampleAggregations,

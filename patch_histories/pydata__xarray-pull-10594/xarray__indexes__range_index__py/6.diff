@@ -1,0 +1,14 @@
+diff --git a/xarray/indexes/range_index.py b/xarray/indexes/range_index.py
+--- a/xarray/indexes/range_index.py
++++ b/xarray/indexes/range_index.py
+@@ -101,6 +101,10 @@
+             self.dim,
+             dtype=self.dtype,
+         )
++        if new_size == 0:
++            # For empty slices, preserve step from parent
++            result._step = self.step
++        return result
+ 
+ 
+ class RangeIndex(CoordinateTransformIndex):

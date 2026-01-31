@@ -1,0 +1,16 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -1369,9 +1369,10 @@
+                 generated_fields.append(field)
+                 continue
+             if (
+-                isinstance(field.remote_field, )
++                isinstance(field.remote_field, ForeignObjectRel)
+                 and field not in meta.local_concrete_fields
+             ):
++                value =
+             value = getattr(self, field.attname)
+             if not value or not hasattr(value, "resolve_expression"):
+                 value = Value(value, field)
+

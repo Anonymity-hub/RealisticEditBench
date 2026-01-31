@@ -1,0 +1,28 @@
+diff --git a/astropy/io/fits/hdu/hdulist.py b/astropy/io/fits/hdu/hdulist.py
+--- a/astropy/io/fits/hdu/hdulist.py
++++ b/astropy/io/fits/hdu/hdulist.py
+@@ -7,6 +7,7 @@
+ import shutil
+ import sys
+ import warnings
++from textwrap import indent
+ 
+ import numpy as np
+ 
+@@ -23,7 +24,6 @@
+     isfile,
+ )
+ from astropy.io.fits.verify import VerifyError, VerifyWarning, _ErrList, _Verify
+-from astropy.utils import indent
+ from astropy.utils.compat.numpycompat import NUMPY_LT_2_0
+ 
+ # NOTE: Python can be built without bz2.
+@@ -1369,7 +1369,7 @@ def _read_next_hdu(self):
+             except (VerifyError, ValueError) as exc:
+                 warnings.warn(
+                     f"Error validating header for HDU #{len(self)} (note: Astropy "
+-                    f"uses zero-based indexing).\n{indent(str(exc))}\n"
++                    f"uses zero-based indexing).\n{indent(str(exc), 4 * ' ')}\n"
+                     "There may be extra bytes after the last HDU or the "
+                     "file is corrupted.",
+                     VerifyWarning,

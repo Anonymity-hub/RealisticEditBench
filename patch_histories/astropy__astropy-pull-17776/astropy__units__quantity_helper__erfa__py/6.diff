@@ -1,0 +1,22 @@
+diff --git a/astropy/units/quantity_helper/erfa.py b/astropy/units/quantity_helper/erfa.py
+--- a/astropy/units/quantity_helper/erfa.py
++++ b/astropy/units/quantity_helper/erfa.py
+@@ -339,6 +339,18 @@
+     unit_rh,
+     unit_wl,
+ ):
++    from astropy.units import (
++        add_enabled_equivalencies,
++        deg_C,
++        hPa,
++        m,
++        micron,
++        one,
++        radian,
++        second,
++        temperature,
++    )
++
+     check_no_time_units(unit_utc1, unit_utc2, f)
+ 
+     with add_enabled_equivalencies(temperature()):

@@ -1,0 +1,48 @@
+diff --git a/sklearn/manifold/_mds.py b/sklearn/manifold/_mds.py
+--- a/sklearn/manifold/_mds.py
++++ b/sklearn/manifold/_mds.py
+@@ -156,27 +156,30 @@
+             disparities *= np.sqrt(
+                 (n_samples * (n_samples - 1) / 2) / (disparities**2).sum()
+             )
+-
+-        # Compute stress
+-        stress = ((dis.ravel() - disparities.ravel()) ** 2).sum() / 2
+-        if normalized_stress:
+-            stress = np.sqrt(stress / ((disparities.ravel() ** 2).sum() / 2))
++            disparities = disparities + disparities.T
++
+         # Update X using the Guttman transform
+-        dis[dis == 0] = 1e-5
+-        ratio = disparities / dis
++        distances[distances == 0] = 1e-5
++        ratio = disparities / distances
+         B = -ratio
+         B[np.arange(len(B)), np.arange(len(B))] += ratio.sum(axis=1)
+         X = 1.0 / n_samples * np.dot(B, X)
+ 
+-        dis = np.sqrt((X**2).sum(axis=1)).sum()
+-        if verbose >= 2:
+-            print("it: %d, stress %s" % (it, stress))
++        # Compute stress
++        distances = euclidean_distances(X)
++        stress = ((distances.ravel() - disparities.ravel()) ** 2).sum() / 2
++        if normalized_stress:
++            stress = np.sqrt(stress / ((disparities.ravel() ** 2).sum() / 2))
++
++        normalization = np.sqrt((X**2).sum(axis=1)).sum()
++        if verbose >= 2:  # pragma: no cover
++            print(f"Iteration {it}, stress {stress:.4f}")
+         if old_stress is not None:
+-            if (old_stress - stress / dis) < eps:
+-                if verbose:
+-                    print("breaking at iteration %d with stress %s" % (it, stress))
++            if (old_stress - stress / normalization) < eps:
++                if verbose:  # pragma: no cover
++                    print("Convergence criterion reached.")
+                 break
+-        old_stress = stress / dis
++        old_stress = stress / normalization
+ 
+     return X, stress, it + 1
+ 

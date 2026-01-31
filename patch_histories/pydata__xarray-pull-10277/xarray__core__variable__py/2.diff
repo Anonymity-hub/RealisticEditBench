@@ -1,0 +1,14 @@
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -1371,7 +1371,9 @@
+             # don't use broadcast_to unless necessary so the result remains
+             # writeable if possible
+             expanded_data = self.data
+-        elif shape is not None:
++        elif shape is None or all(
++            s == 1 for s, e in zip(shape, dim, strict=True) if e not in self_dims
++        ):
+             dims_map = dict(zip(dim, shape, strict=True))
+             tmp_shape = tuple(dims_map[d] for d in expanded_dims)
+             expanded_data = duck_array_ops.broadcast_to(self._data, tmp_shape)

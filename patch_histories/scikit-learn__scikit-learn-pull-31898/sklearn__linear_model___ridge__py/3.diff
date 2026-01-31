@@ -1,0 +1,16 @@
+diff --git a/sklearn/linear_model/_ridge.py b/sklearn/linear_model/_ridge.py
+--- a/sklearn/linear_model/_ridge.py
++++ b/sklearn/linear_model/_ridge.py
+@@ -2712,6 +2712,12 @@
+         """
+         super().fit(X, y, sample_weight=sample_weight, **params)
+         return self
++
++    def _get_scorer_instance(self):
++        """Return a scorer which corresponds to what's defined in RegressorMixin
++        parent class. This is used for routing `sample_weight`.
++        """
++        return get_scorer("r2")
+ 
+ 
+ class RidgeClassifierCV(_RidgeClassifierMixin, _BaseRidgeCV):

@@ -1,0 +1,126 @@
+diff --git a/sphinx/ext/intersphinx/_cli.py b/sphinx/ext/intersphinx/_cli.py
+--- a/sphinx/ext/intersphinx/_cli.py
++++ b/sphinx/ext/intersphinx/_cli.py
+@@ -5,7 +5,7 @@
+ import sys
+ from pathlib import Path
+ 
+-from sphinx.ext.intersphinx._load import _fetch_inventory
++from sphinx.ext.intersphinx._load import _fetch_inventory, _InvConfig
+ 
+ 
+ def inspect_main(argv: list[str], /) -> int:
+@@ -18,18 +18,20 @@ def inspect_main(argv: list[str], /) -> int:
+         )
+         return 1
+ 
+-    class MockConfig:
+-        intersphinx_timeout: int | None = None
+-        tls_verify = False
+-        tls_cacerts: str | dict[str, str] | None = None
+-        user_agent: str = ''
++    filename = argv[0]
++    config = _InvConfig(
++        intersphinx_cache_limit=5,
++        intersphinx_timeout=None,
++        tls_verify=False,
++        tls_cacerts=None,
++        user_agent='',
++    )
+ 
+     try:
+-        filename = argv[0]
+         inv_data = _fetch_inventory(
+             target_uri='',
+             inv_location=filename,
+-            config=MockConfig(),  # type: ignore[arg-type]
++            config=config,
+             srcdir=Path(''),
+         )
+         for key in sorted(inv_data or {}):
+diff --git a/sphinx/ext/intersphinx/_load.py b/sphinx/ext/intersphinx/_load.py
+--- a/sphinx/ext/intersphinx/_load.py
++++ b/sphinx/ext/intersphinx/_load.py
+@@ -3,6 +3,7 @@
+ from __future__ import annotations
+ 
+ import concurrent.futures
++import dataclasses
+ import io
+ import os.path
+ import posixpath
+@@ -169,14 +170,15 @@ def load_mappings(app: Sphinx) -> None:
+             # This happens when the URI in `intersphinx_mapping` is changed.
+             del intersphinx_cache[uri]
+ 
++    inv_config = _InvConfig.from_config(app.config)
+     with concurrent.futures.ThreadPoolExecutor() as pool:
+         futures = [
+             pool.submit(
+                 _fetch_inventory_group,
+                 project=project,
+                 cache=intersphinx_cache,
+                 now=now,
+-                config=app.config,
++                config=inv_config,
+                 srcdir=app.srcdir,
+             )
+             for project in projects
+@@ -201,12 +203,31 @@ def load_mappings(app: Sphinx) -> None:
+                 inventories.main_inventory.setdefault(objtype, {}).update(objects)
+ 
+ 
++@dataclasses.dataclass(frozen=True, kw_only=True, slots=True)
++class _InvConfig:
++    intersphinx_cache_limit: int
++    intersphinx_timeout: int | float | None
++    tls_verify: bool
++    tls_cacerts: str | dict[str, str] | None
++    user_agent: str
++
++    @classmethod
++    def from_config(cls, config: Config) -> _InvConfig:
++        return cls(
++            intersphinx_cache_limit=config.intersphinx_cache_limit,
++            intersphinx_timeout=config.intersphinx_timeout,
++            tls_verify=config.tls_verify,
++            tls_cacerts=config.tls_cacerts,
++            user_agent=config.user_agent,
++        )
++
++
+ def _fetch_inventory_group(
+     *,
+     project: _IntersphinxProject,
+     cache: dict[InventoryURI, InventoryCacheEntry],
+     now: int,
+-    config: Config,
++    config: _InvConfig,
+     srcdir: Path,
+ ) -> bool:
+     if config.intersphinx_cache_limit >= 0:
+@@ -283,13 +304,13 @@ def fetch_inventory(app: Sphinx, uri: InventoryURI, inv: str) -> Inventory:
+     return _fetch_inventory(
+         target_uri=uri,
+         inv_location=inv,
+-        config=app.config,
++        config=_InvConfig.from_config(app.config),
+         srcdir=app.srcdir,
+     )
+ 
+ 
+ def _fetch_inventory(
+-    *, target_uri: InventoryURI, inv_location: str, config: Config, srcdir: Path
++    *, target_uri: InventoryURI, inv_location: str, config: _InvConfig, srcdir: Path
+ ) -> Inventory:
+     """Fetch, parse and return an intersphinx inventory file."""
+     # both *target_uri* (base URI of the links to generate)
+@@ -315,7 +336,7 @@ def _fetch_inventory(
+ 
+ 
+ def _fetch_inventory_url(
+-    *, target_uri: InventoryURI, inv_location: str, config: Config
++    *, target_uri: InventoryURI, inv_location: str, config: _InvConfig
+ ) -> tuple[bytes, str]:
+     try:
+         with requests.get(

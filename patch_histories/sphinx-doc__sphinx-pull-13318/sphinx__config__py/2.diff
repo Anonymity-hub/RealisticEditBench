@@ -1,0 +1,24 @@
+diff --git a/sphinx/config.py b/sphinx/config.py
+--- a/sphinx/config.py
++++ b/sphinx/config.py
+@@ -378,14 +378,12 @@
+         valid_types = opt.valid_types
+         if valid_types == Any:
+             return value
+-        if type(default) is bool or (
+-            not isinstance(valid_types, ENUM)
+-            and len(valid_types) == 1
+-            and bool in valid_types
+-        ):
+-            if isinstance(valid_types, ENUM) or len(valid_types) > 1:
+-                # if valid_types are given, and non-bool valid types exist,
+-                # return the value without coercing to a Boolean.
++        if isinstance(valid_types, ENUM):
++            if False in valid_types._candidates and value == '0':
++                return False
++            if True in valid_types._candidates and value == '1':
++                return True
++            return value
+                 return value
+             # given falsy string from a command line option
+             return value not in {'0', ''}

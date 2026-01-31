@@ -1,0 +1,11 @@
+diff --git a/sympy/core/function.py b/sympy/core/function.py
+--- a/sympy/core/function.py
++++ b/sympy/core/function.py
+@@ -1259,6 +1259,7 @@ def _diff_wrt(self):
+ 
+     def __new__(cls, expr, *variables, **kwargs):
+         expr = sympify(expr)
++        if not isinstance(
+         symbols_or_none = getattr(expr, "free_symbols", None)
+         has_symbol_set = isinstance(symbols_or_none, set)
+ 

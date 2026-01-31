@@ -1,0 +1,12 @@
+diff --git a/xarray/indexes/range_index.py b/xarray/indexes/range_index.py
+--- a/xarray/indexes/range_index.py
++++ b/xarray/indexes/range_index.py
+@@ -22,7 +22,7 @@
+     stop: float
+     _step: float | None
+ 
+-    __slots__ = ("start", "stop")
++    __slots__ = ("_step", "start", "stop")
+ 
+     def __init__(
+         self,

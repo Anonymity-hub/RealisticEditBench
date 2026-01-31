@@ -1,0 +1,15 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -1231,9 +1231,8 @@
+             return all(base in namespace for base in unit.bases)
+ 
+         unit = self.decompose()
+-        key = hash(unit)
+-
+-        cached = cached_results.get(key)
++
++        cached = cached_results.get(unit)
+         if cached is not None:
+             if isinstance(cached, Exception):
+                 raise cached

@@ -1,0 +1,12 @@
+diff --git a/sympy/ntheory/residue_ntheory.py b/sympy/ntheory/residue_ntheory.py
+--- a/sympy/ntheory/residue_ntheory.py
++++ b/sympy/ntheory/residue_ntheory.py
+@@ -1630,6 +1630,8 @@
+     if n < 1:
+         raise ValueError("n should be positive")
+     if n == 1:
++        return 0
++
+     if order is None:
+         # Compute the order and its factoring in one pass
+         # order = totient(n), factors = factorint(order)

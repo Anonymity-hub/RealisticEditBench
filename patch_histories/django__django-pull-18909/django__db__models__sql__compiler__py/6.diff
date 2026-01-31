@@ -1,0 +1,11 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1868,6 +1868,7 @@
+                 [self.connection.ops.pk_default_value()] for _ in self.query.objs
+             ]
+             fields = [None]
++            result.append("(%s)" % qn(opts.pk.column))
+ 
+         # Currently the backends just accept values when generating bulk
+         # queries and generate their own placeholders. Doing that isn't

@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/rcsetup.py b/lib/matplotlib/rcsetup.py
+--- a/lib/matplotlib/rcsetup.py
++++ b/lib/matplotlib/rcsetup.py
+@@ -98,6 +98,8 @@
+     Convert the string *s* to a list of colors interpreting it either as a
+     color sequence name, or a string containing single-letter colors.
+     """
++    try:
++        colors = mpl.color_sequences[s]
+ 
+ 
+ @lru_cache

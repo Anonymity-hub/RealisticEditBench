@@ -1,0 +1,11 @@
+diff --git a/xarray/plot/facetgrid.py b/xarray/plot/facetgrid.py
+--- a/xarray/plot/facetgrid.py
++++ b/xarray/plot/facetgrid.py
+@@ -378,6 +378,7 @@
+                 self._mappables.append(mappable)
+
+         xlabel = label_from_attrs(self.data[x])
++        ylabel = label_from_attrs(self.data[y])
+         self._finalize_grid(x, y)
+
+         if kwargs.get("add_colorbar", True):

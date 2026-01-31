@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py
+--- a/lib/matplotlib/__init__.py
++++ b/lib/matplotlib/__init__.py
+@@ -1040,6 +1040,7 @@
+         'ec':  'edgecolor',
+         'mew': 'markeredgewidth',
+         'aa':  'antialiased',
++        'sans': 'sans-serif',
+         }
+ 
+     if isinstance(group, str):

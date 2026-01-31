@@ -1,0 +1,17 @@
+diff --git a/sphinx/util/logging.py b/sphinx/util/logging.py
+--- a/sphinx/util/logging.py
++++ b/sphinx/util/logging.py
+@@ -608,8 +608,12 @@ def write(self, data: str) -> None:
+         self._app.messagelog.append(data)
+ 
+ 
+-def setup(app: Sphinx, status: IO[str], warning: IO[str]) -> None:
++def setup(
++    app: Sphinx, status: IO[str], warning: IO[str], *, verbosity: int = 0
++) -> None:
+     """Setup root logger for Sphinx"""
++    log_level = VERBOSITY_MAP[max(verbosity, 0)]
++
+     logger = logging.getLogger(NAMESPACE)
+     logger.setLevel(logging.DEBUG)
+     logger.propagate = False

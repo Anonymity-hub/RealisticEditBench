@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/spines.py b/lib/matplotlib/spines.py
+--- a/lib/matplotlib/spines.py
++++ b/lib/matplotlib/spines.py
+@@ -269,7 +269,7 @@
+                         tr = mtransforms.IdentityTransform()
+                     else:
+                         tr = self.axis.get_transform()
+-                    rmin, rmax = self.axes.viewLim.intervaly
++                    rmin, rmax = tr.transform(self.axes.viewLim.intervaly)
+                     try:
+                         rorigin = self.axes.get_rorigin()
+                     except AttributeError:

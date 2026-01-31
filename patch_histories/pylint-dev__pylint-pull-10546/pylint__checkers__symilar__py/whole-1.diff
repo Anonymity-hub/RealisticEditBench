@@ -1,0 +1,13 @@
+diff --git a/pylint/checkers/symilar.py b/pylint/checkers/symilar.py
+--- a/pylint/checkers/symilar.py
++++ b/pylint/checkers/symilar.py
+@@ -430,8 +430,7 @@ def _compute_sims(self) -> list[tuple[int, set[LinesChunkLimits_T]]]:
+             cpls: set[LinesChunkLimits_T]
+             for cpls in ensembles:
+                 sims.append((num, cpls))
+-        sims.sort()
+-        sims.reverse()
++        sims.sort(reverse=True)
+         return sims
+ 
+     def _display_sims(

@@ -1,0 +1,31 @@
+diff --git a/sphinx/builders/linkcheck.py b/sphinx/builders/linkcheck.py
+--- a/sphinx/builders/linkcheck.py
++++ b/sphinx/builders/linkcheck.py
+@@ -731,6 +731,8 @@
+ def _allowed_redirect(
+     url: str, new_url: str, allowed_redirects: dict[re.Pattern[str], re.Pattern[str]]
+ ) -> bool:
++    if allowed_redirects is _SENTINEL_LAR:
++        return False
+     return any(
+         from_url.match(url) and to_url.match(new_url)
+         for from_url, to_url in allowed_redirects.items()
+@@ -780,9 +782,6 @@
+     config.linkcheck_allowed_redirects = allowed_redirects
+ 
+ 
+-_sentinel_lar = object()
+-
+-
+ def setup(app: Sphinx) -> ExtensionMetadata:
+     app.add_builder(CheckExternalLinksBuilder)
+     app.add_post_transform(HyperlinkCollector)
+@@ -792,7 +791,7 @@
+         'linkcheck_exclude_documents', [], '', types=frozenset({list, tuple})
+     )
+     app.add_config_value(
+-        'linkcheck_allowed_redirects', _sentinel_lar, '', types=frozenset({dict})
++        'linkcheck_allowed_redirects', _SENTINEL_LAR, '', types=frozenset({dict})
+     )
+     app.add_config_value('linkcheck_auth', [], '', types=frozenset({list, tuple}))
+     app.add_config_value('linkcheck_request_headers', {}, '', types=frozenset({dict}))
