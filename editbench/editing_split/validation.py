@@ -4,12 +4,16 @@ import re
 import subprocess
 import sys
 import traceback
+import warnings
 from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Union, List, Optional
 import tempfile
 from tqdm import tqdm
+
+# Suppress RuntimeWarning when running as module
+warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*found in sys.modules.*")
 
 from editbench.collection.instance.activity import Activity, load_datasets_from_jsonl
 from editbench.editing_split.constants import REPO_AND_LOG_DIR, EDITING_SPLIT_DIR
@@ -205,8 +209,14 @@ def gather_all_res(repos: list[str], instance_ids=None):
                     else:
                         pass_res["fail"].add(instance_id)
 
-    print(f"✅ [{datetime.now()}] success applied instance: {pass_res['success']}\n"
-          f"❌ [{datetime.now()}] fail applied instance: {pass_res['fail']}")
+    success_list = sorted(pass_res['success']) if pass_res['success'] else []
+    fail_list = sorted(pass_res['fail']) if pass_res['fail'] else []
+    
+    success_display = success_list if len(success_list) <= 10 else success_list[:10] + [f"... and {len(success_list) - 10} more"]
+    fail_display = fail_list if len(fail_list) <= 10 else fail_list[:10] + [f"... and {len(fail_list) - 10} more"]
+    
+    print(f"✅ [{datetime.now()}] success applied instance ({len(success_list)}): {success_display if success_list else 'None'}\n"
+          f"❌ [{datetime.now()}] fail applied instance ({len(fail_list)}): {fail_display if fail_list else 'None'}")
 
     return pass_res
 
@@ -334,7 +344,7 @@ def validation_instance(instance: Activity, patch_list: list[list[str]], is_outp
         4.Optionally saves modified files to a standardized location
         5.Checks validation results and cleans up logging resources
     """
-    test_path = REPO_AND_LOG_DIR / instance.repo.replace("/", "__") / f"{instance.src_type}-{instance.instance_num}"
+    test_path = REPO_AND_LOG_DIR / instance.repo.replace("/", "__") / f"pull-{instance.instance_num}"
     logger_path = test_path / "validation.log"
     script_sh = test_path / "apply.sh"
     logger = setup_logger(instance.instance_id, logger_path)
@@ -506,10 +516,11 @@ def make_valid_script_inf(instance:Activity):
     return valid_commands, "\n".join(valid_commands)
 
 if __name__ == "__main__":
+    # sys.argv = ["validation.py", "--dataset_name", "crawled_data/bench/all-task-instances.jsonl", "--instance_ids", "astropy__astropy-pull-18627"]
     parser = ArgumentParser()
     parser.add_argument("--dataset_name",
-                        default="crawled_data/activity_execution/astropy-astropy-task-instances.jsonl", type=str,
-                        help="Name of dataset or path to JSON file.")
+                            default="crawled_data/bench/all-task-instances.jsonl", type=str,
+                            help="Name of dataset or path to JSON file.")
     parser.add_argument("--instance_ids", nargs="+", type=str, help="Instance IDs to run (space separated)")
     args = parser.parse_args()
 

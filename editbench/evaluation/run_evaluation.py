@@ -612,7 +612,7 @@ def get_gold_predictions(dataset_name, split):
     return [
         {
             KEY_INSTANCE_ID: instance.instance_id,
-            KEY_PREDICTION: instance.work_patch,
+            KEY_PREDICTION: instance.ground_truth,
             KEY_MODEL: "gold"
         }
         for instance in inf_instances
@@ -823,7 +823,6 @@ def main(
     if not dataset:
         print("No instance to run.")
     else:
-        pass
         predictions = {dataset_.instance_id: predictions[dataset_.instance_id] for dataset_ in dataset}
         build_env_images(client, dataset, force_rebuild, max_workers)
         run_instances(predictions, dataset, cache_level, clean, force_rebuild, max_workers, run_id, timeout, client, max_eval_images)
@@ -905,21 +904,31 @@ def analysis_results_from_report(
     predictions_dict = {}
     prediction_file_path = None
     if prediction_path:
-        prediction_file_path = Path(prediction_path)
-        if not prediction_file_path.exists():
-            raise FileNotFoundError(f"prediction file not found: {prediction_file_path}")
-        
-        print(f"\n📋 load predictions from prediction file: {prediction_file_path}")
-        with open(prediction_file_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                try:
-                    data = json.loads(line.strip())
-                    instance_id = data.get('instance_id')
-                    if instance_id:
-                        predictions_dict[instance_id] = data
-                except json.JSONDecodeError:
-                    continue
-        print(f"loaded {len(predictions_dict)} predictions")
+        if prediction_path == "gold":
+            # For gold predictions, get ground truth from datasets
+            print(f"\n📋 using gold predictions from dataset")
+            for instance in datasets:
+                predictions_dict[instance.instance_id] = {
+                    'instance_id': instance.instance_id,
+                    'model_patch': instance.ground_truth if hasattr(instance, 'ground_truth') else ""
+                }
+            print(f"loaded {len(predictions_dict)} gold predictions from dataset")
+        else:
+            prediction_file_path = Path(prediction_path)
+            if not prediction_file_path.exists():
+                raise FileNotFoundError(f"prediction file not found: {prediction_file_path}")
+            
+            print(f"\n📋 load predictions from prediction file: {prediction_file_path}")
+            with open(prediction_file_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    try:
+                        data = json.loads(line.strip())
+                        instance_id = data.get('instance_id')
+                        if instance_id:
+                            predictions_dict[instance_id] = data
+                    except json.JSONDecodeError:
+                        continue
+            print(f"loaded {len(predictions_dict)} predictions")
 
     # first step: collect all preprocessed patches, for TF-IDF fitting
     print(f"\n📋 collect patch data ({len(datasets)} instances)...")
@@ -999,10 +1008,14 @@ def analysis_results_from_report(
 
         # read prediction patch: prefer from prediction_file_path, otherwise from file
         raw_pred_diff = None
-        if prediction_file_path and instance_id in predictions_dict:
+        if prediction_path == "gold" or (prediction_file_path and instance_id in predictions_dict):
             # get model_patch from prediction results
-            pred_data = predictions_dict[instance_id]
-            raw_pred_diff = pred_data.get('model_patch', '').strip()
+            if prediction_path == "gold":
+                # For gold, use ground_truth from dataset
+                raw_pred_diff = instance.ground_truth.strip() if hasattr(instance, "ground_truth") else ""
+            else:
+                pred_data = predictions_dict[instance_id]
+                raw_pred_diff = pred_data.get('model_patch', '').strip()
         else:
             incomplete_ids.add(instance_id)
             continue
@@ -1828,7 +1841,9 @@ if __name__ == "__main__":
     p_run = subparsers.add_parser("run", help="Run evaluation for one dataset + predictions + run_id")
     p_run.add_argument("--dataset-name", type=str, required=True, help="Dataset jsonl path (e.g. infbench all-task-instances_0.2.jsonl)")
     p_run.add_argument("--predictions-path", type=str, required=True, help="Predictions jsonl/json path or 'gold'")
-    p_run.add_argument("--run-id", type=str, required=True, help="Run ID (e.g. 0.2)")
+    p_run.add_argument("--run-id", type=str, default="0.2",
+                       choices=["0.2", "0.4", "0.6", "0.8", "0.2_bm25_1", "0.2_bm25_3", "0.2_bm25_5", "0.2_body_issue", "None_body_issue"],
+                       help="Run ID (default: 0.2, e.g. 0.2, 0.4, 0.6, 0.8, or variants like 0.2_bm25_1)")
     p_run.add_argument("--split", type=str, default="", help="Split name (default: empty)")
     p_run.add_argument("--instance-ids", type=str, nargs="*", default=None, help="Instance IDs to run; if omitted, run all")
     p_run.add_argument("--sampled-ids-file", type=str, default=None, help="JSON file with sampled_instance_ids (overrides --instance-ids if set)")
@@ -1851,7 +1866,9 @@ if __name__ == "__main__":
     p_batch = subparsers.add_parser("batch", help="Run evaluation for multiple dataset/model/run_id combinations")
     p_batch.add_argument("--dataset-name", type=str, nargs="+", default=["all"], help="Dataset name(s), e.g. all (default: all)")
     p_batch.add_argument("--model", type=str, nargs="+", required=True, help="Model name(s), e.g. claude-sonnet-4-5-20250929")
-    p_batch.add_argument("--run-id", type=str, nargs="+", required=True, help="Run ID(s), e.g. 0.2")
+    p_batch.add_argument("--run-id", type=str, nargs="+", default=["0.2"],
+                        choices=["0.2", "0.4", "0.6", "0.8", "0.2_bm25_1", "0.2_bm25_3", "0.2_bm25_5", "0.2_body_issue", "None_body_issue"],
+                        help="Run ID(s) (default: 0.2, e.g. 0.2 0.4 0.6 0.8, or variants like 0.2_bm25_1)")
     p_batch.add_argument("--sampled-ids-file", type=str, default=None, help="JSON file with sampled_instance_ids (optional)")
     p_batch.add_argument("--max-workers", type=int, default=4, help="Max concurrent workers (default: 4)")
     p_batch.add_argument("--force-rebuild", action="store_true", help="Force rebuild Docker images")
