@@ -5,10 +5,12 @@ from collections import defaultdict
 from dataclasses import fields
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Union, Optional, Tuple
 
 import pandas as pd
 from editbench.collection.instance.activity import Activity, load_datasets_from_jsonl
+from editbench.config import SRC_INF_BENCHMARK_DATA
+from editbench.evaluation.constants import MAP_REPO_VERSION_TO_SPECS
 
 
 def get_inf_datasets(
@@ -352,3 +354,38 @@ def modified_jsonl_patch_list(file_path):
         print(f"successfully modified")
 
     return modified
+
+
+def normalize_dataset_name(dataset_name: str, run_id: str) -> Tuple[str, str]:
+    """
+    Normalize dataset_name to full path and extract name.
+    
+    Args:
+        dataset_name: Can be "all", "owner/repo_name", or full path
+        run_id: Run ID for constructing path
+    
+    Returns:
+        (normalized_path, name): Full path and extracted name
+    """
+    # If it's already a full path (ends with .jsonl), extract name from path
+    if dataset_name.endswith(".jsonl"):
+        path = Path(dataset_name)
+        # Extract name from filename: {name}-task-instances_{run_id}.jsonl
+        stem = path.stem  # e.g. "all-task-instances_0.2"
+        name_match = re.match(r'^(.+?)-task-instances_.+$', stem)
+        if name_match:
+            name = name_match.group(1)
+        else:
+            name = stem.split('-task-instances_')[0] if '-task-instances_' in stem else "all"
+        return str(path), name
+    
+    # If it's "all" or in MAP_REPO_VERSION_TO_SPECS, convert to full path
+    if dataset_name == "all" or dataset_name in MAP_REPO_VERSION_TO_SPECS.keys():
+        name = dataset_name.replace("/", "-")
+        normalized_path = f"{SRC_INF_BENCHMARK_DATA}/{name}-task-instances_{run_id}.jsonl"
+        return normalized_path, name
+    
+    # Otherwise, assume it's a simple name and convert to full path
+    name = dataset_name.replace("/", "-")
+    normalized_path = f"{SRC_INF_BENCHMARK_DATA}/{name}-task-instances_{run_id}.jsonl"
+    return normalized_path, name

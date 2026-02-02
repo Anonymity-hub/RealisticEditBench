@@ -25,7 +25,7 @@ from editbench.config import SRC_INF_BENCHMARK_DATA, SRC_EXPERIMENTS
 from editbench.config.constants import SRC_BENCHMARK_DATA
 from editbench.evaluation.constants import KEY_INSTANCE_ID, KEY_MODEL, KEY_PREDICTION, RUN_EVALUATION_LOG_DIR, \
     INSTANCE_IMAGE_BUILD_DIR, LOG_INSTANCE, LOG_REPORT, DOCKER_PATCH, DOCKER_WORKDIR, DOCKER_USER, APPLY_PATCH_FAIL, \
-    UTF8, APPLY_PATCH_PASS, LOG_TEST_OUTPUT
+    UTF8, APPLY_PATCH_PASS, LOG_TEST_OUTPUT, MAP_REPO_VERSION_TO_SPECS
 from editbench.evaluation.docker_build import build_env_images, setup_logger, build_container, BuildImageError, \
     close_logger
 from editbench.evaluation.docker_utils import list_images, copy_to_container, exec_run_with_timeout, should_remove, \
@@ -34,7 +34,7 @@ from editbench.evaluation.grading import get_eval_report
 from editbench.evaluation.test_spec import make_test_spec, TestSpec, apply_script
 from editbench.evaluation.utils import load_inf_results, find_instance
 from editbench.inference.run_api import MAP_MODEL_TO_COFIG, gpt_tokenize
-from editbench.utils.dataset_utils import get_inf_datasets
+from editbench.utils.dataset_utils import get_inf_datasets, normalize_dataset_name
 from editbench.evaluation.metric_utils import preprocess_diff, python_code_tokenize, calculate_codebleu, jaccard_similarity, normalized_edit_distance, tfidf_cosine_similarity
 
 class EvaluationError(Exception):
@@ -762,7 +762,7 @@ def main(
     Run evaluation harness for the given dataset and predictions.
     
     Args:
-        dataset_name (str): Dataset name
+        dataset_name (str): Dataset name (can be "all", "owner/repo_name", or full path)
         split (str): Split name
         instance_ids (list): List of instance IDs
         predictions_path (str): Path to predictions file
@@ -777,6 +777,11 @@ def main(
             If None, no limit. Only applies when cache_level="eval".
     """
     assert len(run_id) > 0, "Run ID must be provided"
+    
+    # Normalize dataset_name
+    dataset_name, dataset_name_for_output = normalize_dataset_name(dataset_name, run_id)
+    
+    is_gold = predictions_path == "gold"
     # set open file limit - must be set before any file operations
     try:
         resource.setrlimit(resource.RLIMIT_NOFILE, (open_file_limit, open_file_limit))
@@ -796,9 +801,10 @@ def main(
         else:
             print(f"Cache level is 'eval', will keep at most {max_eval_images} eval images.")
 
-    if predictions_path == "gold":
+    if is_gold:
         print("Using gold predictions - ignoring predictions_path")
         predictions = get_gold_predictions(dataset_name, split)
+        # For gold, construct the output path for display
     else:
         if predictions_path.endswith(".json"):
             with open(predictions_path, "r") as f:
@@ -818,7 +824,6 @@ def main(
     dataset = get_dataset_from_preds(dataset_name, split, instance_ids,
                                      predictions, run_id, exclude_completed=True)
 
-
     print(f"Running {len(dataset)} unevaluated instances...")
     if not dataset:
         print("No instance to run.")
@@ -830,22 +835,16 @@ def main(
         # clean images + make final report
         clean_images(client, set(), cache_level, clean, max_eval_images)
 
-    # extract dataset name from dataset_name (remove path and extension)
-    dataset_basename = Path(dataset_name).stem  # e.g. all-task-instances_0.2
-    # extract dataset name part (remove -task-instances_xxx suffix)
-    name_match = re.match(r'^(.+?)-task-instances_.+$', dataset_basename)
-    if name_match:
-        name = name_match.group(1)
-    else:
-        name = dataset_basename.split('-task-instances_')[0] if '-task-instances_' in dataset_basename else "all"
-    
     # get model configuration
     model_config = MAP_MODEL_TO_COFIG.get(model_name, {"temperature": 0, "n": 1})
     
-    output = Path(f"{SRC_EXPERIMENTS}/{model_name}/T={model_config['temperature']}/n={model_config['n']}/{name.replace('/', '-')}-{run_id}-output.json")
+    if is_gold:
+        output = Path(f"{SRC_EXPERIMENTS}/gold/{dataset_name_for_output.replace('/', '-')}-{run_id}-output.json")
+    else:
+        output = Path(f"{SRC_EXPERIMENTS}/{model_name}/T={model_config['temperature']}/n={model_config['n']}/{dataset_name_for_output.replace('/', '-')}-{run_id}-output.json")
     print("\n" + "=" * 80)
     print(f"🚀 evaluation results:")
-    print(f"   - dataset: {name}")
+    print(f"   - dataset: {dataset_name_for_output}")
     print(f"   - model: {model_name}")
     print(f"   - run ID: {run_id}")
     print(f"   - dataset input file: {dataset_name}")
@@ -855,7 +854,9 @@ def main(
     # reuse existing client, avoid creating new connection causing file descriptor exhaustion
     # note: here cannot directly access sampled_instance_ids, need to pass instance_ids parameter when calling main
     # since instance_ids is already used in get_dataset_from_preds, analysis_results_from_report will use the same filtering
-    analysis_results_from_report(dataset_name, run_id, client, model_name, output, predictions_path, target_instance_ids=instance_ids if instance_ids else None)
+    # Pass "gold" if it was gold, otherwise pass the normalized path
+    analysis_predictions_path = "gold" if is_gold else Path(predictions_path)
+    analysis_results_from_report(dataset_name, run_id, client, model_name, output, analysis_predictions_path, target_instance_ids=instance_ids if instance_ids else None)
 
 
 def analysis_results_from_report(
@@ -1168,6 +1169,8 @@ def analysis_results_from_report(
 
     # save detailed results to file
     if output:
+        # Ensure output directory exists
+        output.parent.mkdir(parents=True, exist_ok=True)
         with open(output, "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=2)
             # ------------------------------
@@ -1837,129 +1840,173 @@ if __name__ == "__main__":
     )
     subparsers = parser.add_subparsers(dest="command", required=True, help="Subcommand")
 
-    # run: single evaluation
-    p_run = subparsers.add_parser("run", help="Run evaluation for one dataset + predictions + run_id")
-    p_run.add_argument("--dataset-name", type=str, required=True, help="Dataset jsonl path (e.g. infbench all-task-instances_0.2.jsonl)")
-    p_run.add_argument("--predictions-path", type=str, required=True, help="Predictions jsonl/json path or 'gold'")
-    p_run.add_argument("--run-id", type=str, default="0.2",
+    # run: evaluation (supports single or multiple datasets/models/run_ids)
+    p_run = subparsers.add_parser("run", help="Run evaluation for dataset(s) + predictions + run_id(s)")
+    p_run.add_argument("--dataset_name", type=str, nargs="+", default=["all"], 
+                       help="Dataset name(s): 'all', 'owner/repo_name', or full path (default: all)")
+    p_run.add_argument("--predictions_path", type=str, nargs="+", default=None, 
+                       help="Predictions jsonl/json path(s) or 'gold' (optional, default: 'gold' if model not specified)")
+    p_run.add_argument("--run_id", type=str, nargs="+", default=["0.2"],
                        choices=["0.2", "0.4", "0.6", "0.8", "0.2_bm25_1", "0.2_bm25_3", "0.2_bm25_5", "0.2_body_issue", "None_body_issue"],
-                       help="Run ID (default: 0.2, e.g. 0.2, 0.4, 0.6, 0.8, or variants like 0.2_bm25_1)")
+                       help="Run ID(s) (default: 0.2, e.g. 0.2 0.4 0.6 0.8, or variants like 0.2_bm25_1)")
+    p_run.add_argument("--model", type=str, nargs="+", default=None, 
+                       help="Model name(s), e.g. claude-sonnet-4-5-20250929 (optional, auto-detect from predictions if not specified)")
     p_run.add_argument("--split", type=str, default="", help="Split name (default: empty)")
-    p_run.add_argument("--instance-ids", type=str, nargs="*", default=None, help="Instance IDs to run; if omitted, run all")
-    p_run.add_argument("--sampled-ids-file", type=str, default=None, help="JSON file with sampled_instance_ids (overrides --instance-ids if set)")
-    p_run.add_argument("--max-workers", type=int, default=4, help="Max concurrent workers (default: 4)")
-    p_run.add_argument("--force-rebuild", action="store_true", help="Force rebuild Docker images")
-    p_run.add_argument("--cache-level", type=str, default="eval", choices=("none", "base", "env", "eval"), help="Cache level (default: eval)")
-    p_run.add_argument("--clean", action="store_true", help="Clean images above cache level after run")
-    p_run.add_argument("--open-file-limit", type=int, default=1048576, help="RLIMIT_NOFILE (default: 1048576)")
-    p_run.add_argument("--timeout", type=int, default=600, help="Timeout per instance in seconds (default: 600)")
-    p_run.add_argument("--max-eval-images", type=int, default=None, help="Max eval images to keep when cache_level=eval (default: None)")
+    p_run.add_argument("--instance_ids", type=str, nargs="*", default=None, 
+                       help="Instance IDs to run; if omitted, run all")
+    p_run.add_argument("--sampled_ids_file", type=str, default=None, 
+                       help="JSON file with sampled_instance_ids (overrides instance_ids if set)")
+    p_run.add_argument("--max_workers", type=int, default=4, 
+                       help="Max concurrent workers (default: 4)")
+    p_run.add_argument("--force_rebuild", action="store_true", 
+                       help="Force rebuild Docker images")
+    p_run.add_argument("--cache_level", type=str, default="eval", 
+                       choices=("none", "base", "env", "eval"), help="Cache level (default: eval)")
+    p_run.add_argument("--clean", action="store_true", 
+                       help="Clean images above cache level after run")
+    p_run.add_argument("--open_file_limit", type=int, default=1048576, 
+                       help="RLIMIT_NOFILE (default: 1048576)")
+    p_run.add_argument("--timeout", type=int, default=600, 
+                       help="Timeout per instance in seconds (default: 600)")
+    p_run.add_argument("--max_eval_images", type=int, default=None, 
+                       help="Max eval images to keep when cache_level=eval (default: None)")
 
     # summary: print analysis summary
     p_sum = subparsers.add_parser("summary", help="Print analysis summary for an output.json report")
-    p_sum.add_argument("--report-path", type=str, required=True, help="Path to output.json report")
-    p_sum.add_argument("--filter-ids-file", type=str, default=None, help="JSON file with union_filter_instance_ids to exclude (optional)")
-    p_sum.add_argument("--cutoff-date", type=str, default=None, help="Cutoff date YYYYMMDD or YYYY-MM-DD (optional)")
-    p_sum.add_argument("--date-mode", type=str, default="before", choices=("before", "after"), help="With cutoff_date: before | after (default: before)")
-
-    # batch: run over (dataset_name × model × run_id)
-    p_batch = subparsers.add_parser("batch", help="Run evaluation for multiple dataset/model/run_id combinations")
-    p_batch.add_argument("--dataset-name", type=str, nargs="+", default=["all"], help="Dataset name(s), e.g. all (default: all)")
-    p_batch.add_argument("--model", type=str, nargs="+", required=True, help="Model name(s), e.g. claude-sonnet-4-5-20250929")
-    p_batch.add_argument("--run-id", type=str, nargs="+", default=["0.2"],
-                        choices=["0.2", "0.4", "0.6", "0.8", "0.2_bm25_1", "0.2_bm25_3", "0.2_bm25_5", "0.2_body_issue", "None_body_issue"],
-                        help="Run ID(s) (default: 0.2, e.g. 0.2 0.4 0.6 0.8, or variants like 0.2_bm25_1)")
-    p_batch.add_argument("--sampled-ids-file", type=str, default=None, help="JSON file with sampled_instance_ids (optional)")
-    p_batch.add_argument("--max-workers", type=int, default=4, help="Max concurrent workers (default: 4)")
-    p_batch.add_argument("--force-rebuild", action="store_true", help="Force rebuild Docker images")
-    p_batch.add_argument("--cache-level", type=str, default="eval", choices=("none", "base", "env", "eval"), help="Cache level (default: eval)")
-    p_batch.add_argument("--clean", action="store_true", help="Clean images above cache level after run")
-    p_batch.add_argument("--open-file-limit", type=int, default=1048576, help="RLIMIT_NOFILE (default: 1048576)")
-    p_batch.add_argument("--timeout", type=int, default=600, help="Timeout per instance in seconds (default: 600)")
-    p_batch.add_argument("--max-eval-images", type=int, default=None, help="Max eval images when cache_level=eval (default: None)")
+    p_sum.add_argument("--report_path", type=str, required=True, 
+                       help="Path to output.json report")
+    p_sum.add_argument("--filter_ids_file", type=str, default=None, 
+                       help="JSON file with union_filter_instance_ids to exclude (optional)")
+    p_sum.add_argument("--cutoff_date", type=str, default=None, 
+                       help="Cutoff date YYYYMMDD or YYYY-MM-DD (optional)")
+    p_sum.add_argument("--date_mode", type=str, default="before", 
+                       choices=("before", "after"), help="With cutoff_date: before | after (default: before)")
 
     args = parser.parse_args()
 
     if args.command == "run":
-        instance_ids = None
-        if args.sampled_ids_file and Path(args.sampled_ids_file).exists():
+        # Get arguments (argparse converts hyphens to underscores)
+        dataset_names = args.dataset_name
+        predictions_paths = args.predictions_path
+        run_ids = args.run_id
+        models = args.model if args.model else []
+        sampled_ids_file = args.sampled_ids_file
+        instance_ids = args.instance_ids
+        max_workers = args.max_workers
+        force_rebuild = args.force_rebuild
+        cache_level = args.cache_level
+        clean = args.clean
+        open_file_limit = args.open_file_limit
+        timeout = args.timeout
+        max_eval_images = args.max_eval_images
+        
+        # Auto-infer predictions_path if not provided
+        if predictions_paths is None:
+            if models:
+                # If model is specified, predictions_path will be auto-constructed
+                predictions_paths = []
+            else:
+                # If no model and no predictions_path, default to "gold"
+                predictions_paths = ["gold"]
+        
+        # Load sampled instance IDs if provided
+        sampled_instance_ids = None
+        if sampled_ids_file and Path(sampled_ids_file).exists():
             try:
-                with open(args.sampled_ids_file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    instance_ids = data.get("sampled_instance_ids", [])
-                print(f"Loaded sampled instance IDs from {args.sampled_ids_file}: {len(instance_ids)}")
+                with open(sampled_ids_file, "r", encoding="utf-8") as f:
+                    sampled_instance_ids = json.load(f).get("sampled_instance_ids", [])
+                print(f"Loaded sampled instance IDs from {sampled_ids_file}: {len(sampled_instance_ids)}")
             except Exception as e:
                 print(f"Warning: failed to load sampled IDs: {e}")
-        elif getattr(args, "instance_ids", None):
-            instance_ids = args.instance_ids
+        
+        # If instance_ids is provided, use it; otherwise use sampled_instance_ids
         if instance_ids is None:
-            instance_ids = []
-        main(
-            dataset_name=args.dataset_name,
-            split=args.split,
-            instance_ids=instance_ids,
-            predictions_path=args.predictions_path,
-            max_workers=args.max_workers,
-            force_rebuild=args.force_rebuild,
-            cache_level=args.cache_level,
-            clean=args.clean,
-            open_file_limit=args.open_file_limit,
-            run_id=args.run_id,
-            timeout=args.timeout,
-            max_eval_images=args.max_eval_images,
-        )
+            instance_ids = sampled_instance_ids if sampled_instance_ids is not None else []
+        
+        # Normalize to lists
+        if isinstance(dataset_names, str):
+            dataset_names = [dataset_names]
+        if isinstance(predictions_paths, str):
+            predictions_paths = [predictions_paths]
+        if isinstance(run_ids, str):
+            run_ids = [run_ids]
+        if isinstance(models, str):
+            models = [models]
+        
+        # Unified processing: iterate over all combinations
+        # Auto-detect and normalize dataset_name and predictions_path for each combination
+        for run_id in run_ids:
+            for dataset_name in dataset_names:
+                # Determine predictions_path based on whether models are specified
+                if models:
+                    # If model is specified, iterate over models and construct predictions_path
+                    for model_name in models:
+                        model_config = MAP_MODEL_TO_COFIG.get(model_name, {"temperature": 0, "n": 1})
+                        # Extract name from dataset_name
+                        _, name = normalize_dataset_name(dataset_name, run_id)
+                        current_predictions_path = f"{SRC_EXPERIMENTS}/{model_name}/T={model_config['temperature']}/n={model_config['n']}/{name}-task-instances_{run_id}.jsonl"
+                        
+                        print("\n" + "=" * 80)
+                        print("Starting task:")
+                        print(f"  dataset: {dataset_name}, model: {model_name}, run_id: {run_id}")
+                        print(f"  predictions: {current_predictions_path}")
+                        print("=" * 80 + "\n")
+                        main(
+                            dataset_name=dataset_name,
+                            split=args.split,
+                            instance_ids=instance_ids,
+                            predictions_path=current_predictions_path,
+                            max_workers=max_workers,
+                            force_rebuild=force_rebuild,
+                            cache_level=cache_level,
+                            clean=clean,
+                            open_file_limit=open_file_limit,
+                            run_id=run_id,
+                            timeout=timeout,
+                            max_eval_images=max_eval_images,
+                        )
+                else:
+                    # If model is not specified, use predictions_path directly (can be "gold" or path)
+                    for current_predictions_path in predictions_paths:
+                        print("\n" + "=" * 80)
+                        print("Starting task:")
+                        print(f"  dataset: {dataset_name}, run_id: {run_id}")
+                        print(f"  predictions: {current_predictions_path}")
+                        print("=" * 80 + "\n")
+                        main(
+                            dataset_name=dataset_name,
+                            split=args.split,
+                            instance_ids=instance_ids,
+                            predictions_path=current_predictions_path,
+                            max_workers=max_workers,
+                            force_rebuild=force_rebuild,
+                            cache_level=cache_level,
+                            clean=clean,
+                            open_file_limit=open_file_limit,
+                            run_id=run_id,
+                            timeout=timeout,
+                            max_eval_images=max_eval_images,
+                        )
 
     elif args.command == "summary":
         report_path = Path(args.report_path)
-        filter_path = Path(args.filter_ids_file) if args.filter_ids_file else None
+        filter_ids_file = args.filter_ids_file
+        cutoff_date = args.cutoff_date
+        date_mode = args.date_mode
+        
+        filter_path = Path(filter_ids_file) if filter_ids_file else None
         if filter_path and filter_path.exists():
             print_analysis_summary_filtered(
                 report_path,
                 filter_path,
-                cutoff_date=args.cutoff_date,
-                date_mode=args.date_mode,
+                cutoff_date=cutoff_date,
+                date_mode=date_mode,
             )
         else:
-            if args.filter_ids_file and not (filter_path and filter_path.exists()):
-                print(f"Warning: filter IDs file not found: {args.filter_ids_file}, printing unfiltered summary.")
+            if filter_ids_file and not (filter_path and filter_path.exists()):
+                print(f"Warning: filter IDs file not found: {filter_ids_file}, printing unfiltered summary.")
             print_analysis_summary(
                 report_path,
-                cutoff_date=args.cutoff_date,
-                date_mode=args.date_mode,
+                cutoff_date=cutoff_date,
+                date_mode=date_mode,
             )
-
-    elif args.command == "batch":
-        sampled_instance_ids = None
-        if args.sampled_ids_file and Path(args.sampled_ids_file).exists():
-            try:
-                with open(args.sampled_ids_file, "r", encoding="utf-8") as f:
-                    sampled_instance_ids = json.load(f).get("sampled_instance_ids", [])
-                print(f"Loaded sampled instance IDs: {len(sampled_instance_ids)}")
-            except Exception as e:
-                print(f"Warning: failed to load sampled IDs: {e}")
-        for model_name in args.model:
-            for run_id in args.run_id:
-                for name in args.dataset_name:
-                    model_config = MAP_MODEL_TO_COFIG.get(model_name, {"temperature": 0, "n": 1})
-                    dataset_name = f"{SRC_INF_BENCHMARK_DATA}/{name.replace('/', '-')}-task-instances_{run_id}.jsonl"
-                    prediction_path = f"{SRC_EXPERIMENTS}/{model_name}/T={model_config['temperature']}/n={model_config['n']}/{name.replace('/', '-')}-task-instances_{run_id}.jsonl"
-                    print("\n" + "=" * 80)
-                    print("Starting task:")
-                    print(f"  dataset: {name}, model: {model_name}, run_id: {run_id}")
-                    print(f"  dataset file: {dataset_name}")
-                    print(f"  predictions: {prediction_path}")
-                    print("=" * 80 + "\n")
-                    main(
-                        dataset_name=dataset_name,
-                        split="",
-                        instance_ids=sampled_instance_ids if sampled_instance_ids is not None else [],
-                        predictions_path=prediction_path,
-                        max_workers=args.max_workers,
-                        force_rebuild=args.force_rebuild,
-                        cache_level=args.cache_level,
-                        clean=args.clean,
-                        open_file_limit=args.open_file_limit,
-                        run_id=run_id,
-                        timeout=args.timeout,
-                        max_eval_images=args.max_eval_images,
-                    )

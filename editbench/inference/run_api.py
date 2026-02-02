@@ -17,6 +17,7 @@ from tqdm import tqdm
 from dotenv import load_dotenv
 
 from editbench.config import SRC_INF_BENCHMARK_DATA
+from editbench.utils.dataset_utils import normalize_dataset_name
 from editbench.inference.constants import EXPERIMENTAL_RESULTS
 from editbench.inference.utils import extract_diff
 from editbench.inference.prompt_builder import remove_last_file_from_prompt
@@ -397,6 +398,10 @@ class InferenceWorker:
     """Inference worker thread class, each thread uses one API Key"""
 
     def __init__(self, api_key: str, base_url: Optional[str] = None):
+        # Validate API key
+        assert api_key, "API key cannot be empty"
+        assert len(api_key) >= 20, f"API key is too short (length: {len(api_key)}, expected at least 20 characters)"
+        
         self.api_key = api_key
         self.base_url = base_url or os.getenv("BASE_URL")
         self.client = OpenAI(base_url=self.base_url, api_key=self.api_key)
@@ -553,12 +558,26 @@ def inference_openai(inf_datasets, model_name, model_args, out_file, encoding=No
         existing_ids = []
     if openai_keys is None:
         # get multiple keys from environment variable, separated by commas
-        openai_keys = os.getenv("OPENAI_KEYS", os.getenv("OPENAI_KEY")).split(",")
+        openai_keys = os.getenv("OPENAI_KEYS", os.getenv("OPENAI_KEY"))
+        if openai_keys:
+            openai_keys = openai_keys.split(",")
+        else:
+            openai_keys = []
         # remove duplicates and filter empty values
         openai_keys = [key.strip() for key in openai_keys if key.strip()]
 
     if not openai_keys:
         raise ValueError("no valid OpenAI API Key provided")
+    
+    # Validate API keys: check if they exist and look correct
+    for i, key in enumerate(openai_keys):
+        assert key, f"API key {i+1} is empty"
+        assert len(key) >= 20, f"API key {i+1} is too short (length: {len(key)}, expected at least 20 characters)"
+        # Check for common API key patterns (optional, but helpful for validation)
+        # OpenAI keys typically start with "sk-", but other services may have different patterns
+        if not (key.startswith("sk-") or key.startswith("x-") or len(key) >= 32):
+            # Warn but don't fail - some API keys may have different formats
+            logger.warning(f"API key {i+1} does not match common patterns (sk-*, x-*, or >=32 chars), but continuing anyway")
 
     # get and filter dataset
     # if target_instance_ids is specified, use it to filter
@@ -877,12 +896,11 @@ def main(
         for model_name in model_names:
             for run_id in run_ids:
                 model_args = MAP_MODEL_TO_COFIG[model_name]
-                src = Path(
-                    f"{SRC_INF_BENCHMARK_DATA}/{name.replace('/', '-')}-task-instances_{run_id}.jsonl"
-                )
+                path, name = normalize_dataset_name(name, run_id)
+                src = Path(path)
                 out_file = (
                     f"{EXPERIMENTAL_RESULTS / model_name}"
-                    f"/T={model_args['temperature']}/n={model_args['n']}/{src.name}"
+                    f"/T={model_args['temperature']}/n={model_args['n']}/{src.stem}"
                 )
                 print("\n" + "=" * 80)
                 print("🚀 start executing tasks:")
@@ -910,50 +928,51 @@ def main(
 
 if __name__ == "__main__":
     # Example:
-    #   python -m editbench.inference.run_api --dataset-name all --model deepseek-v3.2 --run-id 0.2
-    #   python -m editbench.inference.run_api --dataset-name all --model qwen3-235b-a22b deepseek-v3.2 --run-id 0.2_bm25_1 0.2_bm25_5 --max-workers 10 --timeout 600
-    #   python -m editbench.inference.run_api --dataset-name all --model claude-sonnet-4-5-20250929 --run-id 0.2 --sampled-ids-file ./crawled_data/infbench/sampled_instance_ids_0.2.json
+    #   python -m editbench.inference.run_api --dataset_name all --model deepseek-v3.2 --run_id 0.2
+    #   python -m editbench.inference.run_api --dataset_name all --model qwen3-235b-a22b deepseek-v3.2 --run_id 0.2_bm25_1 0.2_bm25_5 --max_workers 10 --timeout 600
+    #   python -m editbench.inference.run_api --dataset_name all --model claude-sonnet-4-5-20250929 --run_id 0.2 --sampled_ids_file ./crawled_data/infbench/sampled_instance_ids_0.2.json
     parser = argparse.ArgumentParser(
         description="Run API inference over infbench datasets (dataset × model × run_id).",
     )
     parser.add_argument(
-        "--dataset-name",
+        "--dataset_name",
         type=str,
         nargs="+",
         default=["all"],
-        help="Dataset name(s), e.g. all or django/django (default: all).",
+        help="Dataset name(s): 'all', 'owner/repo_name', or full path (default: all)",
     )
     parser.add_argument(
         "--model",
         type=str,
         nargs="+",
         required=True,
-        help="Model name(s), e.g. deepseek-v3.2 claude-sonnet-4-5-20250929.",
+        help="Model name(s), e.g. deepseek-v3.2 claude-sonnet-4-5-20250929",
     )
     parser.add_argument(
-        "--run-id",
+        "--run_id",
         type=str,
         nargs="+",
-        required=True,
-        help="Run ID(s), e.g. 0.2 or 0.2_bm25_1 0.2_bm25_5.",
+        default=["0.2"],
+        choices=["0.2", "0.4", "0.6", "0.8", "0.2_bm25_1", "0.2_bm25_3", "0.2_bm25_5", "0.2_body_issue", "None_body_issue"],
+        help="Run ID(s) (default: 0.2, e.g. 0.2 0.4 0.6 0.8, or variants like 0.2_bm25_1)",
     )
     parser.add_argument(
-        "--sampled-ids-file",
+        "--sampled_ids_file",
         type=str,
         default=None,
-        help="Optional JSON file with sampled_instance_ids to restrict instances.",
+        help="JSON file with sampled_instance_ids to restrict instances (optional)",
     )
     parser.add_argument(
-        "--max-workers",
+        "--max_workers",
         type=int,
         default=10,
-        help="Max concurrent workers (default: 10).",
+        help="Max concurrent workers (default: 10)",
     )
     parser.add_argument(
         "--timeout",
         type=int,
         default=600,
-        help="Timeout per request in seconds (default: 600).",
+        help="Timeout per request in seconds (default: 600)",
     )
     args = parser.parse_args()
     main(
