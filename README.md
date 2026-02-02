@@ -72,10 +72,10 @@ Evaluate patch predictions on RealisticEditBench with the following command:
 
 ```bash
 python -m editbench.evaluation.run_evaluation run \
-    --dataset-name "crawled_data/infbench/all-task-instances_0.2.jsonl" \
-    --predictions-path 'gold' \
-    --max-workers 2 \
-    --run-id "0.2"
+    --dataset_name "all" \
+    --predictions_path 'gold' \
+    --max_workers 2 \
+    --run_id "0.2"
 ```
 
 > [!NOTE]
@@ -98,9 +98,9 @@ Generate predictions for your model:
 
 ```bash
 python -m editbench.inference.run_api \
-    --model_name <model_name> \
-    --dataset_name <dataset_name> \
-    --output_path <output_path>
+    --model gpt-5-codex \
+    --dataset_name all \
+    --run_id "0.2"
 ```
 
 ### Evaluating Predictions
@@ -108,11 +108,11 @@ python -m editbench.inference.run_api \
 Evaluate your model's predictions:
 
 ```bash
-python -m editbench.evaluation.run_evaluation \
-    --predictions_path <path_to_predictions> \
-    --max_workers <num_workers> \
-    --run_id <run_id> \
-    --timeout <timeout_seconds>
+python -m editbench.evaluation.run_evaluation run \
+    --dataset_name "all" \
+    --model gpt-5-codex \
+    --max_workers 2 \
+    --run_id "0.2"
 ```
 
 > [!WARNING]

@@ -14,3 +14,4 @@ editbench.egg-info/
 crawled_data/swe
 .vscode/
 RealisticEditBench.egg-info/
+experiment_results/

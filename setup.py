@@ -14,7 +14,7 @@ if readme_file.exists():
 
 setup(
     name="RealisticEditBench",
-    version="0.1.0",
+    version="1.0.0",
     description="Realistic Code Edit Benchmark",
     long_description=long_description,
     long_description_content_type="text/markdown",
