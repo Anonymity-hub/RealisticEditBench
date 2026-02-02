@@ -28,6 +28,10 @@
 
 Given a *codebase*, a *task description* (from PR/issue), and *previous edit history*, a language model is tasked with generating a *patch* that correctly implements the required changes in the context of existing code modifications.
 
+<p align="center">
+  <img src="./assets/process.png" style="width:100%; margin-left:auto; margin-right:auto;">
+</p>
+
 ### Key Features
 
 - **Incremental Editing**: Tasks require models to understand and build upon previous code changes, simulating real-world development workflows
@@ -35,6 +39,7 @@ Given a *codebase*, a *task description* (from PR/issue), and *previous edit his
 - **Real-World Tasks**: All instances are collected from actual GitHub pull requests across diverse open-source projects
 - **Comprehensive Evaluation**: Supports both execution-based testing and code similarity metrics
 - **Docker-Based Evaluation**: Reproducible evaluation harness using Docker containers
+
 
 ## ⚡ Quick Start
 
@@ -66,10 +71,11 @@ dataset = get_inf_datasets("crawled_data/bench/all-task-instances.jsonl")
 Evaluate patch predictions on RealisticEditBench with the following command:
 
 ```bash
-python -m editbench.evaluation.run_evaluation \
-    --predictions_path <path_to_predictions> \
-    --max_workers <num_workers> \
-    --run_id <run_id>
+python -m editbench.evaluation.run_evaluation run \
+    --dataset-name "crawled_data/infbench/all-task-instances_0.2.jsonl" \
+    --predictions-path 'gold' \
+    --max-workers 2 \
+    --run-id "0.2"
 ```
 
 > [!NOTE]

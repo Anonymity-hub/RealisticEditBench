@@ -33,6 +33,12 @@ setup(
         "tiktoken>=0.5.0",
         
         "scikit-learn>=1.2.0",
+        "rank-bm25>=0.2.2",
+        "editdistance>=0.6.0",  # Note: requires C++ compiler to build
+        "nltk>=3.8.0",
+        "codebleu>=0.1.0",
+        "tree-sitter>=0.22.0,<0.23.0",  # Required by codebleu, must match codebleu's version constraint
+        "tree-sitter-python==0.21.0",  # Required by codebleu for Python code parsing, must be compatible with tree-sitter 0.22.x
         
         "docker>=6.0.0",
         "psutil>=5.9.0",
