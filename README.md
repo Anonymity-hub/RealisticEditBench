@@ -23,7 +23,9 @@
 
 ## 🆕 News
 
-- **[2025-01-30]**: 🎉 We are excited to announce the release of **RealisticEditBench**! You can access the dataset on [here](./crawled_data) and start evaluating your models!
+- **[2026-02-03]**: We have launched the **RealisticEditBench Leaderboard**! You can access the leaderboard [here](https://realisticeditbench.github.io/). We welcome everyone to evaluate their models and submit PRs to update the leaderboard!
+
+- **[2026-01-30]**: We are excited to announce the release of **RealisticEditBench**! You can access the dataset on [here](./crawled_data) and start evaluating your models!
 
 
 ## 🎯 Overview
