@@ -140,6 +140,9 @@ The benchmark includes:
   - BM25 retrieval variants
   - With/without issue body
 
+> [!NOTE]
+> **Dataset hosting**: The dataset will be uploaded to Hugging Face soon. We will update the dataset access instructions (e.g. download from Hugging Face Hub) once it is available.
+
 ## 🏗️ Project Structure
 
 ```
