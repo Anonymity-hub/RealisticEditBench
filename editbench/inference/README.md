@@ -12,6 +12,23 @@ Build **inference (infbench)** datasets from the final **bench** and run model i
 - **Infbench data:** `crawled_data/infbench/` (see `editbench.config`: `SRC_INF_BENCHMARK_DATA`).
 - **Prediction output:** `experiment_results/{model_name}/T={temperature}/n={n}/{dataset_stem}.jsonl` (see `editbench.inference.constants`: `EXPERIMENTAL_RESULTS`).
 
+### Configuration (.env)
+
+Create a `.env` file in the project root and set the following variables as needed:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `OPENAI_KEYS` or `OPENAI_KEY` | **Yes** (for inference) | API key(s) for inference. Use `OPENAI_KEYS` for comma-separated multiple keys (load balancing). Used by `run_api` for OpenAI-compatible endpoints (OpenAI, Claude, Qwen, Gemini, DeepSeek, etc.). |
+| `BASE_URL` | No | Override API base URL for the inference client (e.g. proxy or custom endpoint). |
+
+**Minimal `.env` for inference:**
+
+```bash
+OPENAI_KEYS=sk-xxxxxxxxxxxxxxxxxxxx
+# Optional: custom endpoint
+# BASE_URL=https://your-api-endpoint.com/v1
+```
+
 ---
 
 ## 1. Convert bench to inference (infbench)
