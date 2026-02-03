@@ -32,7 +32,7 @@
 
 **RealisticEditBench** is a benchmark for evaluating large language models on **real-world incremental code editing tasks** collected from GitHub pull requests. Unlike traditional benchmarks that focus on isolated code generation or bug fixing, RealisticEditBench challenges models to perform **incremental code edits** that reflect how developers actually modify code in production environments.
 
-Given a *codebase*, <span style="color: #888;">a *task description* (optional, from PR/issue)</span>, and *previous edit history*, a language model is tasked with generating a *patch* that correctly implements the required changes in the context of existing code modifications.
+Given a **codebase**, <span style="color: #888;">a task description (optional, from PR/issue)</span>, and **previous edit history**, a language model is tasked with generating a *patch* that correctly implements the required changes in the context of existing code modifications.
 
 <p align="center">
   <img src="./assets/process.png" style="width:80%; margin-left:auto; margin-right:auto;">
