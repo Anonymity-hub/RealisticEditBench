@@ -9,7 +9,7 @@
     <a href="./crawled_data">
         <img src="https://img.shields.io/badge/📂_Datasets-F1CA42" alt="Datasets">
     </a>
-    <a href="https://realisticeditbench.org/">
+    <a href="https://realisticeditbench.github.io/">
         <img alt="Leaderboard" src="https://img.shields.io/badge/🏆_Leaderboard-4285F4">
     </a>
     <a href="https://www.python.org/">
