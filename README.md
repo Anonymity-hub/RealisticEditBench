@@ -6,7 +6,7 @@
     <a href="https://github.com/Anonymity-hub/RealisticEditBench">
         <img alt="GitHub" src="https://img.shields.io/badge/GitHub-000?logo=github&color=181717">
     </a>
-    <a href="https://huggingface.co/datasets/Anonymity-hub/RealisticEditBench">
+    <a href="./crawled_data">
         <img src="https://img.shields.io/badge/📂_Datasets-F1CA42" alt="Datasets">
     </a>
     <a href="https://realisticeditbench.org/">
@@ -21,6 +21,10 @@
     <hr>
 </div>
 
+## 🆕 News
+
+- **[2025-01-30]**: 🎉 We are excited to announce the release of **RealisticEditBench**! You can access the dataset on [here](./crawled_data) and start evaluating your models!
+
 
 ## 🎯 Overview
 
@@ -29,7 +33,7 @@
 Given a *codebase*, a *task description* (from PR/issue), and *previous edit history*, a language model is tasked with generating a *patch* that correctly implements the required changes in the context of existing code modifications.
 
 <p align="center">
-  <img src="./assets/process.png" style="width:100%; margin-left:auto; margin-right:auto;">
+  <img src="./assets/process.png" style="width:80%; margin-left:auto; margin-right:auto;">
 </p>
 
 ### Key Features
@@ -39,7 +43,6 @@ Given a *codebase*, a *task description* (from PR/issue), and *previous edit his
 - **Real-World Tasks**: All instances are collected from actual GitHub pull requests across diverse open-source projects
 - **Comprehensive Evaluation**: Supports both execution-based testing and code similarity metrics
 - **Docker-Based Evaluation**: Reproducible evaluation harness using Docker containers
-
 
 ## ⚡ Quick Start
 
@@ -54,6 +57,13 @@ pip install -e .
 ### 2. Environment Setup
 
 RealisticEditBench uses Docker for reproducible evaluations. Follow the [Docker setup guide](https://docs.docker.com/engine/install/) to install Docker on your machine.
+
+> [!WARNING]
+> **System Requirements**
+> 
+> - RealisticEditBench evaluation currently **does not support Windows**.
+> - Some Docker environments may not work properly on Mac M-series (ARM64) architectures.
+> - To ensure all environments can be set up successfully, we **recommend using Ubuntu 22.04 on x86_64 architecture**.
 
 ### 3. Access the Dataset
 
@@ -122,8 +132,8 @@ python -m editbench.evaluation.run_evaluation run \
 
 The benchmark includes:
 
-- **Main Benchmark**: `crawled_data/bench/all-task-instances.jsonl` - Full benchmark dataset
-- **Inference Variants**: Multiple variants in `crawled_data/infbench/` with different context configurations:
+- **Main Benchmark**: [`crawled_data/bench/all-task-instances.jsonl`](./crawled_data/bench/all-task-instances.jsonl) - Full benchmark dataset
+- **Inference Variants**: Multiple variants in [`crawled_data/infbench/`](./crawled_data/infbench) with different context configurations:
   - Different information percentages (0.2, 0.4, 0.6, 0.8)
   - BM25 retrieval variants
   - With/without issue body
