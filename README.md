@@ -6,7 +6,7 @@
     <a href="https://github.com/Anonymity-hub/RealisticEditBench">
         <img alt="GitHub" src="https://img.shields.io/badge/GitHub-000?logo=github&color=181717">
     </a>
-    <a href="./crawled_data">
+    <a href="#dataset">
         <img src="https://img.shields.io/badge/📂_Datasets-F1CA42" alt="Datasets">
     </a>
     <a href="https://realisticeditbench.github.io/">
@@ -130,6 +130,7 @@ python -m editbench.evaluation.run_evaluation run \
 > [!WARNING]
 > RealisticEditBench evaluation can be resource intensive. We recommend running on a machine with at least 120GB of free storage, 16GB of RAM, and 8 CPU cores.
 
+<a id="dataset"></a>
 ## 📦 Dataset
 
 The benchmark includes:
