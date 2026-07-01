@@ -75,8 +75,6 @@ def get_logs_eval(log_fp: str, repo: str) -> tuple[dict[str, str], bool]:
     Returns:
         bool: whether the patch applied successfully
         dict: status map
-
-    TODO(john-b-yang): Check this is working properly...
     """
     # Convert e.g. "logs/scikit-learn__scikit-learn-12421/test_output.txt" to "scikit-learn/scikit-learn"
     # sample_id = str(Path(log_fp).parent.stem)  # e.g. scikit-learn__scikit-learn-12421
