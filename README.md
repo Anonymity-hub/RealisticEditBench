@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center"><img src="assets/logo-1.png" height="32" style="vertical-align: middle;"> RealisticEditBench: Towards Real-World Project-Level Incremental Code Editing Evaluation</h1>
+  <h1 align="center">RealisticEditBench: Towards Real-World Project-Level Incremental Code Editing Evaluation</h1>
 </div>
 
 <div align="center">
@@ -23,9 +23,9 @@
 
 ## 🆕 News
 
-- **[2026-02-03]**: We have launched the **RealisticEditBench Leaderboard**! You can access the leaderboard [here](https://realisticeditbench.github.io/). We welcome everyone to evaluate their models and submit PRs to update the leaderboard!
+- **[2026-02-03]**: We have launched the **RealisticEditBench Leaderboard**. You can access the leaderboard [here](https://realisticeditbench.github.io/). We welcome everyone to evaluate your models and submit PRs to update the leaderboard!
 
-- **[2026-01-30]**: We are excited to announce the release of **RealisticEditBench**! You can access the dataset on [here](#dataset) and start evaluating your models!
+- **[2026-01-30]**: **RealisticEditBench** is now available. You can access the dataset on [here](#dataset) and start evaluating your models.
 
 
 ## 🎯 Overview
