@@ -1,0 +1,12 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -411,6 +411,8 @@
+         try:
+             for c in node.getElementsByTagName("object"):
+                 values.append(m2m_convert(c))
++        except SuspiciousOperation:
++            raise
+         except Exception as e:
+             if isinstance(e, ObjectDoesNotExist) and self.handle_forward_references:
+                 return base.DEFER_FIELD

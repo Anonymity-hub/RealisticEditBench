@@ -1,0 +1,14 @@
+diff --git a/django/db/models/fields/generated.py b/django/db/models/fields/generated.py
+--- a/django/db/models/fields/generated.py
++++ b/django/db/models/fields/generated.py
+@@ -189,6 +189,10 @@
+                 )
+         return errors
+ 
++    def _check_ignored_options(self, databases):
++        warnings = []
++
++
+     def deconstruct(self):
+         name, path, args, kwargs = super().deconstruct()
+         del kwargs["blank"]

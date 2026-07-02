@@ -1,0 +1,97 @@
+diff --git a/xarray/structure/combine.py b/xarray/structure/combine.py
+--- a/xarray/structure/combine.py
++++ b/xarray/structure/combine.py
+@@ -407,15 +407,34 @@
+     return combined
+ 
+ 
+-# Define types for arbitrarily-nested list of lists
+-DatasetHyperCube: TypeAlias = Dataset | Sequence["DatasetHyperCube"]
+-DataTreeHyperCube: TypeAlias = DataTree | Sequence["DataTreeHyperCube"]
++# Define types for arbitrarily-nested list of lists.
++# Mypy doesn't seem to handle overloads properly with recursive types, so we
++# explicitly expand the first handful of levels of recursion.
++DatasetLike: TypeAlias = DataArray | Dataset
++DatasetHyperCube: TypeAlias = (
++    DatasetLike
++    | Sequence[DatasetLike]
++    | Sequence[Sequence[DatasetLike]]
++    | Sequence[Sequence[Sequence[DatasetLike]]]
++    | Sequence[Sequence[Sequence[Sequence[DatasetLike]]]]
++)
++DataTreeHyperCube: TypeAlias = (
++    DataTree
++    | Sequence[DataTree]
++    | Sequence[Sequence[DataTree]]
++    | Sequence[Sequence[Sequence[DataTree]]]
++    | Sequence[Sequence[Sequence[Sequence[DataTree]]]]
++)
+ 
+ 
+ @overload
+ def combine_nested(
+     datasets: DatasetHyperCube,
+-    concat_dim: str | DataArray | Sequence[str | DataArray | pd.Index | None] | None,
++    concat_dim: str
++    | DataArray
++    | list[str]
++    | Sequence[str | DataArray | pd.Index | None]
++    | None,
+     compat: str | CombineKwargDefault = ...,
+     data_vars: str | CombineKwargDefault = ...,
+     coords: str | CombineKwargDefault = ...,
+@@ -428,7 +447,11 @@
+ @overload
+ def combine_nested(
+     datasets: DataTreeHyperCube,
+-    concat_dim: str | DataArray | Sequence[str | DataArray | pd.Index | None] | None,
++    concat_dim: str
++    | DataArray
++    | list[str]
++    | Sequence[str | DataArray | pd.Index | None]
++    | None,
+     compat: str | CombineKwargDefault = ...,
+     data_vars: str | CombineKwargDefault = ...,
+     coords: str | CombineKwargDefault = ...,
+@@ -440,7 +463,11 @@
+ 
+ def combine_nested(
+     datasets: DatasetHyperCube | DataTreeHyperCube,
+-    concat_dim: str | DataArray | Sequence[str | DataArray | pd.Index | None] | None,
++    concat_dim: str
++    | DataArray
++    | list[str]
++    | Sequence[str | DataArray | pd.Index | None]
++    | None,
+     compat: str | CombineKwargDefault = _COMPAT_DEFAULT,
+     data_vars: str | CombineKwargDefault = _DATA_VARS_DEFAULT,
+     coords: str | CombineKwargDefault = _COORDS_DEFAULT,
+@@ -468,7 +495,7 @@
+ 
+     Parameters
+     ----------
+-    datasets : list or nested list of Dataset or DataTree
++    datasets : list or nested list of Dataset, DataArray or DataTree
+         Dataset objects to combine.
+         If concatenation or merging along more than one dimension is desired,
+         then datasets must be supplied in a nested list-of-lists.
+@@ -669,13 +696,16 @@
+     if any_datatrees and not all_datatrees:
+         raise ValueError("Can't combine a mix of DataTree and non-DataTree objects.")
+ 
+-    if isinstance(concat_dim, str | DataArray) or concat_dim is None:
+-        concat_dim = [concat_dim]
++    concat_dims = (
++        [concat_dim]
++        if isinstance(concat_dim, str | DataArray) or concat_dim is None
++        else concat_dim
++    )
+ 
+     # The IDs argument tells _nested_combine that datasets aren't yet sorted
+     return _nested_combine(
+         datasets,
+-        concat_dims=concat_dim,
++        concat_dims=concat_dims,
+         compat=compat,
+         data_vars=data_vars,
+         coords=coords,

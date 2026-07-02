@@ -1,0 +1,15 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -9079,9 +9087,9 @@
+             body_artist_alpha = 0.3
+             # Use default colors if user doesn't provide them
+             if mpl.rcParams['_internal.classic_mode']:
+-                facecolor = cycle_color('y', alpha=body_artist_alpha)
++                facecolor = cycle_color('y')
+             else:
+-                facecolor = cycle_color(next_color, alpha=body_artist_alpha)
++                facecolor = cycle_color(next_color)
+ 
+         if mpl.rcParams['_internal.classic_mode']:
+             # Classic mode uses patch.force_edgecolor=True, so we need to

@@ -1,0 +1,394 @@
+diff --git a/examples/ensemble/plot_gradient_boosting_quantile.py b/examples/ensemble/plot_gradient_boosting_quantile.py
+--- a/examples/ensemble/plot_gradient_boosting_quantile.py
++++ b/examples/ensemble/plot_gradient_boosting_quantile.py
+@@ -52,13 +52,13 @@ def f(x):
+ # Fitting non-linear quantile and least squares regressors
+ # --------------------------------------------------------
+ #
+-# Fit gradient boosting models trained with the quantile loss and
+-# alpha=0.05, 0.5, 0.95.
++# Fit gradient boosting models trained with the quantile loss and `alpha=0.05`,
++# `alpha=0.5`, `alpha=0.95`.
+ #
+-# The models obtained for alpha=0.05 and alpha=0.95 produce a 90% confidence
+-# interval (95% - 5% = 90%).
++# The models obtained for `alpha=0.05` and `alpha=0.95` produce a 90%
++# confidence interval (95% - 5% = 90%).
+ #
+-# The model trained with alpha=0.5 produces a regression of the median: on
++# The model trained with `alpha=0.5` produces a regression of the median: on
+ # average, there should be the same number of target observations above and
+ # below the predicted values.
+ from sklearn.ensemble import GradientBoostingRegressor
+diff --git a/sklearn/ensemble/_forest.py b/sklearn/ensemble/_forest.py
+--- a/sklearn/ensemble/_forest.py
++++ b/sklearn/ensemble/_forest.py
+@@ -1603,25 +1603,24 @@ class RandomForestRegressor(ForestRegressor):
+            The default value of ``n_estimators`` changed from 10 to 100
+            in 0.22.
+ 
+-    criterion : {"squared_error", "absolute_error", "friedman_mse", "poisson"}, \
+-            default="squared_error"
++    criterion : {"squared_error", "absolute_error", "poisson"}, default="squared_error"
+         The function to measure the quality of a split. Supported criteria
+         are "squared_error" for the mean squared error, which is equal to
+         variance reduction as feature selection criterion and minimizes the L2
+-        loss using the mean of each terminal node, "friedman_mse", which uses
+-        mean squared error with Friedman's improvement score for potential
+-        splits, "absolute_error" for the mean absolute error, which minimizes
+-        the L1 loss using the median of each terminal node, and "poisson" which
+-        uses reduction in Poisson deviance to find splits.
+-        Training using "absolute_error" is significantly slower
+-        than when using "squared_error".
++        loss using the mean of each terminal node, "absolute_error" for the mean
++        absolute error, which minimizes the L1 loss using the median of each terminal
++        node, and "poisson" which uses reduction in Poisson deviance to find splits,
++        also using the mean of each terminal node.
+ 
+         .. versionadded:: 0.18
+            Mean Absolute Error (MAE) criterion.
+ 
+         .. versionadded:: 1.0
+            Poisson criterion.
+ 
++        .. versionchanged:: 1.9
++            Criterion `"friedman_mse"` was deprecated.
++
+     max_depth : int, default=None
+         The maximum depth of the tree. If None, then nodes are expanded until
+         all leaves are pure or until all leaves contain less than
+@@ -2353,22 +2352,21 @@ class ExtraTreesRegressor(ForestRegressor):
+            The default value of ``n_estimators`` changed from 10 to 100
+            in 0.22.
+ 
+-    criterion : {"squared_error", "absolute_error", "friedman_mse", "poisson"}, \
+-            default="squared_error"
++    criterion : {"squared_error", "absolute_error", "poisson"}, default="squared_error"
+         The function to measure the quality of a split. Supported criteria
+         are "squared_error" for the mean squared error, which is equal to
+         variance reduction as feature selection criterion and minimizes the L2
+-        loss using the mean of each terminal node, "friedman_mse", which uses
+-        mean squared error with Friedman's improvement score for potential
+-        splits, "absolute_error" for the mean absolute error, which minimizes
+-        the L1 loss using the median of each terminal node, and "poisson" which
+-        uses reduction in Poisson deviance to find splits.
+-        Training using "absolute_error" is significantly slower
+-        than when using "squared_error".
++        loss using the mean of each terminal node, "absolute_error" for the mean
++        absolute error, which minimizes the L1 loss using the median of each terminal
++        node, and "poisson" which uses reduction in Poisson deviance to find splits,
++        also using the mean of each terminal node.
+ 
+         .. versionadded:: 0.18
+            Mean Absolute Error (MAE) criterion.
+ 
++        .. versionchanged:: 1.9
++            Criterion `"friedman_mse"` was deprecated.
++
+     max_depth : int, default=None
+         The maximum depth of the tree. If None, then nodes are expanded until
+         all leaves are pure or until all leaves contain less than
+diff --git a/sklearn/ensemble/_gb.py b/sklearn/ensemble/_gb.py
+--- a/sklearn/ensemble/_gb.py
++++ b/sklearn/ensemble/_gb.py
+@@ -52,7 +52,7 @@
+ from sklearn.tree import DecisionTreeRegressor
+ from sklearn.tree._tree import DOUBLE, DTYPE, TREE_LEAF
+ from sklearn.utils import check_array, check_random_state, column_or_1d
+-from sklearn.utils._param_validation import HasMethods, Interval, StrOptions
++from sklearn.utils._param_validation import HasMethods, Hidden, Interval, StrOptions
+ from sklearn.utils.multiclass import check_classification_targets
+ from sklearn.utils.stats import _weighted_percentile
+ from sklearn.utils.validation import (
+@@ -365,7 +365,10 @@ class BaseGradientBoosting(BaseEnsemble, metaclass=ABCMeta):
+         **DecisionTreeRegressor._parameter_constraints,
+         "learning_rate": [Interval(Real, 0.0, None, closed="left")],
+         "n_estimators": [Interval(Integral, 1, None, closed="left")],
+-        "criterion": [StrOptions({"friedman_mse", "squared_error"})],
++        "criterion": [
++            StrOptions({"squared_error"}),
++            Hidden(StrOptions({"deprecated", "friedman_mse"})),
++        ],
+         "subsample": [Interval(Real, 0.0, 1.0, closed="right")],
+         "verbose": ["verbose"],
+         "warm_start": ["boolean"],
+@@ -383,7 +386,6 @@ def __init__(
+         loss,
+         learning_rate,
+         n_estimators,
+-        criterion,
+         min_samples_split,
+         min_samples_leaf,
+         min_weight_fraction_leaf,
+@@ -401,6 +403,7 @@ def __init__(
+         validation_fraction=0.1,
+         n_iter_no_change=None,
+         tol=1e-4,
++        criterion="deprecated",
+     ):
+         self.n_estimators = n_estimators
+         self.learning_rate = learning_rate
+@@ -476,7 +479,7 @@ def _fit_stage(
+ 
+             # induce regression tree on the negative gradient
+             tree = DecisionTreeRegressor(
+-                criterion=self.criterion,
++                criterion="squared_error",
+                 splitter="best",
+                 max_depth=self.max_depth,
+                 min_samples_split=self.min_samples_split,
+@@ -659,6 +662,14 @@ def fit(self, X, y, sample_weight=None, monitor=None):
+         if not self.warm_start:
+             self._clear_state()
+ 
++        if self.criterion != "deprecated":
++            warnings.warn(
++                "The parameter `criterion` is deprecated and will be "
++                "removed in 1.11. It has no effect. Leave it to its default value to "
++                "avoid this warning.",
++                FutureWarning,
++            )
++
+         # Check input
+         # Since check_array converts both X and y to the same dtype, but the
+         # trees use different types for X and y, checking them separately.
+@@ -1013,7 +1024,7 @@ def feature_importances_(self):
+ 
+         The higher, the more important the feature.
+         The importance of a feature is computed as the (normalized)
+-        total reduction of the criterion brought by that feature.  It is also
++        total reduction of the MSE brought by that feature.  It is also
+         known as the Gini importance.
+ 
+         Warning: impurity-based feature importances can be misleading for
+@@ -1179,14 +1190,13 @@ class GradientBoostingClassifier(ClassifierMixin, BaseGradientBoosting):
+         Values must be in the range `(0.0, 1.0]`.
+ 
+     criterion : {'friedman_mse', 'squared_error'}, default='friedman_mse'
+-        The function to measure the quality of a split. Supported criteria are
+-        'friedman_mse' for the mean squared error with improvement score by
+-        Friedman, 'squared_error' for mean squared error. The default value of
+-        'friedman_mse' is generally the best as it can provide a better
+-        approximation in some cases.
++        This parameter has no effect.
+ 
+         .. versionadded:: 0.18
+ 
++        .. deprecated:: 1.9
++           `criterion` is deprecated and will be removed in 1.11.
++
+     min_samples_split : int or float, default=2
+         The minimum number of samples required to split an internal node:
+ 
+@@ -1354,7 +1364,7 @@ class GradientBoostingClassifier(ClassifierMixin, BaseGradientBoosting):
+         The impurity-based feature importances.
+         The higher, the more important the feature.
+         The importance of a feature is computed as the (normalized)
+-        total reduction of the criterion brought by that feature.  It is also
++        total reduction of the MSE brought by that feature.  It is also
+         known as the Gini importance.
+ 
+         Warning: impurity-based feature importances can be misleading for
+@@ -1432,7 +1442,7 @@ class GradientBoostingClassifier(ClassifierMixin, BaseGradientBoosting):
+     -----
+     The features are always randomly permuted at each split. Therefore,
+     the best found split may vary, even with the same training data and
+-    ``max_features=n_features``, if the improvement of the criterion is
++    ``max_features=n_features``, if the improvement of the MSE is
+     identical for several splits enumerated during the search of the best
+     split. To obtain a deterministic behaviour during fitting,
+     ``random_state`` has to be fixed.
+@@ -1478,7 +1488,7 @@ def __init__(
+         learning_rate=0.1,
+         n_estimators=100,
+         subsample=1.0,
+-        criterion="friedman_mse",
++        criterion="deprecated",
+         min_samples_split=2,
+         min_samples_leaf=1,
+         min_weight_fraction_leaf=0.0,
+@@ -1791,14 +1801,13 @@ class GradientBoostingRegressor(RegressorMixin, BaseGradientBoosting):
+         Values must be in the range `(0.0, 1.0]`.
+ 
+     criterion : {'friedman_mse', 'squared_error'}, default='friedman_mse'
+-        The function to measure the quality of a split. Supported criteria are
+-        "friedman_mse" for the mean squared error with improvement score by
+-        Friedman, "squared_error" for mean squared error. The default value of
+-        "friedman_mse" is generally the best as it can provide a better
+-        approximation in some cases.
++        This parameter has no effect.
+ 
+         .. versionadded:: 0.18
+ 
++        .. deprecated:: 1.9
++           `criterion` is deprecated and will be removed in 1.11.
++
+     min_samples_split : int or float, default=2
+         The minimum number of samples required to split an internal node:
+ 
+@@ -1970,7 +1979,7 @@ class GradientBoostingRegressor(RegressorMixin, BaseGradientBoosting):
+         The impurity-based feature importances.
+         The higher, the more important the feature.
+         The importance of a feature is computed as the (normalized)
+-        total reduction of the criterion brought by that feature.  It is also
++        total reduction of the MSE brought by that feature.  It is also
+         known as the Gini importance.
+ 
+         Warning: impurity-based feature importances can be misleading for
+@@ -2033,7 +2042,7 @@ class GradientBoostingRegressor(RegressorMixin, BaseGradientBoosting):
+     -----
+     The features are always randomly permuted at each split. Therefore,
+     the best found split may vary, even with the same training data and
+-    ``max_features=n_features``, if the improvement of the criterion is
++    ``max_features=n_features``, if the improvement of the MSE is
+     identical for several splits enumerated during the search of the best
+     split. To obtain a deterministic behaviour during fitting,
+     ``random_state`` has to be fixed.
+@@ -2084,7 +2093,7 @@ def __init__(
+         learning_rate=0.1,
+         n_estimators=100,
+         subsample=1.0,
+-        criterion="friedman_mse",
++        criterion="deprecated",
+         min_samples_split=2,
+         min_samples_leaf=1,
+         min_weight_fraction_leaf=0.0,
+diff --git a/sklearn/tree/_classes.py b/sklearn/tree/_classes.py
+--- a/sklearn/tree/_classes.py
++++ b/sklearn/tree/_classes.py
+@@ -8,6 +8,7 @@
+ 
+ import copy
+ import numbers
++import warnings
+ from abc import ABCMeta, abstractmethod
+ from math import ceil
+ from numbers import Integral, Real
+@@ -74,7 +75,6 @@
+ }
+ CRITERIA_REG = {
+     "squared_error": _criterion.MSE,
+-    "friedman_mse": _criterion.FriedmanMSE,
+     "absolute_error": _criterion.MAE,
+     "poisson": _criterion.Poisson,
+ }
+@@ -1118,23 +1118,24 @@ class DecisionTreeRegressor(RegressorMixin, BaseDecisionTree):
+ 
+     Parameters
+     ----------
+-    criterion : {"squared_error", "friedman_mse", "absolute_error", \
+-            "poisson"}, default="squared_error"
++    criterion : {"squared_error", "absolute_error", "poisson"}, default="squared_error"
+         The function to measure the quality of a split. Supported criteria
+         are "squared_error" for the mean squared error, which is equal to
+         variance reduction as feature selection criterion and minimizes the L2
+-        loss using the mean of each terminal node, "friedman_mse", which uses
+-        mean squared error with Friedman's improvement score for potential
+-        splits, "absolute_error" for the mean absolute error, which minimizes
+-        the L1 loss using the median of each terminal node, and "poisson" which
+-        uses reduction in the half mean Poisson deviance to find splits.
++        loss using the mean of each terminal node, "absolute_error" for the mean
++        absolute error, which minimizes the L1 loss using the median of each terminal
++        node, and "poisson" which uses reduction in Poisson deviance to find splits,
++        also using the mean of each terminal node.
+ 
+         .. versionadded:: 0.18
+            Mean Absolute Error (MAE) criterion.
+ 
+         .. versionadded:: 0.24
+             Poisson deviance criterion.
+ 
++        .. versionchanged:: 1.9
++            Criterion `"friedman_mse"` was deprecated.
++
+     splitter : {"best", "random"}, default="best"
+         The strategy used to choose the split at each node. Supported
+         strategies are "best" to choose the best split and "random" to choose
+@@ -1338,7 +1339,7 @@ class DecisionTreeRegressor(RegressorMixin, BaseDecisionTree):
+     _parameter_constraints: dict = {
+         **BaseDecisionTree._parameter_constraints,
+         "criterion": [
+-            StrOptions({"squared_error", "friedman_mse", "absolute_error", "poisson"}),
++            StrOptions({"squared_error", "absolute_error", "poisson"}),
+             Hidden(Criterion),
+         ],
+     }
+@@ -1359,6 +1360,16 @@ def __init__(
+         ccp_alpha=0.0,
+         monotonic_cst=None,
+     ):
++        if isinstance(criterion, str) and criterion == "friedman_mse":
++            # TODO(1.11): remove support of "friedman_mse" criterion.
++            criterion = "squared_error"
++            warnings.warn(
++                'Value `"friedman_mse"` for `criterion` is deprecated and will be '
++                'removed in 1.11. It maps to `"squared_error"` as both '
++                'were always equivalent. Use `criterion="squared_error"` '
++                "to remove this warning.",
++                FutureWarning,
++            )
+         super().__init__(
+             criterion=criterion,
+             splitter=splitter,
+@@ -1446,7 +1457,6 @@ def __sklearn_tags__(self):
+         # common test to pass, specifically: check_estimators_nan_inf
+         allow_nan = self.splitter in ("best", "random") and self.criterion in {
+             "squared_error",
+-            "friedman_mse",
+             "poisson",
+         }
+         tags.input_tags.allow_nan = allow_nan
+@@ -1758,23 +1768,24 @@ class ExtraTreeRegressor(DecisionTreeRegressor):
+ 
+     Parameters
+     ----------
+-    criterion : {"squared_error", "friedman_mse", "absolute_error", "poisson"}, \
+-            default="squared_error"
++    criterion : {"squared_error", "absolute_error", "poisson"}, default="squared_error"
+         The function to measure the quality of a split. Supported criteria
+         are "squared_error" for the mean squared error, which is equal to
+         variance reduction as feature selection criterion and minimizes the L2
+-        loss using the mean of each terminal node, "friedman_mse", which uses
+-        mean squared error with Friedman's improvement score for potential
+-        splits, "absolute_error" for the mean absolute error, which minimizes
+-        the L1 loss using the median of each terminal node, and "poisson" which
+-        uses reduction in Poisson deviance to find splits.
++        loss using the mean of each terminal node, "absolute_error" for the mean
++        absolute error, which minimizes the L1 loss using the median of each terminal
++        node, and "poisson" which uses reduction in Poisson deviance to find splits,
++        also using the mean of each terminal node.
+ 
+         .. versionadded:: 0.18
+            Mean Absolute Error (MAE) criterion.
+ 
+         .. versionadded:: 0.24
+             Poisson deviance criterion.
+ 
++        .. versionchanged:: 1.9
++            Criterion `"friedman_mse"` was deprecated.
++
+     splitter : {"random", "best"}, default="random"
+         The strategy used to choose the split at each node. Supported
+         strategies are "best" to choose the best split and "random" to choose
+@@ -1993,7 +2004,6 @@ def __sklearn_tags__(self):
+         # common test to pass, specifically: check_estimators_nan_inf
+         allow_nan = self.splitter == "random" and self.criterion in {
+             "squared_error",
+-            "friedman_mse",
+             "poisson",
+         }
+         tags.input_tags.allow_nan = allow_nan
+diff --git a/sklearn/tree/_export.py b/sklearn/tree/_export.py
+--- a/sklearn/tree/_export.py
++++ b/sklearn/tree/_export.py
+@@ -334,9 +334,7 @@ def node_to_str(self, tree, node_id, criterion):
+ 
+         # Write impurity
+         if self.impurity:
+-            if isinstance(criterion, _criterion.FriedmanMSE):
+-                criterion = "friedman_mse"
+-            elif isinstance(criterion, _criterion.MSE) or criterion == "squared_error":
++            if isinstance(criterion, _criterion.MSE) or criterion == "squared_error":
+                 criterion = "squared_error"
+             elif not isinstance(criterion, str):
+                 criterion = "impurity"

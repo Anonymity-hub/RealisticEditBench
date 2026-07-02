@@ -1,0 +1,12 @@
+diff --git a/xarray/core/_aggregations.py b/xarray/core/_aggregations.py
+--- a/xarray/core/_aggregations.py
++++ b/xarray/core/_aggregations.py
+@@ -3663,7 +3663,7 @@ def _flox_scan(
+         skipna: bool | None = None,
+         keep_attrs: bool | None = None,
+         **kwargs: Any,
+-    ) -> DataArray:
++    ) -> Dataset:
+         raise NotImplementedError()
+ 
+     def count(

@@ -1,0 +1,31 @@
+diff --git a/sympy/vector/vector.py b/sympy/vector/vector.py
+--- a/sympy/vector/vector.py
++++ b/sympy/vector/vector.py
+@@ -416,20 +416,16 @@
+ 
+ # The following is adapted from the matrices.expressions.matexpr file
+ 
+-def get_postprocessor(cls):
+-    def _postprocessor(expr):
+-        vec_class = {Add: VectorAdd, Mul: VectorMul}[cls]
+-
+-        if vec_class == VectorAdd:
+-            return VectorAdd(*expr.args).doit(deep=False)
+-        if vec_class == VectorMul:
+-            return VectorMul(*expr.args).doit(deep=False)
+-    return _postprocessor
++def _add_vector_postprocessor(expr: Add) -> Vector:
++    return VectorAdd(*expr.args).doit(deep=False)
++
++def _mul_vector_postprocessor(expr: Mul) -> Vector:
++    return VectorMul(*expr.args).doit(deep=False)
+ 
+ 
+ Basic._constructor_postprocessor_mapping[Vector] = {
+-    "Add": [get_postprocessor(Add)],
+-    "Mul": [get_postprocessor(Mul)],
++    "Add": [_add_vector_postprocessor],
++    "Mul": [_mul_vector_postprocessor],
+ }
+ 
+ class BaseVector(Vector, AtomicExpr):

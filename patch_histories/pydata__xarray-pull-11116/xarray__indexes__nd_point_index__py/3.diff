@@ -1,0 +1,16 @@
+diff --git a/xarray/indexes/nd_point_index.py b/xarray/indexes/nd_point_index.py
+--- a/xarray/indexes/nd_point_index.py
++++ b/xarray/indexes/nd_point_index.py
+@@ -263,12 +263,6 @@
+             )
+ 
+         var0 = next(iter(variables.values()))
+-
+-        if len(variables) != len(var0.dims):
+-            raise ValueError(
+-                f"the number of variables {len(variables)} doesn't match "
+-                f"the number of dimensions {len(var0.dims)}"
+-            )
+ 
+         opts = dict(options)
+ 

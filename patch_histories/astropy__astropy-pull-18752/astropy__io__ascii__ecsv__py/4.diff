@@ -1,0 +1,12 @@
+diff --git a/astropy/io/ascii/ecsv.py b/astropy/io/ascii/ecsv.py
+--- a/astropy/io/ascii/ecsv.py
++++ b/astropy/io/ascii/ecsv.py
+@@ -70,6 +70,8 @@
+     comment character.  See the :class:`CommentedHeader` class  for an example.
+     """
+ 
++    splitter_class = ECSVHeaderSplitter
++
+     def process_lines(self, lines):
+         """Return only non-blank lines that start with the comment regexp.  For these
+         lines strip out the matching characters and leading/trailing whitespace.

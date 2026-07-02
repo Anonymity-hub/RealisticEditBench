@@ -1,0 +1,37 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -1,5 +1,6 @@
+ from __future__ import annotations
+ 
++import operator
+ from typing import TYPE_CHECKING, NewType, TypeVar
+ 
+ from docutils.statemachine import StringList
+@@ -1078,3 +1079,26 @@
+             real_modname=real_modname,
+             check_module=members_check_module and not is_attr,
+         )
++
++
++def _best_object_type_for_member(
++    member: Any,
++    member_name: str,
++    is_attr: bool,
++    parent_documenter: Documenter,
++) -> str | None:
++    """Return the best object type that supports documenting *member*."""
++    filtered = []
++
++    # Don't document submodules automatically: 'module' is never returned.
++
++    try:
++        if isinstance(member, type) and issubclass(member, BaseException):
++            # priority must be higher than 'class'
++            filtered.append((20, 'exception'))
++    except TypeError as exc:
++        # It's possible for a member to be considered a type, but fail
++        # issubclass checks due to not being a class. For example:
++        # https://github.com/sphinx-doc/sphinx/issues/11654#issuecomment-1696790436
++        msg = f'Failed to discern if member {member} is a BaseException subclass.'
++        raise ValueError(msg) from exc

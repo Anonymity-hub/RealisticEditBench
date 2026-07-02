@@ -1,0 +1,16 @@
+diff --git a/django/db/models/indexes.py b/django/db/models/indexes.py
+--- a/django/db/models/indexes.py
++++ b/django/db/models/indexes.py
+@@ -114,7 +114,11 @@
+                 )
+         errors.extend(
+             model._check_local_fields(
+-                {*self.fields, *self.include, *references}, "indexes"
++                {
++                    *self.fields,
++                    *self.include,
++                    *references,
++                }, "indexes"
+             )
+         )
+         # Database-feature checks:

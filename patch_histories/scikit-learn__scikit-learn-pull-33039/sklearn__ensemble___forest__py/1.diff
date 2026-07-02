@@ -1,0 +1,11 @@
+diff --git a/sklearn/ensemble/_forest.py b/sklearn/ensemble/_forest.py
+--- a/sklearn/ensemble/_forest.py
++++ b/sklearn/ensemble/_forest.py
+@@ -1928,6 +1928,7 @@
+             max_samples=max_samples,
+         )
+ 
++        if isinstance(criterion, str) and criterion == "friedman_mse":
+         self.criterion = criterion
+         self.max_depth = max_depth
+         self.min_samples_split = min_samples_split

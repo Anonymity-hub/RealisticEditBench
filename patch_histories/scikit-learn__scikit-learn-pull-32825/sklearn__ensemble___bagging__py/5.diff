@@ -1,0 +1,31 @@
+diff --git a/sklearn/ensemble/_bagging.py b/sklearn/ensemble/_bagging.py
+--- a/sklearn/ensemble/_bagging.py
++++ b/sklearn/ensemble/_bagging.py
+@@ -330,6 +330,7 @@
+         "estimator": [HasMethods(["fit", "predict"]), None],
+         "n_estimators": [Interval(Integral, 1, None, closed="left")],
+         "max_samples": [
++            None,
+             Interval(Integral, 1, None, closed="left"),
+             Interval(RealNotInt, 0, 1, closed="right"),
+         ],
+@@ -352,7 +353,7 @@
+         estimator=None,
+         n_estimators=10,
+         *,
+-        max_samples=1.0,
++        max_samples=None,
+         max_features=1.0,
+         bootstrap=True,
+         bootstrap_features=False,
+@@ -397,7 +398,9 @@
+             Sample weights. If None, then samples are equally weighted. Used as
+             probabilities to sample the training set. Note that the expected
+             frequency semantics for the `sample_weight` parameter are only
+-            fulfilled when sampling with replacement `bootstrap=True`.
++            fulfilled when sampling with replacement `bootstrap=True` and using
++            a float or integer `max_samples` (instead of the default
++            `max_samples=None`).
+ 
+         **fit_params : dict
+             Parameters to pass to the underlying estimators.

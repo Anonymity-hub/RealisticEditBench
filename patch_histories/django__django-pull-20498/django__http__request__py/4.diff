@@ -1,0 +1,15 @@
+diff --git a/django/http/request.py b/django/http/request.py
+--- a/django/http/request.py
++++ b/django/http/request.py
+@@ -372,6 +372,11 @@
+     @multipart_parser_class.setter
+     def multipart_parser_class(self, multipart_parser_class):
+         if hasattr(self, "_files"):
++            raise RuntimeError(
++                "You cannot set the multipart parser class after the upload has been "
++                "processed."
++            )
++        self._multipart_parser_class = multipart_parser_class
+ 
+     def parse_file_upload(self, META, post_data):
+         """Return a tuple of (POST QueryDict, FILES MultiValueDict)."""

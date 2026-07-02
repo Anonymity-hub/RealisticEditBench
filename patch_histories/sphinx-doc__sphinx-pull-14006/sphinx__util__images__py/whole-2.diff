@@ -1,0 +1,11 @@
+diff --git a/sphinx/util/images.py b/sphinx/util/images.py
+--- a/sphinx/util/images.py
++++ b/sphinx/util/images.py
+@@ -2,7 +2,6 @@
+ 
+ from __future__ import annotations
+ 
+-import base64
+ from pathlib import Path
+ from typing import TYPE_CHECKING, NamedTuple, overload
+ from urllib.request import DataHandler, build_opener

@@ -1,0 +1,70 @@
+diff --git a/sklearn/inspection/_plot/decision_boundary.py b/sklearn/inspection/_plot/decision_boundary.py
+--- a/sklearn/inspection/_plot/decision_boundary.py
++++ b/sklearn/inspection/_plot/decision_boundary.py
+@@ -5,7 +5,7 @@
+ 
+ import numpy as np
+ 
+-from sklearn.base import is_regressor
++from sklearn.base import is_classifier, is_clusterer, is_outlier_detector, is_regressor
+ from sklearn.preprocessing import LabelEncoder
+ from sklearn.utils import _safe_indexing
+ from sklearn.utils._dataframe import is_pandas_df, is_polars_df
+@@ -382,20 +382,19 @@
+                 For multiclass problems, 'auto' no longer defaults to 'predict'.
+ 
+         class_of_interest : int, float, bool or str, default=None
+-            The class to be plotted when `response_method` is 'predict_proba'
+-            or 'decision_function'. If None, `estimator.classes_[1]` is considered
+-            the positive class for binary classifiers. For multiclass
+-            classifiers, if None, all classes will be represented in the
+-            decision boundary plot; the class with the highest response value
++            The class to be plotted. For :term:`binary` classifiers, if None,
++            `estimator.classes_[1]` is considered the positive class. For
++            :term:`multiclass` classifiers, if None, all classes will be represented in
++            the decision boundary plot; when `response_method` is :term:`predict_proba`
++            or :term:`decision_function`, the class with the highest response value
+             at each point is plotted. The color of each class can be set via
+             `multiclass_colors`.
+ 
+             .. versionadded:: 1.4
+ 
+         multiclass_colors : list of str, or str, default=None
+-            Specifies how to color each class when plotting multiclass
+-            'predict_proba' or 'decision_function' and `class_of_interest` is
+-            None. Ignored in all other cases.
++            Specifies how to color each class when plotting :term:`multiclass` problems
++            and `class_of_interest` is None.
+ 
+             Possible inputs are:
+ 
+@@ -428,8 +427,7 @@
+             created.
+ 
+         **kwargs : dict
+-            Additional keyword arguments to be passed to the
+-            `plot_method`.
++            Additional keyword arguments to be passed to the `plot_method`.
+ 
+         Returns
+         -------
+@@ -581,10 +579,16 @@
+                 response = response.reshape(*xx0.shape, response.shape[-1])
+ 
+ 
+-        if hasattr(estimator, "classes_"):
++        if (
++            class_of_interest is not None
++            or is_regressor(estimator)
++            or is_outlier_detector(estimator)
++        ):
++            n_classes = 2
++        elif is_classifier(estimator):
+             n_classes = len(estimator.classes_)
+-        else:
+-            n_classes = len(np.unique(response))
++        elif is_clusterer(estimator):
++            n_classes = len(np.unique(estimator.labels_))
+ 
+         if xlabel is None:
+             xlabel = X.columns[0] if hasattr(X, "columns") else ""

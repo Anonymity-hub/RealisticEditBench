@@ -1,0 +1,19 @@
+diff --git a/sympy/tensor/array/expressions/from_array_to_matrix.py b/sympy/tensor/array/expressions/from_array_to_matrix.py
+--- a/sympy/tensor/array/expressions/from_array_to_matrix.py
++++ b/sympy/tensor/array/expressions/from_array_to_matrix.py
+@@ -411,6 +411,15 @@ def _(expr: ArrayTensorProduct):
+                 pending = k
+                 prev_i = i
+                 newargs.append(arg)
++            elif pending == 1:
++                prev = newargs[-1]
++                if arg.shape[0] == 1:
++                    newargs[-1] = prev*arg
++                else:  # case args.shape[1] == 1
++                    newargs[-1] = arg*prev
++                removed.extend([cumul[prev_i], cumul[prev_i] + 1])
++                pending = k
++                prev_i = i
+             elif pending == k:
+                 prev = newargs[-1]
+                 if prev.shape[0] == 1:

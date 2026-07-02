@@ -1,0 +1,23 @@
+diff --git a/django/db/models/lookups.py b/django/db/models/lookups.py
+--- a/django/db/models/lookups.py
++++ b/django/db/models/lookups.py
+@@ -287,6 +287,19 @@
+     def get_prep_lookup(self):
+         if hasattr(self.rhs, "resolve_expression"):
+             return self.rhs
++        if any(hasattr(value, "resolve_expression") for value in self.rhs):
++            # Wrap direct values in Value expressions so they are handled by
++            # the database at compilation time, along with other expressions.
++            return ExpressionList(
++                *[
++                    (
++                        value
++                        if hasattr(value, "resolve_expression")
++                        else Value(value, self.lhs.output_field)
++                    )
++                    for value in self.rhs
++                ]
++            )
+         contains_expr = False
+         prepared_values = []
+         for rhs_value in self.rhs:

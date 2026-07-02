@@ -1,0 +1,16 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -1055,6 +1055,12 @@
+             *self._check_on_delete(databases),
+             *self._check_unique(),
+         ]
++
++    def _check_on_delete_db_support(self, on_delete, feature_flag, databases):
++        for db in databases:
++            if not router.allow_migrate_model(db, self.model):
++                continue
++            connection = connections[db]
+ 
+     def _check_on_delete(self, databases):
+         on_delete = getattr(self.remote_field, "on_delete", None)

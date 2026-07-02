@@ -1,0 +1,116 @@
+diff --git a/astropy/nddata/ccddata.py b/astropy/nddata/ccddata.py
+--- a/astropy/nddata/ccddata.py
++++ b/astropy/nddata/ccddata.py
+@@ -95,13 +95,13 @@
+ 
+     uncertainty : `~astropy.nddata.StdDevUncertainty`, \
+             `~astropy.nddata.VarianceUncertainty`, \
+-            `~astropy.nddata.InverseVariance`, `numpy.ndarray` or \
++            `~astropy.nddata.InverseVariance`, `~numpy.ndarray` or \
+             None, optional
+-        Uncertainties on the data. If the uncertainty is a `numpy.ndarray`, it
++        Uncertainties on the data. If the uncertainty is a `~numpy.ndarray`, it
+         it assumed to be, and stored as, a `~astropy.nddata.StdDevUncertainty`.
+         Default is ``None``.
+ 
+-    mask : `numpy.ndarray` or None, optional
++    mask : `~numpy.ndarray` or None, optional
+         Mask for the data, given as a boolean Numpy array with a shape
+         matching that of the data. The values must be `False` where
+         the data is *valid* and `True` when it is not (like Numpy
+@@ -110,7 +110,7 @@
+         ignored.
+         Default is ``None``.
+ 
+-    flags : `numpy.ndarray` or `~astropy.nddata.FlagCollection` or None, \
++    flags : `~numpy.ndarray` or `~astropy.nddata.FlagCollection` or None, \
+             optional
+         Flags giving information about each pixel. These can be specified
+         either as a Numpy array of any type with a shape matching that of the
+@@ -137,7 +137,7 @@
+             If the unit is ``None`` or not otherwise specified it will raise a
+             ``ValueError``
+ 
+-    psf : `numpy.ndarray` or None, optional
++    psf : `~numpy.ndarray` or None, optional
+         Image representation of the PSF at the center of this image. In order
+         for convolution to be flux-preserving, this should generally be
+         normalized to sum to unity.
+@@ -311,8 +311,10 @@
+         hdu_mask, hdu_uncertainty, hdu_flags, hdu_psf : str or None, optional
+             If it is a string append this attribute to the HDUList as
+             `~astropy.io.fits.ImageHDU` with the string as extension name.
+-            Flags are not supported at this time. If ``None`` this attribute
+-            is not appended.
++            For flags stored as a `~astropy.nddata.FlagCollection`, each flag
++            array will be saved as a separate ImageHDU with extension names
++            of the form ``hdu_flags + '_' + flag_name``.
++            If ``None`` this attribute is not appended.
+             Default is ``'MASK'`` for mask, ``'UNCERT'`` for uncertainty,
+             ``'PSFIMAGE'`` for psf, and `None` for flags.
+ 
+@@ -338,13 +340,13 @@
+         Raises
+         ------
+         ValueError
+-            - If ``self.mask`` is set but not a `numpy.ndarray`.
+-            - If ``self.uncertainty`` is set but not a astropy uncertainty type.
++            - If ``self.mask`` is set but not a `~numpy.ndarray`.
++            - If ``self.uncertainty`` is set but not a astropy uncertainty
++              type.
+             - If ``self.uncertainty`` is set but has another unit then
+               ``self.data``.
+-
+-        NotImplementedError
+-            Saving flags is not supported.
++            - If ``self.flags`` is set but not a `~numpy.ndarray` or
++              `~astropy.nddata.FlagCollection`.
+ 
+         Returns
+         -------
+@@ -633,7 +635,13 @@
+         Default is ``'MASK'``.
+ 
+     hdu_flags : str or None, optional
+-        Currently not implemented.
++        FITS extension name (or prefix) from which flags should be
++        initialized. If a single extension with this exact name exists, flags
++        will be loaded as a `~numpy.ndarray`. If multiple extensions exist
++        with names starting with this prefix (e.g., ``'FLAGS_*'``), they will
++        be loaded into a `~astropy.nddata.FlagCollection` where the flag
++        names are derived by removing the prefix and underscore.
++        If no matching extension exists, the flags of the CCDData is ``None``.
+         Default is ``None``.
+ 
+     key_uncertainty_type : str, optional
+@@ -781,8 +789,10 @@
+     hdu_mask, hdu_uncertainty, hdu_flags, hdu_psf : str or None, optional
+         If it is a string append this attribute to the HDUList as
+         `~astropy.io.fits.ImageHDU` with the string as extension name.
+-        Flags are not supported at this time. If ``None`` this attribute
+-        is not appended.
++        For flags stored as a `~astropy.nddata.FlagCollection`, each flag
++        array will be saved as a separate ImageHDU with extension names
++        of the form ``hdu_flags + '_' + flag_name``.
++        If ``None`` this attribute is not appended.
+         Default is ``'MASK'`` for mask, ``'UNCERT'`` for uncertainty,
+         ``'PSFIMAGE'`` for psf, and `None` for flags.
+ 
+@@ -804,14 +814,13 @@
+     Raises
+     ------
+     ValueError
+-        - If ``self.mask`` is set but not a `numpy.ndarray`.
++        - If ``self.mask`` is set but not a `~numpy.ndarray`.
+         - If ``self.uncertainty`` is set but not a
+           `~astropy.nddata.StdDevUncertainty`.
+         - If ``self.uncertainty`` is set but has another unit then
+           ``self.data``.
+-
+-    NotImplementedError
+-        Saving flags is not supported.
++        - If ``self.flags`` is set but not a `~numpy.ndarray` or
++          `~astropy.nddata.FlagCollection`.
+     """
+     hdu = ccd_data.to_hdu(
+         hdu_mask=hdu_mask,

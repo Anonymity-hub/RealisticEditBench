@@ -1,0 +1,11 @@
+diff --git a/sklearn/utils/_repr_html/params.py b/sklearn/utils/_repr_html/params.py
+--- a/sklearn/utils/_repr_html/params.py
++++ b/sklearn/utils/_repr_html/params.py
+@@ -89,6 +89,7 @@
+ 
+     PARAM_AVAILABLE_DOC_LINK_TEMPLATE = """
+         <a class="param-doc-link"
++            style="anchor-name: --doc-link-{param_name};"
+             rel="noreferrer" target="_blank" href="{link}">
+             {param_name}
+             <span class="param-doc-description">{param_description}</span>

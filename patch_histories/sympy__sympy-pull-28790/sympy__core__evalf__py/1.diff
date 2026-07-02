@@ -1,0 +1,12 @@
+diff --git a/sympy/core/evalf.py b/sympy/core/evalf.py
+--- a/sympy/core/evalf.py
++++ b/sympy/core/evalf.py
+@@ -990,7 +990,7 @@ def evalf_log(expr: 'log', prec: int, options: OPT_DICT) -> TMP_RES:
+ 
+     re = mpf_log(mpf_abs(xre), prec, rnd)
+     size = fastlog(re)
+-    if prec - size > workprec and re != fzero:
++    if prec - size > workprec:
+         from .add import Add
+         # We actually need to compute 1+x accurately, not x
+         add = Add(S.NegativeOne, arg, evaluate=False)

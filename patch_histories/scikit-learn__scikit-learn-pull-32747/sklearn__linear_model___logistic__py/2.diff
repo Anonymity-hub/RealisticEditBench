@@ -1,0 +1,12 @@
+diff --git a/sklearn/linear_model/_logistic.py b/sklearn/linear_model/_logistic.py
+--- a/sklearn/linear_model/_logistic.py
++++ b/sklearn/linear_model/_logistic.py
+@@ -281,7 +281,7 @@
+         class_weight_ = compute_class_weight(
+             class_weight, classes=classes, y=y, sample_weight=sample_weight
+         )
+-        sample_weight *= class_weight_[le.fit_transform(y)]
++        sample_weight *= class_weight_[le.transform(y)]
+ 
+     if is_binary:
+         w0 = np.zeros(n_features + int(fit_intercept), dtype=X.dtype)

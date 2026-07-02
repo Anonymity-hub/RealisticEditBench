@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/widgets.py b/lib/matplotlib/widgets.py
+--- a/lib/matplotlib/widgets.py
++++ b/lib/matplotlib/widgets.py
+@@ -118,10 +118,6 @@
+         self.ax = ax
+         self._cids = []
+         self._blit_background_id = None
+-
+-    def __del__(self):
+-        if self._blit_background_id is not None:
+-            self.canvas._release_blit_background_id(self._blit_background_id)
+ 
+     canvas = property(
+         lambda self: getattr(self.ax.get_figure(root=True), 'canvas', None)

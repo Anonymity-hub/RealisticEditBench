@@ -1,0 +1,61 @@
+diff --git a/xarray/core/formatting_html.py b/xarray/core/formatting_html.py
+--- a/xarray/core/formatting_html.py
++++ b/xarray/core/formatting_html.py
+@@ -3,11 +3,12 @@
+ import uuid
+ from collections import OrderedDict
+ from collections.abc import Mapping
++from dataclasses import dataclass
+ from functools import lru_cache, partial
+ from html import escape
+ from importlib.resources import files
+ from math import ceil
+-from typing import TYPE_CHECKING, Literal
++from typing import TYPE_CHECKING
+ 
+ from xarray.core.formatting import (
+     filter_nondefault_indexes,
+@@ -176,25 +177,31 @@
+ 
+ 
+ def collapsible_section(
+-    name, inline_details="", details="", n_items=None, enabled=True, collapsed=False
++    header: str,
++    inline_details="",
++    details="",
++    n_items=None,
++    enabled=True,
++    collapsed=False,
++    span_grid=False,
+ ) -> str:
+     # "unique" id to expand/collapse the section
+     data_id = "section-" + str(uuid.uuid4())
+ 
+     has_items = n_items is not None and n_items
+     n_items_span = "" if n_items is None else f" <span>({n_items})</span>"
+-    enabled = "" if enabled and has_items else "disabled"
+-    collapsed = "" if collapsed or not has_items else "checked"
+-    tip = " title='Expand/collapse section'" if enabled else ""
+-
+-    return (
+-        f"<input id='{data_id}' class='xr-section-summary-in' "
+-        f"type='checkbox' {enabled} {collapsed}>"
+-        f"<label for='{data_id}' class='xr-section-summary' {tip}>"
+-        f"{name}:{n_items_span}</label>"
++    enabled_attr = "" if enabled and has_items else " disabled"
++    collapsed_attr = "" if collapsed or not has_items else " checked"
++    span_grid_attr = " xr-span-grid" if span_grid else ""
++    tip = " title='Expand/collapse section'" if enabled_attr == "" else ""
++    html = (
++        f"<input id='{data_id}' class='xr-section-summary-in' type='checkbox'{enabled_attr}{collapsed_attr} />"
++        f"<label for='{data_id}' class='xr-section-summary{span_grid_attr}'{tip}>{header}{n_items_span}</label>"
+         f"<div class='xr-section-inline-details'>{inline_details}</div>"
+-        f"<div class='xr-section-details'>{details}</div>"
+-    )
++    )
++    if details:
++        html += f"<div class='xr-section-details'>{details}</div>"
++    return html
+ 
+ 
+ def _mapping_section(

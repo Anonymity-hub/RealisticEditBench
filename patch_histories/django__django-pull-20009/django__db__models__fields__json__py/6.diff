@@ -1,0 +1,51 @@
+diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py
+--- a/django/db/models/fields/json.py
++++ b/django/db/models/fields/json.py
+@@ -449,6 +449,39 @@
+             sql = "JSON_UNQUOTE(%s)" % sql
+         return sql, params
+ 
++    def process_lhs(self, compiler, connection):
++        sql, params = super().process_lhs(compiler, connection)
++        if isinstance(self.lhs, KeyTransform):
++            return sql, params
++        if connection.vendor == "mysql":
++            return self._process_as_mysql(sql, params, connection)
++        elif connection.vendor == "oracle":
++            return self._process_as_oracle(sql, params, connection)
++        elif connection.vendor == "sqlite":
++            return self._process_as_sqlite(sql, params, connection)
++        return sql, params
++
++    def as_oracle(self, compiler, connection):
++        if (
++            connection.features.supports_primitives_in_json_field
++            and isinstance(self.rhs, expressions.ExpressionList)
++            and JSONNull() in self.rhs.get_source_expressions()
++        ):
++            # Break the lookup into multiple exact lookups combined with OR, as
++            # Oracle does not support directly extracting JSON scalar null as a
++            # value in the right-hand side of an IN clause.
++            exact_lookup = self.lhs.get_lookup("exact")
++            sql_parts = []
++            all_params = ()
++            for expr in self.rhs.get_source_expressions():
++                lookup = exact_lookup(self.lhs, expr)
++                sql, params = lookup.as_oracle(compiler, connection)
++                sql_parts.append(f"({sql})")
++                all_params = (*all_params, *params)
++            sql = " OR ".join(sql_parts)
++            return sql, all_params
++        return self.as_sql(compiler, connection)
++
+ 
+ JSONField.register_lookup(DataContains)
+ JSONField.register_lookup(ContainedBy)
+@@ -457,6 +490,7 @@
+ JSONField.register_lookup(HasAnyKeys)
+ JSONField.register_lookup(JSONExact)
+ JSONField.register_lookup(JSONIContains)
++JSONField.register_lookup(JSONIn)
+ 
+ 
+ class KeyTransform(Transform):

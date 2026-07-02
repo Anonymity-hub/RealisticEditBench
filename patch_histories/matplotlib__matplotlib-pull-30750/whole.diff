@@ -1,0 +1,43 @@
+diff --git a/lib/matplotlib/backend_bases.py b/lib/matplotlib/backend_bases.py
+--- a/lib/matplotlib/backend_bases.py
++++ b/lib/matplotlib/backend_bases.py
+@@ -1763,7 +1763,7 @@ def __init__(self, figure=None):
+         self.toolbar = None  # NavigationToolbar2 will set me
+         self._is_idle_drawing = False
+         # We don't want to scale up the figure DPI more than once.
+-        figure._original_dpi = figure.dpi
++        figure._original_dpi = getattr(figure, '_original_dpi', figure.dpi)
+         self._device_pixel_ratio = 1
+         super().__init__()  # Typically the GUI widget init (if any).
+ 
+diff --git a/lib/matplotlib/figure.py b/lib/matplotlib/figure.py
+--- a/lib/matplotlib/figure.py
++++ b/lib/matplotlib/figure.py
+@@ -3003,12 +3003,10 @@ def _set_base_canvas(self):
+         This is used upon initialization of the Figure, but also
+         to reset the canvas when decoupling from pyplot.
+         """
+-        # check if we have changed the DPI due to hi-dpi screens
+-        orig_dpi = getattr(self, '_original_dpi', self._dpi)
+         FigureCanvasBase(self)  # Set self.canvas as a side-effect
+-        # put it back to what it was
+-        if orig_dpi != self._dpi:
+-            self.dpi = orig_dpi
++        # undo any high-dpi scaling
++        if self._dpi != self._original_dpi:
++            self.dpi = self._original_dpi
+ 
+     def set_canvas(self, canvas):
+         """
+@@ -3323,8 +3321,9 @@ def __setstate__(self, state):
+         self.__dict__ = state
+ 
+         # re-initialise some of the unstored state information
+-        FigureCanvasBase(self)  # Set self.canvas.
+-
++        self._set_base_canvas()
++        # force the bounding boxes to respect current dpi
++        self.dpi_scale_trans.clear().scale(self._dpi)
+         if restore_to_pylab:
+             # lazy import to avoid circularity
+             import matplotlib.pyplot as plt

@@ -1,0 +1,22 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1778,11 +1778,15 @@
+ 
+         # list of (sql, [params]) tuples for each object to be saved
+         # Shape: [n_objs][n_fields][2]
+-        get_placeholders = [getattr(field, "get_placeholder", None) for field in fields]
++        get_placeholder_sqls = [
++            getattr(field, "get_placeholder_sql", None) for field in fields
++        ]
+         rows_of_fields_as_sql = (
+             (
+-                self.field_as_sql(field, get_placeholder, value)
+-                for field, get_placeholder, value in zip(fields, get_placeholders, row)
++                self.field_as_sql(field, get_placeholder_sql, value)
++                for field, get_placeholder_sql, value in zip(
++                    fields, get_placeholder_sqls, row
++                )
+             )
+             for row in value_rows
+         )

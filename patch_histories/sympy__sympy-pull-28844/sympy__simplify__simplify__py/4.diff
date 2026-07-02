@@ -1,0 +1,16 @@
+diff --git a/sympy/simplify/simplify.py b/sympy/simplify/simplify.py
+--- a/sympy/simplify/simplify.py
++++ b/sympy/simplify/simplify.py
+@@ -1458,10 +1458,10 @@
+     expr = sympify(expr)
+     if isinstance(expr, Integer):
+         return expr
+-    expr = sympify(expr).xreplace({
++    expr = expr.xreplace({
+         Float('inf'): S.Infinity,
+         Float('-inf'): S.NegativeInfinity,
+-        })
++    })
+     if expr is S.Infinity or expr is S.NegativeInfinity:
+         return expr
+     if rational or expr.free_symbols:

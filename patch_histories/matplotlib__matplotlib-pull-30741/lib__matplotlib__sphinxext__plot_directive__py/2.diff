@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/sphinxext/plot_directive.py b/lib/matplotlib/sphinxext/plot_directive.py
+--- a/lib/matplotlib/sphinxext/plot_directive.py
++++ b/lib/matplotlib/sphinxext/plot_directive.py
+@@ -958,8 +958,8 @@
+             if is_doctest:
+                 lines = ['', *code_piece.splitlines()]
+             else:
+-                lines = ['.. code-block:: python', '',
+-                         *textwrap.indent(code_piece, '    ').splitlines()]
++                lines = ['.. code-block:: python']
++                lines.extend(['', *textwrap.indent(code_piece, '    ').splitlines()])
+             source_code = "\n".join(lines)
+         else:
+             source_code = ""

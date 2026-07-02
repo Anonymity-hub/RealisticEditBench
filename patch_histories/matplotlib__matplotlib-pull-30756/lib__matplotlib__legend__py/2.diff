@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py
+--- a/lib/matplotlib/legend.py
++++ b/lib/matplotlib/legend.py
+@@ -37,7 +37,7 @@
+ from matplotlib.patches import (Patch, Rectangle, Shadow, FancyBboxPatch,
+                                 StepPatch)
+ from matplotlib.collections import (
+-    Collection, CircleCollection, LineCollection, PathCollection,
++    Collection, CircleCollection, LineCollection, PatchCollection, PathCollection,
+     PolyCollection, RegularPolyCollection)
+ from matplotlib.text import Text
+ from matplotlib.transforms import Bbox, BboxBase, TransformedBbox

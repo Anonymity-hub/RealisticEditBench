@@ -1,0 +1,27 @@
+diff --git a/django/template/library.py b/django/template/library.py
+--- a/django/template/library.py
++++ b/django/template/library.py
+@@ -276,6 +276,15 @@
+                 ) = getfullargspec(unwrap(func))
+             function_name = name or func.__name__
+ 
++            if takes_context:
++                if params and params[0] == "context":
++                    params = params[1:]
++                else:
++                    raise TemplateSyntaxError(
++                        f"{function_name!r} is decorated with takes_context=True so it "
++                        "must have a first argument of 'context'"
++                    )
++
+             @wraps(func)
+             def compile_func(parser, token):
+                 bits = token.split_contents()[1:]
+@@ -288,7 +297,6 @@
+                     defaults,
+                     kwonly,
+                     kwonly_defaults,
+-                    takes_context,
+                     function_name,
+                 )
+                 return InclusionNode(

@@ -1,0 +1,33 @@
+diff --git a/xarray/core/indexes.py b/xarray/core/indexes.py
+--- a/xarray/core/indexes.py
++++ b/xarray/core/indexes.py
+@@ -2045,6 +2045,29 @@
+     if set(a_indexes.keys()) != set(b_indexes.keys()):
+         return False
+ 
++    # Compare each index pair
++    # Note: could optimize for PandasMultiIndex where multiple coord names
++    # share the same index object, but this is not performance critical
++    for coord_name in a_indexes.keys():
++        a_idx = a_indexes[coord_name]
++        b_idx = b_indexes[coord_name]
++
++        # For identical(), index types must match
++        if type(a_idx) is not type(b_idx):
++            return False
++
++        try:
++            if not a_idx.equals(b_idx):
++                return False
++        except NotImplementedError:
++            # Fall back to variable comparison when equals() not implemented
++            a_var = a_indexes.variables[coord_name]
++            b_var = b_indexes.variables[coord_name]
++            if not a_var.equals(b_var):
++                return False
++
++    return True
++
+ 
+ def indexes_all_equal(
+     elements: Sequence[tuple[Index, dict[Hashable, Variable]]],

@@ -1,0 +1,51 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -42,7 +42,7 @@
+         _ModuleProperties,
+         _TypeStatementProperties,
+     )
+-    from sphinx.ext.autodoc.directive import DocumenterBridge
++    from sphinx.ext.autodoc.importer import _AttrGetter
+     from sphinx.util.typing import OptionSpec, _RestifyMode
+ 
+ logger = logging.getLogger('sphinx.ext.autodoc')
+@@ -86,16 +86,29 @@
+     }
+ 
+     def __init__(
+-        self, directive: DocumenterBridge, orig_name: str, indent: str = ''
++        self,
++        *,
++        env: BuildEnvironment,
++        options: _AutoDocumenterOptions,
++        get_attr: _AttrGetter,
++        record_dependencies: set[str] | None = None,
++        result: StringList | None = None,
++        indent: str = '',
+     ) -> None:
+-        self.directive = directive
+-        self.config: Config = directive.env.config
+-        self.env: BuildEnvironment = directive.env
+-        self._current_document: _CurrentDocument = directive.env.current_document
+-        self._events: EventManager = directive.env.events
+-        self.options: _AutoDocumenterOptions = directive.genopt
+-        self.get_attr = directive.get_attr
+-        self.orig_name = orig_name
++        self.config: Config = env.config
++        self.env: BuildEnvironment = env
++        self._current_document: _CurrentDocument = env.current_document
++        self._events: EventManager = env.events
++        self.options: _AutoDocumenterOptions = options
++        self.get_attr = get_attr
++        if record_dependencies is not None:
++            self.record_dependencies: set[str] = record_dependencies
++        else:
++            self.record_dependencies = set()
++        if result is not None:
++            self.result: StringList = result
++        else:
++            self.result = StringList()
+         self.indent: Final = indent
+         # the module analyzer to get at attribute docs, or None
+         self.analyzer: ModuleAnalyzer | None = None

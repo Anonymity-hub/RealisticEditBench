@@ -1,0 +1,268 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -19,7 +19,6 @@
+ from sphinx.ext.autodoc._docstrings import _prepare_docstrings, _process_docstrings
+ from sphinx.ext.autodoc._member_finder import _document_members
+ from sphinx.ext.autodoc._renderer import _add_content, _directive_header_lines
+-from sphinx.ext.autodoc.importer import _load_object_by_name
+ from sphinx.ext.autodoc.mock import ismock
+ from sphinx.locale import _, __
+ from sphinx.pycode import ModuleAnalyzer
+@@ -98,13 +97,9 @@ def __init__(
+         self.get_attr = directive.get_attr
+         self.orig_name = orig_name
+         self.indent: Final = indent
+-        # the parent/owner of the object to document
+-        self.parent: Any = None
+         # the module analyzer to get at attribute docs, or None
+         self.analyzer: ModuleAnalyzer | None = None
+ 
+-        self._load_object_has_been_called = False
+-
+         if isinstance(self, ModuleDocumenter):
+             self.options = self.options.merge_member_options()
+         elif isinstance(self, ClassDocumenter):
+@@ -122,35 +117,6 @@ def add_line(self, line: str, source: str, *lineno: int, indent: str) -> None:
+         else:
+             self.directive.result.append('', source, *lineno)
+ 
+-    def _load_object_by_name(self) -> Literal[True] | None:
+-        """Import the object given by *self.orig_name*.
+-
+-        Returns True if parsing and resolving was successful, otherwise None.
+-        """
+-        if self._load_object_has_been_called:
+-            return True
+-
+-        ret = _load_object_by_name(
+-            name=self.orig_name,
+-            objtype=self.objtype,  # type: ignore[arg-type]
+-            mock_imports=self.config.autodoc_mock_imports,
+-            type_aliases=self.config.autodoc_type_aliases,
+-            current_document=self._current_document,
+-            config=self.config,
+-            env=self.env,
+-            events=self._events,
+-            get_attr=self.get_attr,
+-            options=self.options,
+-        )
+-        if ret is None:
+-            return None
+-        props, parent = ret
+-
+-        self.props = props
+-        self.parent = parent
+-        self._load_object_has_been_called = True
+-        return True
+-
+     def add_directive_header(self, *, indent: str) -> None:
+         """Add the directive header and options to the generated content."""
+         domain_name = getattr(self, 'domain', 'py')
+@@ -286,41 +252,29 @@ def _assemble_more_content(
+ 
+         return more_content
+ 
+-    def generate(
++    def _generate(
+         self,
+         more_content: StringList | None = None,
+         real_modname: str | None = None,
+         check_module: bool = False,
+         all_members: bool = False,
+     ) -> None:
+-        """Generate reST for the object given by *self.orig_name*, and possibly for
++        """Generate reST for the object given by *self.props*, and possibly for
+         its members.
+ 
+         If *more_content* is given, include that content. If *real_modname* is
+         given, use that module name to find attribute docs. If *check_module* is
+         True, only generate if the object is defined in the module name it is
+         imported from. If *all_members* is True, document all members.
+         """
+-        if isinstance(self, ClassDocumenter):
++        if self.props.obj_type in {'class', 'exception'}:
+             # Do not pass real_modname and use the name from the __module__
+             # attribute of the class.
+             # If a class gets imported into the module real_modname
+             # the analyzer won't find the source of the class, if
+             # it looks in real_modname.
+             real_modname = None
+ 
+-        if self._load_object_by_name() is None:
+-            return
+-
+-        self._generate(more_content, real_modname, check_module, all_members)
+-
+-    def _generate(
+-        self,
+-        more_content: StringList | None = None,
+-        real_modname: str | None = None,
+-        check_module: bool = False,
+-        all_members: bool = False,
+-    ) -> None:
+         # If there is no real module defined, figure out which to use.
+         # The real module is used in the module analyzer to look up the module
+         # where the attribute documentation would actually be found in.
+diff --git a/sphinx/ext/autodoc/_member_finder.py b/sphinx/ext/autodoc/_member_finder.py
+--- a/sphinx/ext/autodoc/_member_finder.py
++++ b/sphinx/ext/autodoc/_member_finder.py
+@@ -10,6 +10,7 @@
+ from sphinx.ext.autodoc._directive_options import _AutoDocumenterOptions
+ from sphinx.ext.autodoc._property_types import _ClassDefProperties, _ModuleProperties
+ from sphinx.ext.autodoc._sentinels import ALL, INSTANCE_ATTR, SLOTS_ATTR
++from sphinx.ext.autodoc.importer import _load_object_by_name
+ from sphinx.ext.autodoc.mock import ismock, undecorate
+ from sphinx.locale import __
+ from sphinx.pycode import ModuleAnalyzer
+@@ -174,6 +175,8 @@ def _gather_members(
+     If *want_all* is True, document all members, else those given by
+     *self.options.members*.
+     """
++    env = directive.env
++
+     if props.obj_type not in {'module', 'class', 'exception'}:
+         msg = 'must be implemented in subclasses'
+         raise NotImplementedError(msg)
+@@ -236,8 +239,21 @@ def _gather_members(
+         # We now try to import all objects before ordering them. This is to
+         # avoid possible circular imports if we were to import objects after
+         # their associated documenters have been sorted.
+-        if documenter._load_object_by_name() is None:
++        member_props = _load_object_by_name(
++            name=full_name,
++            objtype=obj_type,
++            mock_imports=config.autodoc_mock_imports,
++            type_aliases=config.autodoc_type_aliases,
++            current_document=current_document,
++            config=config,
++            env=env,
++            events=events,
++            get_attr=get_attr,
++            options=documenter.options,
++        )
++        if member_props is None:
+             continue
++        documenter.props = member_props
+ 
+         member_documenters.append((documenter, is_attr))
+ 
+diff --git a/sphinx/ext/autodoc/directive.py b/sphinx/ext/autodoc/directive.py
+--- a/sphinx/ext/autodoc/directive.py
++++ b/sphinx/ext/autodoc/directive.py
+@@ -11,6 +11,7 @@
+     _process_documenter_options,
+ )
+ from sphinx.ext.autodoc._documenters import _AutodocAttrGetter
++from sphinx.ext.autodoc.importer import _load_object_by_name
+ from sphinx.util import logging
+ from sphinx.util.docutils import SphinxDirective, switch_source_input
+ from sphinx.util.parsing import nested_parse_to_nodes
+@@ -145,7 +146,21 @@ def run(self) -> list[Node]:
+             self.env, reporter, documenter_options, lineno, self.state, get_attr
+         )
+         documenter = doccls(params, self.arguments[0])
+-        documenter.generate(more_content=self.content)
++        props = _load_object_by_name(
++            name=self.arguments[0],
++            objtype=objtype,  # type: ignore[arg-type]
++            mock_imports=self.config.autodoc_mock_imports,
++            type_aliases=self.config.autodoc_type_aliases,
++            current_document=self.env.current_document,
++            config=self.config,
++            env=self.env,
++            events=self.env.events,
++            get_attr=get_attr,
++            options=documenter.options,
++        )
++        if props is not None:
++            documenter.props = props
++            documenter._generate(more_content=self.content)
+         if not params.result:
+             return []
+ 
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -495,7 +495,7 @@ def _load_object_by_name(
+     events: EventManager,
+     get_attr: _AttrGetter,
+     options: _AutoDocumenterOptions,
+-) -> tuple[_ItemProperties, Any] | None:
++) -> _ItemProperties | None:
+     """Import and load the object given by *name*."""
+     parsed = _parse_name(
+         name=name,
+@@ -916,7 +916,7 @@ def _load_object_by_name(
+         f'{args} -> {retann}' if retann else str(args) for args, retann in signatures
+     )
+ 
+-    return props, parent
++    return props
+ 
+ 
+ def _parse_name(
+diff --git a/sphinx/ext/autosummary/__init__.py b/sphinx/ext/autosummary/__init__.py
+--- a/sphinx/ext/autosummary/__init__.py
++++ b/sphinx/ext/autosummary/__init__.py
+@@ -71,7 +71,7 @@
+ from sphinx.ext.autodoc._member_finder import _best_object_type_for_member
+ from sphinx.ext.autodoc._sentinels import INSTANCE_ATTR
+ from sphinx.ext.autodoc.directive import DocumenterBridge
+-from sphinx.ext.autodoc.importer import import_module
++from sphinx.ext.autodoc.importer import _load_object_by_name, import_module
+ from sphinx.ext.autodoc.mock import mock
+ from sphinx.locale import __
+ from sphinx.pycode import ModuleAnalyzer
+@@ -339,6 +339,12 @@ def get_items(self, names: list[str]) -> list[tuple[str, str | None, str, str]]:
+             )
+             raise ValueError(msg)
+ 
++        env = self.env
++        config = env.config
++        current_document = env.current_document
++        events = env.events
++        get_attr = self.bridge.get_attr
++
+         max_item_chars = 50
+ 
+         for name in names:
+@@ -363,7 +369,7 @@ def get_items(self, names: list[str]) -> list[tuple[str, str | None, str, str]]:
+ 
+             result = StringList()  # initialize for each documenter
+             obj_type = _get_documenter(obj, parent)
+-            doccls = self.env._registry.documenters[obj_type]
++            doccls = env._registry.documenters[obj_type]
+             if isinstance(obj, ModuleType):
+                 full_name = real_name
+             else:
+@@ -374,15 +380,27 @@ def get_items(self, names: list[str]) -> list[tuple[str, str | None, str, str]]:
+             #     handle module prefixes slightly differently
+             self.bridge.result = result
+             documenter = doccls(self.bridge, full_name)
+-            if documenter._load_object_by_name() is None:
++            props = _load_object_by_name(
++                name=full_name,
++                objtype=obj_type,
++                mock_imports=config.autodoc_mock_imports,
++                type_aliases=config.autodoc_type_aliases,
++                current_document=current_document,
++                config=config,
++                env=env,
++                events=events,
++                get_attr=get_attr,
++                options=documenter.options,
++            )
++            if props is None:
+                 logger.warning(
+                     __('failed to import object %s'),
+                     real_name,
+                     location=self.get_location(),
+                 )
+                 items.append((display_name, '', '', real_name))
+                 continue
+-            props = documenter.props
++            documenter.props = props
+ 
+             # try to also get a source code analyzer for attribute docs
+             real_module = props._obj___module__ or props.module_name

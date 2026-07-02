@@ -1,0 +1,14 @@
+diff --git a/django/db/backends/postgresql/features.py b/django/db/backends/postgresql/features.py
+--- a/django/db/backends/postgresql/features.py
++++ b/django/db/backends/postgresql/features.py
+@@ -85,6 +85,10 @@ class DatabaseFeatures(BaseDatabaseFeatures):
+     def supports_uuid7_function(self):
+         return self.is_postgresql_18
+ 
++    @cached_property
++    def supports_uuid7_function_shift(self):
++        return self.is_postgresql_18
++
+     @cached_property
+     def django_test_skips(self):
+         skips = {

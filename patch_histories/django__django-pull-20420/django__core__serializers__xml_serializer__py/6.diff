@@ -1,0 +1,17 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -340,7 +340,12 @@
+                 if natural_keys:
+                     # If there are 'natural' subelements, it must be a natural
+                     # key
+-                    field_value = [getInnerText(k).strip() for k in natural_keys]
++                    field_value = []
++                    for k in natural_keys:
++                        if k.getElementsByTagName("None"):
++                            field_value.append(None)
++                        else:
++                            field_value.append(getInnerText(k).strip())
+                     try:
+                         obj = model._default_manager.db_manager(
+                             self.db

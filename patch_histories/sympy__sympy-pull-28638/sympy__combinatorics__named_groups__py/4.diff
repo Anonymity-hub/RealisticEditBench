@@ -1,0 +1,24 @@
+diff --git a/sympy/combinatorics/named_groups.py b/sympy/combinatorics/named_groups.py
+--- a/sympy/combinatorics/named_groups.py
++++ b/sympy/combinatorics/named_groups.py
+@@ -121,6 +121,8 @@
+ 
+ def set_alternating_group_properties(G, n, degree):
+     """Set known properties of an alternating group. """
++    if n < 3:
++        G._order = 1
+     if n < 4:
+         G._is_abelian = True
+         G._is_nilpotent = True
+@@ -132,7 +134,10 @@
+     else:
+         G._is_solvable = False
+     G._degree = degree
+-    G._is_transitive = True
++    if n == 2:
++        G._is_transitive = False
++    else:
++        G._is_transitive = True
+     G._is_dihedral = False
+ 
+ 

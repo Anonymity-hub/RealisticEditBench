@@ -1,0 +1,18 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -1690,8 +1690,13 @@
+         generic_step = RewriteRule(integrand, x, rewritten, substep)
+     elif n == -1:
+         generic_step = sqrt_quadratic_denom_rule(f_poly, integrand)
++    elif f_poly.degree() == 0:
++        # The numerator must be a const, the formula assumes this
++        generic_step = sqrt_quadratic_reduction_rule(integrand, n)
+     else:
+-        return  # todo: handle n < -1 case
++        # Handle non-constant numerators (eg. x / R**(-3/2))
++        # This requires splitting the integral as A*(2ax+b) + B form
++        return None
+     return _add_degenerate_step(generic_cond, generic_step, degenerate_step)
+ 
+ 

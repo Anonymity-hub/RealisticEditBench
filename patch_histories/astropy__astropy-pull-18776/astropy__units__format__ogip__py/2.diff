@@ -1,0 +1,30 @@
+diff --git a/astropy/units/format/ogip.py b/astropy/units/format/ogip.py
+--- a/astropy/units/format/ogip.py
++++ b/astropy/units/format/ogip.py
+@@ -248,9 +248,8 @@
+             """
+             scale_factor : LIT10 POWER numeric_power
+                          | LIT10
+-                         | signed_float
+-                         | signed_float POWER numeric_power
+-                         | signed_int POWER numeric_power
++                         | number
++                         | number POWER numeric_power
+             """
+             if len(p) == 4:
+                 p[0] = 10 ** p[3]
+@@ -274,11 +273,9 @@
+ 
+         def p_numeric_power(p):
+             """
+-            numeric_power : UINT
+-                          | signed_float
+-                          | OPEN_PAREN signed_int CLOSE_PAREN
+-                          | OPEN_PAREN signed_float CLOSE_PAREN
+-                          | OPEN_PAREN signed_float DIVISION UINT CLOSE_PAREN
++            numeric_power : number
++                          | OPEN_PAREN number CLOSE_PAREN
++                          | OPEN_PAREN INT DIVISION INT CLOSE_PAREN
+             """
+             if len(p) == 6:
+                 p[0] = Fraction(int(p[2]), int(p[4]))

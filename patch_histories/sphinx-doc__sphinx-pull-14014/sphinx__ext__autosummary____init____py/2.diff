@@ -1,0 +1,36 @@
+diff --git a/sphinx/ext/autosummary/__init__.py b/sphinx/ext/autosummary/__init__.py
+--- a/sphinx/ext/autosummary/__init__.py
++++ b/sphinx/ext/autosummary/__init__.py
+@@ -540,14 +540,6 @@
+ def extract_summary(doc: list[str], document: Any) -> str:
+     """Extract summary from docstring."""
+ 
+-    def parse(doc: list[str], settings: Any) -> nodes.document:
+-        state_machine = RSTStateMachine(state_classes, 'Body')
+-        node = new_document('', settings)
+-        node.reporter = NullReporter()
+-        state_machine.run(doc, node)
+-
+-        return node
+-
+     # Skip a blank lines at the top
+     while doc and not doc[0].strip():
+         doc.pop(0)
+@@ -564,7 +556,7 @@
+         return ''
+ 
+     # parse the docstring
+-    node = parse(doc, document.settings)
++    node = _parse_summary(doc, document.settings)
+     if isinstance(node[0], nodes.section):
+         # document starts with a section heading, so use that.
+         summary = node[0].astext().strip()
+@@ -581,7 +573,7 @@
+             for i in range(len(sentences)):
+                 summary = '. '.join(sentences[: i + 1]).rstrip('.') + '.'
+                 node[:] = []
+-                node = parse(doc, document.settings)
++                node = _parse_summary(doc, document.settings)
+                 if summary.endswith(WELL_KNOWN_ABBREVIATIONS):
+                     pass
+                 elif not any(node.findall(nodes.system_message)):

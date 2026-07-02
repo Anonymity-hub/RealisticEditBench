@@ -1,0 +1,13 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -2864,6 +2864,9 @@
+ 
+     def _print_CovarDerivativeOp(self, cvd):
+         return r'\mathbb{\nabla}_{%s}' % self._print(cvd._wrt)
++
++    def _print_BaseScalar(self, expr):
++        coord_sys_name, scalar_name = expr.name.split(".")
+ 
+     def _print_BaseScalarField(self, field):
+         string = field._coord_sys.symbols[field._index].name

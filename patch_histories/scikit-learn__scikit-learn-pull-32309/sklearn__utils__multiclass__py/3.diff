@@ -1,0 +1,13 @@
+diff --git a/sklearn/utils/multiclass.py b/sklearn/utils/multiclass.py
+--- a/sklearn/utils/multiclass.py
++++ b/sklearn/utils/multiclass.py
+@@ -429,8 +429,7 @@
+     # Check multiclass
+     if issparse(first_row_or_val):
+         first_row_or_val = first_row_or_val.data
+-    classes = cached_unique(y)
+-    if classes.shape[0] > 2 or (y.ndim == 2 and len(first_row_or_val) > 1):
++    if cached_unique(y).shape[0] > 2 or (y.ndim == 2 and len(first_row_or_val) > 1):
+         # [1, 2, 3] or [[1., 2., 3]] or [[1, 2]]
+         return "multiclass" + suffix
+     else:

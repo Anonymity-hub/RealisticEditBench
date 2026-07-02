@@ -1,0 +1,16 @@
+diff --git a/django/core/serializers/base.py b/django/core/serializers/base.py
+--- a/django/core/serializers/base.py
++++ b/django/core/serializers/base.py
+@@ -220,7 +220,11 @@
+         pass
+ 
+     def _model_supports_natural_key(self, model):
+-        pass
++        """Return True if the model defines a natural_key() method."""
++        try:
++            return callable(model.natural_key)
++        except AttributeError:
++            return False
+ 
+ 
+ class Deserializer:

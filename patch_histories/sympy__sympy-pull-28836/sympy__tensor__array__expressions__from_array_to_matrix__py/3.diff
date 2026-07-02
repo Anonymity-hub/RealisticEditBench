@@ -1,0 +1,15 @@
+diff --git a/sympy/tensor/array/expressions/from_array_to_matrix.py b/sympy/tensor/array/expressions/from_array_to_matrix.py
+--- a/sympy/tensor/array/expressions/from_array_to_matrix.py
++++ b/sympy/tensor/array/expressions/from_array_to_matrix.py
+@@ -568,9 +568,9 @@
+ @_remove_trivial_dims.register(ElementwiseApplyFunction)
+ def _(expr: ElementwiseApplyFunction):
+     subexpr, removed = _remove_trivial_dims(expr.expr)
+-    if subexpr.shape == (1, 1):
++    if subexpr.shape == (1, 1) and isinstance(subexpr, MatrixExpr):
+         # TODO: move this to ElementwiseApplyFunction
+-        return expr.function(subexpr), removed + [0, 1]
++        return expr.function(subexpr[0, 0]), removed + [0, 1]
+     return ElementwiseApplyFunction(expr.function, subexpr), []
+ 
+ 

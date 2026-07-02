@@ -1,0 +1,12 @@
+diff --git a/sympy/geometry/line.py b/sympy/geometry/line.py
+--- a/sympy/geometry/line.py
++++ b/sympy/geometry/line.py
+@@ -613,7 +613,7 @@
+         False
+ 
+         """
+-        if not isinstance(l1, LinearEntity) and not isinstance(l2, LinearEntity):
++        if not isinstance(l1, LinearEntity) or not isinstance(l2, LinearEntity):
+             raise TypeError('Must pass only LinearEntity objects')
+ 
+         return l1.direction.is_scalar_multiple(l2.direction)

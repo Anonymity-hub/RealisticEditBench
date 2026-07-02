@@ -1,0 +1,12 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -296,7 +296,7 @@
+     index it with another slice to return a new slice equivalent to applying
+     the slices sequentially
+     """
+-    old_slice = normalize_slice(old_slice, size)
++    old_slice = slice(*old_slice.indices(size))
+ 
+     size_after_old_slice = len(range(old_slice.start, old_slice.stop, old_slice.step))
+     if size_after_old_slice == 0:

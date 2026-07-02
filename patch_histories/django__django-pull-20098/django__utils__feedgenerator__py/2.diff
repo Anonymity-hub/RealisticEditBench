@@ -1,0 +1,20 @@
+diff --git a/django/utils/feedgenerator.py b/django/utils/feedgenerator.py
+--- a/django/utils/feedgenerator.py
++++ b/django/utils/feedgenerator.py
+@@ -28,6 +28,7 @@
+ from io import StringIO
+ from urllib.parse import urlparse
+ 
++from django.forms.utils import flatatt
+ from django.utils.encoding import iri_to_uri
+ from django.utils.xmlutils import SimplerXMLGenerator
+ 
+@@ -105,7 +106,7 @@
+             data.append(f'type="{self.mimetype}"')
+         if self.media is not None:
+             data.append(f'media="{self.media}"')
+-        return " ".join(data)
++        return flatatt(attrs).strip()
+ 
+     def __repr__(self):
+         return repr((self.url, self.mimetype, self.media))

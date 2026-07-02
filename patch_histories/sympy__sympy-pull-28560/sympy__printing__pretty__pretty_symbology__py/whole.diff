@@ -1,0 +1,11 @@
+diff --git a/sympy/printing/pretty/pretty_symbology.py b/sympy/printing/pretty/pretty_symbology.py
+--- a/sympy/printing/pretty/pretty_symbology.py
++++ b/sympy/printing/pretty/pretty_symbology.py
+@@ -498,6 +498,7 @@ def xsym(sym):
+     'IdentityMatrix':          U('MATHEMATICAL DOUBLE-STRUCK CAPITAL I'),
+     'ZeroMatrix':              U('MATHEMATICAL DOUBLE-STRUCK DIGIT ZERO'),
+     'OneMatrix':               U('MATHEMATICAL DOUBLE-STRUCK DIGIT ONE'),
++    'MatrixUnit':              U('MATHEMATICAL DOUBLE-STRUCK CAPITAL E'),
+     'Differential':            U('DOUBLE-STRUCK ITALIC SMALL D'),
+     'Union':                   U('UNION'),
+     'ElementOf':               U('ELEMENT OF'),

@@ -1,0 +1,47 @@
+diff --git a/sphinx/ext/autosummary/__init__.py b/sphinx/ext/autosummary/__init__.py
+--- a/sphinx/ext/autosummary/__init__.py
++++ b/sphinx/ext/autosummary/__init__.py
+@@ -539,24 +539,28 @@
+ 
+ def extract_summary(doc: list[str], document: Any) -> str:
+     """Extract summary from docstring."""
+-
+-    # Skip a blank lines at the top
+-    while doc and not doc[0].strip():
+-        doc.pop(0)
+-
+-    # If there's a blank line, then we can assume the first sentence /
+-    # paragraph has ended, so anything after shouldn't be part of the
+-    # summary
+-    for i, piece in enumerate(doc):
+-        if not piece.strip():
+-            doc = doc[:i]
+-            break
+-
+-    if doc == []:
++    # Find the first stanza (heading, sentence, paragraph, etc.).
++    # If there's a blank line, then we can assume that the stanza has ended,
++    # so anything after shouldn't be part of the summary.
++    first_stanza = []
++    content_started = False
++    for line in doc:
++        is_blank_line = not line or line.isspace()
++        if not content_started:
++            # Skip any blank lines at the start
++            if is_blank_line:
++                continue
++            content_started = True
++        if content_started:
++            if is_blank_line:
++                break
++            first_stanza.append(line)
++
++    if not first_stanza:
+         return ''
+ 
+     # parse the docstring
+-    node = _parse_summary(doc, document.settings)
++    node = _parse_summary(first_stanza, document.settings)
+     if isinstance(node[0], nodes.section):
+         # document starts with a section heading, so use that.
+         summary = node[0].astext().strip()

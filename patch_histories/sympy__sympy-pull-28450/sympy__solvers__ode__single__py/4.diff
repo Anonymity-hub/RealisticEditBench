@@ -1,0 +1,30 @@
+diff --git a/sympy/solvers/ode/single.py b/sympy/solvers/ode/single.py
+--- a/sympy/solvers/ode/single.py
++++ b/sympy/solvers/ode/single.py
+@@ -2824,6 +2824,26 @@
+         # Check if b3 = 0 (no first derivative term) or a3 = 0  (no second derivative term)
+         # or rhs != 0 (non-homogeneous)
+         if b3 != 0 or a3 == 0 or rhs != 0:
++            return False
++
++        # Normalize: divide by coefficient of y''
++        c3 = c3 / a3
++
++        # Check if c3 is of the form A*x^k where k has free symbols
++        A_sym = Wild('A_sym', exclude=[x])
++        k_sym = Wild('k_sym', exclude=[x])
++
++        pattern_match = c3.match(A_sym * x**k_sym)
++
++        if not pattern_match or k_sym not in pattern_match:
++            return False
++
++        k_val = pattern_match[k_sym]
++        A_val = pattern_match[A_sym]
++
++        if k_val == -2:
++            # Special case: k = -2 is an Euler equation, better handled by other solvers.
++            return False
+ 
+ 
+ class SecondLinearAiry(SingleODESolver):

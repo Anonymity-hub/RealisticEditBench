@@ -1,0 +1,13 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -2180,7 +2180,8 @@
+         null_safe(switch(key, {
+             Pow: do_one(null_safe(power_rule), null_safe(inverse_trig_rule),
+                         null_safe(sqrt_linear_rule),
+-                        null_safe(quadratic_denom_rule)),
++                        null_safe(quadratic_denom_rule),
++                        null_safe(sqrt_quadratic_rule)),
+             Symbol: power_rule,
+             exp: exp_rule,
+             Add: add_rule,

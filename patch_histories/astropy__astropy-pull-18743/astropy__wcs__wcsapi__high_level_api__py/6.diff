@@ -1,0 +1,12 @@
+diff --git a/astropy/wcs/wcsapi/high_level_api.py b/astropy/wcs/wcsapi/high_level_api.py
+--- a/astropy/wcs/wcsapi/high_level_api.py
++++ b/astropy/wcs/wcsapi/high_level_api.py
+@@ -4,6 +4,8 @@
+ 
+ import numpy as np
+ 
++from astropy.utils.masked import Masked, MaskedNDArray, combine_masks
++
+ from .utils import deserialize_class
+ 
+ __all__ = [

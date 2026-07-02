@@ -1,0 +1,31 @@
+diff --git a/sympy/polys/rootoftools.py b/sympy/polys/rootoftools.py
+--- a/sympy/polys/rootoftools.py
++++ b/sympy/polys/rootoftools.py
+@@ -19,7 +19,7 @@
+ from sympy.polys.polyroots import (
+     roots_linear, roots_quadratic, roots_binomial,
+     preprocess_roots, roots)
+-from sympy.polys.polytools import Poly, PurePoly, factor
++from sympy.polys.polytools import Poly, factor
+ from sympy.polys.rationaltools import together
+ from sympy.polys.rootisolation import (
+     dup_isolate_complex_roots_sqf,
+@@ -1224,7 +1224,7 @@
+     @classmethod
+     def _transform(cls, expr, x):
+         """Transform an expression to a polynomial. """
+-        poly = PurePoly(expr, x, greedy=False)
++        poly = Poly(expr, x, greedy=False)
+         return preprocess_roots(poly)
+ 
+     @classmethod
+@@ -1300,7 +1300,8 @@
+ 
+     @property
+     def free_symbols(self):
+-        return self.poly.free_symbols | self.fun.free_symbols
++        poly_syms = self.poly.free_symbols - {self.poly.gen}
++        return poly_syms | self.fun.free_symbols
+ 
+     @property
+     def is_commutative(self):

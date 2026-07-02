@@ -1,0 +1,19 @@
+diff --git a/astropy/coordinates/spectral_coordinate.py b/astropy/coordinates/spectral_coordinate.py
+--- a/astropy/coordinates/spectral_coordinate.py
++++ b/astropy/coordinates/spectral_coordinate.py
+@@ -64,11 +64,10 @@
+             return squantity / doppler_factor
+         case u.physical.velocity:
+             return (squantity.to(u.Hz) / doppler_factor).to(squantity.unit)
+-    else:  # pragma: no cover
+-        raise RuntimeError(
+-            f"Unexpected units in velocity shift: {squantity.unit}. This should not"
+-            " happen, so please report this in the astropy issue tracker!"
+-        )
++    raise RuntimeError(  # pragma: no cover
++        f"Unexpected units in velocity shift: {squantity.unit}. This should not"
++        " happen, so please report this in the astropy issue tracker!"
++    )
+ 
+ 
+ def update_differentials_to_match(

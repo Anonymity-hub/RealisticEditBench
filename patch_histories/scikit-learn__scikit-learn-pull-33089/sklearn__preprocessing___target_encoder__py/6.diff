@@ -1,0 +1,33 @@
+diff --git a/sklearn/preprocessing/_target_encoder.py b/sklearn/preprocessing/_target_encoder.py
+--- a/sklearn/preprocessing/_target_encoder.py
++++ b/sklearn/preprocessing/_target_encoder.py
+@@ -333,6 +333,29 @@
+             random_state=self.random_state,
+         )
+ 
++        if _routing_enabled():
++            if params["groups"] is not None:
++                X, y, params["groups"] = indexable(X, y, params["groups"])
++            routed_params = process_routing(self, "fit_transform", **params)
++        else:
++            routed_params = Bunch(splitter=Bunch(split={}))
++
++        # The internal cross-fitting is only well-defined when each sample index
++        # appears in exactly one validation fold. Skip the validation check for
++        # known non-overlapping splitters in scikit-learn:
++        if not isinstance(
++            cv, (GroupKFold, KFold, StratifiedKFold, StratifiedGroupKFold)
++        ):
++            seen_count = np.zeros(X.shape[0])
++            for _, test_idx in cv.split(X, y, **routed_params.splitter.split):
++                seen_count[test_idx] += 1
++            if not np.all(seen_count == 1):
++                raise ValueError(
++                    "Validation indices from `cv` must cover each sample index exactly "
++                    "once with no overlap. Pass a splitter with non-overlapping "
++                    "validation folds as `cv` or refer to the docs for other options."
++                )
++
+         # If 'multiclass' multiply axis=1 by num classes else keep shape the same
+         if self.target_type_ == "multiclass":
+             X_out = np.empty(

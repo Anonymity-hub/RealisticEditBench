@@ -1,0 +1,16 @@
+diff --git a/sympy/matrices/decompositions.py b/sympy/matrices/decompositions.py
+--- a/sympy/matrices/decompositions.py
++++ b/sympy/matrices/decompositions.py
+@@ -1367,7 +1367,11 @@
+             if z is True:
+                 continue
+ 
+-            R[i, j] = dot(Q[:, i], Q[:, j]) / dot(Q[:, i], Q[:, i])
++            norm = dps(dot(Q[:, i], Q[:, i]))
++            if z is None and norm.equals(0):
++                continue
++
++            R[i, j] = dot(Q[:, i], Q[:, j]) / norm
+             R[i, j] = dps(R[i, j])
+             Q[:, j] -= Q[:, i] * R[i, j]
+ 

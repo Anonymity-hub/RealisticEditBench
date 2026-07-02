@@ -1,0 +1,13 @@
+diff --git a/django/core/serializers/base.py b/django/core/serializers/base.py
+--- a/django/core/serializers/base.py
++++ b/django/core/serializers/base.py
+@@ -209,6 +209,9 @@
+         if callable(getattr(self.stream, "getvalue", None)):
+             return self.stream.getvalue()
+ 
++    def _resolve_natural_key(self, obj):
++        pass
++
+ 
+ class Deserializer:
+     """

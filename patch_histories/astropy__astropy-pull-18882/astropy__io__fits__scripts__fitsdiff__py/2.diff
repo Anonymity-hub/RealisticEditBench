@@ -1,0 +1,13 @@
+diff --git a/astropy/io/fits/scripts/fitsdiff.py b/astropy/io/fits/scripts/fitsdiff.py
+--- a/astropy/io/fits/scripts/fitsdiff.py
++++ b/astropy/io/fits/scripts/fitsdiff.py
+@@ -415,7 +415,8 @@
+                     ignore_blank_cards=opts.ignore_blank_cards,
+                 )
+             except OSError:
+-                pass
++                identical.append(None)
++                continue
+             diff.report(fileobj=out_file)
+             identical.append(diff.identical)
+ 

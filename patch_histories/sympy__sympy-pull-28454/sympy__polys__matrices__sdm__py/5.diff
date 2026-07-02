@@ -1,0 +1,17 @@
+diff --git a/sympy/polys/matrices/sdm.py b/sympy/polys/matrices/sdm.py
+--- a/sympy/polys/matrices/sdm.py
++++ b/sympy/polys/matrices/sdm.py
+@@ -834,11 +834,11 @@
+         {0: {1: 6}, 1: {0: 3}}
+ 
+         """
+-        Csdm = unop_dict(A, lambda aij: aij*b)
++        Csdm = sdm_scalar_mul(A, b, lambda x, y: x * y, A.domain)
+         return A.new(Csdm, A.shape, A.domain)
+ 
+     def rmul(A, b):
+-        Csdm = unop_dict(A, lambda aij: b*aij)
++        Csdm = sdm_scalar_mul(A, b, lambda x, y: y * x, A.domain)
+         return A.new(Csdm, A.shape, A.domain)
+ 
+     def mul_elementwise(A, B):

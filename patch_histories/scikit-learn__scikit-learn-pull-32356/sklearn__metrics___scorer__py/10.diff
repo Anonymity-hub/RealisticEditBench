@@ -1,0 +1,12 @@
+diff --git a/sklearn/metrics/_scorer.py b/sklearn/metrics/_scorer.py
+--- a/sklearn/metrics/_scorer.py
++++ b/sklearn/metrics/_scorer.py
+@@ -828,6 +828,8 @@
+     neg_mean_poisson_deviance=neg_mean_poisson_deviance_scorer,
+     neg_mean_gamma_deviance=neg_mean_gamma_deviance_scorer,
+     d2_absolute_error_score=d2_absolute_error_scorer,
++    d2_log_loss_score=d2_log_loss_scorer,
++    d2_brier_score=d2_brier_score_scorer,
+     accuracy=accuracy_scorer,
+     top_k_accuracy=top_k_accuracy_scorer,
+     roc_auc=roc_auc_scorer,

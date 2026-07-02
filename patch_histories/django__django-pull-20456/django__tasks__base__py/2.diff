@@ -1,0 +1,11 @@
+diff --git a/django/tasks/base.py b/django/tasks/base.py
+--- a/django/tasks/base.py
++++ b/django/tasks/base.py
+@@ -138,6 +138,7 @@
+     queue_name=DEFAULT_TASK_QUEUE_NAME,
+     backend=DEFAULT_TASK_BACKEND_ALIAS,
+     takes_context=False,
++    **kwargs,
+ ):
+     from . import task_backends
+ 

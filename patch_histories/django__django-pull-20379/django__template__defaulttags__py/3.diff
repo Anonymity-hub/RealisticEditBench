@@ -1,0 +1,13 @@
+diff --git a/django/template/defaulttags.py b/django/template/defaulttags.py
+--- a/django/template/defaulttags.py
++++ b/django/template/defaulttags.py
+@@ -1337,7 +1341,8 @@ def querystring(context, *args, **kwargs):
+             if value is None:
+                 params.pop(key, None)
+             elif isinstance(value, Iterable) and not isinstance(value, str):
+-                params.setlist(key, value)
++                # Drop None values; if no values remain, the key is removed.
++                params.setlist(key, [v for v in value if v is not None])
+             else:
+                 params[key] = value
+     query_string = params.urlencode() if params else ""

@@ -1,0 +1,12 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -314,7 +314,7 @@
+                         )
+                     get_select_from_parent(ki)
+ 
+-            get_select_from_parent(klass_info)
++            self.get_select_from_parent(klass_info)
+ 
+         ret = []
+         col_idx = 1

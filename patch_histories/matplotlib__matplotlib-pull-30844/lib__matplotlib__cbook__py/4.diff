@@ -1,0 +1,39 @@
+diff --git a/lib/matplotlib/cbook.py b/lib/matplotlib/cbook.py
+--- a/lib/matplotlib/cbook.py
++++ b/lib/matplotlib/cbook.py
+@@ -229,6 +229,9 @@
+         >>> callbacks.process('drink', 123)
+         drink 123
+ 
++        >>> callbacks.disconnect(ondrink, signal='drink')  # disconnect by func
++        >>> callbacks.process('drink', 123)      # nothing will be called
++
+     In practice, one should always disconnect all callbacks when they are
+     no longer needed to avoid dangling references (and thus memory leaks).
+     However, real code in Matplotlib rarely does so, and due to its design,
+@@ -360,15 +363,16 @@
+             else:  # Not found
+                 return
+             self._remove_proxy(sig, proxy)
+-
+-    def disconnect_func(self, signal, func):
+-        """
+-        Disconnect the callback for *func* registered to *signal*.
+-
+-        No error is raised if such a callback does not exist.
+-        """
+-        proxy = _weak_or_strong_ref(func, None)
+-        self._remove_proxy(signal, proxy)
++        elif signal is not None:
++            # Disconnect from a specific signal
++            proxy = _weak_or_strong_ref(cid_or_func, None)
++            self._remove_proxy(signal, proxy)
++        else:
++            # Disconnect from all signals
++            proxy = _weak_or_strong_ref(cid_or_func, None)
++            for sig, prx in list(self._func_cid_map):
++                if prx == proxy:
++                    self._remove_proxy(sig, proxy)
+ 
+     def process(self, s, *args, **kwargs):
+         """

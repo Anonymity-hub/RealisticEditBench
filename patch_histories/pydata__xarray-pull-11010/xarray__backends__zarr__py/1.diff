@@ -1,0 +1,29 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -30,6 +30,7 @@
+ from xarray.core.utils import (
+     FrozenDict,
+     HiddenKeyDict,
++    _default,
+     attempt_import,
+     close_on_error,
+     emit_user_level_warning,
+@@ -1400,7 +1401,7 @@
+     store,
+     group=None,
+     synchronizer=None,
+-    chunks="auto",
++    chunks=_default,
+     decode_cf=True,
+     mask_and_scale=True,
+     decode_times=True,
+@@ -1436,7 +1437,7 @@
+         Array synchronizer provided to zarr
+     group : str, optional
+         Group path. (a.k.a. `path` in zarr terminology.)
+-    chunks : int, dict, 'auto' or None, default: 'auto'
++    chunks : int, dict, "auto" or None, optional
+         If provided, used to load the data into dask arrays.
+ 
+         - ``chunks='auto'`` will use dask ``auto`` chunking taking into account the

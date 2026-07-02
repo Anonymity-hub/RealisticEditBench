@@ -1,0 +1,20 @@
+diff --git a/xarray/core/formatting.py b/xarray/core/formatting.py
+--- a/xarray/core/formatting.py
++++ b/xarray/core/formatting.py
+@@ -1101,10 +1101,12 @@
+     ):
+         summary.append(data_diff)
+ 
+-    if compat == "identical" and (
+-        attrs_diff := diff_attrs_repr(a.attrs, b.attrs, compat)
+-    ):
+-        summary.append(attrs_diff)
++    if compat == "identical":
++        if indexes_diff := diff_indexes_repr(a.xindexes, b.xindexes):
++            summary.append(indexes_diff)
++
++        if attrs_diff := diff_attrs_repr(a.attrs, b.attrs, compat):
++            summary.append(attrs_diff)
+ 
+     return "\n".join(summary)
+ 

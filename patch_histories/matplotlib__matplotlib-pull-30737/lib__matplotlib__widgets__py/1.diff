@@ -1,0 +1,20 @@
+diff --git a/lib/matplotlib/widgets.py b/lib/matplotlib/widgets.py
+--- a/lib/matplotlib/widgets.py
++++ b/lib/matplotlib/widgets.py
+@@ -2021,11 +2021,12 @@
+     See :doc:`/gallery/widgets/multicursor`.
+     """
+ 
+-    def __init__(self, canvas, axes, *, useblit=True, horizOn=False, vertOn=True,
++    def __init__(self, *args, useblit=True, horizOn=False, vertOn=True,
+                  **lineprops):
+-        # canvas is stored only to provide the deprecated .canvas attribute;
+-        # once it goes away the unused argument won't need to be stored at all.
+-        self._canvas = canvas
++        # Deprecation of canvas as the first attribute. When the deprecation expires:
++        # - change the signature to __init__(self, axes, *, ...)
++        # - delete the "Call signatures" block in the docstring
++        # - delete this block
+ 
+         self.axes = axes
+         self.horizOn = horizOn

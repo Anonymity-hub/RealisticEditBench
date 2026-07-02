@@ -1,0 +1,30 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -134,7 +134,7 @@
+         else:
+             is_final = False
+ 
+-        result = self.directive.result
++        result = self.result
+         analyzer_source = '' if self.analyzer is None else self.analyzer.srcname
+         source_name = _docstring_source_name(props=self.props, source=analyzer_source)
+         for line in _directive_header_lines(
+@@ -168,7 +168,7 @@
+         )
+         _add_content(
+             processed_doc,
+-            result=self.directive.result,
++            result=self.result,
+             indent=indent + '   ',
+         )
+ 
+@@ -181,7 +181,7 @@
+         )
+         _add_content(
+             more_content,
+-            result=self.directive.result,
++            result=self.result,
+             indent=indent + '   ' * (self.props.obj_type != 'module'),
+         )
+ 

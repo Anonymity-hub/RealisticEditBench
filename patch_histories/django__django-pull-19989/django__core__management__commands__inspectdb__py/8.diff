@@ -1,0 +1,31 @@
+diff --git a/django/core/management/commands/inspectdb.py b/django/core/management/commands/inspectdb.py
+--- a/django/core/management/commands/inspectdb.py
++++ b/django/core/management/commands/inspectdb.py
+@@ -4,6 +4,7 @@
+ from django.core.management.base import BaseCommand, CommandError
+ from django.db import DEFAULT_DB_ALIAS, connections
+ from django.db.models.constants import LOOKUP_SEP
++from django.db.models.deletion import DatabaseOnDelete
+ 
+ 
+ class Command(BaseCommand):
+@@ -163,7 +164,9 @@ def handle_inspection(self, options):
+                         extra_params["unique"] = True
+ 
+                     if is_relation:
+-                        ref_db_column, ref_db_table = relations[column_name]
++                        ref_db_column, ref_db_table, db_on_delete = relations[
++                            column_name
++                        ]
+                         if extra_params.pop("unique", False) or extra_params.get(
+                             "primary_key"
+                         ):
+@@ -191,6 +194,8 @@ def handle_inspection(self, options):
+                                 model_name.lower(),
+                                 att_name,
+                             )
++                        if db_on_delete and isinstance(db_on_delete, DatabaseOnDelete):
++                            extra_params["on_delete"] = f"models.{db_on_delete}"
+                         used_relations.add(rel_to)
+                     else:
+                         # Calling `get_field_type` to get the field type string

@@ -1,0 +1,18 @@
+diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py
+--- a/sphinx/ext/napoleon/docstring.py
++++ b/sphinx/ext/napoleon/docstring.py
+@@ -356,7 +356,13 @@ def __init__(
+         self._what = what
+         self._name = name
+         self._obj = obj
+-        self._opt = options
++        if options:
++            try:
++                self._no_index = options.no_index or options.noindex
++            except (AttributeError, TypeError):
++                self._no_index = False
++        else:
++            self._no_index = False
+         if isinstance(docstring, str):
+             lines = docstring.splitlines()
+         else:

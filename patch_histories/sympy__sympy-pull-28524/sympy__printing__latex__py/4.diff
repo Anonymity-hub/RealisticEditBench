@@ -1,0 +1,18 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -830,12 +830,12 @@
+             precedence += 1
+         if any(i.could_extract_minus_sign() for i in expr.args):
+             return r"%s %s" % (tex, self.parenthesize(expr.expr,
+-                                                  PRECEDENCE["Mul"],
++                                                  precedence,
+                                                   is_neg=True,
+                                                   strict=True))
+ 
+         return r"%s %s" % (tex, self.parenthesize(expr.expr,
+-                                                  PRECEDENCE["Mul"],
++                                                  precedence,
+                                                   is_neg=False,
+                                                   strict=True))
+ 

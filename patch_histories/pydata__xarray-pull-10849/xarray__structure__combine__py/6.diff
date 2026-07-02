@@ -1,0 +1,44 @@
+diff --git a/xarray/structure/combine.py b/xarray/structure/combine.py
+--- a/xarray/structure/combine.py
++++ b/xarray/structure/combine.py
+@@ -468,7 +468,7 @@
+ 
+     Parameters
+     ----------
+-    datasets : list or nested list of Dataset
++    datasets : list or nested list of Dataset or DataTree
+         Dataset objects to combine.
+         If concatenation or merging along more than one dimension is desired,
+         then datasets must be supplied in a nested list-of-lists.
+@@ -562,7 +562,7 @@
+ 
+     Returns
+     -------
+-    combined : xarray.Dataset
++    combined : xarray.Dataset or xarray.DataTree
+ 
+     Examples
+     --------
+@@ -656,14 +656,18 @@
+     concat
+     merge
+     """
+-    mixed_datasets_and_arrays = any(
+-        isinstance(obj, Dataset) for obj in iterate_nested(datasets)
+-    ) and any(
++    any_datasets = any(isinstance(obj, Dataset) for obj in iterate_nested(datasets))
++    any_unnamed_arrays = any(
+         isinstance(obj, DataArray) and obj.name is None
+         for obj in iterate_nested(datasets)
+     )
+-    if mixed_datasets_and_arrays:
++    if any_datasets and any_unnamed_arrays:
+         raise ValueError("Can't combine datasets with unnamed arrays.")
++
++    any_datatrees = any(isinstance(obj, DataTree) for obj in iterate_nested(datasets))
++    all_datatrees = all(isinstance(obj, DataTree) for obj in iterate_nested(datasets))
++    if any_datatrees and not all_datatrees:
++        raise ValueError("Can't combine a mix of DataTree and non-DataTree objects.")
+ 
+     if isinstance(concat_dim, str | DataArray) or concat_dim is None:
+         concat_dim = [concat_dim]

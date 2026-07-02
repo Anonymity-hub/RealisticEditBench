@@ -1,0 +1,12 @@
+diff --git a/sympy/polys/agca/extensions.py b/sympy/polys/agca/extensions.py
+--- a/sympy/polys/agca/extensions.py
++++ b/sympy/polys/agca/extensions.py
+@@ -347,6 +347,8 @@
+         except ExactQuotientFailed:
+             if not ring.domain.is_Field:
+                 raise
++            ginv = ring.invert(g.rep, self.mod)
++            rep = ring.mul(f.rep, ginv)
+         return ExtElem(rep % self.mod, self)
+ 
+     def is_negative(self, a):

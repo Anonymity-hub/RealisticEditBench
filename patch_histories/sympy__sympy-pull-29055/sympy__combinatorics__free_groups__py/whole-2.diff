@@ -1,0 +1,12 @@
+diff --git a/sympy/combinatorics/free_groups.py b/sympy/combinatorics/free_groups.py
+--- a/sympy/combinatorics/free_groups.py
++++ b/sympy/combinatorics/free_groups.py
+@@ -677,6 +677,8 @@ def eliminate_word(self, gen, by=None, _all=False, inverse=True):
+         """
+         if by is None:
+             by = self.group.identity
++        if not gen:
++            raise ValueError("gen must be a non-empty word")
+         if self.is_independent(gen) or gen == by:
+             return self
+         if gen == self:

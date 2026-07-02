@@ -1,0 +1,12 @@
+diff --git a/django/contrib/auth/checks.py b/django/contrib/auth/checks.py
+--- a/django/contrib/auth/checks.py
++++ b/django/contrib/auth/checks.py
+@@ -98,7 +98,7 @@ def check_user_model(app_configs, **kwargs):
+                 )
+             )
+ 
+-    if isinstance(cls().is_anonymous, MethodType):
++    if callable(cls().is_anonymous):
+         errors.append(
+             checks.Critical(
+                 "%s.is_anonymous must be an attribute or property rather than "

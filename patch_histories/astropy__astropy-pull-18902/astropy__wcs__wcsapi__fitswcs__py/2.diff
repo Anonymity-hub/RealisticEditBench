@@ -1,0 +1,36 @@
+diff --git a/astropy/wcs/wcsapi/fitswcs.py b/astropy/wcs/wcsapi/fitswcs.py
+--- a/astropy/wcs/wcsapi/fitswcs.py
++++ b/astropy/wcs/wcsapi/fitswcs.py
+@@ -597,19 +597,19 @@
+                         # likely to be fine and is a very common use case. It
+                         # is more important to emit a warning if one has
+                         # observer information and the other does not.
+-                        if not
+-                        if observer is None:
+-                            msg = "No observer defined on WCS"
+-                        elif spectralcoord.observer is None:
+-                            msg = "No observer defined on SpectralCoord"
+-                        else:
+-                            msg = "No target defined on SpectralCoord"
+-                        warnings.warn(
+-                            f"{msg}, SpectralCoord "
+-                            "will be converted without any velocity "
+-                            "frame change",
+-                            AstropyUserWarning,
+-                        )
++                        if not (observer is None and spectralcoord.observer is None):
++                            if observer is None:
++                                msg = "No observer defined on WCS"
++                            elif spectralcoord.observer is None:
++                                msg = "No observer defined on SpectralCoord"
++                            else:
++                                msg = "No target defined on SpectralCoord"
++                            warnings.warn(
++                                f"{msg}, SpectralCoord "
++                                "will be converted without any velocity "
++                                "frame change",
++                                AstropyUserWarning,
++                            )
+                         return spectralcoord.to_value(u.m) / self.wcs.restwav - 1.0
+                     else:
+                         return (

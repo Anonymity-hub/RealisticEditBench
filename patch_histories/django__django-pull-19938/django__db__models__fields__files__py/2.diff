@@ -1,0 +1,12 @@
+diff --git a/django/db/models/fields/files.py b/django/db/models/fields/files.py
+--- a/django/db/models/fields/files.py
++++ b/django/db/models/fields/files.py
+@@ -249,6 +249,8 @@
+         self._primary_key_set_explicitly = "primary_key" in kwargs
+ 
+         self.storage = storage
++        if storage is None:
++            self.storage = default_storage
+         if callable(self.storage):
+             # Hold a reference to the callable for deconstruct().
+             self._storage_callable = self.storage

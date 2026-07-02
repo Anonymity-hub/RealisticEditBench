@@ -1,0 +1,22 @@
+diff --git a/sklearn/utils/_plotting.py b/sklearn/utils/_plotting.py
+--- a/sklearn/utils/_plotting.py
++++ b/sklearn/utils/_plotting.py
+@@ -126,6 +126,7 @@
+         legend_metric,
+         legend_metric_name,
+         curve_kwargs,
++        default_curve_kwargs=None,
+         **kwargs,
+     ):
+         """Get validated line kwargs for each curve.
+@@ -151,6 +152,10 @@
+             parameters are applied to the curves sequentially. If a single
+             dictionary is provided, the same parameters are applied to all
+             curves.
++
++        default_curve_kwargs : dict, default=None
++            Default curve kwargs, to be added to all curves. Individual kwargs
++            are over-ridden by `curve_kwargs`, if kwarg also set in `curve_kwargs`.
+ 
+         **kwargs : dict
+             Deprecated. Keyword arguments to be passed to matplotlib's `plot`.

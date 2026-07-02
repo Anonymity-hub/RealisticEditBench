@@ -1,0 +1,27 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -2009,6 +2009,23 @@
+                 if field_name == "pk":
+                     return True
+ 
++                # Normalize attname references by using get_field().
++                try:
++                    field = opts.get_field(field_name)
++                except exceptions.FieldDoesNotExist:
++                    # Could be "?" for random ordering or a related field
++                    # lookup. Skip this part of introspection for now.
++                    continue
++                # Ordering by a related field name orders by the referenced
++                # model's ordering. Skip this part of introspection for now.
++                if field.remote_field and field_name == field.name:
++                    continue
++                if field.attname in pk_fields and len(pk_fields) == 1:
++                    return True
++                if field.unique and not field.null:
++                    return True
++                ordering_fields.add(field.attname)
++
+     @property
+     def db(self):
+         """Return the database used if this query is executed now."""

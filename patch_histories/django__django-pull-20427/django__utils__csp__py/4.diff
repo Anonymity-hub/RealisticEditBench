@@ -1,0 +1,13 @@
+diff --git a/django/utils/csp.py b/django/utils/csp.py
+--- a/django/utils/csp.py
++++ b/django/utils/csp.py
+@@ -73,9 +73,6 @@
+     def __init__(self):
+         super().__init__(generate_nonce)
+ 
+-    def _generate(self):
+-        return secrets.token_urlsafe(16)
+-
+     def __bool__(self):
+         return self._wrapped is not empty
+ 

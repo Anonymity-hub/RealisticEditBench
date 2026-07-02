@@ -1,0 +1,62 @@
+diff --git a/django/http/response.py b/django/http/response.py
+--- a/django/http/response.py
++++ b/django/http/response.py
+@@ -632,13 +632,20 @@ def set_headers(self, filelike):
+ class HttpResponseRedirectBase(HttpResponse):
+     allowed_schemes = ["http", "https", "ftp"]
+ 
+-    def __init__(self, redirect_to, preserve_request=False, *args, **kwargs):
++    def __init__(
++        self,
++        redirect_to,
++        preserve_request=False,
++        *args,
++        max_length=MAX_URL_REDIRECT_LENGTH,
++        **kwargs,
++    ):
+         super().__init__(*args, **kwargs)
+         self["Location"] = iri_to_uri(redirect_to)
+         redirect_to_str = str(redirect_to)
+-        if len(redirect_to_str) > MAX_URL_REDIRECT_LENGTH:
++        if max_length is not None and len(redirect_to_str) > max_length:
+             raise DisallowedRedirect(
+-                f"Unsafe redirect exceeding {MAX_URL_REDIRECT_LENGTH} characters"
++                f"Unsafe redirect exceeding {max_length} characters"
+             )
+         parsed = urlsplit(redirect_to_str)
+         if preserve_request:
+diff --git a/django/shortcuts.py b/django/shortcuts.py
+--- a/django/shortcuts.py
++++ b/django/shortcuts.py
+@@ -13,6 +13,7 @@
+ from django.template import loader
+ from django.urls import NoReverseMatch, reverse
+ from django.utils.functional import Promise
++from django.utils.http import MAX_URL_REDIRECT_LENGTH
+ from django.utils.translation import gettext as _
+ 
+ 
+@@ -27,7 +28,14 @@ def render(
+     return HttpResponse(content, content_type, status)
+ 
+ 
+-def redirect(to, *args, permanent=False, preserve_request=False, **kwargs):
++def redirect(
++    to,
++    *args,
++    permanent=False,
++    preserve_request=False,
++    max_length=MAX_URL_REDIRECT_LENGTH,
++    **kwargs,
++):
+     """
+     Return an HttpResponseRedirect to the appropriate URL for the arguments
+     passed.
+@@ -51,6 +59,7 @@ def redirect(to, *args, permanent=False, preserve_request=False, **kwargs):
+     return redirect_class(
+         resolve_url(to, *args, **kwargs),
+         preserve_request=preserve_request,
++        max_length=max_length,
+     )
+ 
+ 

@@ -1,0 +1,11 @@
+diff --git a/django/template/defaulttags.py b/django/template/defaulttags.py
+--- a/django/template/defaulttags.py
++++ b/django/template/defaulttags.py
+@@ -1327,6 +1327,7 @@ def querystring(context, *args, **kwargs):
+                 "querystring requires mappings for positional arguments (got "
+                 "%r instead)." % d
+             )
++        items = d.lists() if isinstance(d, QueryDict) else d.items()
+         for key, value in d.items():
+             if not isinstance(key, str):
+                 raise TemplateSyntaxError(

@@ -1,0 +1,20 @@
+diff --git a/astropy/nddata/ccddata.py b/astropy/nddata/ccddata.py
+--- a/astropy/nddata/ccddata.py
++++ b/astropy/nddata/ccddata.py
+@@ -704,6 +704,16 @@
+             if hdu_flags in hdus and not flag_extensions:
+                 # Simple case: single flags array
+                 flags = hdus[hdu_flags].data
++            elif flag_extensions:
++                # Multiple flag extensions - reconstruct FlagCollection
++                # Get the shape from the primary data
++                data_shape = hdus[hdu].data.shape
++                flags = FlagCollection(shape=data_shape)
++
++                for ext_name in flag_extensions:
++                    # Remove the prefix and underscore to get flag name
++                    flag_name = ext_name[len(hdu_flags) + 1 :]
++                    flags[flag_name] = hdus[ext_name].data
+             else:
+                 flags = None
+         else:

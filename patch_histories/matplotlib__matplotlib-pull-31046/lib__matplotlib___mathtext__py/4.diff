@@ -1,0 +1,49 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -1095,6 +1095,15 @@
+     def render(self, output: Output, x: float, y: float) -> None:
+         """Render this node."""
+ 
++    def is_char_node(self) -> bool:
++        # TeX defines a `char_node` as one which represents a single character,
++        # but also states that a `char_node` will never appear in a `Vlist`
++        # (node134). Further, nuclei made of one `Char` and nuclei made of
++        # multiple `Char`s have their superscripts and subscripts shifted by
++        # the same amount. In order to make Mathtext behave similarly, just
++        # check whether this node is a `Vlist` or has any `Vlist` descendants.
++        return True
++
+ 
+ class Box(Node):
+     """A node with a physical location."""
+@@ -1283,6 +1292,10 @@
+         if do_kern:
+             self.kern()
+         self.hpack(w=w, m=m)
++
++    def is_char_node(self) -> bool:
++        # See description in Node.is_char_node.
++        return all(map(lambda node: node.is_char_node(), self.children))
+ 
+     def kern(self) -> None:
+         """
+@@ -1374,6 +1387,10 @@
+                  m: T.Literal['additional', 'exactly'] = 'additional'):
+         super().__init__(elements)
+         self.vpack(h=h, m=m)
++
++    def is_char_node(self) -> bool:
++        # See description in Node.is_char_node.
++        return False
+ 
+     def vpack(self, h: float = 0.0,
+               m: T.Literal['additional', 'exactly'] = 'additional',
+@@ -2191,6 +2208,7 @@
+             | p.text
+             | p.boldsymbol
+             | p.substack
++            | p.auto_delim
+         )
+ 
+         mdelim = r"\middle" - (p.delim("mdelim") | Error("Expected a delimiter"))

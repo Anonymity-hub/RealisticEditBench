@@ -1,0 +1,13 @@
+diff --git a/django/db/models/fields/files.py b/django/db/models/fields/files.py
+--- a/django/db/models/fields/files.py
++++ b/django/db/models/fields/files.py
+@@ -34,6 +34,9 @@ def __eq__(self, other):
+     def __hash__(self):
+         return hash(self.name)
+ 
++    def __bool__(self):
++        return bool(self.name)
++
+     # The standard File contains most of the necessary properties, but
+     # FieldFiles can be instantiated without a name, so that needs to
+     # be checked for here.

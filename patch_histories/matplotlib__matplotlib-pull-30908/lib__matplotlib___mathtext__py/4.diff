@@ -1,0 +1,41 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -2169,6 +2169,10 @@
+ 
+         p.customspace = cmd(r"\hspace", "{" + p.float_literal("space") + "}")
+ 
++        p.phantom = cmd(r"\phantom", p.optional_group("value"))
++        p.llap = cmd(r"\llap", p.optional_group("value"))
++        p.rlap = cmd(r"\rlap", p.optional_group("value"))
++
+         p.accent = (
+             csnames("accent", [*self._accent_map, *self._wide_accents])
+             - p.named_placeable("sym"))
+@@ -2235,7 +2239,8 @@
+             r"\boldsymbol", "{" + ZeroOrMore(p.simple)("value") + "}")
+ 
+         p.placeable     <<= (
+-            p.accent     # Must be before symbol as all accents are symbols
++            p.phantom | p.llap | p.rlap
++            | p.accent   # Must be before symbol as all accents are symbols
+             | p.symbol   # Must be second to catch all named symbols and single
+                          # chars not in a group
+             | p.function
+@@ -2428,6 +2433,16 @@
+ 
+     def unknown_symbol(self, s: str, loc: int, toks: ParseResults) -> T.Any:
+         raise ParseFatalException(s, loc, f"Unknown symbol: {toks['name']}")
++
++    def phantom(self, toks: ParseResults) -> T.Any:
++        toks["value"].is_phantom = True
++        return toks["value"]
++
++    def llap(self, toks: ParseResults) -> T.Any:
++        return [Hlist([Kern(-toks["value"].width), toks["value"]])]
++
++    def rlap(self, toks: ParseResults) -> T.Any:
++        return [Hlist([toks["value"], Kern(-toks["value"].width)])]
+ 
+     _accent_map = {
+         r'hat':            r'\circumflexaccent',

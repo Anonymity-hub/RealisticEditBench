@@ -1,0 +1,15 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -1717,6 +1717,11 @@ def ship(box: Box, xy: tuple[float, float] = (0, 0)) -> Output:
+     off_v = oy + box.height
+     output = Output(box)
+ 
++    phantom: list[bool] = []
++    def render(node, *args):
++        if not any(phantom):
++            node.render(*args)
++
+     def clamp(value: float) -> float:
+         return -1e9 if value < -1e9 else +1e9 if value > +1e9 else value
+ 

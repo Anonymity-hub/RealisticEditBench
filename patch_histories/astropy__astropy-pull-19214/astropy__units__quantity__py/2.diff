@@ -1,0 +1,27 @@
+diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py
+--- a/astropy/units/quantity.py
++++ b/astropy/units/quantity.py
+@@ -257,6 +257,23 @@
+     ([eE][+-]?\d+)?
+     [.+-]?
+ """
++# List of numbers separated by "," or whitespace.
++VECTOR_COMMA: Final = rf"""
++    \[\s*
++    {NUM}
++    (?: (\s*,\s*){NUM})*
++    (\s*,\s*)?
++    \s*\]
++"""
++VECTOR_WSPACE: Final = rf"""
++    \[\s*
++    {NUM}
++    (?: (\s+){NUM})*
++    \s*\]
++"""
++VECTOR_1D: Final = rf"{VECTOR_COMMA} | {VECTOR_WSPACE}"
++NUMBER_PATTERN: Final = re.compile(rf"\s*(?:{NUM}|{VECTOR_1D})\s*", re.VERBOSE)
++
+ 
+ class Quantity(np.ndarray):
+     """A `~astropy.units.Quantity` represents a number with some associated unit.

@@ -1,0 +1,12 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -3607,7 +3607,7 @@
+     """
+     xp_y_true, _ = get_namespace(y_true)
+     y_true_pos = xp_y_true.asarray(y_true == pos_label, dtype=xp_y_true.int64)
+-    y_true_pos = target_xp.asarray(y_true_pos, device=target_device)
++    y_true_pos = move_to(y_true_pos, xp=target_xp, device=target_device)
+     return target_xp.stack((1 - y_true_pos, y_true_pos), axis=1)
+ 
+ 

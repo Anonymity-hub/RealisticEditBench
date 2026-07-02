@@ -1,0 +1,24 @@
+diff --git a/sklearn/ensemble/_gb.py b/sklearn/ensemble/_gb.py
+--- a/sklearn/ensemble/_gb.py
++++ b/sklearn/ensemble/_gb.py
+@@ -52,7 +52,7 @@
+ from sklearn.tree import DecisionTreeRegressor
+ from sklearn.tree._tree import DOUBLE, DTYPE, TREE_LEAF
+ from sklearn.utils import check_array, check_random_state, column_or_1d
+-from sklearn.utils._param_validation import HasMethods, Interval, StrOptions
++from sklearn.utils._param_validation import HasMethods, Hidden, Interval, StrOptions
+ from sklearn.utils.multiclass import check_classification_targets
+ from sklearn.utils.stats import _weighted_percentile
+ from sklearn.utils.validation import (
+@@ -365,7 +365,10 @@
+         **DecisionTreeRegressor._parameter_constraints,
+         "learning_rate": [Interval(Real, 0.0, None, closed="left")],
+         "n_estimators": [Interval(Integral, 1, None, closed="left")],
+-        "criterion": [StrOptions({"friedman_mse", "squared_error"})],
++        "criterion": [
++            StrOptions({"squared_error"}),
++            Hidden(StrOptions({"deprecated", "friedman_mse"})),
++        ],
+         "subsample": [Interval(Real, 0.0, 1.0, closed="right")],
+         "verbose": ["verbose"],
+         "warm_start": ["boolean"],

@@ -1,0 +1,11 @@
+diff --git a/sympy/combinatorics/pc_groups.py b/sympy/combinatorics/pc_groups.py
+--- a/sympy/combinatorics/pc_groups.py
++++ b/sympy/combinatorics/pc_groups.py
+@@ -705,6 +705,6 @@
+                 h = gen**(-f)*h
+                 e[i] = f
+                 d = self.depth(h)
+-        if h == 1:
++        if h.is_identity:
+             return e
+         return False

@@ -1,0 +1,29 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -729,18 +729,16 @@
+         member_documenters: list[tuple[Documenter, bool]] = []
+         for member_name, member, is_attr in filtered_members:
+             # prefer the documenter with the highest priority
+-            doccls = max(
+-                (
+-                    cls
+-                    for cls in registry.documenters.values()
+-                    if cls.can_document_member(member, member_name, is_attr, self)
+-                ),
+-                key=lambda cls: cls.priority,
+-                default=None,
++            obj_type = _best_object_type_for_member(
++                member=member,
++                member_name=member_name,
++                is_attr=is_attr,
++                parent_documenter=self,
+             )
+-            if doccls is None:
++            if not obj_type:
+                 # don't know how to document this member
+                 continue
++            doccls = registry.documenters[obj_type]
+             # give explicitly separated module name, so that members
+             # of inner classes can be documented
+             module_prefix = f'{props.module_name}::'

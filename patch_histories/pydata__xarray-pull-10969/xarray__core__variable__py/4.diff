@@ -1,0 +1,20 @@
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -1469,7 +1469,7 @@
+         if self.dims == expanded_dims:
+             # don't use broadcast_to unless necessary so the result remains
+             # writeable if possible
+-            expanded_data = self.data
++            expanded_data = self._data
+         elif shape is None or all(
+             s == 1 for s, e in zip(shape, dim, strict=True) if e not in self_dims
+         ):
+@@ -1477,6 +1477,7 @@
+             # This is typically easier for duck arrays to implement
+             # than the full "broadcast_to" semantics
+             indexer = (None,) * (len(expanded_dims) - self.ndim) + (...,)
++            # TODO: switch this to ._data once we teach ExplicitlyIndexed arrays to handle indexers with None.
+             expanded_data = self.data[indexer]
+         else:  # elif shape is not None:
+             dims_map = dict(zip(dim, shape, strict=True))

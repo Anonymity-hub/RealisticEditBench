@@ -1,0 +1,14 @@
+diff --git a/xarray/core/dataarray.py b/xarray/core/dataarray.py
+--- a/xarray/core/dataarray.py
++++ b/xarray/core/dataarray.py
+@@ -4928,7 +4928,9 @@
+         other_coords = getattr(other, "coords", None)
+         other_variable = getattr(other, "variable", other)
+         try:
+-            with self.coords._merge_inplace(other_coords):
++            with self.coords._merge_inplace(
++                other_coords, compat=OPTIONS["arithmetic_compat"]
++            ):
+                 f(self.variable, other_variable)
+         except MergeError as exc:
+             raise MergeError(

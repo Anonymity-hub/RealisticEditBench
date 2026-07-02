@@ -1,0 +1,15 @@
+diff --git a/sympy/parsing/sympy_parser.py b/sympy/parsing/sympy_parser.py
+--- a/sympy/parsing/sympy_parser.py
++++ b/sympy/parsing/sympy_parser.py
+@@ -1202,6 +1202,11 @@
+ 
+                 if rev:  # undo reversal
+                     left, right = right, left
++
++                # Check if numerator is 1, if yes, directly returns Pow(denom, -1)
++                temp_node = ast.parse("lambda n, d: d if n == 1 else (Mul(*n.args, d, evaluate=False) \
++                                      if isinstance(n, Mul) else Mul(n, d, evaluate=False))").body[0].value
++
+             new_node = ast.Call(
+                 func=ast.Name(id=sympy_class, ctx=ast.Load()),
+                 args=[left, right],

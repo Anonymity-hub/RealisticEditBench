@@ -1,0 +1,24 @@
+diff --git a/astropy/table/index.py b/astropy/table/index.py
+--- a/astropy/table/index.py
++++ b/astropy/table/index.py
+@@ -222,6 +222,9 @@
+     from . import QTable, Table
+ 
+ 
++ENGINE_CLS_DEFAULT = SortedArray
++
++
+ @runtime_checkable
+ class IndexEngine(Protocol):
+     """Protocol defining an index engine class"""
+@@ -285,9 +288,8 @@ def __init__(self, columns, engine=None, unique=False):
+         if columns is not None:
+             columns = list(columns)
+ 
+-        # by default, use SortedArray
+         if engine is None:
+-            engine = SortedArray
++            engine = ENGINE_CLS_DEFAULT
+ 
+         # Validate engine. This catches an easy mistake of `t.add_index("a", "b")`.
+         engine_cls = engine if isinstance(engine, type) else engine.__class__

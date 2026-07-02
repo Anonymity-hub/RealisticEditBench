@@ -1,0 +1,18 @@
+diff --git a/sklearn/utils/_plotting.py b/sklearn/utils/_plotting.py
+--- a/sklearn/utils/_plotting.py
++++ b/sklearn/utils/_plotting.py
+@@ -106,14 +106,6 @@
+                 f"The target `y` is not binary. Got {type_of_target(y)} type of target."
+             )
+         check_consistent_length(X, y, sample_weight)
+-
+-        try:
+-            pos_label = _check_pos_label_consistency(pos_label, y)
+-        except ValueError as e:
+-            # Adapt error message
+-            raise ValueError(str(e).replace("y_true", "y"))
+-
+-        return pos_label
+ 
+     @staticmethod
+     def _get_legend_label(curve_legend_metric, curve_name, legend_metric_name):

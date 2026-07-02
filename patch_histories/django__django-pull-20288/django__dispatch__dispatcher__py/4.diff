@@ -1,0 +1,12 @@
+diff --git a/django/dispatch/dispatcher.py b/django/dispatch/dispatcher.py
+--- a/django/dispatch/dispatcher.py
++++ b/django/dispatch/dispatcher.py
+@@ -253,7 +253,7 @@
+         if async_receivers:
+ 
+             async def asend():
+-                async_responses = await _gather(
++                async_responses = await _run_parallel(
+                     *(
+                         receiver(signal=self, sender=sender, **named)
+                         for receiver in async_receivers

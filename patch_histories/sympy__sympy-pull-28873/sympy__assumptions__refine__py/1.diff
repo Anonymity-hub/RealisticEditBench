@@ -1,0 +1,50 @@
+diff --git a/sympy/assumptions/refine.py b/sympy/assumptions/refine.py
+--- a/sympy/assumptions/refine.py
++++ b/sympy/assumptions/refine.py
+@@ -403,6 +403,46 @@
+             return expr
+         return MatrixElement(matrix, j, i)
+ 
++
++def refine_sin_cos(expr, assumptions):
++    """
++    Handler for sin and cos functions.
++
++    Examples
++    ========
++
++    >>> from sympy.assumptions.refine import refine_sin_cos
++    >>> from sympy import Symbol, Q, sin, cos, pi
++    >>> from sympy.abc import x, y
++    >>> n = Symbol('n')
++    >>> refine_sin_cos(cos(n*pi), Q.even(n))
++    (-1)**n
++    >>> refine_sin_cos(sin(n*pi/2), Q.odd(n) & Q.odd((n-1)/2))
++    (-1)**(n/2 - 1/2)
++    >>> refine_sin_cos(sin(x + n*pi/2), Q.odd(n))
++    (-1)**(n/2 - 1/2)*cos(x)
++    >>> refine_sin_cos(cos(x + n*pi/2), Q.even(n))
++    (-1)**(n/2)*cos(x)
++    >>> refine_sin_cos(cos(x + y + 2*n*pi), Q.integer(n))
++    (-1)**(2*n)*cos(x + y)
++    """
++    from sympy.functions.elementary.trigonometric import sin, cos
++    arg = expr.args[0]
++
++    integer_coeffs_of_pi_half = []
++    remaining_terms = []
++
++    terms = arg.args if arg.is_Add else (arg,)
++    for term in terms:
++        coeff_of_pi = term.coeff(S.Pi)
++        if coeff_of_pi and ask(Q.integer(2 * coeff_of_pi), assumptions):
++            coeff_of_pi_half = 2 * coeff_of_pi
++            integer_coeffs_of_pi_half.append(coeff_of_pi_half)
++        else:
++            remaining_terms.append(term)
++
++    if not integer_coeffs_of_pi_half:
++        return expr
+ handlers_dict: dict[str, Callable[[Basic, Boolean | bool], Expr]] = {
+     'Abs': refine_abs,
+     'Pow': refine_Pow,

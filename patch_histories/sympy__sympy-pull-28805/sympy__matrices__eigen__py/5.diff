@@ -1,0 +1,13 @@
+diff --git a/sympy/matrices/eigen.py b/sympy/matrices/eigen.py
+--- a/sympy/matrices/eigen.py
++++ b/sympy/matrices/eigen.py
+@@ -245,6 +245,9 @@
+ ) -> list[Expr]:
+     vals_dict = _eigenvals_dict(M, error_when_incomplete, simplify, **flags)
+     vals = []
++    for val, mult in vals_dict.items():
++        vals.extend([val] * mult)
++    return vals
+ 
+ 
+ def _eigenvals_dict(

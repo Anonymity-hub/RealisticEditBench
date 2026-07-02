@@ -1,0 +1,24 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -331,16 +331,16 @@
+         Handle a <field> node for a ForeignKey
+         """
+         # Check if there is a child node named 'None', returning None if so.
+-        if node.getElementsByTagName("None"):
++        natural_keys = node.getElementsByTagName("natural")
++        if node.getElementsByTagName("None") and not natural_keys:
+             return None
+         else:
+             model = field.remote_field.model
+             if hasattr(model._default_manager, "get_by_natural_key"):
+-                keys = node.getElementsByTagName("natural")
+-                if keys:
++                if natural_keys:
+                     # If there are 'natural' subelements, it must be a natural
+                     # key
+-                    field_value = [getInnerText(k).strip() for k in keys]
++                    field_value = [getInnerText(k).strip() for k in natural_keys]
+                     try:
+                         obj = model._default_manager.db_manager(
+                             self.db

@@ -1,0 +1,26 @@
+diff --git a/sklearn/linear_model/_logistic.py b/sklearn/linear_model/_logistic.py
+--- a/sklearn/linear_model/_logistic.py
++++ b/sklearn/linear_model/_logistic.py
+@@ -749,7 +749,13 @@
+ 
+     scores = list()
+ 
++    # Prepare the call to get the score per fold: calc_score
+     scoring = get_scorer(scoring)
++    if scoring is None:
++
++        def calc_score(log_reg):
++            return log_reg.score(X_test, y_test, sample_weight=sw_test)
++
+     for w, C in zip(coefs, Cs):
+         log_reg.C = C
+         if fit_intercept:
+@@ -760,7 +766,7 @@
+             log_reg.intercept_ = 0.0
+ 
+         if scoring is None:
+-            scores.append(log_reg.score(X_test, y_test, sample_weight=sw_test))
++            scores.append(calc_score(log_reg))
+         else:
+             score_params = score_params or {}
+             score_params = _check_method_params(X=X, params=score_params, indices=test)

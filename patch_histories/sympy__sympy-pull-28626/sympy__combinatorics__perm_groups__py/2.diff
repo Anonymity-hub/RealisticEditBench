@@ -1,0 +1,13 @@
+diff --git a/sympy/combinatorics/perm_groups.py b/sympy/combinatorics/perm_groups.py
+--- a/sympy/combinatorics/perm_groups.py
++++ b/sympy/combinatorics/perm_groups.py
+@@ -5060,6 +5060,9 @@
+         """
+         if not N.is_normal(self):
+             raise ValueError("N must be a normal subgroup of G")
++        else:
++            t = self.coset_table(N)
++
+ 
+ def _orbit(degree, generators, alpha, action='tuples'):
+     r"""Compute the orbit of alpha `\{g(\alpha) | g \in G\}` as a set.

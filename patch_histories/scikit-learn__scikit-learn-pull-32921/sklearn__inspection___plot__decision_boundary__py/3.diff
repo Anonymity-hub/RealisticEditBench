@@ -1,0 +1,14 @@
+diff --git a/sklearn/inspection/_plot/decision_boundary.py b/sklearn/inspection/_plot/decision_boundary.py
+--- a/sklearn/inspection/_plot/decision_boundary.py
++++ b/sklearn/inspection/_plot/decision_boundary.py
+@@ -497,9 +497,7 @@
+                 columns=X.columns,
+             )
+ 
+-        prediction_method = _check_boundary_response_method(
+-            estimator, response_method
+-        )
++        prediction_method = _check_boundary_response_method(estimator, response_method)
+         try:
+             response, _, response_method_used = _get_response_values(
+                 estimator,

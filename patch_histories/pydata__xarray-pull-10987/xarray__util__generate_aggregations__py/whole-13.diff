@@ -1,0 +1,22 @@
+diff --git a/xarray/util/generate_aggregations.py b/xarray/util/generate_aggregations.py
+--- a/xarray/util/generate_aggregations.py
++++ b/xarray/util/generate_aggregations.py
+@@ -35,6 +35,7 @@
+ from xarray.core.utils import contains_only_chunked_or_numpy, module_available
+ 
+ if TYPE_CHECKING:
++    from xarray.core.coordinates import DatasetCoordinates
+     from xarray.core.dataarray import DataArray
+     from xarray.core.dataset import Dataset
+ 
+@@ -88,6 +89,10 @@ def reduce(
+     ) -> Self:
+         raise NotImplementedError()
+ 
++    @property
++    def coords(self) -> DatasetCoordinates:
++        raise NotImplementedError()
++
+     def assign_coords(
+         self,
+         coords: Mapping | None = None,

@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -7326,7 +7326,7 @@ def hist(self, x, bins=None, range=None, density=False, weights=None,
+             Color or sequence of colors, one per dataset.  Default (``None``)
+             uses the standard line color sequence.
+ 
+-            .. versionadded:: 3.10.9
++            .. versionadded:: 3.10
+                It is now possible to use a single color with multiple datasets.
+ 
+         label : str or list of str, optional

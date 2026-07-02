@@ -1,0 +1,14 @@
+diff --git a/django/db/backends/mysql/introspection.py b/django/db/backends/mysql/introspection.py
+--- a/django/db/backends/mysql/introspection.py
++++ b/django/db/backends/mysql/introspection.py
+@@ -224,8 +224,8 @@
+             [table_name],
+         )
+         return {
+-            field_name: (other_field, other_table)
+-            for field_name, other_field, other_table in cursor.fetchall()
++            field_name: (other_field, other_table, self.on_delete_types.get(on_delete))
++            for field_name, other_field, other_table, on_delete in cursor.fetchall()
+         }
+ 
+     def get_storage_engine(self, cursor, table_name):

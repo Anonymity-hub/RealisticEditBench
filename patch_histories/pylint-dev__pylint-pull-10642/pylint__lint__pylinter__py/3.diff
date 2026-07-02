@@ -1,0 +1,22 @@
+diff --git a/pylint/lint/pylinter.py b/pylint/lint/pylinter.py
+--- a/pylint/lint/pylinter.py
++++ b/pylint/lint/pylinter.py
+@@ -517,6 +517,18 @@
+         if not getattr(checker, "enabled", True):
+             self.disable(checker.name)
+ 
++    def _deregister_checkers(
++        self, checker_collection: Collection[tuple[str, checkers.BaseChecker, int]]
++    ) -> None:
++        """De-registered a collection of checkers with its reports.
++
++        Leave messages in place as re-registering them is a no-op.
++        """
++        for checker_name, checker, _ in checker_collection:
++            self._checkers[checker_name].remove(checker)
++            if checker.reports:
++                self.deregister_reports(checker)
++
+     def enable_fail_on_messages(self) -> None:
+         """Enable 'fail on' msgs.
+ 

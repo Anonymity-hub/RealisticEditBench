@@ -1,0 +1,12 @@
+diff --git a/sklearn/utils/_array_api.py b/sklearn/utils/_array_api.py
+--- a/sklearn/utils/_array_api.py
++++ b/sklearn/utils/_array_api.py
+@@ -572,7 +572,7 @@
+                     # kwargs in the from_dlpack method and their expected
+                     # meaning by namespaces implementing the array API spec.
+                     # TODO: try removing this once DLPack v1 more widely supported
+-                    # TODO: ValueError should not be needed but is in practice:
++                    # TODO: ValueError not needed once min NumPy >=2.4.0:
+                     # https://github.com/numpy/numpy/issues/30341
+                 except (
+                     AttributeError,

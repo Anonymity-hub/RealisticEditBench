@@ -1,0 +1,11 @@
+diff --git a/django/contrib/admin/templatetags/admin_modify.py b/django/contrib/admin/templatetags/admin_modify.py
+--- a/django/contrib/admin/templatetags/admin_modify.py
++++ b/django/contrib/admin/templatetags/admin_modify.py
+@@ -51,6 +51,7 @@ def prepopulated_fields_js(context):
+ @register.tag(name="prepopulated_fields_js")
+ def prepopulated_fields_js_tag(parser, token):
+     return InclusionAdminNode(
++        "prepopulated_fields_js",
+         parser,
+         token,
+         func=prepopulated_fields_js,

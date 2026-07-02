@@ -1,0 +1,28 @@
+diff --git a/xarray/structure/combine.py b/xarray/structure/combine.py
+--- a/xarray/structure/combine.py
++++ b/xarray/structure/combine.py
+@@ -407,8 +407,22 @@
+     return combined
+ 
+ 
+-# Define type for arbitrarily-nested list of lists recursively:
+-DATASET_HYPERCUBE = Union[Dataset, Iterable["DATASET_HYPERCUBE"]]
++# Define types for arbitrarily-nested list of lists
++DatasetHyperCube: TypeAlias = Dataset | Sequence["DatasetHyperCube"]
++DataTreeHyperCube: TypeAlias = DataTree | Sequence["DataTreeHyperCube"]
++
++
++@overload
++def combine_nested(
++    datasets: DatasetHyperCube,
++    concat_dim: str | DataArray | Sequence[str | DataArray | pd.Index | None] | None,
++    compat: str | CombineKwargDefault = ...,
++    data_vars: str | CombineKwargDefault = ...,
++    coords: str | CombineKwargDefault = ...,
++    fill_value: object = ...,
++    join: JoinOptions | CombineKwargDefault = ...,
++    combine_attrs: CombineAttrsOptions = ...,
++) -> Dataset: ...
+ 
+ 
+ def combine_nested(

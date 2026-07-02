@@ -1,0 +1,57 @@
+diff --git a/examples/neighbors/approximate_nearest_neighbors.py b/examples/neighbors/approximate_nearest_neighbors.py
+--- a/examples/neighbors/approximate_nearest_neighbors.py
++++ b/examples/neighbors/approximate_nearest_neighbors.py
+@@ -121,7 +121,7 @@ def load_mnist(n_samples):
+     ("MNIST_20000", load_mnist(n_samples=20_000)),
+ ]
+ 
+-n_iter = 500
++max_iter = 500
+ perplexity = 30
+ metric = "euclidean"
+ # TSNE requires a certain number of neighbors which depends on the
+@@ -130,11 +130,11 @@ def load_mnist(n_samples):
+ n_neighbors = int(3.0 * perplexity + 1) + 1
+ 
+ tsne_params = dict(
+-    init="random",  # pca not supported for sparse matrices
++    init="random",  # pca cannot be used with precomputed distances
+     perplexity=perplexity,
+     method="barnes_hut",
+     random_state=42,
+-    n_iter=n_iter,
++    max_iter=max_iter,
+     learning_rate="auto",
+ )
+ 
+diff --git a/sklearn/manifold/_t_sne.py b/sklearn/manifold/_t_sne.py
+--- a/sklearn/manifold/_t_sne.py
++++ b/sklearn/manifold/_t_sne.py
+@@ -852,13 +852,6 @@ def _check_params_vs_input(self, X):
+     def _fit(self, X, skip_num_points=0):
+         """Private function to fit the model using X as training data."""
+ 
+-        if isinstance(self.init, str) and self.init == "pca" and issparse(X):
+-            raise TypeError(
+-                "PCA initialization is currently not supported "
+-                "with the sparse input matrix. Use "
+-                'init="random" instead.'
+-            )
+-
+         if self.learning_rate == "auto":
+             # See issue #18018
+             self.learning_rate_ = X.shape[0] / self.early_exaggeration / 4
+@@ -1009,7 +1002,6 @@ def _fit(self, X, skip_num_points=0):
+         elif self.init == "pca":
+             pca = PCA(
+                 n_components=self.n_components,
+-                svd_solver="randomized",
+                 random_state=random_state,
+             )
+             # Always output a numpy array, no matter what is configured globally
+@@ -1181,4 +1173,5 @@ def _n_features_out(self):
+     def __sklearn_tags__(self):
+         tags = super().__sklearn_tags__()
+         tags.input_tags.pairwise = self.metric == "precomputed"
++        tags.input_tags.sparse = True
+         return tags

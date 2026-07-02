@@ -1,0 +1,15 @@
+diff --git a/django/db/backends/sqlite3/operations.py b/django/db/backends/sqlite3/operations.py
+--- a/django/db/backends/sqlite3/operations.py
++++ b/django/db/backends/sqlite3/operations.py
+@@ -300,6 +300,11 @@
+                 value = parse_time(value)
+         return value
+ 
++    @staticmethod
++    def _create_decimal(value):
++        if isinstance(value, (int, str)):
++            return decimal.Decimal(value)
++
+     def get_decimalfield_converter(self, expression):
+         # SQLite stores only 15 significant digits. Digits coming from
+         # float inaccuracy must be removed.

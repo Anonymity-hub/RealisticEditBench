@@ -1,0 +1,31 @@
+diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py
+--- a/astropy/units/quantity.py
++++ b/astropy/units/quantity.py
+@@ -12,7 +12,7 @@
+ import warnings
+ from collections.abc import Collection
+ from fractions import Fraction
+-from typing import ClassVar, Self
++from typing import ClassVar, Final, Self
+ 
+ import numpy as np
+ 
+@@ -245,6 +245,18 @@
+         """
+         return [self._parent]
+ 
++
++# For parsing a string with a number or list of numbers and a unit.  The first
++# part of the regex string matches any integer/float; the second parts adds
++# possible trailing .+-, which will break the float function in
++# _parse_quantity_string and ensure things like 1.2.3deg won't work.
++NUM: Final = r"""
++    [+-]?
++    ((\d+\.?\d*)|(\.\d+)|([nN][aA][nN])|
++    ([iI][nN][fF]([iI][nN][iI][tT][yY]){0,1}))
++    ([eE][+-]?\d+)?
++    [.+-]?
++"""
+ 
+ class Quantity(np.ndarray):
+     """A `~astropy.units.Quantity` represents a number with some associated unit.

@@ -1,0 +1,24 @@
+diff --git a/django/dispatch/dispatcher.py b/django/dispatch/dispatcher.py
+--- a/django/dispatch/dispatcher.py
++++ b/django/dispatch/dispatcher.py
+@@ -20,6 +20,20 @@
+ 
+ # A marker for caching
+ NO_RECEIVERS = object()
++
++
++def _restore_context(context):
++    """
++    Check for changes in contextvars, and set them to the current
++    context for downstream consumers.
++    """
++    for cvar in context:
++        cvalue = context.get(cvar)
++        try:
++            if cvar.get() != cvalue:
++                cvar.set(cvalue)
++        except LookupError:
++            cvar.set(cvalue)
+ 
+ 
+ async def _gather(*coros):

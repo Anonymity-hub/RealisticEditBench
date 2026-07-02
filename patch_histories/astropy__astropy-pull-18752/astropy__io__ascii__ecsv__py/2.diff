@@ -1,0 +1,20 @@
+diff --git a/astropy/io/ascii/ecsv.py b/astropy/io/ascii/ecsv.py
+--- a/astropy/io/ascii/ecsv.py
++++ b/astropy/io/ascii/ecsv.py
+@@ -54,6 +54,16 @@
+     process_val = None
+ 
+ 
++class ECSVHeaderSplitterQuoteAll(ECSVHeaderSplitter):
++    """Special case splitter used for writing header line to quote all the column names.
++
++    This is used if the first column name starts with the ECSV comment regex or if any
++    column names have leading or trailing whitespace. See issue #18710.
++    """
++
++    quoting = csv.QUOTE_ALL
++
++
+ class EcsvHeader(basic.BasicHeader):
+     """Header class for which the column definition line starts with the
+     comment character.  See the :class:`CommentedHeader` class  for an example.

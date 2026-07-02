@@ -1,0 +1,27 @@
+diff --git a/xarray/computation/computation.py b/xarray/computation/computation.py
+--- a/xarray/computation/computation.py
++++ b/xarray/computation/computation.py
+@@ -656,8 +656,12 @@
+         values to choose from where `cond` is True
+     y : scalar, array, Variable, DataArray or Dataset
+         values to choose from where `cond` is False
+-    keep_attrs : bool or str or callable, optional
+-        How to treat attrs. If True, keep the attrs of `x`.
++    keep_attrs : bool or {"drop", "identical", "no_conflicts", "drop_conflicts", "override"} or callable, optional
++        - 'override' or True (default): skip comparing and copy attrs from `x` to the result.
++        - 'drop' or False: empty attrs on returned xarray object.
++        - 'identical': all attrs must be the same on every object.
++        - 'no_conflicts': attrs from all objects are combined, any that have the same name must also have the same value.
++        - 'drop_conflicts': attrs from all objects are combined, any that have the same name but different values are dropped.
+ 
+     Returns
+     -------
+@@ -746,7 +750,7 @@
+     # be consistent with the `where` method of `DataArray` and `Dataset`
+     # rebuild the attrs from x at each level of the output, which could be
+     # Dataset, DataArray, or Variable, and also handle coords
+-    if keep_attrs is True and hasattr(result, "attrs"):
++    if keep_attrs in (True, "override") and hasattr(result, "attrs"):
+         if isinstance(y, Dataset) and not isinstance(x, Dataset):
+             # handle special case where x gets promoted to Dataset
+             result.attrs = {}

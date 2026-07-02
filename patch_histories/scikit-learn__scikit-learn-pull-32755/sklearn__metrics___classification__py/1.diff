@@ -1,0 +1,12 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -225,7 +225,7 @@
+             )
+ 
+     transformed_labels = lb.transform(y_true)
+-    transformed_labels = target_xp.asarray(transformed_labels, device=target_device)
++    transformed_labels = move_to(transformed_labels, xp=target_xp, device=target_device)
+     if transformed_labels.shape[1] == 1:
+         transformed_labels = target_xp.concat(
+             (1 - transformed_labels, transformed_labels), axis=1

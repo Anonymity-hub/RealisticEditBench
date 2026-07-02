@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -1223,7 +1223,7 @@ def _flox_scan(
+ 
+         parsed_dim = self._parse_dim(dim)
+ 
+-        axis = obj.get_axis_num(parsed_dim)
++        axis = obj.transpose(..., *parsed_dim)
+         # axis = (axis_,) if isinstance(axis_, int) else axis_
+         codes = tuple(g.codes for g in self.groupers)
+ 

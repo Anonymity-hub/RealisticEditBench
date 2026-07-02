@@ -1,0 +1,47 @@
+diff --git a/astropy/wcs/wcsapi/high_level_api.py b/astropy/wcs/wcsapi/high_level_api.py
+--- a/astropy/wcs/wcsapi/high_level_api.py
++++ b/astropy/wcs/wcsapi/high_level_api.py
+@@ -138,9 +138,9 @@
+     """
+     Convert the input high level object to low level values.
+ 
+-    This function uses the information in ``wcs.world_axis_object_classes`` and
+-    ``wcs.world_axis_object_components`` to convert the high level objects
+-    (such as `~.SkyCoord`) to low level "values" which should be scalars or
++    This function uses the information in ``low_level_wcs.world_axis_object_classes``
++    and ``low_level_wcs.world_axis_object_components`` to convert the high level
++    objects (such as `~.SkyCoord`) to low level "values" which should be scalars or
+     Numpy arrays.
+ 
+     This is used in `.HighLevelWCSMixin.world_to_pixel`, but provided as a
+@@ -148,11 +148,18 @@
+ 
+     Parameters
+     ----------
+-    *world_objects: object
++    *world_objects : object
+         High level coordinate objects.
+ 
+-    low_level_wcs: `.BaseLowLevelWCS`
+-        The WCS object to use to interpret the coordinates.
++    low_level_wcs : `.BaseLowLevelWCS` or object
++        Source of the world axis metadata to use for the conversion. A full
++        `.BaseLowLevelWCS` instance is accepted, but any object exposing
++        ``world_axis_object_classes`` and ``world_axis_object_components``
++        attributes also works (for example a `types.SimpleNamespace` or a
++        namedtuple). The ``serialized_classes`` attribute is read if present
++        and otherwise treated as ``False``. This is useful when the metadata
++        for the intended conversion direction does not match what a WCS
++        exposes by default.
+     """
+     # Cache the classes and components since this may be expensive
+     serialized_classes = low_level_wcs.world_axis_object_classes
+@@ -161,7 +168,7 @@
+     # Deserialize world_axis_object_classes using the default order
+     classes = OrderedDict()
+     for key in default_order(components):
+-        if low_level_wcs.serialized_classes:
++        if getattr(low_level_wcs, "serialized_classes", False):
+             classes[key] = deserialize_class(serialized_classes[key], construct=False)
+         else:
+             classes[key] = serialized_classes[key]

@@ -1,0 +1,19 @@
+diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py
+--- a/astropy/units/quantity.py
++++ b/astropy/units/quantity.py
+@@ -273,6 +273,15 @@
+ """
+ VECTOR_1D: Final = rf"{VECTOR_COMMA} | {VECTOR_WSPACE}"
+ NUMBER_PATTERN: Final = re.compile(rf"\s*(?:{NUM}|{VECTOR_1D})\s*", re.VERBOSE)
++
++
++def _parse_quantity_string(string: str) -> tuple[float | list[float], Unit]:
++    """Parse a string as a number or list of numbers.
++
++    Returns a tuple of value (float or array) and unit.
++    Raises if not possible.
++    """
++    pass
+ 
+ 
+ class Quantity(np.ndarray):

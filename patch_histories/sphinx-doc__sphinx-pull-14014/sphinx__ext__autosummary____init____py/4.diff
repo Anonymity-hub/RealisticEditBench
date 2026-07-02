@@ -1,0 +1,25 @@
+diff --git a/sphinx/ext/autosummary/__init__.py b/sphinx/ext/autosummary/__init__.py
+--- a/sphinx/ext/autosummary/__init__.py
++++ b/sphinx/ext/autosummary/__init__.py
+@@ -566,10 +566,10 @@
+         summary = node[0].astext().strip()
+     elif not isinstance(node[0], nodes.paragraph):
+         # document starts with non-paragraph: pick up the first line
+-        summary = doc[0].strip()
++        summary = first_stanza[0].strip()
+     else:
+         # Try to find the "first sentence", which may span multiple lines
+-        sentences = periods_re.split(' '.join(doc))
++        sentences = periods_re.split(' '.join(first_stanza))
+         if len(sentences) == 1:
+             summary = sentences[0].strip()
+         else:
+@@ -577,7 +577,7 @@
+             for i in range(len(sentences)):
+                 summary = '. '.join(sentences[: i + 1]).rstrip('.') + '.'
+                 node[:] = []
+-                node = _parse_summary(doc, document.settings)
++                node = _parse_summary(first_stanza, document.settings)
+                 if summary.endswith(WELL_KNOWN_ABBREVIATIONS):
+                     pass
+                 elif not any(node.findall(nodes.system_message)):

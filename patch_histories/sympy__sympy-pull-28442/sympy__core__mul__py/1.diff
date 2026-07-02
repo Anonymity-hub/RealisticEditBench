@@ -1,0 +1,12 @@
+diff --git a/sympy/core/mul.py b/sympy/core/mul.py
+--- a/sympy/core/mul.py
++++ b/sympy/core/mul.py
+@@ -1479,7 +1479,7 @@
+             return False
+         if len(denominators) == 1:
+             d = denominators[0]
+-            if d.is_Integer and d.is_even:
++            if d.is_Integer:
+                 # if minimal power of 2 in num vs den is not
+                 # negative then we have an integer
+                 if (Add(*[i.as_base_exp()[1] for i in

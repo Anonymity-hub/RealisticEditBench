@@ -1,0 +1,31 @@
+diff --git a/sklearn/metrics/_plot/roc_curve.py b/sklearn/metrics/_plot/roc_curve.py
+--- a/sklearn/metrics/_plot/roc_curve.py
++++ b/sklearn/metrics/_plot/roc_curve.py
+@@ -729,24 +729,23 @@ def from_cv_results(
+         <...>
+         >>> plt.show()
+         """
+-        pos_label_ = cls._validate_from_cv_results_params(
++        cls._validate_from_cv_results_params(
+             cv_results,
+             X,
+             y,
+             sample_weight=sample_weight,
+-            pos_label=pos_label,
+         )
+ 
+         fpr_folds, tpr_folds, auc_folds = [], [], []
+         for estimator, test_indices in zip(
+             cv_results["estimator"], cv_results["indices"]["test"]
+         ):
+             y_true = _safe_indexing(y, test_indices)
+-            y_pred, _ = _get_response_values_binary(
++            y_pred, pos_label_ = _get_response_values_binary(
+                 estimator,
+                 _safe_indexing(X, test_indices),
+                 response_method=response_method,
+-                pos_label=pos_label_,
++                pos_label=pos_label,
+             )
+             sample_weight_fold = (
+                 None

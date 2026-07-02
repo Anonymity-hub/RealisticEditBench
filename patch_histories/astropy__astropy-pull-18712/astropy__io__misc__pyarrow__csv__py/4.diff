@@ -1,0 +1,18 @@
+diff --git a/astropy/io/misc/pyarrow/csv.py b/astropy/io/misc/pyarrow/csv.py
+--- a/astropy/io/misc/pyarrow/csv.py
++++ b/astropy/io/misc/pyarrow/csv.py
+@@ -6,13 +6,13 @@
+ import datetime
+ import io
+ import os
+-from contextlib import ExitStack
+ from typing import TYPE_CHECKING, BinaryIO, Literal, Union
+ 
+ import numpy as np
+ from numpy.typing import DTypeLike, NDArray
+ 
+ from astropy.utils.compat.optional_deps import HAS_PYARROW
++from astropy.utils.data import get_readable_fileobj
+ 
+ if TYPE_CHECKING:
+     import pyarrow

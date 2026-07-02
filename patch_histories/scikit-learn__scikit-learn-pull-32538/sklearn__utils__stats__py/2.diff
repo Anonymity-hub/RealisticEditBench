@@ -1,0 +1,14 @@
+diff --git a/sklearn/utils/stats.py b/sklearn/utils/stats.py
+--- a/sklearn/utils/stats.py
++++ b/sklearn/utils/stats.py
+@@ -133,6 +133,10 @@
+     # `xp.searchsorted` calls take contiguous inputs as a result (for
+     # performance reasons).
+     weight_cdf = xp.cumulative_sum(sorted_weights.T, axis=1)
++
++    n_percentiles = percentile_rank.shape[0]
++    result = xp.empty((n_features, n_percentiles), dtype=floating_dtype, device=device)
++
+     adjusted_percentile_rank = percentile_rank / 100 * weight_cdf[..., -1]
+ 
+     # Ignore leading `sample_weight=0` observations when `percentile_rank=0` (#20528)

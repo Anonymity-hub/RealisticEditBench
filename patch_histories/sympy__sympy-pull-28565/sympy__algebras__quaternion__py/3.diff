@@ -1,0 +1,14 @@
+diff --git a/sympy/algebras/quaternion.py b/sympy/algebras/quaternion.py
+--- a/sympy/algebras/quaternion.py
++++ b/sympy/algebras/quaternion.py
+@@ -1040,6 +1040,10 @@
+             raise ValueError("Cannot compute logarithm for a zero quaternion")
+         a = ln(q_norm)
+ 
++        # Handle purely real quaternions to avoid division by zero
++        if vector_norm.is_zero:
++            return Quaternion(a, 0, 0, 0)
++
+         return Quaternion(a, b, c, d)
+ 
+     def _eval_subs(self, old: Expr, new: Expr) -> Quaternion: # type: ignore

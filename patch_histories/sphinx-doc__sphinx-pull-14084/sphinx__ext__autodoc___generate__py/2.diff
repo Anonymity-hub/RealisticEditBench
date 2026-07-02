@@ -1,0 +1,32 @@
+diff --git a/sphinx/ext/autodoc/_generate.py b/sphinx/ext/autodoc/_generate.py
+--- a/sphinx/ext/autodoc/_generate.py
++++ b/sphinx/ext/autodoc/_generate.py
+@@ -6,6 +6,7 @@
+ from docutils.statemachine import StringList
+ 
+ from sphinx.errors import PycodeError
++from sphinx.ext.autodoc._loader import _load_object_by_name
+ from sphinx.ext.autodoc._member_finder import _gather_members
+ from sphinx.ext.autodoc._renderer import _add_content, _directive_header_lines
+ from sphinx.ext.autodoc._sentinels import ALL
+@@ -41,7 +42,19 @@
+     ref_context: Mapping[str, str | None],
+     reread_always: MutableSet[str],
+ ) -> StringList | None:
+-
++    props = _load_object_by_name(
++        name=name,
++        objtype=obj_type,
++        current_document=current_document,
++        config=config,
++        events=events,
++        get_attr=get_attr,
++        options=options,
++        ref_context=ref_context,
++        reread_always=reread_always,
++    )
++    if props is None:
++        return None
+ 
+ logger = logging.getLogger('sphinx.ext.autodoc')
+ 

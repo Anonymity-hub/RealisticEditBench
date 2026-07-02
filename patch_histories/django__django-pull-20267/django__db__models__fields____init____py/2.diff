@@ -1,0 +1,14 @@
+diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py
+--- a/django/db/models/fields/__init__.py
++++ b/django/db/models/fields/__init__.py
+@@ -316,7 +316,9 @@
+         if not self.choices:
+             return []
+ 
+-        if not isinstance(self.choices, Iterable) or isinstance(self.choices, (str, set)):
++        if not isinstance(self.choices, Iterable) or isinstance(
++            self.choices, (str, set, frozenset)
++        ):
+             return [
+                 checks.Error(
+                     "'choices' must be a mapping (e.g. a dictionary) or an "

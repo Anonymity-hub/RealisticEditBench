@@ -1,0 +1,14 @@
+diff --git a/sympy/logic/boolalg.py b/sympy/logic/boolalg.py
+--- a/sympy/logic/boolalg.py
++++ b/sympy/logic/boolalg.py
+@@ -2876,8 +2876,8 @@
+             form_ok = is_dnf(expr)
+ 
+         if form_ok and dontcare is None and all(is_literal(a)
+-                for a in expr.args):
+-            return expr
++               for a in expr.args):
++           return expr
+     from sympy.core.relational import Relational
+     if deep:
+         variables = expr.atoms(Relational)

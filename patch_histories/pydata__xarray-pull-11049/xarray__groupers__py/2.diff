@@ -1,0 +1,11 @@
+diff --git a/xarray/groupers.py b/xarray/groupers.py
+--- a/xarray/groupers.py
++++ b/xarray/groupers.py
+@@ -69,6 +69,7 @@
+     # convert to np.datetime64 values prior to passing to the DatetimeIndex
+     # constructor. With pandas < 3 the DatetimeIndex constructor does not
+     # infer the resolution from the resolution of the Timestamp values.
++    return pd.Timestamp(**kwargs).as_unit(unit).to_numpy()
+ 
+ @dataclass(init=False)
+ class EncodedGroups:

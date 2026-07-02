@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -1216,7 +1216,7 @@ def _flox_scan(
+         skipna: bool | None = None,
+         keep_attrs: bool | None = None,
+         **kwargs: Any,
+-    ) -> DataArray:
++    ) -> T_Xarray:
+         from flox import groupby_scan
+ 
+         obj = self._original_obj

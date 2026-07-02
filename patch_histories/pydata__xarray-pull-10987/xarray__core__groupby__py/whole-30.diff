@@ -1,0 +1,16 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -1252,9 +1252,9 @@ def wrapper(array, *by, func: str, skipna: bool | None, **kwargs):
+                 skipna=skipna,
+                 expected_groups=expected_groups,
+                 axis=axis,
+-                dtype=kwargs.get("dtype", None),
+-                method=kwargs.get("method", None),
+-                engine=kwargs.get("engine", None),
++                dtype=kwargs.get("dtype"),
++                method=kwargs.get("method"),
++                engine=kwargs.get("engine"),
+             ),
+         )
+ 

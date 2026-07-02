@@ -1,0 +1,48 @@
+diff --git a/sympy/physics/vector/dyadic.py b/sympy/physics/vector/dyadic.py
+--- a/sympy/physics/vector/dyadic.py
++++ b/sympy/physics/vector/dyadic.py
+@@ -216,39 +216,11 @@
+ 
+                 outstr = None
+                 bar = prettyForm(u"\N{CIRCLED TIMES}" if mpp._use_unicode else "|")
+-                ol = []  # output list, to be concatenated to a string
+-                for v in e.args:
+-                    # if the coef of the dyadic is 1, we skip the 1
+-                    if v[0] == 1:
+-                        ol.extend([" + ",
+-                                  mpp.doprint(v[1]),
+-                                  bar,
+-                                  mpp.doprint(v[2])])
+-
+-                    # if the coef of the dyadic is -1, we skip the 1
+-                    elif v[0] == -1:
+-                        ol.extend([" - ",
+-                                  mpp.doprint(v[1]),
+-                                  bar,
+-                                  mpp.doprint(v[2])])
+-
+-                    # If the coefficient of the dyadic is not 1 or -1,
+-                    # we might wrap it in parentheses, for readability.
+-                    elif v[0] != 0:
+-                        if isinstance(v[0], Add):
+-                            arg_str = mpp._print(
+-                                v[0]).parens()[0]
+-                        else:
+-                            arg_str = mpp.doprint(v[0])
+-                        if arg_str.startswith("-"):
+-                            arg_str = arg_str[1:]
+-                            str_start = " - "
+-                        else:
+-                            str_start = " + "
+-                        ol.extend([str_start, arg_str, " ",
+-                                  mpp.doprint(v[1]),
+-                                  bar,
+-                                  mpp.doprint(v[2])])
++                for i, v in enumerate(e.args):
++                    p_v1 = mpp._print(v[1])
++                    p_v2 = mpp._print(v[2])
++                    p_dyad = prettyForm(*p_v1.right(bar, p_v2))
++
+                 outstr = "".join(ol)
+                 if outstr.startswith(" + "):
+                     outstr = outstr[3:]

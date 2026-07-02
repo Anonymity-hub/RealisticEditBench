@@ -1,0 +1,15 @@
+diff --git a/sympy/vector/coordsysrect.py b/sympy/vector/coordsysrect.py
+--- a/sympy/vector/coordsysrect.py
++++ b/sympy/vector/coordsysrect.py
+@@ -653,6 +653,11 @@
+                 result *= path[i]._transformation_matrix_to_parent.T
+             else:
+                 result *= path[i]._transformation_matrix_to_parent.inv()
++        for i in range(rootindex + 1, len(path)):
++            result *= path[i]._transformation_matrix_to_parent
++
++        return result
++
+     @cacheit
+     def position_wrt(self, other):
+         """

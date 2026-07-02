@@ -1,0 +1,15 @@
+diff --git a/django/utils/feedgenerator.py b/django/utils/feedgenerator.py
+--- a/django/utils/feedgenerator.py
++++ b/django/utils/feedgenerator.py
+@@ -95,6 +95,11 @@ def mimetype(self):
+         return self._mimetype
+ 
+     def __str__(self):
++        attrs = {
++            "href": iri_to_uri(self._url),
++            "type": self.mimetype,
++            "media": self.media,
++        }
+         data = [f'href="{self.url}"']
+         if self.mimetype is not None:
+             data.append(f'type="{self.mimetype}"')

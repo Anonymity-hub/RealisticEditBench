@@ -1,0 +1,23 @@
+diff --git a/sklearn/preprocessing/_encoders.py b/sklearn/preprocessing/_encoders.py
+--- a/sklearn/preprocessing/_encoders.py
++++ b/sklearn/preprocessing/_encoders.py
+@@ -245,14 +245,12 @@
+             # already called above.
+             X_int[:, i] = _encode(Xi, uniques=self.categories_[i], check_unknown=False)
+         if columns_with_unknown:
+-            warnings.warn(
+-                (
+-                    "Found unknown categories in columns "
+-                    f"{columns_with_unknown} during transform. These "
+-                    "unknown categories will be encoded as all zeros"
+-                ),
+-                UserWarning,
++            msg = (
++                "Found unknown categories in columns "
++                f"{columns_with_unknown} during transform. These "
++                "unknown categories will be encoded as all zeros"
+             )
++            warnings.warn(msg, UserWarning)
+ 
+         self._map_infrequent_categories(X_int, X_mask, ignore_category_indices)
+         return X_int, X_mask

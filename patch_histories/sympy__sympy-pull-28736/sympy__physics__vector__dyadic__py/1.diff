@@ -1,0 +1,22 @@
+diff --git a/sympy/physics/vector/dyadic.py b/sympy/physics/vector/dyadic.py
+--- a/sympy/physics/vector/dyadic.py
++++ b/sympy/physics/vector/dyadic.py
+@@ -211,8 +211,8 @@
+             def render(self, *args, **kwargs):
+                 ar = e.args  # just to shorten things
+                 mpp = printer
+-                if len(ar) == 0:
+-                    return str(0)
++                if len(e.args) == 0:
++                    return mpp._print(0)
+                 bar = "\N{CIRCLED TIMES}" if printer._use_unicode else "|"
+                 ol = []  # output list, to be concatenated to a string
+                 for v in ar:
+@@ -247,7 +247,6 @@
+                                   mpp.doprint(v[1]),
+                                   bar,
+                                   mpp.doprint(v[2])])
+-
+                 outstr = "".join(ol)
+                 if outstr.startswith(" + "):
+                     outstr = outstr[3:]

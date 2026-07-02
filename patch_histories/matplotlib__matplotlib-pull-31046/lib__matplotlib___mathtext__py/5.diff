@@ -1,0 +1,30 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -2538,8 +2538,7 @@
+         state = self.get_state()
+         rule_thickness = state.fontset.get_underline_thickness(
+             state.font, state.fontsize, state.dpi)
+-        x_height = state.fontset.get_xheight(
+-            state.font, state.fontsize, state.dpi)
++        x_height = state.fontset.get_xheight(state.font, state.fontsize, state.dpi)
+ 
+         if napostrophes:
+             if super is None:
+@@ -2627,6 +2626,16 @@
+                 superkern = (3 * consts.delta + consts.delta_integral) * lc_height
+             else:
+                 subkern = 0
++
++        # Set the minimum shifts for the superscript and subscript (node756).
++        if nucleus.is_char_node():
++            shift_up = 0.0
++            shift_down = 0.0
++        else:
++            shrunk_x_height = state.fontset.get_xheight(
++                state.font, state.fontsize * SHRINK_FACTOR, state.dpi)
++            shift_up = nucleus.height - consts.supdrop * shrunk_x_height
++            shift_down = nucleus.depth + consts.subdrop * shrunk_x_height
+ 
+         x: List
+         if super is None:

@@ -1,0 +1,19 @@
+diff --git a/sympy/polys/matrices/sdm.py b/sympy/polys/matrices/sdm.py
+--- a/sympy/polys/matrices/sdm.py
++++ b/sympy/polys/matrices/sdm.py
+@@ -1594,6 +1594,15 @@
+     zero_prod = op(zero, b)
+     m, n = A.shape
+     Csdm = {i: dict.fromkeys(range(n), zero_prod) for i in range(m)}
++    for i, Ai in A.items():
++        Ci = Csdm[i]
++        for j, Aij in Ai.items():
++            Cij = op(Aij, b)
++            if Cij == zero:
++                del Ci[j]
++            else:
++                Ci[j] = Cij
++    return Csdm
+ 
+ 
+ def sdm_irref(A):

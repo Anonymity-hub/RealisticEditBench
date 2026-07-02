@@ -1,0 +1,112 @@
+diff --git a/sympy/vector/coordsysrect.py b/sympy/vector/coordsysrect.py
+--- a/sympy/vector/coordsysrect.py
++++ b/sympy/vector/coordsysrect.py
+@@ -551,6 +551,108 @@
+             result *= path[i]._parent_rotation_matrix.T
+         return result
+ 
++    def change_of_basis_matrix_from(self, other):
++        """
++        Returns the change-of-basis matrix from the ``other`` coordinate system
++        to this coordinate system. This matrix transforms the components of a
++        vector defined in ``other`` to componenets of a vector defined in
++        this system. The columns of this matrix represent the base vectors of
++        the ``other`` system in terms of base vectors of this
++        coordinate system.
++
++        If v_a is a vector defined in system 'A' (in matrix format)
++        and v_b is the same vector defined in system 'B', then
++        v_a = A.change_of_basis_matrix_from(B) * v_b.
++
++        A SymPy Matrix is returned.
++
++        Parameters
++        ==========
++
++        other : CoordSys3D
++            The system from which the change-of-basis matrix is generated.
++
++        See Also
++        ========
++
++        CoordSys3D.rotation_matrix
++
++        Examples
++        ========
++
++        >>> from sympy.vector import CoordSys3D, express
++        >>> from sympy import symbols, Matrix
++
++        Let's consider two Cartesian systems connected by rotations:
++
++        >>> q1 = symbols('q1')
++        >>> N = CoordSys3D('N')
++        >>> A = N.orient_new_axis('A', q1, N.i)
++
++        The change-of-basis matrix (or transformation matrix) from A to N is:
++
++        >>> T_fromA_toN = N.change_of_basis_matrix_from(A)
++        >>> T_fromA_toN
++        Matrix([
++        [1,       0,        0],
++        [0, cos(q1), -sin(q1)],
++        [0, sin(q1),  cos(q1)]])
++
++        The change-of-basis matrix allows to express vectors defined
++        in one system into a different system. In fact, the change-of-basis
++        matrix is internally used by the ``express`` function. The following
++        example shows a direct comparison between working with matrices
++        and the vector module:
++
++        >>> vA_matrix = Matrix([1, 2, 3])
++        >>> vN_matrix = T_fromA_toN * vA_matrix
++        >>> vN_matrix
++        Matrix([
++        [                     1],
++        [-3*sin(q1) + 2*cos(q1)],
++        [ 2*sin(q1) + 3*cos(q1)]])
++        >>> vA = A.i + 2 * A.j + 3 * A.k
++        >>> vN = express(vA, N)
++        >>> vN
++        N.i + (-3*sin(q1) + 2*cos(q1))*N.j + (2*sin(q1) + 3*cos(q1))*N.k
++
++        Change-of-basis matrix from spherical to Cartesian coordinates:
++
++        >>> Cart = CoordSys3D("Cart")
++        >>> S = Cart.create_new("S", transformation="spherical")
++        >>> C = Cart.create_new("C", transformation="cylindrical")
++        >>> Cart.change_of_basis_matrix_from(S)
++        Matrix([
++        [sin(S.theta)*cos(S.phi), cos(S.phi)*cos(S.theta), -sin(S.phi)],
++        [sin(S.phi)*sin(S.theta), sin(S.phi)*cos(S.theta),  cos(S.phi)],
++        [           cos(S.theta),           -sin(S.theta),           0]])
++
++        Change-of-basis matrix from spherical to cylindrical coordinates
++        (note that the azimuthal angle of S and C are the same):
++
++        >>> r_s, theta_s, phi_s = S.base_scalars()
++        >>> r_c, theta_c, z_c = C.base_scalars()
++        >>> C.change_of_basis_matrix_from(S).subs(phi_s, theta_c).simplify()
++        Matrix([
++        [sin(S.theta),  cos(S.theta), 0],
++        [           0,             0, 1],
++        [cos(S.theta), -sin(S.theta), 0]])
++
++        """
++        from sympy.vector.functions import _path
++        if not isinstance(other, CoordSys3D):
++            raise TypeError(str(other) + " is not a CoordSys3D")
++        if self == other:
++            return eye(3)
++
++        # Else, use tree to calculate position
++        rootindex, path = _path(self, other)
++        result = eye(3)
++        for i in range(rootindex):
++            if path[i]._is_cartesian or path[i]._is_curvilinear:
++                result *= path[i]._transformation_matrix_to_parent.T
++            else:
++                result *= path[i]._transformation_matrix_to_parent.inv()
+     @cacheit
+     def position_wrt(self, other):
+         """

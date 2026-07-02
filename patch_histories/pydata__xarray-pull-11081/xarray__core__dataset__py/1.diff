@@ -1,0 +1,15 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -3940,6 +3940,11 @@
+                 # For normal number types do the interpolation:
+                 var_indexers = {k: v for k, v in use_indexers.items() if k in var.dims}
+                 variables[name] = missing.interp(var, var_indexers, method, **kwargs)
++            elif dtype_kind in "Mm" and (use_indexers.keys() & var.dims):
++                # For datetime-like types, interpolate as float64:
++                var_indexers = {k: v for k, v in use_indexers.items() if k in var.dims}
++                int_data = var.astype(np.int64)
++                nat = np.iinfo(np.int64).min
+             elif dtype_kind in "ObU" and (use_indexers.keys() & var.dims):
+                 if all(var.sizes[d] == 1 for d in (use_indexers.keys() & var.dims)):
+                     # Broadcastable, can be handled quickly without reindex:

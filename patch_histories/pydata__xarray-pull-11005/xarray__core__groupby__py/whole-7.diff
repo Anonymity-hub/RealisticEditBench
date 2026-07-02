@@ -1,0 +1,11 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -38,6 +38,7 @@
+ from xarray.core.types import (
+     Dims,
+     QuantileMethods,
++    T_DataArray,
+     T_DataWithCoords,
+     T_Xarray,
+ )

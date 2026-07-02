@@ -1,0 +1,13 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -2141,7 +2141,8 @@
+             raise TypeError(f"Cannot use {operator_} operator with combined queryset.")
+ 
+     def _check_ordering_first_last_queryset_aggregation(self, method):
+-        if isinstance(self.query.group_by, tuple) and not any(
++        if (
++            isinstance(self.query.group_by, tuple) and not any(
+             col.output_field is self.model._meta.pk for col in self.query.group_by
+         ):
+             raise TypeError(

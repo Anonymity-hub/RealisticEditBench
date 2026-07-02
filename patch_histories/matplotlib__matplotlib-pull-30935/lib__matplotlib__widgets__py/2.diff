@@ -1,0 +1,19 @@
+diff --git a/lib/matplotlib/widgets.py b/lib/matplotlib/widgets.py
+--- a/lib/matplotlib/widgets.py
++++ b/lib/matplotlib/widgets.py
+@@ -12,6 +12,7 @@
+ import enum
+ import functools
+ import itertools
++import weakref
+ from numbers import Integral, Number
+ 
+ from cycler import cycler
+@@ -163,6 +164,7 @@ def _save_blit_background(self, background):
+         """
+         if self._blit_background_id is None:
+             bbid = self.canvas._get_blit_background_id()
++            weakref.finalize(self, self.canvas._release_blit_background_id, bbid)
+             self._blit_background_id = bbid
+         self.canvas._blit_backgrounds[self._blit_background_id] = background
+ 

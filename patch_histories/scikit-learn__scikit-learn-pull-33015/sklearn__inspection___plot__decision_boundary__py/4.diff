@@ -1,0 +1,100 @@
+diff --git a/sklearn/inspection/_plot/decision_boundary.py b/sklearn/inspection/_plot/decision_boundary.py
+--- a/sklearn/inspection/_plot/decision_boundary.py
++++ b/sklearn/inspection/_plot/decision_boundary.py
+@@ -95,22 +95,28 @@
+         Values of the response function.
+ 
+     multiclass_colors : list of str or str, default=None
+-        Specifies how to color each class when plotting all classes of multiclass
+-        problem. Ignored for binary problems and multiclass problems when plotting a
+-        single prediction value per point.
++        Specifies how to color each class when plotting all classes of
++        :term:`multiclass` problems.
++
+         Possible inputs are:
+ 
+         * list: list of Matplotlib
+           `color <https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def>`_
+           strings, of length `n_classes`
+         * str: name of :class:`matplotlib.colors.Colormap`
+-        * None: 'viridis' colormap is used to sample colors
+-
+-        Single color colormaps will be generated from the colors in the list or
+-        colors taken from the colormap and passed to the `cmap` parameter of
+-        the `plot_method`.
++        * None: 'tab10' colormap is used to sample colors if the number of
++          classes is less than or equal to 10, otherwise 'gist_rainbow' colormap.
++
++        Single color (fading to white) colormaps will be generated from the colors in
++        the list or colors taken from the colormap, and passed to the `cmap` parameter
++        of the `plot_method`.
++
++        For :term:`binary` problems, this is ignored and `cmap` or `colors` can be
++        passed as kwargs instead, otherwise, the default colormap ('viridis') is used.
+ 
+         .. versionadded:: 1.7
++        .. versionchanged:: 1.9
++           `multiclass_colors` is now also used when `response_method="predict"`
+ 
+     xlabel : str, default=None
+         Default label to place on x axis.
+@@ -128,7 +134,7 @@
+ 
+     multiclass_colors_ : array of shape (n_classes, 4)
+         Colors used to plot each class in multiclass problems.
+-        Only defined when `color_of_interest` is None.
++        Only defined when `n_classes` > 2.
+ 
+         .. versionadded:: 1.7
+ 
+@@ -211,7 +217,9 @@
+             Overwrite the y-axis label.
+ 
+         **kwargs : dict
+-            Additional keyword arguments to be passed to the `plot_method`.
++            Additional keyword arguments to be passed to the `plot_method`. For
++            :term:`binary` problems, `cmap` or `colors` can be set here to specify the
++            colormap or colors, otherwise the default colormap ('viridis') is used.
+ 
+         Returns
+         -------
+@@ -239,8 +247,7 @@
+                 if kwarg in kwargs:
+                     warnings.warn(
+                         f"'{kwarg}' is ignored in favor of 'multiclass_colors' "
+-                        "in the multiclass case when the response method is "
+-                        "'decision_function' or 'predict_proba'."
++                        "in the multiclass case."
+                     )
+                     del kwargs[kwarg]
+ 
+@@ -248,22 +255,22 @@
+                 self.multiclass_colors, str
+             ):
+                 if self.multiclass_colors is None:
+-                    cmap = "tab10" if n_responses <= 10 else "gist_rainbow"
++                    cmap = "tab10" if self.n_classes <= 10 else "gist_rainbow"
+                 else:
+                     cmap = self.multiclass_colors
+ 
+                 # Special case for the tab10 and tab20 colormaps that encode a
+                 # discrete set of colors that are easily distinguishable
+                 # contrary to other colormaps that are continuous.
+-                if cmap == "tab10" and n_responses <= 10:
+-                    colors = plt.get_cmap("tab10", 10).colors[:n_responses]
+-                elif cmap == "tab20" and n_responses <= 20:
+-                    colors = plt.get_cmap("tab20", 20).colors[:n_responses]
++                if cmap == "tab10" and self.n_classes <= 10:
++                    colors = plt.get_cmap("tab10", 10).colors[:self.n_classes]
++                elif cmap == "tab20" and self.n_classes <= 20:
++                    colors = plt.get_cmap("tab20", 20).colors[:self.n_classes]
+                 else:
+-                    cmap = plt.get_cmap(cmap, n_responses)
++                    cmap = plt.get_cmap(cmap, self.n_classes)
+                     if not hasattr(cmap, "colors"):
+                         # For LinearSegmentedColormap
+-                        colors = cmap(np.linspace(0, 1, n_responses))
++                        colors = cmap(np.linspace(0, 1, self.n_classes))
+                     else:
+                         colors = cmap.colors
+             elif isinstance(self.multiclass_colors, list):

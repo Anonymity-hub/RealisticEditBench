@@ -1,0 +1,12 @@
+diff --git a/django/db/backends/sqlite3/features.py b/django/db/backends/sqlite3/features.py
+--- a/django/db/backends/sqlite3/features.py
++++ b/django/db/backends/sqlite3/features.py
+@@ -26,8 +26,6 @@
+     time_cast_precision = 3
+     can_release_savepoints = True
+     has_case_insensitive_like = True
+-    # Is "ALTER TABLE ... DROP COLUMN" supported?
+-    can_alter_table_drop_column = Database.sqlite_version_info >= (3, 35, 5)
+     supports_parentheses_in_compound = False
+     can_defer_constraint_checks = True
+     supports_over_clause = True

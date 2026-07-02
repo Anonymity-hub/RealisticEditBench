@@ -1,0 +1,52 @@
+diff --git a/lib/matplotlib/bezier.py b/lib/matplotlib/bezier.py
+--- a/lib/matplotlib/bezier.py
++++ b/lib/matplotlib/bezier.py
+@@ -75,6 +75,16 @@
+         return np.array([root]) if 0 <= root <= 1 else np.array([])
+     elif deg == 2:
+         roots = _quadratic_roots_in_01(coeffs[0], coeffs[1], coeffs[2])
++    else:
++        # np.roots expects descending order (highest power first)
++        eps = 1e-10
++        all_roots = np.roots(coeffs[deg::-1])
++        real_mask = np.abs(all_roots.imag) < eps
++        real_roots = all_roots[real_mask].real
++        in_range = (real_roots >= -eps) & (real_roots <= 1 + eps)
++        roots = np.clip(real_roots[in_range], 0, 1)
++
++    return np.sort(roots)
+ 
+ 
+ @lru_cache(maxsize=16)
+@@ -375,17 +385,21 @@
+         if n <= 1:
+             return np.array([]), np.array([])
+         Cj = self.polynomial_coefficients
+-        dCj = np.arange(1, n+1)[:, None] * Cj[1:]
+-        dims = []
+-        roots = []
++        dCj = np.arange(1, n + 1)[:, None] * Cj[1:]
++
++        all_dims = []
++        all_roots = []
++
+         for i, pi in enumerate(dCj.T):
+-            r = np.roots(pi[::-1])
+-            roots.append(r)
+-            dims.append(np.full_like(r, i))
+-        roots = np.concatenate(roots)
+-        dims = np.concatenate(dims)
+-        in_range = np.isreal(roots) & (roots >= 0) & (roots <= 1)
+-        return dims[in_range], np.real(roots)[in_range]
++            r = _real_roots_in_01(pi)
++            if len(r) > 0:
++                all_roots.append(r)
++                all_dims.append(np.full(len(r), i))
++
++        if not all_roots:
++            return np.array([]), np.array([])
++
++        return np.concatenate(all_dims), np.concatenate(all_roots)
+ 
+ 
+ def split_bezier_intersecting_with_closedpath(

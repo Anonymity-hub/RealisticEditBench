@@ -1,0 +1,18 @@
+diff --git a/sympy/physics/vector/dyadic.py b/sympy/physics/vector/dyadic.py
+--- a/sympy/physics/vector/dyadic.py
++++ b/sympy/physics/vector/dyadic.py
+@@ -235,6 +235,14 @@
+                             sign = " - "
+                         c = -c
+ 
++                    if c == 1:
++                        p_term = p_dyad
++                    else:
++                        p_c = mpp._print(c)
++                        if isinstance(c, Add):
++                            p_c = prettyForm(*p_c.parens())
++                        p_term = prettyForm(*p_c.right(" ", p_dyad))
++
+                 outstr = "".join(ol)
+                 if outstr.startswith(" + "):
+                     outstr = outstr[3:]

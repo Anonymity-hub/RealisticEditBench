@@ -1,0 +1,23 @@
+diff --git a/asv_bench/benchmarks/groupby.py b/asv_bench/benchmarks/groupby.py
+--- a/asv_bench/benchmarks/groupby.py
++++ b/asv_bench/benchmarks/groupby.py
+@@ -28,15 +28,17 @@ def time_init(self, ndim):
+         getattr(self, f"ds{ndim}d").groupby("b")
+ 
+     @parameterized(
+-        ["method", "ndim", "use_flox"], [("sum", "mean"), (1, 2), (True, False)]
++        ["method", "ndim", "use_flox"],
++        [("sum", "mean", "cumsum"), (1, 2), (True, False)],
+     )
+     def time_agg_small_num_groups(self, method, ndim, use_flox):
+         ds = getattr(self, f"ds{ndim}d")
+         with xr.set_options(use_flox=use_flox):
+             getattr(ds.groupby("a"), method)().compute()
+ 
+     @parameterized(
+-        ["method", "ndim", "use_flox"], [("sum", "mean"), (1, 2), (True, False)]
++        ["method", "ndim", "use_flox"],
++        [("sum", "mean", "cumsum"), (1, 2), (True, False)],
+     )
+     def time_agg_large_num_groups(self, method, ndim, use_flox):
+         ds = getattr(self, f"ds{ndim}d")

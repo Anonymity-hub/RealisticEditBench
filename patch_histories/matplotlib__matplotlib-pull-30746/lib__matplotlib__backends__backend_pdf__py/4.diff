@@ -1,0 +1,41 @@
+diff --git a/lib/matplotlib/backends/backend_pdf.py b/lib/matplotlib/backends/backend_pdf.py
+--- a/lib/matplotlib/backends/backend_pdf.py
++++ b/lib/matplotlib/backends/backend_pdf.py
+@@ -2108,6 +2108,7 @@
+         # Calculate maximum marker extent for conservative bounds checking.
+         # We need to account for marker size, not just position.
+         max_marker_extent = 0
++        path_extents = []
+         for i, (path, transform) in enumerate(self._iter_collection_raw_paths(
+                 master_transform, paths, all_transforms)):
+             if len(path.vertices):
+@@ -2117,12 +2118,20 @@
+                 bbox = path.get_extents(transform)
+                 max_marker_extent = max(max_marker_extent,
+                                       bbox.width / 2, bbox.height / 2)
++                path_extents.append((bbox.width / 2, bbox.height / 2))
++            else:
++                path_extents.append((0, 0))
+             name = self.file.pathCollectionObject(
+                 gc, path, transform, padding, filled, stroked)
+             path_codes.append(name)
+ 
+         # Add padding for stroke width.
+         max_marker_extent += padding
++
++        # Create a mapping from path_id to extent for efficient lookup
++        path_extent_map = dict(zip(path_codes, path_extents))
++        canvas_width = self.file.width * 72
++        canvas_height = self.file.height * 72
+ 
+         output = self.file.output
+         output(*self.gc.push())
+@@ -2135,8 +2144,6 @@
+             # Skip markers outside visible canvas bounds to reduce PDF size.
+             # Add max_marker_extent margin to account for marker size - a marker
+             # may be partially visible even if its center is outside the canvas.
+-            canvas_width = self.file.width * 72
+-            canvas_height = self.file.height * 72
+             if not (-max_marker_extent <= xo <= canvas_width + max_marker_extent
+                     and -max_marker_extent <= yo <= canvas_height + max_marker_extent):
+                 continue

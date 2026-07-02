@@ -1,0 +1,14 @@
+diff --git a/django/contrib/admin/views/main.py b/django/contrib/admin/views/main.py
+--- a/django/contrib/admin/views/main.py
++++ b/django/contrib/admin/views/main.py
+@@ -417,7 +417,9 @@
+         # Add the given query's ordering fields, if any.
+         ordering.extend(queryset.query.order_by)
+ 
+-        return self._get_deterministic_ordering(ordering)
++        if queryset.order_by(*ordering).totally_ordered:
++            return ordering
++        return ordering + ["-pk"]
+ 
+     def _get_deterministic_ordering(self, ordering):
+         """

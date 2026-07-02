@@ -1,0 +1,15 @@
+diff --git a/sympy/matrices/eigen.py b/sympy/matrices/eigen.py
+--- a/sympy/matrices/eigen.py
++++ b/sympy/matrices/eigen.py
+@@ -292,8 +292,11 @@
+         simplify: Callable[[Expr], Expr] | bool = False,
+         **flags: Any,
+     ) -> dict[Expr, int]:
++
+     iblocks = M.strongly_connected_components()
+     all_eigs: dict[Expr, int] = {}
++    expanded_eigs: dict[Expr, Expr] = {}
++
+     # XXX: Only RepMatrix has _rep ...
+     is_dom = M._rep.domain in (ZZ, QQ) # type: ignore
+     for b in iblocks:

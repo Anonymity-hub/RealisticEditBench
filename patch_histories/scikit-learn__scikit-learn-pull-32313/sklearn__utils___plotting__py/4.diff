@@ -1,0 +1,14 @@
+diff --git a/sklearn/utils/_plotting.py b/sklearn/utils/_plotting.py
+--- a/sklearn/utils/_plotting.py
++++ b/sklearn/utils/_plotting.py
+@@ -248,7 +248,9 @@
+                 )
+ 
+         curve_kwargs_ = [
+-            _validate_style_kwargs({"label": label}, curve_kwargs[fold_idx])
++            _validate_style_kwargs(
++                {"label": label, **default_curve_kwargs}, curve_kwargs[fold_idx]
++            )
+             for fold_idx, label in enumerate(labels)
+         ]
+         return curve_kwargs_

@@ -1,0 +1,17 @@
+diff --git a/sympy/tensor/array/expressions/array_expressions.py b/sympy/tensor/array/expressions/array_expressions.py
+--- a/sympy/tensor/array/expressions/array_expressions.py
++++ b/sympy/tensor/array/expressions/array_expressions.py
+@@ -895,6 +895,13 @@
+             if not isinstance(i, (tuple, Tuple)):
+                 continue
+             diag_group = []
++            for j in i:
++                if isinstance(j, (tuple, Tuple)):
++                    diag_group.extend(list(j))
++                else:
++                    diag_group.append(j)
++            new_diag_indices.append(tuple(diag_group))
++        return _array_diagonal(expr.expr, *new_diag_indices)
+ 
+     @classmethod
+     def _ArrayDiagonal_denest_ArrayAdd(cls, expr, *diagonal_indices):

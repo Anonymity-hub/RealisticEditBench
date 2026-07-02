@@ -1,0 +1,13 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -177,7 +177,8 @@
+                     chunk_size = (
+                         2000 if getattr(attr, "prefetch_cache_name", None) else None
+                     )
+-                    return attr.iterator(chunk_size)
++                    query_set = attr.all()
++                    return query_set.iterator(chunk_size)
+ 
+             else:
+ 

@@ -1,0 +1,16 @@
+diff --git a/sympy/polys/rootoftools.py b/sympy/polys/rootoftools.py
+--- a/sympy/polys/rootoftools.py
++++ b/sympy/polys/rootoftools.py
+@@ -1150,11 +1150,7 @@ def __new__(cls, expr, func=None, x=None, auto=True, quadratic=False):
+             is_func = getattr(func, 'is_Function', False)
+ 
+             if is_func and 1 in func.nargs:
+-                if not isinstance(func, Lambda):
+-                    func = Lambda(poly.gen, func(poly.gen))
+-                else:
+-                    old_var = func.variables[0]
+-                    func = Lambda(poly.gen, func.expr.subs(old_var, poly.gen))
++                func = Lambda(poly.gen, func(poly.gen))
+             else:
+                 raise ValueError(
+                     "expected a univariate function, got %s" % func)

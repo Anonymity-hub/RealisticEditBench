@@ -1,0 +1,11 @@
+diff --git a/sympy/matrices/determinant.py b/sympy/matrices/determinant.py
+--- a/sympy/matrices/determinant.py
++++ b/sympy/matrices/determinant.py
+@@ -561,6 +561,7 @@
+     import itertools
+ 
+     m, n = M.shape
++    if m == 0:
+     if m > n:
+         M = M.T
+         m, n = n, m

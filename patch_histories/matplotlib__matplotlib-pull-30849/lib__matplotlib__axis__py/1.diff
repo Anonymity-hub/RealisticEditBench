@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -140,7 +140,7 @@
+             f"grid.{major_minor}.linewidth",
+             "grid.linewidth",
+         )
+-        if grid_alpha is None and not mcolors._has_alpha_channel(grid_color):
++        if grid_alpha is None:
+             # alpha precedence: kwarg > color alpha > rcParams['grid.alpha']
+             # Note: only resolve to rcParams if the color does not have alpha
+             # otherwise `grid(color=(1, 1, 1, 0.5))` would work like

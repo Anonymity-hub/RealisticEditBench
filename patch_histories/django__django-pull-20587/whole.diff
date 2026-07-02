@@ -1,0 +1,224 @@
+diff --git a/django/db/backends/base/features.py b/django/db/backends/base/features.py
+--- a/django/db/backends/base/features.py
++++ b/django/db/backends/base/features.py
+@@ -420,10 +420,6 @@ class BaseDatabaseFeatures:
+     # Does the Round() database function round to even?
+     rounds_to_even = False
+ 
+-    # Should dollar signs be prohibited in column aliases to prevent SQL
+-    # injection?
+-    prohibits_dollar_signs_in_column_aliases = False
+-
+     # Should PatternLookup.process_rhs() use self.param_pattern? It's unneeded
+     # on databases that don't use LIKE for pattern matching.
+     pattern_lookup_needs_param_pattern = True
+diff --git a/django/db/backends/mysql/compiler.py b/django/db/backends/mysql/compiler.py
+--- a/django/db/backends/mysql/compiler.py
++++ b/django/db/backends/mysql/compiler.py
+@@ -28,10 +28,7 @@ def as_sql(self):
+             # window functions as it doesn't allow for GROUP BY/HAVING clauses
+             # and the subquery wrapping (necessary to emulate QUALIFY).
+             return super().as_sql()
+-        result = [
+-            "DELETE %s FROM"
+-            % self.quote_name_unless_alias(self.query.get_initial_alias())
+-        ]
++        result = ["DELETE %s FROM" % self.quote_name(self.query.get_initial_alias())]
+         from_sql, params = self.get_from_clause()
+         result.extend(from_sql)
+         try:
+diff --git a/django/db/backends/postgresql/features.py b/django/db/backends/postgresql/features.py
+--- a/django/db/backends/postgresql/features.py
++++ b/django/db/backends/postgresql/features.py
+@@ -70,7 +70,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
+     supports_nulls_distinct_unique_constraints = True
+     supports_no_precision_decimalfield = True
+     can_rename_index = True
+-    prohibits_dollar_signs_in_column_aliases = True
+     test_collations = {
+         "deterministic": "C",
+         "non_default": "sv-x-icu",
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1366,7 +1366,7 @@ def __repr__(self):
+     def as_sql(self, compiler, connection):
+         alias, column = self.alias, self.target.column
+         identifiers = (alias, column) if alias else (column,)
+-        sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
++        sql = ".".join(map(compiler.quote_name, identifiers))
+         return sql, ()
+ 
+     def relabeled_clone(self, relabels):
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1,6 +1,7 @@
+ import collections
+ import json
+ import re
++import warnings
+ from functools import partial
+ from itertools import chain
+ 
+@@ -23,6 +24,7 @@
+ )
+ from django.db.models.sql.query import Query, get_order_dir
+ from django.db.transaction import TransactionManagementError
++from django.utils.deprecation import RemovedInDjango70Warning, django_file_prefixes
+ from django.utils.functional import cached_property
+ from django.utils.hashable import make_hashable
+ from django.utils.regex_helper import _lazy_re_compile
+@@ -439,9 +441,7 @@ def _order_by_pairs(self):
+                 table, col = col.split(".", 1)
+                 yield (
+                     OrderBy(
+-                        RawSQL(
+-                            "%s.%s" % (self.quote_name_unless_alias(table), col), []
+-                        ),
++                        RawSQL("%s.%s" % (self.quote_name(table), col), []),
+                         descending=descending,
+                     ),
+                     False,
+@@ -547,35 +547,28 @@ def get_extra_select(self, order_by, select):
+                     extra_select.append((expr, (without_ordering, params), None))
+         return extra_select
+ 
+-    def quote_name_unless_alias(self, name):
++    def quote_name(self, name):
+         """
+-        A wrapper around connection.ops.quote_name that doesn't quote aliases
+-        for table names. This avoids problems with some SQL dialects that treat
+-        quoted strings specially (e.g. PostgreSQL).
++        A wrapper around connection.ops.quote_name that memoizes quoted
++        name values.
+         """
+-        if (
+-            self.connection.features.prohibits_dollar_signs_in_column_aliases
+-            and "$" in name
+-        ):
+-            raise ValueError(
+-                "Dollar signs are not permitted in column aliases on "
+-                f"{self.connection.display_name}."
+-            )
+-        if name in self.quote_cache:
+-            return self.quote_cache[name]
+-        if (
+-            (name in self.query.alias_map and name not in self.query.table_map)
+-            or name in self.query.extra_select
+-            or (
+-                self.query.external_aliases.get(name)
+-                and name not in self.query.table_map
+-            )
+-        ):
+-            self.quote_cache[name] = name
+-            return name
+-        r = self.connection.ops.quote_name(name)
+-        self.quote_cache[name] = r
+-        return r
++        if (quoted := self.quote_cache.get(name)) is not None:
++            return quoted
++        quoted = self.connection.ops.quote_name(name)
++        self.quote_cache[name] = quoted
++        return quoted
++
++    # RemovedInDjango70Warning: When the deprecation ends, remove.
++    def quote_name_unless_alias(self, name):
++        warnings.warn(
++            (
++                "SQLCompiler.quote_name_unless_alias() is deprecated. "
++                "Use .quote_name() instead."
++            ),
++            category=RemovedInDjango70Warning,
++            skip_file_prefixes=django_file_prefixes(),
++        )
++        return self.quote_name(name)
+ 
+     def compile(self, node):
+         vendor_impl = getattr(node, "as_" + self.connection.vendor, None)
+@@ -1175,7 +1168,7 @@ def get_from_clause(self):
+                 alias not in self.query.alias_map
+                 or self.query.alias_refcount[alias] == 1
+             ):
+-                result.append(", %s" % self.quote_name_unless_alias(alias))
++                result.append(", %s" % self.quote_name(alias))
+         return result, params
+ 
+     def get_related_selections(
+@@ -1504,7 +1497,7 @@ def _get_field_choices():
+                 if self.connection.features.select_for_update_of_column:
+                     result.append(self.compile(col)[0])
+                 else:
+-                    result.append(self.quote_name_unless_alias(col.alias))
++                    result.append(self.quote_name(col.alias))
+         if invalid_names:
+             raise FieldError(
+                 "Invalid field name(s) given in select_for_update(of=(...)): %s. "
+@@ -1805,9 +1798,7 @@ def assemble_as_sql(self, fields, value_rows):
+         return placeholder_rows, param_rows
+ 
+     def as_sql(self):
+-        # We don't need quote_name_unless_alias() here, since these are all
+-        # going to be column names (so we can avoid the extra overhead).
+-        qn = self.connection.ops.quote_name
++        qn = self.quote_name
+         opts = self.query.get_meta()
+         insert_statement = self.connection.ops.insert_statement(
+             on_conflict=self.query.on_conflict,
+@@ -2006,7 +1997,7 @@ def contains_self_reference_subquery(self):
+         )
+ 
+     def _as_sql(self, query):
+-        delete = "DELETE FROM %s" % self.quote_name_unless_alias(query.base_table)
++        delete = "DELETE FROM %s" % self.quote_name(query.base_table)
+         try:
+             where, params = self.compile(query.where)
+         except FullResultSet:
+@@ -2050,7 +2041,7 @@ def as_sql(self):
+         self.pre_sql_setup()
+         if not self.query.values:
+             return "", ()
+-        qn = self.quote_name_unless_alias
++        qn = self.quote_name
+         values, update_params = [], []
+         for field, model, val in self.query.values:
+             if hasattr(val, "resolve_expression"):
+diff --git a/django/db/models/sql/datastructures.py b/django/db/models/sql/datastructures.py
+--- a/django/db/models/sql/datastructures.py
++++ b/django/db/models/sql/datastructures.py
+@@ -82,7 +82,7 @@ def as_sql(self, compiler, connection):
+         """
+         join_conditions = []
+         params = []
+-        qn = compiler.quote_name_unless_alias
++        qn = compiler.quote_name
+         # Add a join condition for each pair of joining columns.
+         for lhs, rhs in self.join_fields:
+             lhs, rhs = connection.ops.prepare_join_on_clause(
+@@ -120,7 +120,9 @@ def as_sql(self, compiler, connection):
+             )
+         on_clause_sql = " AND ".join(join_conditions)
+         alias_str = (
+-            "" if self.table_alias == self.table_name else (" %s" % self.table_alias)
++            ""
++            if self.table_alias == self.table_name
++            else (" %s" % qn(self.table_alias))
+         )
+         sql = "%s %s%s ON (%s)" % (
+             self.join_type,
+@@ -193,10 +195,13 @@ def __init__(self, table_name, alias):
+         self.table_alias = alias
+ 
+     def as_sql(self, compiler, connection):
++        qn = compiler.quote_name
+         alias_str = (
+-            "" if self.table_alias == self.table_name else (" %s" % self.table_alias)
++            ""
++            if self.table_alias == self.table_name
++            else (" %s" % qn(self.table_alias))
+         )
+-        base_sql = compiler.quote_name_unless_alias(self.table_name)
++        base_sql = qn(self.table_name)
+         return base_sql + alias_str, []
+ 
+     def relabeled_clone(self, change_map):

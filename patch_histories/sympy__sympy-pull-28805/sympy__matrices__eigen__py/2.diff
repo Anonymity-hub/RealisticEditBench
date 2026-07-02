@@ -1,0 +1,15 @@
+diff --git a/sympy/matrices/eigen.py b/sympy/matrices/eigen.py
+--- a/sympy/matrices/eigen.py
++++ b/sympy/matrices/eigen.py
+@@ -331,6 +331,11 @@
+                         eigs = {}
+ 
+             for k, v in eigs.items():
++                # Try a bit to canonicalize the eigenvalue expressions to get
++                # the multiplicity correct. This is not robust enough in general
++                # if different subroutines in roots can return different forms
++                # for the same root.
++                k_expanded = k.expand()
+                 v_total = v * multiplicity
+                 if k in all_eigs:
+                     all_eigs[k] += v_total

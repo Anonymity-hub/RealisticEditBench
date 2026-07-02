@@ -1,0 +1,41 @@
+diff --git a/astropy/nddata/ccddata.py b/astropy/nddata/ccddata.py
+--- a/astropy/nddata/ccddata.py
++++ b/astropy/nddata/ccddata.py
+@@ -12,6 +12,7 @@
+ from astropy.wcs import WCS
+ 
+ from .compat import NDDataArray
++from .flag_collection import FlagCollection
+ from .nduncertainty import (
+     InverseVariance,
+     NDUncertainty,
+@@ -430,10 +431,29 @@
+             hdus.append(hduUncert)
+ 
+         if hdu_flags and self.flags is not None:
++            # Flags can be either a numpy array or a FlagCollection
+             if isinstance(self.flags, np.ndarray):
+                 # Simple numpy array of flags - save as a single ImageHDU
+                 hduFlags = fits.ImageHDU(self.flags, name=hdu_flags)
+                 hdus.append(hduFlags)
++            elif isinstance(self.flags, FlagCollection):
++                # FlagCollection is a dict of flag arrays - save each as
++                # separate ImageHDU. Use hdu_flags as a prefix for the
++                # extension names
++                for flag_name, flag_array in self.flags.items():
++                    # Create extension name by combining prefix with flag
++                    # name
++                    if flag_array.dtype == bool:
++                        flag_data = flag_array.astype(np.uint8)
++                    else:
++                        flag_data = flag_array
++                    ext_name = f"{hdu_flags}_{flag_name}"
++                    hduFlag = fits.ImageHDU(flag_data, name=ext_name)
++                    hdus.append(hduFlag)
++            else:
++                raise ValueError(
++                    "flags must be a numpy.ndarray or FlagCollection instance."
++                )
+ 
+         if hdu_psf and self.psf is not None:
+             # The PSF is an image, so write it as a separate ImageHDU.

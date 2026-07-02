@@ -1,0 +1,59 @@
+diff --git a/sphinx/ext/autosummary/generate.py b/sphinx/ext/autosummary/generate.py
+--- a/sphinx/ext/autosummary/generate.py
++++ b/sphinx/ext/autosummary/generate.py
+@@ -399,34 +399,32 @@
+             )
+             ns['modules'] = imported_modules + modules
+             ns['all_modules'] = all_imported_modules + all_modules
+-    elif doc.objtype == 'class':
++    elif obj_type == 'class':
+         ns['members'] = dir(obj)
+         ns['inherited_members'] = set(dir(obj)) - set(obj.__dict__.keys())
+         ns['methods'], ns['all_methods'] = _get_members(
+-            doc,
++            obj_type,
+             obj,
+             {'method'},
+             config=config,
+             events=events,
+-            registry=registry,
+             include_public={'__init__'},
+         )
+         ns['attributes'], ns['all_attributes'] = _get_members(
+-            doc,
++            obj_type,
+             obj,
+             {'attribute', 'property'},
+             config=config,
+             events=events,
+-            registry=registry,
+         )
+ 
+     if modname is None or qualname is None:
+         modname, qualname = _split_full_qualified_name(name)
+ 
+-    if doc.objtype in {'method', 'attribute', 'property'}:
++    if obj_type in {'method', 'attribute', 'property'}:
+         ns['class'] = qualname.rsplit('.', 1)[0]
+ 
+-    if doc.objtype == 'class':
++    if obj_type == 'class':
+         shortname = qualname
+     else:
+         shortname = qualname.rsplit('.', 1)[-1]
+@@ -436,13 +434,13 @@
+     ns['objname'] = qualname
+     ns['name'] = shortname
+ 
+-    ns['objtype'] = doc.objtype
++    ns['objtype'] = obj_type
+     ns['underline'] = len(name) * '='
+ 
+     if template_name:
+         return template.render(template_name, ns)
+     else:
+-        return template.render(doc.objtype, ns)
++        return template.render(obj_type, ns)
+ 
+ 
+ def _skip_member(

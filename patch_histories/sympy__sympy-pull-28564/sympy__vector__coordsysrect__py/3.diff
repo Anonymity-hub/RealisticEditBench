@@ -1,0 +1,13 @@
+diff --git a/sympy/vector/coordsysrect.py b/sympy/vector/coordsysrect.py
+--- a/sympy/vector/coordsysrect.py
++++ b/sympy/vector/coordsysrect.py
+@@ -258,7 +258,8 @@
+         return iter(self.base_vectors())
+ 
+     def _eval_simplify(self, **kwargs):
+-        return
++        return self
++
+     @staticmethod
+     def _check_orthogonality(equations):
+         """

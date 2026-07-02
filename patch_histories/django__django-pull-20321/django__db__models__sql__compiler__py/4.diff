@@ -1,0 +1,11 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1634,6 +1634,7 @@
+             try:
+                 cursor.close()
+             except DatabaseError:
++                raise e from None
+             raise
+ 
+         if result_type == ROW_COUNT:

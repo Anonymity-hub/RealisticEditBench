@@ -1,0 +1,12 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -73,7 +73,7 @@
+ 
+         self.indent(1)
+         attrs = {"model": str(obj._meta)}
+-        if not self.use_natural_primary_keys or not hasattr(obj, "natural_key"):
++        if not self.use_natural_primary_keys or not self._resolve_natural_key(obj):
+             obj_pk = obj.pk
+             if obj_pk is not None:
+                 attrs["pk"] = obj._meta.pk.value_to_string(obj)

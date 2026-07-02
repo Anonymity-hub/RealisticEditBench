@@ -1,0 +1,20 @@
+diff --git a/sympy/combinatorics/free_groups.py b/sympy/combinatorics/free_groups.py
+--- a/sympy/combinatorics/free_groups.py
++++ b/sympy/combinatorics/free_groups.py
+@@ -350,6 +350,16 @@
+     """
+     __slots__ = ()
+     is_assoc_word = True
++
++    def _array_form_from_letter_form(self, letter_form):
++        if not letter_form:
++            return ()
++        array_form = []
++        for letter in letter_form:
++            if letter.is_Symbol:
++                array_form.append((letter, 1))
++            else:
++                array_form.append((-letter, -1))
+ 
+     def __new__(cls, init=(), *, reduced=False, boundary_index=None):
+         if not init:

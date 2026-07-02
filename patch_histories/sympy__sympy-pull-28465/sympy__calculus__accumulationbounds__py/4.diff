@@ -1,0 +1,13 @@
+diff --git a/sympy/calculus/accumulationbounds.py b/sympy/calculus/accumulationbounds.py
+--- a/sympy/calculus/accumulationbounds.py
++++ b/sympy/calculus/accumulationbounds.py
+@@ -692,8 +692,7 @@
+             raise TypeError(
+                 "Input must be AccumulationBounds or FiniteSet object")
+ 
+-        if other.min <= self.min and other.max >= self.min:
+-            return AccumBounds(Min(self.min, other.min), Max(self.max, other.max))
++        return AccumBounds(Min(self.min, other.min), Max(self.max, other.max))
+ 
+ 
+ @dispatch(AccumulationBounds, AccumulationBounds) # type: ignore # noqa:F811

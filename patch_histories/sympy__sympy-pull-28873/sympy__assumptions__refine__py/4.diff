@@ -1,0 +1,12 @@
+diff --git a/sympy/assumptions/refine.py b/sympy/assumptions/refine.py
+--- a/sympy/assumptions/refine.py
++++ b/sympy/assumptions/refine.py
+@@ -487,5 +487,7 @@
+     'im': refine_im,
+     'arg': refine_arg,
+     'sign': refine_sign,
+-    'MatrixElement': refine_matrixelement
++    'MatrixElement': refine_matrixelement,
++    'cos': refine_sin_cos,
++    'sin': refine_sin_cos,
+ }

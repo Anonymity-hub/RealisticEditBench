@@ -1,0 +1,16 @@
+diff --git a/sphinx/ext/autosummary/__init__.py b/sphinx/ext/autosummary/__init__.py
+--- a/sphinx/ext/autosummary/__init__.py
++++ b/sphinx/ext/autosummary/__init__.py
+@@ -348,10 +348,11 @@
+                 type_aliases=config.autodoc_type_aliases,
+                 current_document=current_document,
+                 config=config,
+-                env=env,
+                 events=events,
+                 get_attr=get_attr,
+                 options=opts,
++                ref_context=ref_context,
++                reread_always=reread_always,
+             )
+             if props is None:
+                 logger.warning(

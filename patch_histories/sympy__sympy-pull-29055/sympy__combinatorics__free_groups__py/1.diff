@@ -1,0 +1,12 @@
+diff --git a/sympy/combinatorics/free_groups.py b/sympy/combinatorics/free_groups.py
+--- a/sympy/combinatorics/free_groups.py
++++ b/sympy/combinatorics/free_groups.py
+@@ -1016,6 +1018,8 @@ def contains_generators(self):
+     def cyclic_subword(self, from_i, to_j):
+         group = self.group
+         l = len(self)
++        if l == 0:
++            return group.identity
+         letter_form = self.letter_form
+         period1 = int(from_i/l)
+         if from_i >= l:

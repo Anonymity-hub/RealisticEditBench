@@ -1,0 +1,14 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -683,8 +683,8 @@
+                             return r"\frac{1}{\frac{%s}{%s}}" % (base_p, base_q)
+                         else:
+                             return r"\frac{1}{(\frac{%s}{%s})^{%s}}" % (base_p, base_q, abs(expr.exp))
+-                # things like 1/x
+-                return self._print_Mul(expr)
++                # things like 1/x^y
++                if expr.exp == -1:
+         if expr.base.is_Function:
+             return self._print(expr.base, exp=self._print(expr.exp))
+         tex = r"%s^{%s}"

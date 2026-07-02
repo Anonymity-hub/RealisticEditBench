@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -5311,9 +5311,7 @@
+         s = np.ma.ravel(s)
+         if not (np.issubdtype(s.dtype, np.floating)
+                 or np.issubdtype(s.dtype, np.integer)):
+-            raise ValueError(
+-                "s must be a scalar, "
+-                "or float array-like with the same size as x and y")
++            raise ValueError(f"s must be float, but has type {s.dtype}")
+         if len(s) not in (1, x.size):
+             raise ValueError(
+                 "s must be a scalar, "

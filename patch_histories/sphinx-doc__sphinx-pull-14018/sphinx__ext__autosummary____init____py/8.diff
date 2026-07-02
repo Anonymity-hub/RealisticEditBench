@@ -1,0 +1,12 @@
+diff --git a/sphinx/ext/autosummary/__init__.py b/sphinx/ext/autosummary/__init__.py
+--- a/sphinx/ext/autosummary/__init__.py
++++ b/sphinx/ext/autosummary/__init__.py
+@@ -307,6 +307,8 @@
+         events = env.events
+         get_attr = _AutodocAttrGetter(env._registry.autodoc_attrgetters)
+         opts = _AutoDocumenterOptions()
++        ref_context = env.ref_context
++        reread_always = env.reread_always
+ 
+         max_item_chars = 50
+ 

@@ -1,0 +1,29 @@
+diff --git a/lib/matplotlib/cbook.py b/lib/matplotlib/cbook.py
+--- a/lib/matplotlib/cbook.py
++++ b/lib/matplotlib/cbook.py
+@@ -894,6 +894,8 @@
+         """
+         siblings = self._mapping.get(a, [a])
+         result = sorted(siblings, key=self._ordering.get)
++        if not include_self:
++            result.remove(a)
+         return result
+ 
+ 
+@@ -910,11 +912,13 @@
+         """
+         return self._grouper.joined(a, b)
+ 
+-    def get_siblings(self, a):
++    def get_siblings(self, a, *, include_self=True):
+         """
+-        Return all of the items joined with *a*, including itself.
++        Return all the items joined with *a*.
++
++        *a* is included in the list if *include_self* is True.
+         """
+-        return self._grouper.get_siblings(a)
++        return self._grouper.get_siblings(a, include_self=include_self)
+ 
+ 
+ def simple_linear_interpolation(a, steps):

@@ -1,0 +1,21 @@
+diff --git a/astropy/table/operations.py b/astropy/table/operations.py
+--- a/astropy/table/operations.py
++++ b/astropy/table/operations.py
+@@ -1033,15 +1033,15 @@ def get_descrs(arrays, col_name_map):
+     return out_descrs
+ 
+ 
+-def common_dtype(cols):
++def result_type(cols):
+     """
+     Use numpy to find the common dtype for a list of columns.
+ 
+     Only allow columns within the following fundamental numpy data types:
+     np.bool_, np.object_, np.number, np.character, np.void
+     """
+     try:
+-        return metadata.common_dtype(cols)
++        return metadata.utils.result_type(cols)
+     except metadata.MergeConflictError as err:
+         tme = TableMergeError(f"Columns have incompatible types {err._incompat_types}")
+         tme._incompat_types = err._incompat_types

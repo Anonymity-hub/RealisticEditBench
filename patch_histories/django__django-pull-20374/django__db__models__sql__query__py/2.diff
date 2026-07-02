@@ -1,0 +1,19 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -2344,6 +2344,15 @@
+             # Raw SQL from extra(order_by=...) can't be reliably compared
+             # against resolved OrderBy/Col expressions. Treat as not a subset.
+             return False
++        if self.group_by in (None, True):
++            # There is either no aggregation at all (None), or the group by
++            # is generated automatically from model fields (True), in which
++            # case the order by is necessarily a subset of them.
++            return True
++        if not self.order_by:
++            # Although an empty set is always a subset, there's no point in
++            # clearing ordering when there isn't any. Avoid the clone() below.
++            return True
+ 
+     def clear_ordering(self, force=False, clear_default=True):
+         """

@@ -1,0 +1,15 @@
+diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py
+--- a/django/db/migrations/serializer.py
++++ b/django/db/migrations/serializer.py
+@@ -225,6 +225,11 @@
+ class GenericAliasSerializer(BaseSerializer):
+     def serialize(self):
+         imports = set()
++        # Avoid iterating self.value, because it returns itself.
++        # https://github.com/python/cpython/issues/103450
++        for item in self.value.__args__:
++            _, item_imports = serializer_factory(item).serialize()
++            imports.update(item_imports)
+ 
+ 
+ class IterableSerializer(BaseSerializer):

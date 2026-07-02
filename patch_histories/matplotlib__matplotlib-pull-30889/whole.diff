@@ -1,0 +1,208 @@
+diff --git a/galleries/examples/specialty_plots/skewt.py b/galleries/examples/specialty_plots/skewt.py
+--- a/galleries/examples/specialty_plots/skewt.py
++++ b/galleries/examples/specialty_plots/skewt.py
+@@ -34,9 +34,9 @@ def draw(self, renderer):
+             for artist in [self.gridline, self.tick1line, self.tick2line,
+                            self.label1, self.label2]:
+                 stack.callback(artist.set_visible, artist.get_visible())
+-            needs_lower = transforms.interval_contains(
++            needs_lower = transforms._interval_contains(
+                 self.axes.lower_xlim, self.get_loc())
+-            needs_upper = transforms.interval_contains(
++            needs_upper = transforms._interval_contains(
+                 self.axes.upper_xlim, self.get_loc())
+             self.tick1line.set_visible(
+                 self.tick1line.get_visible() and needs_lower)
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -5662,8 +5662,8 @@ def reduce_C_function(C: array) -> float
+             ymin, ymax = (ty.min(), ty.max()) if len(y) else (0, 1)
+ 
+             # to avoid issues with singular data, expand the min/max pairs
+-            xmin, xmax = mtransforms.nonsingular(xmin, xmax, expander=0.1)
+-            ymin, ymax = mtransforms.nonsingular(ymin, ymax, expander=0.1)
++            xmin, xmax = mtransforms._nonsingular(xmin, xmax, expander=0.1)
++            ymin, ymax = mtransforms._nonsingular(ymin, ymax, expander=0.1)
+ 
+         nx1 = nx + 1
+         ny1 = ny + 1
+diff --git a/lib/matplotlib/colorbar.py b/lib/matplotlib/colorbar.py
+--- a/lib/matplotlib/colorbar.py
++++ b/lib/matplotlib/colorbar.py
+@@ -1098,7 +1098,7 @@ def _process_values(self):
+             # If we still aren't scaled after autoscaling, use 0, 1 as default
+             self.norm.vmin = 0
+             self.norm.vmax = 1
+-        self.norm.vmin, self.norm.vmax = mtransforms.nonsingular(
++        self.norm.vmin, self.norm.vmax = mtransforms._nonsingular(
+             self.norm.vmin, self.norm.vmax, expander=0.1)
+         if (not isinstance(self.norm, colors.BoundaryNorm) and
+                 (self.boundaries is None)):
+diff --git a/lib/matplotlib/projections/polar.py b/lib/matplotlib/projections/polar.py
+--- a/lib/matplotlib/projections/polar.py
++++ b/lib/matplotlib/projections/polar.py
+@@ -469,7 +469,7 @@ def view_limits(self, vmin, vmax):
+         if self._zero_in_bounds() and vmax > vmin:
+             # this allows inverted r/y-lims
+             vmin = min(0, vmin)
+-        return mtransforms.nonsingular(vmin, vmax)
++        return mtransforms._nonsingular(vmin, vmax)
+ 
+ 
+ class _ThetaShift(mtransforms.ScaledTranslation):
+diff --git a/lib/matplotlib/ticker.py b/lib/matplotlib/ticker.py
+--- a/lib/matplotlib/ticker.py
++++ b/lib/matplotlib/ticker.py
+@@ -1029,7 +1029,7 @@ def __call__(self, x, pos=None):
+             return ''
+ 
+         vmin, vmax = self.axis.get_view_interval()
+-        vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)
++        vmin, vmax = mtransforms._nonsingular(vmin, vmax, expander=0.05)
+         s = self._num_to_string(x, vmin, vmax)
+         return self.fix_minus(s)
+ 
+@@ -1730,15 +1730,15 @@ def nonsingular(self, v0, v1):
+           default view limits.
+         - Otherwise, ``(v0, v1)`` is returned without modification.
+         """
+-        return mtransforms.nonsingular(v0, v1, expander=.05)
++        return mtransforms._nonsingular(v0, v1, expander=.05)
+ 
+     def view_limits(self, vmin, vmax):
+         """
+         Select a scale for the range from vmin to vmax.
+ 
+         Subclasses should override this method to change locator behaviour.
+         """
+-        return mtransforms.nonsingular(vmin, vmax)
++        return mtransforms._nonsingular(vmin, vmax)
+ 
+ 
+ class IndexLocator(Locator):
+@@ -1881,7 +1881,7 @@ def __call__(self):
+         return self.tick_values(vmin, vmax)
+ 
+     def tick_values(self, vmin, vmax):
+-        vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)
++        vmin, vmax = mtransforms._nonsingular(vmin, vmax, expander=0.05)
+ 
+         if (vmin, vmax) in self.presets:
+             return self.presets[(vmin, vmax)]
+@@ -1910,7 +1910,7 @@ def view_limits(self, vmin, vmax):
+             vmin = math.floor(scale * vmin) / scale
+             vmax = math.ceil(scale * vmax) / scale
+ 
+-        return mtransforms.nonsingular(vmin, vmax)
++        return mtransforms._nonsingular(vmin, vmax)
+ 
+ 
+ class MultipleLocator(Locator):
+@@ -1980,7 +1980,7 @@ def view_limits(self, dmin, dmax):
+             vmin = dmin
+             vmax = dmax
+ 
+-        return mtransforms.nonsingular(vmin, vmax)
++        return mtransforms._nonsingular(vmin, vmax)
+ 
+ 
+ def scale_range(vmin, vmax, n=1, threshold=100):
+@@ -2236,7 +2236,7 @@ def tick_values(self, vmin, vmax):
+         if self._symmetric:
+             vmax = max(abs(vmin), abs(vmax))
+             vmin = -vmax
+-        vmin, vmax = mtransforms.nonsingular(
++        vmin, vmax = mtransforms._nonsingular(
+             vmin, vmax, expander=1e-13, tiny=1e-14)
+         locs = self._raw_ticks(vmin, vmax)
+ 
+@@ -2254,7 +2254,7 @@ def view_limits(self, dmin, dmax):
+             dmax = max(abs(dmin), abs(dmax))
+             dmin = -dmax
+ 
+-        dmin, dmax = mtransforms.nonsingular(
++        dmin, dmax = mtransforms._nonsingular(
+             dmin, dmax, expander=1e-12, tiny=1e-13)
+ 
+         if mpl.rcParams['axes.autolimit_mode'] == 'round_numbers':
+@@ -2718,7 +2718,7 @@ def view_limits(self, vmin, vmax):
+                 vmin = _decade_less(vmin, b)
+                 vmax = _decade_greater(vmax, b)
+ 
+-        return mtransforms.nonsingular(vmin, vmax)
++        return mtransforms._nonsingular(vmin, vmax)
+ 
+ 
+ class AsinhLocator(Locator):
+diff --git a/lib/matplotlib/transforms.py b/lib/matplotlib/transforms.py
+--- a/lib/matplotlib/transforms.py
++++ b/lib/matplotlib/transforms.py
+@@ -44,7 +44,7 @@
+ import numpy as np
+ from numpy.linalg import inv
+ 
+-from matplotlib import _api
++from matplotlib import _api, _docstring
+ from matplotlib._path import affine_transform, count_bboxes_overlapping_bbox
+ from .path import Path
+ 
+@@ -2865,7 +2865,7 @@ def _revalidate(self):
+         super()._revalidate()
+ 
+ 
+-def nonsingular(vmin, vmax, expander=0.001, tiny=1e-15, increasing=True):
++def _nonsingular(vmin, vmax, expander=0.001, tiny=1e-15, increasing=True):
+     """
+     Modify the endpoints of a range as needed to avoid singularities.
+ 
+@@ -2923,7 +2923,13 @@ def nonsingular(vmin, vmax, expander=0.001, tiny=1e-15, increasing=True):
+     return vmin, vmax
+ 
+ 
+-def interval_contains(interval, val):
++@_api.deprecated("3.11")
++@_docstring.copy(_nonsingular)
++def nonsingular(vmin, vmax, expander=0.001, tiny=1e-15, increasing=True):
++    return _nonsingular(vmin, vmax, expander, tiny, increasing)
++
++
++def _interval_contains(interval, val):
+     """
+     Check, inclusively, whether an interval includes a given value.
+ 
+@@ -2945,6 +2951,12 @@ def interval_contains(interval, val):
+     return a <= val <= b
+ 
+ 
++@_api.deprecated("3.11")
++@_docstring.copy(_interval_contains)
++def interval_contains(interval, val):
++    return _interval_contains(interval, val)
++
++
+ def _interval_contains_close(interval, val, rtol=1e-10):
+     """
+     Check, inclusively, whether an interval includes a given value, with the
+@@ -2974,7 +2986,7 @@ def _interval_contains_close(interval, val, rtol=1e-10):
+     return a - rtol <= val <= b + rtol
+ 
+ 
+-def interval_contains_open(interval, val):
++def _interval_contains_open(interval, val):
+     """
+     Check, excluding endpoints, whether an interval includes a given value.
+ 
+@@ -2994,6 +3006,12 @@ def interval_contains_open(interval, val):
+     return a < val < b or a > val > b
+ 
+ 
++@_api.deprecated("3.11")
++@_docstring.copy(_interval_contains_open)
++def interval_contains_open(interval, val):
++    return _interval_contains_open(interval, val)
++
++
+ def offset_copy(trans, fig=None, x=0.0, y=0.0, units='inches'):
+     """
+     Return a new transform with an added offset.

@@ -1,0 +1,15 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -5313,9 +5313,8 @@
+                 or np.issubdtype(s.dtype, np.integer)):
+             raise ValueError(f"s must be float, but has type {s.dtype}")
+         if len(s) not in (1, x.size):
+-            raise ValueError(
+-                "s must be a scalar, "
+-                "or float array-like with the same size as x and y")
++            raise ValueError(f"s (size {len(s)}) cannot be broadcast "
++                             f"to match x and y (size {len(x)})")
+ 
+         # get the original edgecolor the user passed before we normalize
+         orig_edgecolor = edgecolors

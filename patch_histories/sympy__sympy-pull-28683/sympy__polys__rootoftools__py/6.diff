@@ -1,0 +1,21 @@
+diff --git a/sympy/polys/rootoftools.py b/sympy/polys/rootoftools.py
+--- a/sympy/polys/rootoftools.py
++++ b/sympy/polys/rootoftools.py
+@@ -367,6 +367,7 @@
+         if not dom.is_ZZ:
+             raise NotImplementedError("CRootOf is not supported over %s" % dom)
+ 
++        poly = Poly(poly.replace(poly.gen, _rootof_dummy))
+         root = cls._indexed_root(poly, index, lazy=True)
+         return coeff * cls._postprocess_root(root, radicals)
+ 
+@@ -375,7 +376,8 @@
+         """Construct new ``CRootOf`` object from raw data. """
+         obj = Expr.__new__(cls)
+ 
+-        obj.poly = PurePoly(poly)
++        poly = poly.replace(poly.gen, _rootof_dummy)
++        obj.poly = Poly(poly)
+         obj.index = index
+ 
+         try:

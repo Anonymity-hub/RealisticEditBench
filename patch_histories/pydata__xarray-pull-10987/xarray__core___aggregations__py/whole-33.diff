@@ -1,0 +1,21 @@
+diff --git a/xarray/core/_aggregations.py b/xarray/core/_aggregations.py
+--- a/xarray/core/_aggregations.py
++++ b/xarray/core/_aggregations.py
+@@ -6962,6 +6962,17 @@ def _flox_scan(
+     ) -> DataArray:
+         raise NotImplementedError()
+ 
++    def _flox_scan(
++        self,
++        dim: Dims,
++        *,
++        func: str,
++        skipna: bool | None = None,
++        keep_attrs: bool | None = None,
++        **kwargs: Any,
++    ) -> DataArray:
++        raise NotImplementedError()
++
+     def count(
+         self,
+         dim: Dims = None,

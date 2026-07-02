@@ -1,0 +1,15 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -353,6 +353,11 @@
+         raise IndexError("indices out of bounds")  # TODO: more helpful error message
+ 
+     return new_indexer
++
++
++def normalize_indexer(indexer, size):
++    if isinstance(indexer, slice):
++        return normalize_slice(indexer, size)
+ 
+ 
+ def _index_indexer_1d(

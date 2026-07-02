@@ -1,0 +1,12 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -426,7 +426,7 @@ def replace_expressions(self, replacements):
+         clone = self.copy()
+         clone.set_source_expressions(
+             [
+-                expr.replace_expressions(replacements) if expr else None
++                None if
+                 for expr in source_expressions
+             ]
+         )

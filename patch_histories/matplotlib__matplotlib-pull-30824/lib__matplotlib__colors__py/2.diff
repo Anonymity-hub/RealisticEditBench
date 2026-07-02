@@ -1,0 +1,20 @@
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -2223,6 +2223,16 @@
+         row_frac = (row - left)[:, :, np.newaxis]
+         col_frac = (col - top)[:, :, np.newaxis]
+ 
++        # Indices of the next edges, clipping where needed
++        right = np.clip(left + 1, 0, s[0] - 1)
++        bottom = np.clip(top + 1, 0, s[1] - 1)
++
++        # Values at the corners
++        tl = self.patch[left, top, :]
++        tr = self.patch[right, top, :]
++        bl = self.patch[left, bottom, :]
++        br = self.patch[right, bottom, :]
++
+         self._isinit = True
+ 
+ 

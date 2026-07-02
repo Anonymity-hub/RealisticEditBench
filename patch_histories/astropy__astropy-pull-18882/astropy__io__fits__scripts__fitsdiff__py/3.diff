@@ -1,0 +1,16 @@
+diff --git a/astropy/io/fits/scripts/fitsdiff.py b/astropy/io/fits/scripts/fitsdiff.py
+--- a/astropy/io/fits/scripts/fitsdiff.py
++++ b/astropy/io/fits/scripts/fitsdiff.py
+@@ -415,6 +415,12 @@
+                     ignore_blank_cards=opts.ignore_blank_cards,
+                 )
+             except OSError:
++                if not opts.quiet:
++                    msg = f"Warning: failed to open {a}"
++                    if b != a:
++                        msg += f" (or {b})"
++                    msg += ". Skipping."
++                    print(msg, file=sys.stderr)
+                 identical.append(None)
+                 continue
+             diff.report(fileobj=out_file)

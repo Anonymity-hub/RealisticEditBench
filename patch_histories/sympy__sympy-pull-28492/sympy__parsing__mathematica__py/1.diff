@@ -1,0 +1,15 @@
+diff --git a/sympy/parsing/mathematica.py b/sympy/parsing/mathematica.py
+--- a/sympy/parsing/mathematica.py
++++ b/sympy/parsing/mathematica.py
+@@ -912,6 +912,11 @@ def _parse_after_braces(self, tokens: list, inside_enclosure: bool = False):
+                         if pointer == 0 or pointer == size - 1 or self._is_op(tokens[pointer - 1]) or self._is_op(tokens[pointer + 1]):
+                             pointer += 1
+                             continue
++                    # Special case: "!" without preceding operand is PREFIX Not, not POSTFIX Factorial
++                    if token == "!" and op_type == self.POSTFIX:
++                        if pointer == 0 or self._is_op(tokens[pointer - 1]):
++                            pointer += 1
++                            continue
+                     changed = True
+                     tokens[pointer] = node
+                     if op_type == self.INFIX:

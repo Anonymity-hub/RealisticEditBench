@@ -1,0 +1,11 @@
+diff --git a/xarray/plot/dataset_plot.py b/xarray/plot/dataset_plot.py
+--- a/xarray/plot/dataset_plot.py
++++ b/xarray/plot/dataset_plot.py
+@@ -213,6 +213,7 @@ def newplotfunc(
+                 raise ValueError(msg)
+             else:
+                 warnings.warn(msg, DeprecationWarning, stacklevel=2)
++            del msg
+         del args
+ 
+         _is_facetgrid = kwargs.pop("_is_facetgrid", False)

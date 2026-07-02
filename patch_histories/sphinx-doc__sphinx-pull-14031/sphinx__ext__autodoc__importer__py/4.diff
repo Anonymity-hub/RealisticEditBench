@@ -1,0 +1,19 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -911,6 +911,7 @@
+         signatures = _format_signatures(
+             args=args,
+             retann=retann,
++            autodoc_annotations=current_document.autodoc_annotations,
+             config=config,
+             docstrings=docstrings,
+             events=events,
+@@ -1172,6 +1173,7 @@
+ 
+ def _format_signatures(
+     *,
++    autodoc_annotations: dict[str, dict[str, str]],
+     config: Config,
+     docstrings: list[list[str]] | None,
+     events: EventManager,

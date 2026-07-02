@@ -1,0 +1,15 @@
+diff --git a/django/db/backends/sqlite3/introspection.py b/django/db/backends/sqlite3/introspection.py
+--- a/django/db/backends/sqlite3/introspection.py
++++ b/django/db/backends/sqlite3/introspection.py
+@@ -414,7 +414,10 @@
+                     "check": False,
+                     "index": False,
+                 }
+-                for index, (column_name, (ref_column_name, ref_table_name)) in relations
++                for index, (
++                    column_name,
++                    (ref_column_name, ref_table_name, _),
++                ) in relations
+             }
+         )
+         return constraints

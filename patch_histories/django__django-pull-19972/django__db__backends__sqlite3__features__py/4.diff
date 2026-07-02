@@ -1,0 +1,30 @@
+diff --git a/django/db/backends/sqlite3/features.py b/django/db/backends/sqlite3/features.py
+--- a/django/db/backends/sqlite3/features.py
++++ b/django/db/backends/sqlite3/features.py
+@@ -147,8 +147,8 @@
+         """
+         SQLite has a variable limit per query. The limit can be changed using
+         the SQLITE_MAX_VARIABLE_NUMBER compile-time option (which defaults to
+-        999 in versions < 3.32.0 or 32766 in newer versions) or lowered per
+-        connection at run-time with setlimit(SQLITE_LIMIT_VARIABLE_NUMBER, N).
++        32766) or lowered per connection at run-time with
++        setlimit(SQLITE_LIMIT_VARIABLE_NUMBER, N).
+         """
+         return self.connection.connection.getlimit(sqlite3.SQLITE_LIMIT_VARIABLE_NUMBER)
+ 
+@@ -164,15 +164,3 @@
+ 
+     can_introspect_json_field = property(operator.attrgetter("supports_json_field"))
+     has_json_object_function = property(operator.attrgetter("supports_json_field"))
+-
+-    @cached_property
+-    def can_return_columns_from_insert(self):
+-        return Database.sqlite_version_info >= (3, 35)
+-
+-    can_return_rows_from_bulk_insert = property(
+-        operator.attrgetter("can_return_columns_from_insert")
+-    )
+-
+-    can_return_rows_from_update = property(
+-        operator.attrgetter("can_return_columns_from_insert")
+-    )

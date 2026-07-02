@@ -1,0 +1,11 @@
+diff --git a/astropy/utils/iers/iers.py b/astropy/utils/iers/iers.py
+--- a/astropy/utils/iers/iers.py
++++ b/astropy/utils/iers/iers.py
+@@ -860,7 +860,7 @@ def _check_interpolate_indices(self, indices_orig, indices_clipped, max_input_mj
+         auto_max_age = _none_to_float(conf.auto_max_age)
+         if (
+             max_input_mjd > predictive_mjd
+-            and self.time_now.mjd - predictive_mjd > auto_max_age
++            and Time.now().mjd - predictive_mjd > auto_max_age
+         ):
+             raise ValueError(INTERPOLATE_ERROR.format(auto_max_age))

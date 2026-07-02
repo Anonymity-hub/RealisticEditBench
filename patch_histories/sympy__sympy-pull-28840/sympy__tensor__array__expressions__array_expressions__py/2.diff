@@ -1,0 +1,12 @@
+diff --git a/sympy/tensor/array/expressions/array_expressions.py b/sympy/tensor/array/expressions/array_expressions.py
+--- a/sympy/tensor/array/expressions/array_expressions.py
++++ b/sympy/tensor/array/expressions/array_expressions.py
+@@ -850,7 +850,7 @@
+         if isinstance(expr, ArrayAdd):
+             return self._ArrayDiagonal_denest_ArrayAdd(expr, *diagonal_indices)
+         if isinstance(expr, ArrayDiagonal):
+-            return self._ArrayDiagonal_denest_ArrayDiagonal(expr, *diagonal_indices)
++            return self._ArrayDiagonal_denest_ArrayDiagonal(expr, get_rank(self), *diagonal_indices)
+         if isinstance(expr, PermuteDims):
+             return self._ArrayDiagonal_denest_PermuteDims(expr, *diagonal_indices)
+         if isinstance(expr, (ZeroArray, ZeroMatrix)):

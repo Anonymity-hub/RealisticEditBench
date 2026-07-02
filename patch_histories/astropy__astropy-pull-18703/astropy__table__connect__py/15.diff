@@ -1,0 +1,12 @@
+diff --git a/astropy/table/connect.py b/astropy/table/connect.py
+--- a/astropy/table/connect.py
++++ b/astropy/table/connect.py
+@@ -148,7 +148,7 @@ def __call__(self, *args, serialize_method=None, write_indices=False, **kwargs):
+ 
+ def construct_indices(tbl: Table) -> None:
+     """
+-    Create indices on a table based on the ``__table_indices__`` meta data.
++    Create indices on a table froml column meta ``__indices__`` values.
+ 
+     This is the inverse of `represent_indices`.
+ 

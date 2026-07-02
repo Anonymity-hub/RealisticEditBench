@@ -1,0 +1,64 @@
+diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py
+--- a/django/db/models/fields/json.py
++++ b/django/db/models/fields/json.py
+@@ -493,7 +493,7 @@
+ JSONField.register_lookup(JSONIn)
+ 
+ 
+-class KeyTransform(Transform):
++class KeyTransform(ProcessJSONLHSMixin, Transform):
+     postgres_operator = "->"
+     postgres_nested_operator = "#>"
+ 
+@@ -515,33 +515,11 @@
+ 
+     def as_mysql(self, compiler, connection):
+         lhs, params, key_transforms = self.preprocess_lhs(compiler, connection)
+-        json_path = connection.ops.compile_json_path(key_transforms)
+-        return "JSON_EXTRACT(%s, %%s)" % lhs, (*params, json_path)
++        return self._process_as_mysql(lhs, params, connection, key_transforms)
+ 
+     def as_oracle(self, compiler, connection):
+         lhs, params, key_transforms = self.preprocess_lhs(compiler, connection)
+-        json_path = connection.ops.compile_json_path(key_transforms)
+-        if connection.features.supports_primitives_in_json_field:
+-            sql = (
+-                "COALESCE("
+-                "JSON_VALUE(%s, q'\uffff%s\uffff'),"
+-                "JSON_QUERY(%s, q'\uffff%s\uffff' DISALLOW SCALARS)"
+-                ")"
+-            )
+-        else:
+-            sql = (
+-                "COALESCE("
+-                "JSON_QUERY(%s, q'\uffff%s\uffff'),"
+-                "JSON_VALUE(%s, q'\uffff%s\uffff')"
+-                ")"
+-            )
+-        # Add paths directly into SQL because path expressions cannot be passed
+-        # as bind variables on Oracle. Use a custom delimiter to prevent the
+-        # JSON path from escaping the SQL literal. Each key in the JSON path is
+-        # passed through json.dumps() with ensure_ascii=True (the default),
+-        # which converts the delimiter into the escaped \uffff format. This
+-        # ensures that the delimiter is not present in the JSON path.
+-        return sql % ((lhs, json_path) * 2), tuple(params) * 2
++        return self._process_as_oracle(lhs, params, connection, key_transforms)
+ 
+     def as_postgresql(self, compiler, connection):
+         lhs, params, key_transforms = self.preprocess_lhs(compiler, connection)
+@@ -556,14 +534,7 @@
+ 
+     def as_sqlite(self, compiler, connection):
+         lhs, params, key_transforms = self.preprocess_lhs(compiler, connection)
+-        json_path = connection.ops.compile_json_path(key_transforms)
+-        datatype_values = ",".join(
+-            [repr(datatype) for datatype in connection.ops.jsonfield_datatype_values]
+-        )
+-        return (
+-            "(CASE WHEN JSON_TYPE(%s, %%s) IN (%s) "
+-            "THEN JSON_TYPE(%s, %%s) ELSE JSON_EXTRACT(%s, %%s) END)"
+-        ) % (lhs, datatype_values, lhs, lhs), (*params, json_path) * 3
++        return self._process_as_sqlite(lhs, params, connection, key_transforms)
+ 
+ 
+ class KeyTextTransform(KeyTransform):

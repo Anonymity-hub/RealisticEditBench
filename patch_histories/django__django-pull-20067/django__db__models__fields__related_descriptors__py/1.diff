@@ -1,0 +1,27 @@
+diff --git a/django/db/models/fields/related_descriptors.py b/django/db/models/fields/related_descriptors.py
+--- a/django/db/models/fields/related_descriptors.py
++++ b/django/db/models/fields/related_descriptors.py
+@@ -1262,9 +1262,8 @@
+             else:
+                 return super().count()
+ 
+-        def add(self, *objs, through_defaults=None):
+-            self._remove_prefetched_objects()
+-            db = router.db_for_write(self.through, instance=self.instance)
++        def _add_base(self, *objs, through_defaults=None, using=None):
++            db = using or router.db_for_write(self.through, instance=self.instance)
+             with transaction.atomic(using=db, savepoint=False):
+                 self._add_items(
+                     self.source_field_name,
+@@ -1281,6 +1280,11 @@
+                         *objs,
+                         through_defaults=through_defaults,
+                     )
++
++        def add(self, *objs, through_defaults=None):
++            self._remove_prefetched_objects()
++            db = router.db_for_write(self.through, instance=self.instance)
++            self._add_base(*objs, through_defaults=through_defaults, using=db)
+ 
+         add.alters_data = True
+ 

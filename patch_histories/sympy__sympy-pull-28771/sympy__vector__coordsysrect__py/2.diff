@@ -1,0 +1,12 @@
+diff --git a/sympy/vector/coordsysrect.py b/sympy/vector/coordsysrect.py
+--- a/sympy/vector/coordsysrect.py
++++ b/sympy/vector/coordsysrect.py
+@@ -138,7 +138,7 @@
+             r, l = transformation
+             l = l._projections
+             lambda_lame = CoordSys3D._get_lame_coeff('cartesian')
+-            lambda_inverse = lambda x, y, z: r.inv()*Matrix(
++            lambda_inverse = lambda x, y, z: r*Matrix(
+                 [x-l[0], y-l[1], z-l[2]])
+         elif isinstance(transformation, Str):
+             trname = transformation.name

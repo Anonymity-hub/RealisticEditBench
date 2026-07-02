@@ -1,0 +1,475 @@
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -34,6 +34,7 @@
+ )
+ from sphinx.ext.autodoc.directive import AutodocDirective
+ from sphinx.ext.autodoc.importer import py_ext_sig_re
++from sphinx.ext.autodoc.typehints import _merge_typehints
+ 
+ if TYPE_CHECKING:
+     from sphinx.application import Sphinx
+@@ -140,15 +141,20 @@ def setup(app: Sphinx) -> ExtensionMetadata:
+     app.add_config_value(
+         'autodoc_inherit_docstrings', True, 'env', types=frozenset({bool})
+     )
++    app.add_config_value(
++        'autodoc_preserve_defaults', False, 'env', types=frozenset({bool})
++    )
++    app.add_config_value(
++        'autodoc_use_type_comments', True, 'env', types=frozenset({bool})
++    )
++
+     app.add_event('autodoc-before-process-signature')
+     app.add_event('autodoc-process-docstring')
+     app.add_event('autodoc-process-signature')
+     app.add_event('autodoc-skip-member')
+     app.add_event('autodoc-process-bases')
+ 
+-    app.setup_extension('sphinx.ext.autodoc.preserve_defaults')
+-    app.setup_extension('sphinx.ext.autodoc.type_comment')
+-    app.setup_extension('sphinx.ext.autodoc.typehints')
++    app.connect('object-description-transform', _merge_typehints)
+ 
+     return {
+         'version': sphinx.__display_version__,
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -37,7 +37,9 @@
+     UNINITIALIZED_ATTR,
+ )
+ from sphinx.ext.autodoc.mock import ismock, mock, undecorate
+-from sphinx.ext.autodoc.type_comment import update_annotations_using_type_comments
++from sphinx.ext.autodoc.preserve_defaults import update_default_value
++from sphinx.ext.autodoc.type_comment import _update_annotations_using_type_comments
++from sphinx.ext.autodoc.typehints import _record_typehints
+ from sphinx.locale import __
+ from sphinx.pycode import ModuleAnalyzer
+ from sphinx.util import inspect, logging
+@@ -694,9 +696,9 @@ def _load_object_by_name(
+         else:
+             func = None
+         if func is not None:
+-            app = SimpleNamespace(config=config)
+             # update the annotations of the property getter
+-            update_annotations_using_type_comments(app, func, False)  # type: ignore[arg-type]
++            if config.autodoc_use_type_comments:
++                _update_annotations_using_type_comments(func, False)
+ 
+             try:
+                 signature = inspect.signature(
+@@ -909,6 +911,7 @@ def _load_object_by_name(
+         signatures = _format_signatures(
+             args=args,
+             retann=retann,
++            autodoc_annotations=current_document.autodoc_annotations,
+             config=config,
+             docstrings=docstrings,
+             events=events,
+@@ -1170,6 +1173,7 @@ def _update_module_annotations_from_type_comments(mod: ModuleType) -> None:
+ 
+ def _format_signatures(
+     *,
++    autodoc_annotations: dict[str, dict[str, str]],
+     config: Config,
+     docstrings: list[list[str]] | None,
+     events: EventManager,
+@@ -1236,6 +1240,14 @@ def _format_signatures(
+         # Only keep the return annotation
+         signatures = [('', retann) for _args, retann in signatures]
+ 
++    _record_typehints(
++        autodoc_annotations=autodoc_annotations,
++        name=props.full_name,
++        obj=props._obj,
++        short_literals=config.python_display_short_literal_types,
++        type_aliases=config.autodoc_type_aliases,
++        typehints_format=config.autodoc_typehints_format,
++    )
+     if result := events.emit_firstresult(
+         'autodoc-process-signature',
+         props.obj_type,
+@@ -1303,6 +1315,7 @@ def _format_signatures(
+                     properties=frozenset(),
+                 )
+                 signatures += _format_signatures(
++                    autodoc_annotations=autodoc_annotations,
+                     config=config,
+                     docstrings=None,
+                     events=events,
+@@ -1414,6 +1427,7 @@ def _format_signatures(
+                     properties=frozenset(),
+                 )
+                 signatures += _format_signatures(
++                    autodoc_annotations=autodoc_annotations,
+                     config=config,
+                     docstrings=None,
+                     events=events,
+@@ -1538,8 +1552,10 @@ def _extract_signature_from_object(
+         events=events,
+         get_attr=get_attr,
+         parent=parent,
++        preserve_defaults=config.autodoc_preserve_defaults,
+         props=props,
+         type_aliases=config.autodoc_type_aliases,
++        use_type_comments=config.autodoc_use_type_comments,
+     )
+     if sig is None:
+         return []
+@@ -1584,38 +1600,75 @@ def _get_signature_object(
+     events: EventManager,
+     get_attr: _AttrGetter,
+     parent: Any,
++    preserve_defaults: bool,
+     props: _ItemProperties,
+     type_aliases: Mapping[str, str] | None,
++    use_type_comments: bool,
+ ) -> Signature | None:
+     """Return a Signature for *obj*, or None on failure."""
+-    obj = props._obj
+-    if props.obj_type in {'function', 'decorator'}:
+-        events.emit('autodoc-before-process-signature', obj, False)
++    obj, is_bound_method = _get_object_for_signature(
++        props=props, get_attr=get_attr, parent=parent, type_aliases=type_aliases
++    )
++    if obj is None or isinstance(obj, Signature):
++        return obj
++
++    if preserve_defaults:
++        update_default_value(obj, bound_method=is_bound_method)
++    if use_type_comments:
++        _update_annotations_using_type_comments(obj, bound_method=is_bound_method)
++    events.emit('autodoc-before-process-signature', obj, is_bound_method)
++
++    if props.obj_type in {'class', 'exception', 'function', 'method', 'decorator'}:
+         try:
+-            return inspect.signature(obj, type_aliases=type_aliases)
++            return inspect.signature(
++                obj, bound_method=is_bound_method, type_aliases=type_aliases
++            )
+         except TypeError as exc:
+-            msg = __('Failed to get a function signature for %s: %s')
++            if props.obj_type in {'class', 'exception'}:
++                msg = __('Failed to get a constructor signature for %s: %s')
++            elif props.obj_type in {'function', 'decorator'}:
++                msg = __('Failed to get a function signature for %s: %s')
++            elif props.obj_type == 'method':
++                msg = __('Failed to get a method signature for %s: %s')
++            else:
++                msg = __('Failed to get a signature for %s: %s')
+             logger.warning(msg, props.full_name, exc)
+             return None
+         except ValueError:
++            # Still no signature: happens e.g. for old-style classes
++            # with __init__ in C and no `__text_signature__`.
+             return None
+ 
++    return None
++
++
++def _get_object_for_signature(
++    props: _ItemProperties,
++    get_attr: _AttrGetter,
++    parent: Any,
++    type_aliases: Mapping[str, str] | None,
++) -> tuple[Any, bool]:
++    """Return the object from which we will obtain the signature."""
++    obj = props._obj
++    if props.obj_type in {'function', 'decorator'}:
++        return obj, False
++
+     if props.obj_type in {'class', 'exception'}:
+         if isinstance(obj, (NewType, TypeVar)):
+             # Suppress signature
+-            return None
++            return None, False
+ 
+         try:
+             object_sig = obj.__signature__
+         except AttributeError:
+             pass
+         else:
+             if isinstance(object_sig, Signature):
+-                return object_sig
++                return object_sig, False
+             if sys.version_info[:2] in {(3, 12), (3, 13)} and callable(object_sig):
+                 # Support for enum.Enum.__signature__ in Python 3.12
+                 if isinstance(object_sig_str := object_sig(), str):
+-                    return inspect.signature_from_str(object_sig_str)
++                    return inspect.signature_from_str(object_sig_str), False
+ 
+         def get_user_defined_function_or_method(obj: Any, attr: str) -> Any:
+             """Get the `attr` function or method from `obj`, if it is user-defined."""
+@@ -1643,72 +1696,40 @@ def get_user_defined_function_or_method(obj: Any, attr: str) -> Any:
+                 if f'{meth.__module__}.{meth.__qualname__}' in blacklist:
+                     continue
+ 
+-            events.emit('autodoc-before-process-signature', meth, True)
+             try:
+-                object_sig = inspect.signature(
+-                    meth,
+-                    bound_method=True,
+-                    type_aliases=type_aliases,
+-                )
+-            except TypeError as exc:
+-                msg = __('Failed to get a constructor signature for %s: %s')
+-                logger.warning(msg, props.full_name, exc)
+-                return None
++                inspect.signature(meth, bound_method=True, type_aliases=type_aliases)
++            except TypeError:
++                return meth, True  # _get_signature_object() needs to log the failure
+             except ValueError:
+                 continue
+             else:
+                 from sphinx.ext.autodoc._property_types import _ClassDefProperties
+ 
+                 assert isinstance(props, _ClassDefProperties)
+                 props._signature_method_name = meth_name
+-                return object_sig
++                return meth, True
+ 
+         # None of the attributes are user-defined, so fall back to let inspect
+         # handle it.
+         # We don't know the exact method that inspect.signature will read
+-        # the signature from, so just pass the object itself to our hook.
+-        events.emit('autodoc-before-process-signature', obj, False)
+-        try:
+-            return inspect.signature(
+-                obj,
+-                bound_method=False,
+-                type_aliases=type_aliases,
+-            )
+-        except TypeError as exc:
+-            msg = __('Failed to get a constructor signature for %s: %s')
+-            logger.warning(msg, props.full_name, exc)
+-            return None
+-        except ValueError:
+-            pass
+-
+-        # Still no signature: happens e.g. for old-style classes
+-        # with __init__ in C and no `__text_signature__`.
+-        return None
++        # the signature from, so just return the object itself to be passed
++        # to the ``autodoc-before-process-signature`` hook.
++        return obj, False
+ 
+     if props.obj_type == 'method':
+         if obj == object.__init__ and parent != object:  # NoQA: E721
+             # Classes not having own __init__() method are shown as no arguments.
+             #
+             # Note: The signature of object.__init__() is (self, /, *args, **kwargs).
+             #       But it makes users confused.
+-            return Signature()
++            return Signature(), False
+ 
+         is_bound_method = not inspect.isstaticmethod(
+             obj, cls=parent, name=props.object_name
+         )
+-        events.emit('autodoc-before-process-signature', obj, is_bound_method)
+-        try:
+-            return inspect.signature(
+-                obj, bound_method=is_bound_method, type_aliases=type_aliases
+-            )
+-        except TypeError as exc:
+-            msg = __('Failed to get a method signature for %s: %s')
+-            logger.warning(msg, props.full_name, exc)
+-            return None
+-        except ValueError:
+-            return None
++        return obj, is_bound_method
+ 
+-    return None
++    return None, False
+ 
+ 
+ def _annotate_to_first_argument(
+diff --git a/sphinx/ext/autodoc/preserve_defaults.py b/sphinx/ext/autodoc/preserve_defaults.py
+--- a/sphinx/ext/autodoc/preserve_defaults.py
++++ b/sphinx/ext/autodoc/preserve_defaults.py
+@@ -12,7 +12,6 @@
+ import warnings
+ from typing import TYPE_CHECKING
+ 
+-import sphinx
+ from sphinx.deprecation import RemovedInSphinx90Warning
+ from sphinx.locale import __
+ from sphinx.pycode.ast import unparse as ast_unparse
+@@ -21,8 +20,6 @@
+ if TYPE_CHECKING:
+     from typing import Any
+ 
+-    from sphinx.application import Sphinx
+-    from sphinx.util.typing import ExtensionMetadata
+ 
+ logger = logging.getLogger(__name__)
+ _LAMBDA_NAME = (lambda: None).__name__
+@@ -125,11 +122,8 @@ def get_default_value(lines: list[str], position: ast.expr) -> str | None:
+         return None
+ 
+ 
+-def update_defvalue(app: Sphinx, obj: Any, bound_method: bool) -> None:
+-    """Update defvalue info of *obj* using type_comments."""
+-    if not app.config.autodoc_preserve_defaults:
+-        return
+-
++def update_default_value(obj: Any, bound_method: bool) -> None:
++    """Update default value info of *obj* using type_comments."""
+     try:
+         lines = inspect.getsource(obj).splitlines()
+         if lines[0].startswith((' ', '\t')):
+@@ -194,15 +188,3 @@ def update_defvalue(app: Sphinx, obj: Any, bound_method: bool) -> None:
+         logger.warning(
+             __('Failed to parse a default argument value for %r: %s'), obj, exc
+         )
+-
+-
+-def setup(app: Sphinx) -> ExtensionMetadata:
+-    app.add_config_value(
+-        'autodoc_preserve_defaults', False, 'env', types=frozenset({bool})
+-    )
+-    app.connect('autodoc-before-process-signature', update_defvalue)
+-
+-    return {
+-        'version': sphinx.__display_version__,
+-        'parallel_read_safe': True,
+-    }
+diff --git a/sphinx/ext/autodoc/type_comment.py b/sphinx/ext/autodoc/type_comment.py
+--- a/sphinx/ext/autodoc/type_comment.py
++++ b/sphinx/ext/autodoc/type_comment.py
+@@ -6,7 +6,6 @@
+ from inspect import Parameter, Signature, getsource
+ from typing import TYPE_CHECKING, cast
+ 
+-import sphinx
+ from sphinx.locale import __
+ from sphinx.pycode.ast import unparse as ast_unparse
+ from sphinx.util import inspect, logging
+@@ -15,8 +14,6 @@
+     from collections.abc import Sequence
+     from typing import Any
+ 
+-    from sphinx.application import Sphinx
+-    from sphinx.util.typing import ExtensionMetadata
+ 
+ logger = logging.getLogger(__name__)
+ 
+@@ -127,13 +124,8 @@ def get_type_comment(obj: Any, bound_method: bool = False) -> Signature | None:
+         return None
+ 
+ 
+-def update_annotations_using_type_comments(
+-    app: Sphinx, obj: Any, bound_method: bool
+-) -> None:
++def _update_annotations_using_type_comments(obj: Any, bound_method: bool) -> None:
+     """Update annotations info of *obj* using type_comments."""
+-    if not app.config.autodoc_use_type_comments:
+-        return
+-
+     try:
+         type_sig = get_type_comment(obj, bound_method)
+         if type_sig:
+@@ -152,17 +144,3 @@ def update_annotations_using_type_comments(
+         )
+     except NotImplementedError as exc:  # failed to ast.unparse()
+         logger.warning(__('Failed to parse type_comment for %r: %s'), obj, exc)
+-
+-
+-def setup(app: Sphinx) -> ExtensionMetadata:
+-    app.add_config_value(
+-        'autodoc_use_type_comments', True, 'env', types=frozenset({bool})
+-    )
+-    app.connect(
+-        'autodoc-before-process-signature', update_annotations_using_type_comments
+-    )
+-
+-    return {
+-        'version': sphinx.__display_version__,
+-        'parallel_read_safe': True,
+-    }
+diff --git a/sphinx/ext/autodoc/typehints.py b/sphinx/ext/autodoc/typehints.py
+--- a/sphinx/ext/autodoc/typehints.py
++++ b/sphinx/ext/autodoc/typehints.py
+@@ -7,46 +7,41 @@
+ 
+ from docutils import nodes
+ 
+-import sphinx
+ from sphinx import addnodes
+ from sphinx.util import inspect
+ from sphinx.util.typing import stringify_annotation
+ 
+ if TYPE_CHECKING:
+-    from collections.abc import Iterable
+-    from typing import Any
++    from collections.abc import Iterable, Mapping
++    from typing import Any, Literal
+ 
+     from docutils.nodes import Element
+ 
+     from sphinx.application import Sphinx
+-    from sphinx.ext.autodoc._directive_options import _AutoDocumenterOptions
+     from sphinx.ext.autodoc._property_types import _AutodocObjType
+-    from sphinx.util.typing import ExtensionMetadata, _StringifyMode
++    from sphinx.util.typing import _StringifyMode
+ 
+ 
+-def record_typehints(
+-    app: Sphinx,
+-    obj_type: _AutodocObjType,
++def _record_typehints(
++    *,
++    autodoc_annotations: dict[str, dict[str, str]],
+     name: str,
+     obj: Any,
+-    options: _AutoDocumenterOptions,
+-    args: str,
+-    retann: str,
++    short_literals: bool,
++    type_aliases: Mapping[str, str] | None,
++    typehints_format: Literal['fully-qualified', 'short'],
+ ) -> None:
+     """Record type hints to env object."""
+     mode: _StringifyMode
+-    if app.config.autodoc_typehints_format == 'short':
++    if typehints_format == 'short':
+         mode = 'smart'
+     else:
+         mode = 'fully-qualified'
+ 
+-    short_literals = app.config.python_display_short_literal_types
+-
+     try:
+         if callable(obj):
+-            current_document = app.env.current_document
+-            annotation = current_document.autodoc_annotations.setdefault(name, {})
+-            sig = inspect.signature(obj, type_aliases=app.config.autodoc_type_aliases)
++            annotation = autodoc_annotations.setdefault(name, {})
++            sig = inspect.signature(obj, type_aliases=type_aliases)
+             for param in sig.parameters.values():
+                 if param.annotation is not param.empty:
+                     annotation[param.name] = stringify_annotation(
+@@ -60,7 +55,7 @@ def record_typehints(
+         pass
+ 
+ 
+-def merge_typehints(
++def _merge_typehints(
+     app: Sphinx, domain: str, obj_type: _AutodocObjType, contentnode: Element
+ ) -> None:
+     if domain != 'py':
+@@ -231,14 +226,3 @@ def augment_descriptions_with_types(
+             field += nodes.field_name('', 'rtype')
+             field += nodes.field_body('', nodes.paragraph('', rtype))
+             node += field
+-
+-
+-def setup(app: Sphinx) -> ExtensionMetadata:
+-    app.connect('autodoc-process-signature', record_typehints)
+-    app.connect('object-description-transform', merge_typehints)
+-
+-    return {
+-        'version': sphinx.__display_version__,
+-        'parallel_read_safe': True,
+-        'parallel_write_safe': True,
+-    }

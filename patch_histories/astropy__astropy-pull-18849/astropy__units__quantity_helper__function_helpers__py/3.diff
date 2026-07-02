@@ -1,0 +1,20 @@
+diff --git a/astropy/units/quantity_helper/function_helpers.py b/astropy/units/quantity_helper/function_helpers.py
+--- a/astropy/units/quantity_helper/function_helpers.py
++++ b/astropy/units/quantity_helper/function_helpers.py
+@@ -544,7 +544,15 @@
+     # We (ab)use structural pattern matching here to bind output variables
+     # (start, stop, step), so no additional logic is actually needed after
+     # a match is found.
+-    pass
++    match (start_or_stop, stop_, step_):
++        case (stop, None as start, step):
++            pass
++        case (start, stop, step):
++            pass
++
++    # purely defensive programming
++    assert stop is not None, "Please report this."
++    return start, stop, step
+ 
+ 
+ def arange_impl(*args, start=None, stop=None, step=None, dtype=None, **kwargs):

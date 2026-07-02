@@ -1,0 +1,68 @@
+diff --git a/sklearn/metrics/_plot/roc_curve.py b/sklearn/metrics/_plot/roc_curve.py
+--- a/sklearn/metrics/_plot/roc_curve.py
++++ b/sklearn/metrics/_plot/roc_curve.py
+@@ -665,8 +665,8 @@ def from_cv_results(
+ 
+         pos_label : int, float, bool or str, default=None
+             The class considered as the positive class when computing the ROC AUC
+-            metrics. By default, `estimators.classes_[1]` is considered
+-            as the positive class.
++            metrics. By default, `estimator.classes_[1]` (using `estimator` from
++            `cv_results`) is considered as the positive class.
+ 
+         ax : matplotlib axes, default=None
+             Axes object to plot on. If `None`, a new figure and axes is
+@@ -730,24 +730,23 @@ def from_cv_results(
+         <...>
+         >>> plt.show()
+         """
+-        pos_label_ = cls._validate_from_cv_results_params(
++        cls._validate_from_cv_results_params(
+             cv_results,
+             X,
+             y,
+             sample_weight=sample_weight,
+-            pos_label=pos_label,
+         )
+ 
+         fpr_folds, tpr_folds, auc_folds = [], [], []
+         for estimator, test_indices in zip(
+             cv_results["estimator"], cv_results["indices"]["test"]
+         ):
+             y_true = _safe_indexing(y, test_indices)
+-            y_pred, _ = _get_response_values_binary(
++            y_pred, pos_label_ = _get_response_values_binary(
+                 estimator,
+                 _safe_indexing(X, test_indices),
+                 response_method=response_method,
+-                pos_label=pos_label_,
++                pos_label=pos_label,
+             )
+             sample_weight_fold = (
+                 None
+diff --git a/sklearn/utils/_plotting.py b/sklearn/utils/_plotting.py
+--- a/sklearn/utils/_plotting.py
++++ b/sklearn/utils/_plotting.py
+@@ -77,7 +77,6 @@ def _validate_from_cv_results_params(
+         y,
+         *,
+         sample_weight,
+-        pos_label,
+     ):
+         check_matplotlib_support(f"{cls.__name__}.from_cv_results")
+ 
+@@ -107,14 +106,6 @@ def _validate_from_cv_results_params(
+             )
+         check_consistent_length(X, y, sample_weight)
+ 
+-        try:
+-            pos_label = _check_pos_label_consistency(pos_label, y)
+-        except ValueError as e:
+-            # Adapt error message
+-            raise ValueError(str(e).replace("y_true", "y"))
+-
+-        return pos_label
+-
+     @staticmethod
+     def _get_legend_label(curve_legend_metric, curve_name, legend_metric_name):
+         """Helper to get legend label using `name` and `legend_metric`"""

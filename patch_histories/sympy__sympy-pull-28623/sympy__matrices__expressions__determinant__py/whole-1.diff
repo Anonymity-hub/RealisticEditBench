@@ -1,0 +1,14 @@
+diff --git a/sympy/matrices/expressions/determinant.py b/sympy/matrices/expressions/determinant.py
+--- a/sympy/matrices/expressions/determinant.py
++++ b/sympy/matrices/expressions/determinant.py
+@@ -52,6 +52,10 @@ def doit(self, **hints):
+ 
+         return self
+ 
++    def _eval_derivative(self, x):
++        # Derivative currently implements `hasattr(..., "_eval_derivative")` to proceed:
++        return None
++
+ 
+ def det(matexpr):
+     """ Matrix Determinant

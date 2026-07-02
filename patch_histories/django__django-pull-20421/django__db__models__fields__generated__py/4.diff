@@ -1,0 +1,11 @@
+diff --git a/django/db/models/fields/generated.py b/django/db/models/fields/generated.py
+--- a/django/db/models/fields/generated.py
++++ b/django/db/models/fields/generated.py
+@@ -83,6 +83,7 @@
+             *super().check(**kwargs),
+             *self._check_supported(databases),
+             *self._check_persistence(databases),
++            *self._check_ignored_options(databases),
+         ]
+         output_field_clone = self.output_field.clone()
+         output_field_clone.model = self.model

@@ -1,0 +1,15 @@
+diff --git a/sympy/matrices/expressions/special.py b/sympy/matrices/expressions/special.py
+--- a/sympy/matrices/expressions/special.py
++++ b/sympy/matrices/expressions/special.py
+@@ -117,6 +117,11 @@
+     >>> I = Identity(3)
+     >>> I*A
+     A
++    >>> I.as_explicit()
++    Matrix([
++    [1, 0, 0],
++    [0, 1, 0],
++    [0, 0, 1]])
+     """
+ 
+     is_Identity = True

@@ -1,0 +1,12 @@
+diff --git a/sklearn/utils/stats.py b/sklearn/utils/stats.py
+--- a/sklearn/utils/stats.py
++++ b/sklearn/utils/stats.py
+@@ -195,7 +195,7 @@
+ 
+                 percentile_plus_one_in_sorted[col_idx] = sorted_idx[next_index, col_idx]
+ 
+-            result = xp.where(
++            result[..., p_idx] = xp.where(
+                 is_fraction_above,
+                 array[percentile_in_sorted, col_indices],
+                 (

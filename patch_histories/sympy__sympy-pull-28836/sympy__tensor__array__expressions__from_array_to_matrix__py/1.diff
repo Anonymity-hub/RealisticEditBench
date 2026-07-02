@@ -1,0 +1,15 @@
+diff --git a/sympy/tensor/array/expressions/from_array_to_matrix.py b/sympy/tensor/array/expressions/from_array_to_matrix.py
+--- a/sympy/tensor/array/expressions/from_array_to_matrix.py
++++ b/sympy/tensor/array/expressions/from_array_to_matrix.py
+@@ -391,7 +391,10 @@ def _(expr: ArrayTensorProduct):
+                 removed.extend(current_range)
+             continue
+         elif arg.shape == (1, 1):
+-            arg, _ = _remove_trivial_dims(arg)
++            arg, rem = _remove_trivial_dims(arg)
++            if rem:
++                rem_dims = [current_range[j] for j in rem]
++                removed.extend(rem_dims)
+             # Matrix is equivalent to scalar:
+             if len(newargs) == 0:
+                 newargs.append(arg)

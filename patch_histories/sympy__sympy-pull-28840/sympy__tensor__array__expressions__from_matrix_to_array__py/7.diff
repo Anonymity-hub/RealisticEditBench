@@ -1,0 +1,18 @@
+diff --git a/sympy/tensor/array/expressions/from_matrix_to_array.py b/sympy/tensor/array/expressions/from_matrix_to_array.py
+--- a/sympy/tensor/array/expressions/from_matrix_to_array.py
++++ b/sympy/tensor/array/expressions/from_matrix_to_array.py
+@@ -15,7 +15,13 @@
+ from sympy.matrices.expressions.matexpr import MatrixExpr
+ from sympy.tensor.array.expressions.array_expressions import \
+     ArrayElementwiseApplyFunc, _array_tensor_product, _array_contraction, \
+-    _array_diagonal, _array_add, _permute_dims, Reshape, get_shape
++    _array_diagonal, _array_add, _permute_dims, Reshape, get_shape, _ArrayExpr, _CodegenArrayAbstract
++
++
++def _array_elementwise_apply_func(function, element):
++    if not isinstance(element, (MatrixExpr, _ArrayExpr, _CodegenArrayAbstract)):
++        return function(element)
++    return ArrayElementwiseApplyFunc(function, element)
+ 
+ 
+ def convert_matrix_to_array(expr: Basic) -> Basic:

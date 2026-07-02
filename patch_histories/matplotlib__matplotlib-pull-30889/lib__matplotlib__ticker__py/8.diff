@@ -1,0 +1,30 @@
+diff --git a/lib/matplotlib/ticker.py b/lib/matplotlib/ticker.py
+--- a/lib/matplotlib/ticker.py
++++ b/lib/matplotlib/ticker.py
+@@ -2236,7 +2236,7 @@
+         if self._symmetric:
+             vmax = max(abs(vmin), abs(vmax))
+             vmin = -vmax
+-        vmin, vmax = mtransforms.nonsingular(
++        vmin, vmax = mtransforms._nonsingular(
+             vmin, vmax, expander=1e-13, tiny=1e-14)
+         locs = self._raw_ticks(vmin, vmax)
+ 
+@@ -2254,7 +2254,7 @@
+             dmax = max(abs(dmin), abs(dmax))
+             dmin = -dmax
+ 
+-        dmin, dmax = mtransforms.nonsingular(
++        dmin, dmax = mtransforms._nonsingular(
+             dmin, dmax, expander=1e-12, tiny=1e-13)
+ 
+         if mpl.rcParams['axes.autolimit_mode'] == 'round_numbers':
+@@ -2718,7 +2718,7 @@
+                 vmin = _decade_less(vmin, b)
+                 vmax = _decade_greater(vmax, b)
+ 
+-        return mtransforms.nonsingular(vmin, vmax)
++        return mtransforms._nonsingular(vmin, vmax)
+ 
+ 
+ class AsinhLocator(Locator):

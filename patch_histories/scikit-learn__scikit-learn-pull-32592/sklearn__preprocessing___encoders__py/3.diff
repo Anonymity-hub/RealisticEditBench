@@ -1,0 +1,12 @@
+diff --git a/sklearn/preprocessing/_encoders.py b/sklearn/preprocessing/_encoders.py
+--- a/sklearn/preprocessing/_encoders.py
++++ b/sklearn/preprocessing/_encoders.py
+@@ -442,7 +442,7 @@
+                 continue
+ 
+             X_int[~X_mask[:, col_idx], col_idx] = infrequent_idx[0]
+-            if self.handle_unknown == "infrequent_if_exist":
++            if self.handle_unknown in ("infrequent_if_exist", "warn"):
+                 # All the unknown values are now mapped to the
+                 # infrequent_idx[0], which makes the unknown values valid
+                 # This is needed in `transform` when the encoding is formed

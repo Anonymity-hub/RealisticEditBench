@@ -1,0 +1,12 @@
+diff --git a/sympy/core/power.py b/sympy/core/power.py
+--- a/sympy/core/power.py
++++ b/sympy/core/power.py
+@@ -17,8 +17,6 @@
+ from sympy.utilities.exceptions import sympy_deprecation_warning
+ from sympy.utilities.misc import as_int
+ from sympy.multipledispatch import Dispatcher
+-from .add import Add
+-from .mul import Mul
+ 
+ 
+ class Pow(Expr):

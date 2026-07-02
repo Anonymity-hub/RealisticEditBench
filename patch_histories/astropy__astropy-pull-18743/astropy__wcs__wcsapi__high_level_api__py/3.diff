@@ -1,0 +1,14 @@
+diff --git a/astropy/wcs/wcsapi/high_level_api.py b/astropy/wcs/wcsapi/high_level_api.py
+--- a/astropy/wcs/wcsapi/high_level_api.py
++++ b/astropy/wcs/wcsapi/high_level_api.py
+@@ -359,8 +359,9 @@
+         return self
+ 
+     def world_to_pixel(self, *world_objects):
++        values, masks = MaskedNDArray._get_data_and_masks(world_objects)
+         world_values = high_level_objects_to_values(
+-            *world_objects, low_level_wcs=self.low_level_wcs
++            *values, low_level_wcs=self.low_level_wcs
+         )
+ 
+         # Finally we convert to pixel coordinates

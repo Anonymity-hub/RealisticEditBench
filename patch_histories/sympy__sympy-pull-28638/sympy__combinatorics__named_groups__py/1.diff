@@ -1,0 +1,14 @@
+diff --git a/sympy/combinatorics/named_groups.py b/sympy/combinatorics/named_groups.py
+--- a/sympy/combinatorics/named_groups.py
++++ b/sympy/combinatorics/named_groups.py
+@@ -91,8 +91,8 @@
+ 
+     """
+     # small cases are special
+-    if n in (1, 2):
+-        return PermutationGroup([Permutation([0])])
++    if n == 1:
++        G = PermutationGroup([Permutation([0])])
+ 
+     a = list(range(n))
+     a[0], a[1], a[2] = a[1], a[2], a[0]

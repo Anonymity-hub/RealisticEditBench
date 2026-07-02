@@ -1,0 +1,44 @@
+diff --git a/django/contrib/admin/options.py b/django/contrib/admin/options.py
+--- a/django/contrib/admin/options.py
++++ b/django/contrib/admin/options.py
+@@ -1137,6 +1137,12 @@
+ 
+         # Apply keyword searches.
+         def construct_search(field_name):
++            """
++            Return a tuple of (lookup, field_to_validate).
++
++            field_to_validate is set for non-text exact lookups so that
++            invalid search terms can be skipped (preserving index usage).
++            """
+             if field_name.startswith("^"):
+                 return "%s__istartswith" % field_name.removeprefix("^"), None
+             elif field_name.startswith("="):
+@@ -1148,7 +1154,7 @@
+             lookup_fields = field_name.split(LOOKUP_SEP)
+             # Go through the fields, following all relations.
+             prev_field = None
+-            for i, path_part in enumerate(lookup_fields):
++            for path_part in lookup_fields:
+                 if path_part == "pk":
+                     path_part = opts.pk.name
+                 try:
+@@ -1159,15 +1165,9 @@
+                         if path_part == "exact" and not isinstance(
+                             prev_field, (models.CharField, models.TextField)
+                         ):
+-                            field_name_without_exact = "__".join(lookup_fields[:i])
+-                            alias = Cast(
+-                                field_name_without_exact,
+-                                output_field=models.CharField(),
+-                            )
+-                            alias_name = "_".join(lookup_fields[:i])
+-                            return f"{alias_name}_str", alias
+-                        else:
+-                            return field_name, None
++                            # Use prev_field to validate the search term.
++                            return field_name, prev_field
++                        return field_name, None
+                 else:
+                     prev_field = field
+                     if hasattr(field, "path_infos"):

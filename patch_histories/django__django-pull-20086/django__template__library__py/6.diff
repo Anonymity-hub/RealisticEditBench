@@ -1,0 +1,26 @@
+diff --git a/django/template/library.py b/django/template/library.py
+--- a/django/template/library.py
++++ b/django/template/library.py
+@@ -415,7 +415,6 @@
+     defaults,
+     kwonly,
+     kwonly_defaults,
+-    takes_context,
+     name,
+ ):
+     """
+@@ -423,14 +422,6 @@
+     particular by detecting syntax errors and by extracting positional and
+     keyword arguments.
+     """
+-    if takes_context:
+-        if params and params[0] == "context":
+-            params = params[1:]
+-        else:
+-            raise TemplateSyntaxError(
+-                "'%s' is decorated with takes_context=True so it must "
+-                "have a first argument of 'context'" % name
+-            )
+     args = []
+     kwargs = {}
+     unhandled_params = list(params)

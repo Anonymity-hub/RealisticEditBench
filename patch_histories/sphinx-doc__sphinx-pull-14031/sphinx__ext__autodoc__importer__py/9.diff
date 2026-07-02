@@ -1,0 +1,269 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -1600,26 +1600,63 @@
+     events: EventManager,
+     get_attr: _AttrGetter,
+     parent: Any,
++    preserve_defaults: bool,
+     props: _ItemProperties,
+     type_aliases: Mapping[str, str] | None,
++    use_type_comments: bool,
+ ) -> Signature | None:
+     """Return a Signature for *obj*, or None on failure."""
+-    obj = props._obj
+-    if props.obj_type in {'function', 'decorator'}:
+-        events.emit('autodoc-before-process-signature', obj, False)
++    obj, is_bound_method = _get_object_for_signature(
++        props=props, get_attr=get_attr, parent=parent, type_aliases=type_aliases
++    )
++    if obj is None or isinstance(obj, Signature):
++        return obj
++
++    if preserve_defaults:
++        update_default_value(obj, bound_method=is_bound_method)
++    if use_type_comments:
++        _update_annotations_using_type_comments(obj, bound_method=is_bound_method)
++    events.emit('autodoc-before-process-signature', obj, is_bound_method)
++
++    if props.obj_type in {'class', 'exception', 'function', 'method', 'decorator'}:
+         try:
+-            return inspect.signature(obj, type_aliases=type_aliases)
++            return inspect.signature(
++                obj, bound_method=is_bound_method, type_aliases=type_aliases
++            )
+         except TypeError as exc:
+-            msg = __('Failed to get a function signature for %s: %s')
++            if props.obj_type in {'class', 'exception'}:
++                msg = __('Failed to get a constructor signature for %s: %s')
++            elif props.obj_type in {'function', 'decorator'}:
++                msg = __('Failed to get a function signature for %s: %s')
++            elif props.obj_type == 'method':
++                msg = __('Failed to get a method signature for %s: %s')
++            else:
++                msg = __('Failed to get a signature for %s: %s')
+             logger.warning(msg, props.full_name, exc)
+             return None
+         except ValueError:
++            # Still no signature: happens e.g. for old-style classes
++            # with __init__ in C and no `__text_signature__`.
+             return None
++
++    return None
++
++
++def _get_object_for_signature(
++    props: _ItemProperties,
++    get_attr: _AttrGetter,
++    parent: Any,
++    type_aliases: Mapping[str, str] | None,
++) -> tuple[Any, bool]:
++    """Return the object from which we will obtain the signature."""
++    obj = props._obj
++    if props.obj_type in {'function', 'decorator'}:
++        return obj, False
+ 
+     if props.obj_type in {'class', 'exception'}:
+         if isinstance(obj, (NewType, TypeVar)):
+             # Suppress signature
+-            return None
++            return None, False
+ 
+         try:
+             object_sig = obj.__signature__
+@@ -1627,11 +1664,11 @@
+             pass
+         else:
+             if isinstance(object_sig, Signature):
+-                return object_sig
++                return object_sig, False
+             if sys.version_info[:2] in {(3, 12), (3, 13)} and callable(object_sig):
+                 # Support for enum.Enum.__signature__ in Python 3.12
+                 if isinstance(object_sig_str := object_sig(), str):
+-                    return inspect.signature_from_str(object_sig_str)
++                    return inspect.signature_from_str(object_sig_str), False
+ 
+         def get_user_defined_function_or_method(obj: Any, attr: str) -> Any:
+             """Get the `attr` function or method from `obj`, if it is user-defined."""
+@@ -1659,17 +1696,10 @@
+                 if f'{meth.__module__}.{meth.__qualname__}' in blacklist:
+                     continue
+ 
+-            events.emit('autodoc-before-process-signature', meth, True)
+             try:
+-                object_sig = inspect.signature(
+-                    meth,
+-                    bound_method=True,
+-                    type_aliases=type_aliases,
+-                )
+-            except TypeError as exc:
+-                msg = __('Failed to get a constructor signature for %s: %s')
+-                logger.warning(msg, props.full_name, exc)
+-                return None
++                inspect.signature(meth, bound_method=True, type_aliases=type_aliases)
++            except TypeError:
++                return meth, True  # _get_signature_object() needs to log the failure
+             except ValueError:
+                 continue
+             else:
+@@ -1677,29 +1707,14 @@
+ 
+                 assert isinstance(props, _ClassDefProperties)
+                 props._signature_method_name = meth_name
+-                return object_sig
++                return meth, True
+ 
+         # None of the attributes are user-defined, so fall back to let inspect
+         # handle it.
+         # We don't know the exact method that inspect.signature will read
+-        # the signature from, so just pass the object itself to our hook.
+-        events.emit('autodoc-before-process-signature', obj, False)
+-        try:
+-            return inspect.signature(
+-                obj,
+-                bound_method=False,
+-                type_aliases=type_aliases,
+-            )
+-        except TypeError as exc:
+-            msg = __('Failed to get a constructor signature for %s: %s')
+-            logger.warning(msg, props.full_name, exc)
+-            return None
+-        except ValueError:
+-            pass
+-
+-        # Still no signature: happens e.g. for old-style classes
+-        # with __init__ in C and no `__text_signature__`.
+-        return None
++        # the signature from, so just return the object itself to be passed
++        # to the ``autodoc-before-process-signature`` hook.
++        return obj, False
+ 
+     if props.obj_type == 'method':
+         if obj == object.__init__ and parent != object:  # NoQA: E721
+@@ -1707,122 +1722,14 @@
+             #
+             # Note: The signature of object.__init__() is (self, /, *args, **kwargs).
+             #       But it makes users confused.
+-            return Signature()
++            return Signature(), False
+ 
+         is_bound_method = not inspect.isstaticmethod(
+             obj, cls=parent, name=props.object_name
+         )
+-        events.emit('autodoc-before-process-signature', obj, is_bound_method)
+-        try:
+-            return inspect.signature(
+-                obj, bound_method=is_bound_method, type_aliases=type_aliases
+-            )
+-        except TypeError as exc:
+-            msg = __('Failed to get a method signature for %s: %s')
+-            logger.warning(msg, props.full_name, exc)
+-            return None
+-        except ValueError:
+-            return None
+-
+-    return None
+-
+-
+-
+-def _get_object_for_signature(
+-    props: _ItemProperties,
+-    get_attr: _AttrGetter,
+-    parent: Any,
+-    type_aliases: Mapping[str, str] | None,
+-) -> tuple[Any, bool]:
+-    """Return the object from which we will obtain the signature."""
+-    obj = props._obj
+-    if props.obj_type in {'function', 'decorator'}:
+-        return obj, False
+-
+-    if props.obj_type in {'class', 'exception'}:
+-        if isinstance(obj, (NewType, TypeVar)):
+-            # Suppress signature
+-            return None, False
+-
+-        try:
+-            object_sig = obj.__signature__
+-        except AttributeError:
+-            pass
+-        else:
+-            if isinstance(object_sig, Signature):
+-                return object_sig, False
+-            if sys.version_info[:2] in {(3, 12), (3, 13)} and callable(object_sig):
+-                # Support for enum.Enum.__signature__ in Python 3.12
+-                if isinstance(object_sig_str := object_sig(), str):
+-                    return inspect.signature_from_str(object_sig_str), False
+-
+-        def get_user_defined_function_or_method(obj: Any, attr: str) -> Any:
+-            """Get the `attr` function or method from `obj`, if it is user-defined."""
+-            if inspect.is_builtin_class_method(obj, attr):
+-                return None, False
+-            attr = get_attr(obj, attr, None)
+-            if not (inspect.ismethod(attr) or inspect.isfunction(attr)):
+-                return None, False
+-            return attr
+-
+-        # This sequence is copied from inspect._signature_from_callable.
+-        # ValueError means that no signature could be found, so we keep going.
+-
+-        # Let's see if it has an overloaded __call__ defined in its metaclass,
+-        # or if the 'obj' class has a '__new__' or '__init__' method
+-        for obj_, meth_name, blacklist in (
+-            (type(obj), '__call__', _METACLASS_CALL_BLACKLIST),
+-            (obj, '__new__', _CLASS_NEW_BLACKLIST),
+-            (obj, '__init__', frozenset()),
+-        ):
+-            meth = get_user_defined_function_or_method(obj_, meth_name)
+-            if meth is None:
+-                continue
+-            if blacklist:
+-                if f'{meth.__module__}.{meth.__qualname__}' in blacklist:
+-                    continue
+-
+-            events.emit('autodoc-before-process-signature', meth, True)
+-            try:
+-                object_sig = inspect.signature(
+-                    meth,
+-                    bound_method=True,
+-                    type_aliases=type_aliases,
+-                )
+-            except TypeError as exc:
+-                msg = __('Failed to get a constructor signature for %s: %s')
+-                logger.warning(msg, props.full_name, exc)
+-                return None, False
+-            except ValueError:
+-                continue
+-            else:
+-                from sphinx.ext.autodoc._property_types import _ClassDefProperties
+-
+-                assert isinstance(props, _ClassDefProperties)
+-                props._signature_method_name = meth_name
+-                return object_sig, False
+-
+-        # None of the attributes are user-defined, so fall back to let inspect
+-        # handle it.
+-        # We don't know the exact method that inspect.signature will read
+-        # the signature from, so just pass the object itself to our hook.
+-        events.emit('autodoc-before-process-signature', obj, False)
+-        try:
+-            return inspect.signature(
+-                obj,
+-                bound_method=False,
+-                type_aliases=type_aliases,
+-            )
+-        except TypeError as exc:
+-            msg = __('Failed to get a constructor signature for %s: %s')
+-            logger.warning(msg, props.full_name, exc)
+-            return None, False
+-        except ValueError:
+-            pass
+-
+-        # Still no signature: happens e.g. for old-style classes
+-        # with __init__ in C and no `__text_signature__`.
+-        return None
++        return obj, is_bound_method
++
++    return None, False
+ 
+ 
+ def _annotate_to_first_argument(

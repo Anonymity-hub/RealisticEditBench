@@ -1,0 +1,12 @@
+diff --git a/pylint/reporters/reports_handler_mix_in.py b/pylint/reporters/reports_handler_mix_in.py
+--- a/pylint/reporters/reports_handler_mix_in.py
++++ b/pylint/reporters/reports_handler_mix_in.py
+@@ -49,7 +49,7 @@ def register_report(
+         self._reports[checker].append((reportid, r_title, r_cb))
+ 
+     def deregister_reports(self, checker: BaseChecker) -> None:
+-        """Deregister all reports for a checker."""
++        """De-register all reports for a checker."""
+         self._reports.pop(checker)
+ 
+     def enable_report(self, reportid: str) -> None:

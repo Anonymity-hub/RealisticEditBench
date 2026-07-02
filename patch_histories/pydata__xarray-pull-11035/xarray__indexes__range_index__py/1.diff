@@ -1,0 +1,35 @@
+diff --git a/xarray/indexes/range_index.py b/xarray/indexes/range_index.py
+--- a/xarray/indexes/range_index.py
++++ b/xarray/indexes/range_index.py
+@@ -75,8 +75,30 @@
+         return {self.dim: positions}
+ 
+     def equals(
+-        self, other: CoordinateTransform, exclude: frozenset[Hashable] | None = None
++        self,
++        other: CoordinateTransform,
++        exclude: frozenset[Hashable] | None = None,
++        *,
++        exact: bool = False,
+     ) -> bool:
++        """Check equality with another RangeCoordinateTransform.
++
++        Parameters
++        ----------
++        other : CoordinateTransform
++            The other transform to compare with.
++        exclude : frozenset of hashable, optional
++            Dimensions excluded from checking (unused for 1D RangeIndex).
++        exact : bool, default False
++            If False (default), use np.isclose() for floating point comparisons
++            to handle accumulated floating point errors from slicing operations.
++            If True, require exact equality of start and stop values.
++
++        Returns
++        -------
++        bool
++            True if the transforms are equal, False otherwise.
++        """
+         if not isinstance(other, RangeCoordinateTransform):
+             return False
+ 

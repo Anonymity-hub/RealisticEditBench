@@ -1,0 +1,11 @@
+diff --git a/astropy/utils/compat/optional_deps.py b/astropy/utils/compat/optional_deps.py
+--- a/astropy/utils/compat/optional_deps.py
++++ b/astropy/utils/compat/optional_deps.py
+@@ -32,6 +32,7 @@
+     "matplotlib",
+     "mpmath",
+     "narwhals",
++    "numpy_quaddtype",
+     "pandas",
+     "PIL",
+     "polars",

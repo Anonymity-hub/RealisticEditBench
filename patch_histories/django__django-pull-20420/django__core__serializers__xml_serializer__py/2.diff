@@ -1,0 +1,15 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -163,7 +163,10 @@
+                         self.xml.startElement("object", {})
+                         for key_value in natural:
+                             self.xml.startElement("natural", {})
+-                            self.xml.characters(str(key_value))
++                            if key_value is None:
++                                self.xml.addQuickElement("None")
++                            else:
++                                self.xml.characters(str(key_value))
+                             self.xml.endElement("natural")
+                         self.xml.endElement("object")
+                     else:

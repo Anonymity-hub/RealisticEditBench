@@ -1,0 +1,45 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -3780,31 +3780,25 @@
+         warnings.warn(msg, UndefinedMetricWarning)
+         return float("nan")
+ 
+-    # log loss of the fitted model
+-    numerator = log_loss(
+-        y_true=y_true,
+-        y_pred=y_pred,
+-        normalize=False,
+-        sample_weight=sample_weight,
+-        labels=labels,
+-    )
+-
+     y_pred = check_array(y_pred, ensure_2d=False, dtype="numeric")
+-    transformed_labels, _ = _validate_multiclass_probabilistic_prediction(
++    transformed_labels, y_pred = _validate_multiclass_probabilistic_prediction(
+         y_true, y_pred, sample_weight, labels
+     )
+     y_pred_null = np.average(transformed_labels, axis=0, weights=sample_weight)
+     y_pred_null = np.tile(y_pred_null, (len(y_true), 1))
+ 
+-    # log loss of the null model
+-    denominator = log_loss(
+-        y_true=y_true,
+-        y_pred=y_pred_null,
++    numerator = _log_loss(
++        transformed_labels,
++        y_pred,
+         normalize=False,
+         sample_weight=sample_weight,
+-        labels=labels,
+     )
+-
++    denominator = _log_loss(
++        transformed_labels,
++        y_pred_null,
++        normalize=False,
++        sample_weight=sample_weight,
++    )
+     return float(1 - (numerator / denominator))
+ 
+ 

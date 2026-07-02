@@ -1,0 +1,32 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -26,7 +26,7 @@
+ from django.db.models import AutoField, DateField, DateTimeField, Field, Max, sql
+ from django.db.models.constants import LOOKUP_SEP, OnConflict
+ from django.db.models.deletion import Collector
+-from django.db.models.expressions import Case, DatabaseDefault, F, Value, When
++from django.db.models.expressions import Case, DatabaseDefault, F, OrderBy, Value, When
+ from django.db.models.fetch_modes import FETCH_ONE
+ from django.db.models.functions import Cast, Trunc
+ from django.db.models.query_utils import FilteredRelation, Q
+@@ -1996,6 +1996,19 @@
+         pk_fields = {f.attname for f in opts.pk_fields}
+         ordering_fields = set()
+ 
++        for part in ordering:
++            # Search for single field providing a total ordering.
++            field_name = None
++            if isinstance(part, str):
++                field_name = part.lstrip("-")
++            elif isinstance(part, F):
++                field_name = part.name
++            elif isinstance(part, OrderBy) and isinstance(part.expression, F):
++                field_name = part.expression.name
++            if field_name:
++                if field_name == "pk":
++                    return True
++
+     @property
+     def db(self):
+         """Return the database used if this query is executed now."""

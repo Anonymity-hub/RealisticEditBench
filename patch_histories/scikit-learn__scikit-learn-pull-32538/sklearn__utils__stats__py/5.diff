@@ -1,0 +1,16 @@
+diff --git a/sklearn/utils/stats.py b/sklearn/utils/stats.py
+--- a/sklearn/utils/stats.py
++++ b/sklearn/utils/stats.py
+@@ -205,6 +205,9 @@
+                 / 2,
+             )
+         else:
+-            result = array[percentile_in_sorted, col_indices]
+-
+-    return result[0] if n_dim == 1 else result
++            result[..., p_idx] = array[percentile_in_sorted, col_indices]
++
++    if n_dim_percentile == 0:
++        result = result[..., 0]
++
++    return result[0, ...] if n_dim == 1 else result

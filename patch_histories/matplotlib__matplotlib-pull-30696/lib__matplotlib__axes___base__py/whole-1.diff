@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/axes/_base.py b/lib/matplotlib/axes/_base.py
+--- a/lib/matplotlib/axes/_base.py
++++ b/lib/matplotlib/axes/_base.py
+@@ -4632,9 +4632,7 @@ def get_tightbbox(self, renderer=None, *, call_axes_locator=True,
+ 
+         for a in bbox_artists:
+             bbox = a.get_tightbbox(renderer)
+-            if (bbox is not None
+-                    and 0 < bbox.width < np.inf
+-                    and 0 < bbox.height < np.inf):
++            if bbox is not None and bbox._is_finite():
+                 bb.append(bbox)
+         return mtransforms.Bbox.union(
+             [b for b in bb if b.width != 0 or b.height != 0])

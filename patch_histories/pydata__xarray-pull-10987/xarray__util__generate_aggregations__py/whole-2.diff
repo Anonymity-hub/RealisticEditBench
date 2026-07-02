@@ -1,0 +1,12 @@
+diff --git a/xarray/util/generate_aggregations.py b/xarray/util/generate_aggregations.py
+--- a/xarray/util/generate_aggregations.py
++++ b/xarray/util/generate_aggregations.py
+@@ -15,7 +15,7 @@
+ 
+ import textwrap
+ from dataclasses import dataclass, field
+-from typing import NamedTuple, Literal
++from typing import Literal, NamedTuple
+ 
+ MODULE_PREAMBLE = '''\
+ """Mixin classes with reduction operations."""

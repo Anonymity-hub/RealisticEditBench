@@ -1,0 +1,20 @@
+diff --git a/astropy/units/quantity_helper/function_helpers.py b/astropy/units/quantity_helper/function_helpers.py
+--- a/astropy/units/quantity_helper/function_helpers.py
++++ b/astropy/units/quantity_helper/function_helpers.py
+@@ -537,6 +537,16 @@
+         return arange_impl(start_or_stop, stop=stop, step=step, dtype=dtype)
+ 
+ 
++def unwrap_arange_args(*, start_or_stop, stop_, step_):
++    # handle the perilous task of disentangling original arguments
++    # This isn't trivial because start_or_stop may actually bind to two
++    # different inputs, as the name suggests.
++    # We (ab)use structural pattern matching here to bind output variables
++    # (start, stop, step), so no additional logic is actually needed after
++    # a match is found.
++    pass
++
++
+ def arange_impl(*args, start=None, stop=None, step=None, dtype=None, **kwargs):
+     # NumPy is supposed to validate the input parameters before this dispatched
+     # function is reached. Nevertheless, we'll sprinkle a few rundundant

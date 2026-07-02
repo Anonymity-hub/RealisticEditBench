@@ -1,0 +1,541 @@
+diff --git a/doc/development/tutorials/examples/autodoc_intenum.py b/doc/development/tutorials/examples/autodoc_intenum.py
+--- a/doc/development/tutorials/examples/autodoc_intenum.py
++++ b/doc/development/tutorials/examples/autodoc_intenum.py
+@@ -37,9 +37,9 @@ def add_line(self, line: str, source: str = '', *lineno: int, indent: str) -> No
+         analyzer_source = '' if self.analyzer is None else self.analyzer.srcname
+         source_name = _docstring_source_name(props=self.props, source=analyzer_source)
+         if line.strip():  # not a blank line
+-            self.directive.result.append(indent + line, source_name, *lineno)
++            self.result.append(indent + line, source_name, *lineno)
+         else:
+-            self.directive.result.append('', source_name, *lineno)
++            self.result.append('', source_name, *lineno)
+ 
+     def add_directive_header(self, *, indent: str) -> None:
+         super().add_directive_header(indent=indent)
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -42,7 +42,7 @@
+         _ModuleProperties,
+         _TypeStatementProperties,
+     )
+-    from sphinx.ext.autodoc.directive import DocumenterBridge
++    from sphinx.ext.autodoc.importer import _AttrGetter
+     from sphinx.util.typing import OptionSpec, _RestifyMode
+ 
+ logger = logging.getLogger('sphinx.ext.autodoc')
+@@ -86,26 +86,39 @@ class Documenter:
+     }
+ 
+     def __init__(
+-        self, directive: DocumenterBridge, orig_name: str, indent: str = ''
++        self,
++        *,
++        env: BuildEnvironment,
++        options: _AutoDocumenterOptions,
++        get_attr: _AttrGetter,
++        record_dependencies: set[str] | None = None,
++        result: StringList | None = None,
++        indent: str = '',
+     ) -> None:
+-        self.directive = directive
+-        self.config: Config = directive.env.config
+-        self.env: BuildEnvironment = directive.env
+-        self._current_document: _CurrentDocument = directive.env.current_document
+-        self._events: EventManager = directive.env.events
+-        self.options: _AutoDocumenterOptions = directive.genopt
+-        self.get_attr = directive.get_attr
+-        self.orig_name = orig_name
++        self.config: Config = env.config
++        self.env: BuildEnvironment = env
++        self._current_document: _CurrentDocument = env.current_document
++        self._events: EventManager = env.events
++        self.options: _AutoDocumenterOptions = options
++        self.get_attr = get_attr
++        if record_dependencies is not None:
++            self.record_dependencies: set[str] = record_dependencies
++        else:
++            self.record_dependencies = set()
++        if result is not None:
++            self.result: StringList = result
++        else:
++            self.result = StringList()
+         self.indent: Final = indent
+         # the module analyzer to get at attribute docs, or None
+         self.analyzer: ModuleAnalyzer | None = None
+ 
+     def add_line(self, line: str, source: str, *lineno: int, indent: str) -> None:
+         """Append one line of generated reST to the output."""
+         if line.strip():  # not a blank line
+-            self.directive.result.append(indent + line, source, *lineno)
++            self.result.append(indent + line, source, *lineno)
+         else:
+-            self.directive.result.append('', source, *lineno)
++            self.result.append('', source, *lineno)
+ 
+     def add_directive_header(self, *, indent: str) -> None:
+         """Add the directive header and options to the generated content."""
+@@ -121,7 +134,7 @@ def add_directive_header(self, *, indent: str) -> None:
+         else:
+             is_final = False
+ 
+-        result = self.directive.result
++        result = self.result
+         analyzer_source = '' if self.analyzer is None else self.analyzer.srcname
+         source_name = _docstring_source_name(props=self.props, source=analyzer_source)
+         for line in _directive_header_lines(
+@@ -155,7 +168,7 @@ def add_content(self, more_content: StringList | None, *, indent: str) -> None:
+         )
+         _add_content(
+             processed_doc,
+-            result=self.directive.result,
++            result=self.result,
+             indent=indent + '   ',
+         )
+ 
+@@ -168,7 +181,7 @@ def add_content(self, more_content: StringList | None, *, indent: str) -> None:
+         )
+         _add_content(
+             more_content,
+-            result=self.directive.result,
++            result=self.result,
+             indent=indent + '   ' * (self.props.obj_type != 'module'),
+         )
+ 
+@@ -295,15 +308,15 @@ def _generate(
+                         and module_spec.has_location
+                         and module_spec.origin
+                     ):
+-                        self.directive.record_dependencies.add(module_spec.origin)
++                        self.record_dependencies.add(module_spec.origin)
+         else:
+-            self.directive.record_dependencies.add(self.analyzer.srcname)
++            self.record_dependencies.add(self.analyzer.srcname)
+ 
+         if self.real_modname != guess_modname:
+             # Add module to dependency list if target object is defined in other module.
+             try:
+                 srcname = ModuleAnalyzer.for_module(guess_modname).srcname
+-                self.directive.record_dependencies.add(srcname)
++                self.record_dependencies.add(srcname)
+             except PycodeError:
+                 pass
+ 
+@@ -330,11 +343,11 @@ def _generate(
+         # make sure that the result starts with an empty line.  This is
+         # necessary for some situations where another directive preprocesses
+         # reST and no starting newline is present
+-        self.directive.result.append('', source_name)
++        self.result.append('', source_name)
+ 
+         # generate the directive header and options, if applicable
+         self.add_directive_header(indent=indent)
+-        self.directive.result.append('', source_name)
++        self.result.append('', source_name)
+ 
+         # add all content (from docstrings, attribute docs etc.)
+         self.add_content(more_content, indent=indent)
+@@ -349,14 +362,16 @@ def _generate(
+             attr_docs=analyzer.attr_docs if analyzer is not None else {},
+             config=self.config,
+             current_document=self._current_document,
+-            directive=self.directive,
++            env=self.env,
+             events=self._events,
+             get_attr=self.get_attr,
+             indent=indent,
+             options=self.options,
+             props=self.props,
+             real_modname=self.real_modname,
++            record_dependencies=self.record_dependencies,
+             registry=self.env._registry,
++            result=self.result,
+         )
+ 
+ 
+diff --git a/sphinx/ext/autodoc/_member_finder.py b/sphinx/ext/autodoc/_member_finder.py
+--- a/sphinx/ext/autodoc/_member_finder.py
++++ b/sphinx/ext/autodoc/_member_finder.py
+@@ -32,10 +32,11 @@
+     from collections.abc import Iterable, Iterator, Mapping, Sequence, Set
+     from typing import Any, Literal
+ 
++    from docutils.statemachine import StringList
++
+     from sphinx.config import Config
+-    from sphinx.environment import _CurrentDocument
++    from sphinx.environment import BuildEnvironment, _CurrentDocument
+     from sphinx.events import EventManager
+-    from sphinx.ext.autodoc import Documenter
+     from sphinx.ext.autodoc._directive_options import _AutoDocumenterOptions
+     from sphinx.ext.autodoc._property_types import _AutodocObjType, _ItemProperties
+     from sphinx.ext.autodoc._sentinels import (
+@@ -44,7 +45,6 @@
+         INSTANCE_ATTR_T,
+         SLOTS_ATTR_T,
+     )
+-    from sphinx.ext.autodoc.directive import DocumenterBridge
+     from sphinx.ext.autodoc.importer import _AttrGetter
+     from sphinx.registry import SphinxComponentRegistry
+ 
+@@ -98,14 +98,16 @@ def _document_members(
+     attr_docs: dict[tuple[str, str], list[str]],
+     config: Config,
+     current_document: _CurrentDocument,
+-    directive: DocumenterBridge,
++    env: BuildEnvironment,
+     events: EventManager,
+     get_attr: _AttrGetter,
+     indent: str,
+     options: _AutoDocumenterOptions,
+     props: _ItemProperties,
+     real_modname: str,
++    record_dependencies: set[str],
+     registry: SphinxComponentRegistry,
++    result: StringList,
+ ) -> None:
+     """Generate reST for member documentation.
+ 
+@@ -126,12 +128,11 @@ def _document_members(
+         attr_docs=attr_docs,
+         config=config,
+         current_document=current_document,
+-        directive=directive,
++        env=env,
+         events=events,
+         get_attr=get_attr,
+         options=options,
+         props=props,
+-        registry=registry,
+     )
+ 
+     # for implicit module members, check __module__ to avoid
+@@ -141,13 +142,23 @@ def _document_members(
+         and want_all
+         and (options.ignore_module_all or props.all is None)  # type: ignore[attr-defined]
+     )
+-    for documenter, is_attr in member_documenters:
+-        assert documenter.props.module_name
++    for member_props, is_attr, member_indent in member_documenters:
++        assert member_props.module_name
+         # We can directly call ._generate() since the documenters
+         # already called ``_load_object_by_name()`` before.
+         #
+         # Note that those two methods above do not emit events, so
+         # whatever objects we deduced should not have changed.
++        doccls = registry.documenters[member_props.obj_type]
++        documenter = doccls(
++            env=env,
++            options=options,
++            get_attr=get_attr,
++            record_dependencies=record_dependencies,
++            result=result,
++            indent=member_indent,
++        )
++        documenter.props = member_props
+         documenter._generate(
+             all_members=True,
+             real_modname=real_modname,
+@@ -163,20 +174,17 @@ def _gather_members(
+     attr_docs: dict[tuple[str, str], list[str]],
+     config: Config,
+     current_document: _CurrentDocument,
+-    directive: DocumenterBridge,
++    env: BuildEnvironment,
+     events: EventManager,
+     get_attr: _AttrGetter,
+     options: _AutoDocumenterOptions,
+     props: _ItemProperties,
+-    registry: SphinxComponentRegistry,
+-) -> list[tuple[Documenter, bool]]:
++) -> list[tuple[_ItemProperties, bool, str]]:
+     """Generate reST for member documentation.
+ 
+     If *want_all* is True, document all members, else those given by
+     *self.options.members*.
+     """
+-    env = directive.env
+-
+     if props.obj_type not in {'module', 'class', 'exception'}:
+         msg = 'must be implemented in subclasses'
+         raise NotImplementedError(msg)
+@@ -220,7 +228,7 @@ def _gather_members(
+         attr_docs=attr_docs,
+     )
+     # document non-skipped members
+-    member_documenters: list[tuple[Documenter, bool]] = []
++    member_documenters: list[tuple[_ItemProperties, bool, str]] = []
+     for member_name, member, is_attr in filtered_members:
+         # prefer the documenter with the highest priority
+         obj_type = _best_object_type_for_member(
+@@ -251,16 +259,11 @@ def _gather_members(
+             env=env,
+             events=events,
+             get_attr=get_attr,
+-            options=directive.genopt,
++            options=options,
+         )
+         if member_props is None:
+             continue
+-
+-        doccls = registry.documenters[obj_type]
+-        documenter = doccls(directive, full_name, indent)
+-        documenter.props = member_props
+-
+-        member_documenters.append((documenter, is_attr))
++        member_documenters.append((member_props, is_attr, indent))
+ 
+     member_order = options.member_order or config.autodoc_member_order
+     member_documenters = _sort_members(
+@@ -653,18 +656,18 @@ def _best_object_type_for_member(
+ 
+ 
+ def _sort_members(
+-    documenters: list[tuple[Documenter, bool]],
++    documenters: list[tuple[_ItemProperties, bool, str]],
+     order: Literal['alphabetical', 'bysource', 'groupwise'],
+     *,
+     ignore_module_all: bool,
+     analyzer_order: dict[str, int],
+     props: _ItemProperties,
+-) -> list[tuple[Documenter, bool]]:
++) -> list[tuple[_ItemProperties, bool, str]]:
+     """Sort the given member list."""
+     if order == 'groupwise':
+         # sort by group; alphabetically within groups
+-        def group_order(entry: tuple[Documenter, bool]) -> tuple[int, str]:
+-            return entry[0].props._groupwise_order_key, entry[0].props.full_name
++        def group_order(entry: tuple[_ItemProperties, bool, str]) -> tuple[int, str]:
++            return entry[0]._groupwise_order_key, entry[0].full_name
+ 
+         documenters.sort(key=group_order)
+     elif order == 'bysource':
+@@ -677,8 +680,8 @@ def group_order(entry: tuple[Documenter, bool]) -> tuple[int, str]:
+             module_all_idx = {name: idx for idx, name in enumerate(module_all)}
+             module_all_len = len(module_all)
+ 
+-            def source_order(entry: tuple[Documenter, bool]) -> int:
+-                fullname = entry[0].props.dotted_parts
++            def source_order(entry: tuple[_ItemProperties, bool, str]) -> int:
++                fullname = entry[0].dotted_parts
+                 return module_all_idx.get(fullname, module_all_len)
+ 
+             documenters.sort(key=source_order)
+@@ -689,13 +692,13 @@ def source_order(entry: tuple[Documenter, bool]) -> int:
+             # sort by source order, by virtue of the module analyzer
+             order_len = len(analyzer_order)
+ 
+-            def source_order(entry: tuple[Documenter, bool]) -> int:
+-                fullname = entry[0].props.dotted_parts
++            def source_order(entry: tuple[_ItemProperties, bool, str]) -> int:
++                fullname = entry[0].dotted_parts
+                 return analyzer_order.get(fullname, order_len)
+ 
+             documenters.sort(key=source_order)
+     else:  # alphabetical
+-        documenters.sort(key=lambda entry: entry[0].props.full_name)
++        documenters.sort(key=lambda entry: entry[0].full_name)
+ 
+     return documenters
+ 
+diff --git a/sphinx/ext/autodoc/directive.py b/sphinx/ext/autodoc/directive.py
+--- a/sphinx/ext/autodoc/directive.py
++++ b/sphinx/ext/autodoc/directive.py
+@@ -17,17 +17,12 @@
+ from sphinx.util.parsing import nested_parse_to_nodes
+ 
+ if TYPE_CHECKING:
+-    from typing import Any
+-
+     from docutils.nodes import Node
+     from docutils.parsers.rst.states import RSTState
+-    from docutils.utils import Reporter
+ 
+     from sphinx.config import Config
+-    from sphinx.environment import BuildEnvironment
+     from sphinx.ext.autodoc import Documenter
+     from sphinx.ext.autodoc._directive_options import Options
+-    from sphinx.ext.autodoc.importer import _AttrGetter
+ 
+ logger = logging.getLogger(__name__)
+ 
+@@ -43,28 +38,6 @@ def __getitem__(self, _key: str) -> Callable[[str], str]:
+         return lambda x: x
+ 
+ 
+-class DocumenterBridge:
+-    """A parameters container for Documenters."""
+-
+-    def __init__(
+-        self,
+-        env: BuildEnvironment,
+-        reporter: Reporter | None,
+-        options: _AutoDocumenterOptions,
+-        lineno: int,
+-        state: Any,
+-        get_attr: _AttrGetter,
+-    ) -> None:
+-        self.env = env
+-        self._reporter = reporter
+-        self.genopt = options
+-        self.lineno = lineno
+-        self.record_dependencies: set[str] = set()
+-        self.result = StringList()
+-        self.state = state
+-        self.get_attr = get_attr
+-
+-
+ def process_documenter_options(
+     documenter: type[Documenter], config: Config, options: dict[str, str | None]
+ ) -> Options:
+@@ -157,21 +130,25 @@ def run(self) -> list[Node]:
+         if props is None:
+             return []
+ 
+-        params = DocumenterBridge(
+-            self.env, reporter, documenter_options, lineno, self.state, get_attr
++        record_dependencies: set[str] = set()
++        result = StringList()
++        documenter = doccls(
++            env=self.env,
++            options=documenter_options,
++            get_attr=get_attr,
++            record_dependencies=record_dependencies,
++            result=result,
+         )
+-        documenter = doccls(params, self.arguments[0])
+         documenter.props = props
+         documenter._generate(more_content=self.content)
+-        if not params.result:
++        if not result:
+             return []
+ 
+-        logger.debug('[autodoc] output:\n%s', '\n'.join(params.result))
++        logger.debug('[autodoc] output:\n%s', '\n'.join(result))
+ 
+         # record all filenames as dependencies -- this will at least
+         # partially make automatic invalidation possible
+-        for fn in params.record_dependencies:
++        for fn in record_dependencies:
+             self.state.document.settings.record_dependencies.add(fn)
+ 
+-        result = parse_generated_content(self.state, params.result, documenter)
+-        return result
++        return parse_generated_content(self.state, result, documenter)
+diff --git a/sphinx/ext/autosummary/__init__.py b/sphinx/ext/autosummary/__init__.py
+--- a/sphinx/ext/autosummary/__init__.py
++++ b/sphinx/ext/autosummary/__init__.py
+@@ -70,7 +70,6 @@
+ from sphinx.ext.autodoc._documenters import _AutodocAttrGetter
+ from sphinx.ext.autodoc._member_finder import _best_object_type_for_member
+ from sphinx.ext.autodoc._sentinels import INSTANCE_ATTR
+-from sphinx.ext.autodoc.directive import DocumenterBridge
+ from sphinx.ext.autodoc.importer import _load_object_by_name, import_module
+ from sphinx.ext.autodoc.mock import mock
+ from sphinx.locale import __
+@@ -97,7 +96,6 @@
+     from sphinx.environment import BuildEnvironment
+     from sphinx.ext.autodoc import Documenter
+     from sphinx.ext.autodoc._property_types import _AutodocObjType
+-    from sphinx.registry import SphinxComponentRegistry
+     from sphinx.util.typing import ExtensionMetadata, OptionSpec
+     from sphinx.writers.html5 import HTML5Translator
+ 
+@@ -220,17 +218,6 @@ class Autosummary(SphinxDirective):
+     }
+ 
+     def run(self) -> list[Node]:
+-        opts = _AutoDocumenterOptions()
+-        get_attr = _AutodocAttrGetter(self.env._registry.autodoc_attrgetters)
+-        self.bridge = DocumenterBridge(
+-            self.env,
+-            self.state.document.reporter,
+-            opts,
+-            self.lineno,
+-            self.state,
+-            get_attr,
+-        )
+-
+         names = [
+             x.strip().split()[0]
+             for x in self.content
+@@ -302,23 +289,6 @@ def import_by_name(
+ 
+                     raise ImportExceptionGroup(exc.args[0], errors) from None
+ 
+-    def create_documenter(
+-        self,
+-        obj: Any,
+-        parent: Any,
+-        full_name: str,
+-        *,
+-        registry: SphinxComponentRegistry,
+-    ) -> Documenter:
+-        """Get an autodoc.Documenter class suitable for documenting the given
+-        object.
+-
+-        Wraps _get_documenter and is meant as a hook for extensions.
+-        """
+-        obj_type = _get_documenter(obj, parent)
+-        doccls = registry.documenters[obj_type]
+-        return doccls(self.bridge, full_name)
+-
+     def get_items(self, names: list[str]) -> list[tuple[str, str | None, str, str]]:
+         """Try to import the given names, and return a list of
+         ``[(name, signature, summary_string, real_name), ...]``.
+@@ -343,7 +313,8 @@ def get_items(self, names: list[str]) -> list[tuple[str, str | None, str, str]]:
+         config = env.config
+         current_document = env.current_document
+         events = env.events
+-        get_attr = self.bridge.get_attr
++        get_attr = _AutodocAttrGetter(env._registry.autodoc_attrgetters)
++        opts = _AutoDocumenterOptions()
+ 
+         max_item_chars = 50
+ 
+@@ -367,7 +338,6 @@ def get_items(self, names: list[str]) -> list[tuple[str, str | None, str, str]]:
+                 )
+                 continue
+ 
+-            result = StringList()  # initialize for each documenter
+             obj_type = _get_documenter(obj, parent)
+             if isinstance(obj, ModuleType):
+                 full_name = real_name
+@@ -377,7 +347,6 @@ def get_items(self, names: list[str]) -> list[tuple[str, str | None, str, str]]:
+                 full_name = f'{modname}::{real_name[len(modname) + 1 :]}'
+             # NB. using full_name here is important, since Documenters
+             #     handle module prefixes slightly differently
+-            self.bridge.result = result
+             props = _load_object_by_name(
+                 name=full_name,
+                 objtype=obj_type,
+@@ -388,7 +357,7 @@ def get_items(self, names: list[str]) -> list[tuple[str, str | None, str, str]]:
+                 env=env,
+                 events=events,
+                 get_attr=get_attr,
+-                options=self.bridge.genopt,
++                options=opts,
+             )
+             if props is None:
+                 logger.warning(
+@@ -425,11 +394,17 @@ def get_items(self, names: list[str]) -> list[tuple[str, str | None, str, str]]:
+ 
+             # -- Grab the summary
+ 
++            result = StringList()  # Initialise for each documenter
+             doccls = env._registry.documenters[obj_type]
+-            documenter = doccls(self.bridge, full_name)
++            documenter = doccls(
++                env=env,
++                options=opts,
++                get_attr=get_attr,
++                result=result,
++            )
+             documenter.props = props
+             documenter.analyzer = analyzer
+-            documenter.add_content(None, indent=documenter.indent)
++            documenter.add_content(None, indent='')
+             lines = result.data[:]
+             if props.obj_type != 'module':
+                 lines[:] = [line.removeprefix('   ') for line in lines]

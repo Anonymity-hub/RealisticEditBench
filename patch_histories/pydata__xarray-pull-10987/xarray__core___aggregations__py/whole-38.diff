@@ -1,0 +1,11 @@
+diff --git a/xarray/core/_aggregations.py b/xarray/core/_aggregations.py
+--- a/xarray/core/_aggregations.py
++++ b/xarray/core/_aggregations.py
+@@ -5104,7 +5104,6 @@ def cumsum(
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
+-            return out.assign_coords(self._original_obj.coords)
+             return out.assign_coords(self._obj.coords)
+ 
+     def cumprod(

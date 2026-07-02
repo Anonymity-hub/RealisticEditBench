@@ -1,0 +1,17 @@
+diff --git a/sphinx/ext/autodoc/_docstrings.py b/sphinx/ext/autodoc/_docstrings.py
+--- a/sphinx/ext/autodoc/_docstrings.py
++++ b/sphinx/ext/autodoc/_docstrings.py
+@@ -298,6 +298,13 @@
+             return []
+         return [prepare_docstring(docstring, tab_width)]
+ 
++    if props.obj_type == 'type':
++        try:
++            analyzer = ModuleAnalyzer.for_module(props.module_name)
++            analyzer.analyze()
++        except PycodeError:
++            return None
++
+     docstring = getdoc(
+         obj,
+         allow_inherited=inherit_docstrings,

@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/font_manager.py b/lib/matplotlib/font_manager.py
+--- a/lib/matplotlib/font_manager.py
++++ b/lib/matplotlib/font_manager.py
+@@ -1345,6 +1345,7 @@
+         # _findfont_cached so to prevent using a stale cache entry after an
+         # rcParam was changed.
+         rc_params = [mpl.rcParams[f"font.{key}"] for key in [
++            "family", "style", "variant",
+             "serif", "sans-serif", "cursive", "fantasy", "monospace"]]
+         ret = self._findfont_cached(
+             prop, fontext, directory, fallback_to_default, rebuild_if_missing,

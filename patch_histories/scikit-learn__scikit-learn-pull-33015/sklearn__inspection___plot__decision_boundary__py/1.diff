@@ -1,0 +1,24 @@
+diff --git a/sklearn/inspection/_plot/decision_boundary.py b/sklearn/inspection/_plot/decision_boundary.py
+--- a/sklearn/inspection/_plot/decision_boundary.py
++++ b/sklearn/inspection/_plot/decision_boundary.py
+@@ -157,10 +157,19 @@
+     """
+ 
+     def __init__(
+-        self, *, xx0, xx1, response, multiclass_colors=None, xlabel=None, ylabel=None
++        self,
++        *,
++        xx0,
++        xx1,
++        n_classes,
++        response,
++        multiclass_colors=None,
++        xlabel=None,
++        ylabel=None,
+     ):
+         self.xx0 = xx0
+         self.xx1 = xx1
++        self.n_classes = n_classes
+         self.response = response
+         self.multiclass_colors = multiclass_colors
+         self.xlabel = xlabel

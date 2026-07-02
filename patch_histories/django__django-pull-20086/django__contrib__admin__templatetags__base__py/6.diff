@@ -1,0 +1,11 @@
+diff --git a/django/contrib/admin/templatetags/base.py b/django/contrib/admin/templatetags/base.py
+--- a/django/contrib/admin/templatetags/base.py
++++ b/django/contrib/admin/templatetags/base.py
+@@ -36,7 +36,6 @@
+             defaults,
+             kwonly,
+             kwonly_defaults,
+-            takes_context,
+             bits[0],
+         )
+         super().__init__(func, takes_context, args, kwargs, filename=None)

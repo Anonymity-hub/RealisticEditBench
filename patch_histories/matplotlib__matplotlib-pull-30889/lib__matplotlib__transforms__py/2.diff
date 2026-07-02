@@ -1,0 +1,15 @@
+diff --git a/lib/matplotlib/transforms.py b/lib/matplotlib/transforms.py
+--- a/lib/matplotlib/transforms.py
++++ b/lib/matplotlib/transforms.py
+@@ -2923,6 +2923,11 @@
+     return vmin, vmax
+ 
+ 
++@_api.deprecated("3.11")
++def nonsingular(vmin, vmax, expander=0.001, tiny=1e-15, increasing=True):
++    return _nonsingular(vmin, vmax, expander, tiny, increasing)
++
++
+ def interval_contains(interval, val):
+     """
+     Check, inclusively, whether an interval includes a given value.

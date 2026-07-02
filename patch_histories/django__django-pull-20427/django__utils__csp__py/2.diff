@@ -1,0 +1,14 @@
+diff --git a/django/utils/csp.py b/django/utils/csp.py
+--- a/django/utils/csp.py
++++ b/django/utils/csp.py
+@@ -80,6 +80,10 @@
+         return self._wrapped is not empty
+ 
+ 
++def generate_nonce():
++    return secrets.token_urlsafe(16)
++
++
+ def build_policy(config, nonce=None):
+     policy = []
+ 

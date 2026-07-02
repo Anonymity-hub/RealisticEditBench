@@ -1,0 +1,21 @@
+diff --git a/django/core/serializers/python.py b/django/core/serializers/python.py
+--- a/django/core/serializers/python.py
++++ b/django/core/serializers/python.py
+@@ -52,14 +52,10 @@
+         self._current[field.name] = self._value_from_field(obj, field)
+ 
+     def handle_fk_field(self, obj, field):
+-        if self.use_natural_foreign_keys and hasattr(
+-            field.remote_field.model, "natural_key"
++        if self.use_natural_foreign_keys and (
++            natural_key_value := self._resolve_fk_natural_key(obj, field)
+         ):
+-            related = getattr(obj, field.name)
+-            if related:
+-                value = related.natural_key()
+-            else:
+-                value = None
++            value = natural_key_value
+         else:
+             value = self._value_from_field(obj, field)
+         self._current[field.name] = value

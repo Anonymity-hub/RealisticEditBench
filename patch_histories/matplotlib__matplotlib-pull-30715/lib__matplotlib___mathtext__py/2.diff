@@ -1,0 +1,17 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -2482,7 +2482,12 @@
+                 shift = hlist.height + vgap + nucleus.depth
+             vlt = Vlist(vlist)
+             vlt.shift_amount = shift
+-            result = Hlist([vlt])
++            result = Hlist([
++                vlt,
++                *([self._make_space(self._space_widths[r'\,'])]
++                  if self._in_subscript_or_superscript else []),
++            ])
++            self._in_subscript_or_superscript = False
+             return [result]
+ 
+         # We remove kerning on the last character for consistency (otherwise

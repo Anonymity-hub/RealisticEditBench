@@ -1,0 +1,45 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -549,33 +549,14 @@
+ 
+     def quote_name(self, name):
+         """
+-        A wrapper around connection.ops.quote_name that doesn't quote aliases
+-        for table names. This avoids problems with some SQL dialects that treat
+-        quoted strings specially (e.g. PostgreSQL).
+-        """
+-        if (
+-            self.connection.features.prohibits_dollar_signs_in_column_aliases
+-            and "$" in name
+-        ):
+-            raise ValueError(
+-                "Dollar signs are not permitted in column aliases on "
+-                f"{self.connection.display_name}."
+-            )
+-        if name in self.quote_cache:
+-            return self.quote_cache[name]
+-        if (
+-            (name in self.query.alias_map and name not in self.query.table_map)
+-            or name in self.query.extra_select
+-            or (
+-                self.query.external_aliases.get(name)
+-                and name not in self.query.table_map
+-            )
+-        ):
+-            self.quote_cache[name] = name
+-            return name
+-        r = self.connection.ops.quote_name(name)
+-        self.quote_cache[name] = r
+-        return r
++        A wrapper around connection.ops.quote_name that memoizes quoted
++        name values.
++        """
++        if (quoted := self.quote_cache.get(name)) is not None:
++            return quoted
++        quoted = self.connection.ops.quote_name(name)
++        self.quote_cache[name] = quoted
++        return quoted
+ 
+     quote_name_unless_alias = quote_name
+ 

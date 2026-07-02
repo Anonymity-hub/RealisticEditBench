@@ -1,0 +1,63 @@
+diff --git a/sphinx/ext/autosummary/generate.py b/sphinx/ext/autosummary/generate.py
+--- a/sphinx/ext/autosummary/generate.py
++++ b/sphinx/ext/autosummary/generate.py
+@@ -451,10 +451,12 @@
+         return template.render(doc.objtype, ns)
+ 
+ 
+-def _skip_member(obj: Any, name: str, objtype: str, *, events: EventManager) -> bool:
++def _skip_member(
++    obj: Any, name: str, obj_type: _AutodocObjType, *, events: EventManager
++) -> bool:
+     try:
+         return events.emit_firstresult(
+-            'autodoc-skip-member', objtype, name, obj, False, {}
++            'autodoc-skip-member', obj_type, name, obj, False, {}
+         )
+     except Exception as exc:
+         logger.warning(
+@@ -553,37 +555,35 @@
+ 
+ 
+ def _get_all_members(
+-    doc: type[Documenter], obj: Any, *, config: Config
++    obj_type: _AutodocObjType, obj: Any, *, config: Config
+ ) -> dict[str, Any]:
+-    if doc.objtype == 'module':
++    if obj_type == 'module':
+         return _get_module_members(obj, config=config)
+-    elif doc.objtype == 'class':
++    elif obj_type == 'class':
+         return _get_class_members(obj)
+     return {}
+ 
+ 
+ def _get_members(
+-    doc: type[Documenter],
++    obj_type: _AutodocObjType,
+     obj: Any,
+     types: set[str],
+     *,
+     config: Config,
+     events: EventManager,
+-    registry: SphinxComponentRegistry,
+     include_public: Set[str] = frozenset(),
+     imported: bool = True,
+ ) -> tuple[list[str], list[str]]:
+     items: list[str] = []
+     public: list[str] = []
+ 
+-    all_members = _get_all_members(doc, obj, config=config)
++    all_members = _get_all_members(obj_type, obj, config=config)
+     for name, value in all_members.items():
+         obj_type = _get_documenter(value, obj)
+-        documenter = registry.documenters[obj_type]
+-        if documenter.objtype in types:
++        if obj_type in types:
+             # skip imported members if expected
+             if imported or getattr(value, '__module__', None) == obj.__name__:
+-                skipped = _skip_member(value, name, documenter.objtype, events=events)
++                skipped = _skip_member(value, name, obj_type, events=events)
+                 if skipped is True:
+                     pass
+                 elif skipped is False:

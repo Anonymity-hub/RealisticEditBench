@@ -1,0 +1,11 @@
+diff --git a/astropy/table/pprint.py b/astropy/table/pprint.py
+--- a/astropy/table/pprint.py
++++ b/astropy/table/pprint.py
+@@ -542,6 +542,7 @@ def format_col_str(idx):
+                 right = format_func(col_format, col[(idx,) + multidim1])
+                 result = f"{left} .. {right}"
+             else:
++
+                 def format_multidim(arr):
+                     """Recursively format multidimensional arrays."""
+                     if arr.ndim == 0:

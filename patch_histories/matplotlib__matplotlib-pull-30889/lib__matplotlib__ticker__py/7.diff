@@ -1,0 +1,30 @@
+diff --git a/lib/matplotlib/ticker.py b/lib/matplotlib/ticker.py
+--- a/lib/matplotlib/ticker.py
++++ b/lib/matplotlib/ticker.py
+@@ -1881,7 +1881,7 @@
+         return self.tick_values(vmin, vmax)
+ 
+     def tick_values(self, vmin, vmax):
+-        vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)
++        vmin, vmax = mtransforms._nonsingular(vmin, vmax, expander=0.05)
+ 
+         if (vmin, vmax) in self.presets:
+             return self.presets[(vmin, vmax)]
+@@ -1910,7 +1910,7 @@
+             vmin = math.floor(scale * vmin) / scale
+             vmax = math.ceil(scale * vmax) / scale
+ 
+-        return mtransforms.nonsingular(vmin, vmax)
++        return mtransforms._nonsingular(vmin, vmax)
+ 
+ 
+ class MultipleLocator(Locator):
+@@ -1980,7 +1980,7 @@
+             vmin = dmin
+             vmax = dmax
+ 
+-        return mtransforms.nonsingular(vmin, vmax)
++        return mtransforms._nonsingular(vmin, vmax)
+ 
+ 
+ def scale_range(vmin, vmax, n=1, threshold=100):

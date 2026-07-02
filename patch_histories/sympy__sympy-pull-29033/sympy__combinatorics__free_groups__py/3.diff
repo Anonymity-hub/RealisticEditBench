@@ -1,0 +1,60 @@
+diff --git a/sympy/combinatorics/free_groups.py b/sympy/combinatorics/free_groups.py
+--- a/sympy/combinatorics/free_groups.py
++++ b/sympy/combinatorics/free_groups.py
+@@ -357,8 +357,13 @@
+         if boundary_index is not None:
+             init = _reduce_array_form(init, boundary_index=boundary_index)
+             return tuple.__new__(cls, init)
++        if reduced:
++            return tuple.__new__(cls, tuple(init))
++        return tuple.__new__(cls, _reduce_array_form(init))
+ 
+     def new(self, init):
++        if isinstance(init, FreeGroupElement):
++            return self.__class__(init, reduced=True)
+         return self.__class__(init)
+ 
+     _hash = None
+@@ -536,9 +541,8 @@
+             return other
+         if other.is_identity:
+             return self
+-        r = list(self.array_form + other.array_form)
+-        zero_mul_simp(r, len(self.array_form) - 1)
+-        return group.dtype(tuple(r))
++        r = self.array_form + other.array_form
++        return group.dtype(r, boundary_index=len(self.array_form) - 1)
+ 
+     def __truediv__(self, other):
+         group = self.group
+@@ -573,8 +577,8 @@
+ 
+         """
+         group = self.group
+-        r = tuple([(i, -j) for i, j in self.array_form[::-1]])
+-        return group.dtype(r)
++        r = tuple((i, -j) for i, j in self.array_form[::-1])
++        return group.dtype(r, reduced=True)
+ 
+     def order(self):
+         """Find the order of a ``FreeGroupElement``.
+@@ -1313,6 +1317,7 @@
+             return rest.power_of(other)
+         return False
+ 
++
+ def _reduce_array_form(array_form, boundary_index=None):
+     """Return a reduced array form.
+ 
+@@ -1322,6 +1327,11 @@
+     """
+     if not array_form:
+         return ()
++    if boundary_index is not None:
++        reduced = list(array_form)
++        zero_mul_simp(reduced, boundary_index)
++        return tuple(reduced)
++
+     reduced = []
+     for gen, exp in array_form:
+         if exp == 0:

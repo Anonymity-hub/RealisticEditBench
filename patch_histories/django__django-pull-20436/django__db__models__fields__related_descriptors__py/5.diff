@@ -1,0 +1,29 @@
+diff --git a/django/db/models/fields/related_descriptors.py b/django/db/models/fields/related_descriptors.py
+--- a/django/db/models/fields/related_descriptors.py
++++ b/django/db/models/fields/related_descriptors.py
+@@ -172,14 +172,17 @@ def get_queryset(self, *, instance):
+         ).fetch_mode(instance._state.fetch_mode)
+ 
+     def get_prefetch_querysets(self, instances, querysets=None):
+-        if querysets and len(querysets) != 1:
+-            raise ValueError(
+-                "querysets argument of get_prefetch_querysets() should have a length "
+-                "of 1."
+-            )
+-        queryset = (
+-            querysets[0] if querysets else self.get_queryset(instance=instances[0])
+-        )
++        _cloning_disabled = False
++        if querysets:
++            if len(querysets) != 1:
++                raise ValueError(
++                    "querysets argument of get_prefetch_querysets() should have a "
++                    "length of 1."
++                )
++            queryset = querysets[0]
++        else:
++            _cloning_disabled = True
++            queryset = self.get_queryset(instance=instances[0])._disable_cloning()
+ 
+         rel_obj_attr = self.field.get_foreign_related_value
+         instance_attr = self.field.get_local_related_value

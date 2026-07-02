@@ -1,0 +1,69 @@
+diff --git a/django/template/library.py b/django/template/library.py
+--- a/django/template/library.py
++++ b/django/template/library.py
+@@ -190,26 +190,32 @@
+             if end_name is None:
+                 end_name = f"end{function_name}"
+ 
++            if takes_context:
++                if len(params) >= 2 and params[1] == "content":
++                    del params[1]
++                else:
++                    raise TemplateSyntaxError(
++                        f"{function_name!r} is decorated with takes_context=True so"
++                        " it must have a first argument of 'context' and a second "
++                        "argument of 'content'"
++                    )
++
++                if params and params[0] == "context":
++                    del params[0]
++                else:
++                    raise TemplateSyntaxError(
++                        f"{function_name!r} is decorated with takes_context=True so it "
++                        "must have a first argument of 'context'"
++                    )
++            elif params and params[0] == "content":
++                del params[0]
++            else:
++                raise TemplateSyntaxError(
++                    f"{function_name!r} must have a first argument of 'content'"
++                )
++
+             @wraps(func)
+             def compile_func(parser, token):
+-                tag_params = params.copy()
+-
+-                if takes_context:
+-                    if len(tag_params) >= 2 and tag_params[1] == "content":
+-                        del tag_params[1]
+-                    else:
+-                        raise TemplateSyntaxError(
+-                            f"{function_name!r} is decorated with takes_context=True so"
+-                            " it must have a first argument of 'context' and a second "
+-                            "argument of 'content'"
+-                        )
+-                elif tag_params and tag_params[0] == "content":
+-                    del tag_params[0]
+-                else:
+-                    raise TemplateSyntaxError(
+-                        f"'{function_name}' must have a first argument of 'content'"
+-                    )
+-
+                 bits = token.split_contents()[1:]
+                 target_var = None
+                 if len(bits) >= 2 and bits[-2] == "as":
+@@ -222,13 +228,12 @@
+                 args, kwargs = parse_bits(
+                     parser,
+                     bits,
+-                    tag_params,
++                    params,
+                     varargs,
+                     varkw,
+                     defaults,
+                     kwonly,
+                     kwonly_defaults,
+-                    takes_context,
+                     function_name,
+                 )
+ 

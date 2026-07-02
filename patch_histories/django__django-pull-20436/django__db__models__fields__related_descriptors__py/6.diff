@@ -1,0 +1,13 @@
+diff --git a/django/db/models/fields/related_descriptors.py b/django/db/models/fields/related_descriptors.py
+--- a/django/db/models/fields/related_descriptors.py
++++ b/django/db/models/fields/related_descriptors.py
+@@ -203,6 +206,9 @@ def get_prefetch_querysets(self, instances, querysets=None):
+         # There can be only one object prefetched for each instance so clear
+         # ordering if the query allows it without side effects.
+         queryset.query.clear_ordering()
++        # Restore subsequent cloning operations.
++        if _cloning_disabled:
++            queryset._enable_cloning()
+ 
+         # Since we're going to assign directly in the cache,
+         # we must manage the reverse relation cache manually.

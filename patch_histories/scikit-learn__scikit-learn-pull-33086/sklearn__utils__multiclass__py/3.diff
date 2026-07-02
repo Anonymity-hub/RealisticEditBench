@@ -1,0 +1,15 @@
+diff --git a/sklearn/utils/multiclass.py b/sklearn/utils/multiclass.py
+--- a/sklearn/utils/multiclass.py
++++ b/sklearn/utils/multiclass.py
+@@ -119,7 +119,10 @@
+     )
+     # Check that we don't mix string type with number type
+     if len(set(isinstance(label, str) for label in ys_labels)) > 1:
+-        raise ValueError("Mix of label input types (string and number)")
++        msg_details = (
++            "Got " + " and ".join([f"{xp.unique_values(y)}" for y in ys]) + "."
++        )
++        raise ValueError(f"Mix of label input types (string and number); {msg_details}")
+ 
+     return xp.asarray(sorted(ys_labels))
+ 

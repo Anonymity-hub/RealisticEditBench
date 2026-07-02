@@ -1,0 +1,43 @@
+diff --git a/sklearn/linear_model/_logistic.py b/sklearn/linear_model/_logistic.py
+--- a/sklearn/linear_model/_logistic.py
++++ b/sklearn/linear_model/_logistic.py
+@@ -28,7 +28,7 @@
+ from sklearn.linear_model._glm.glm import NewtonCholeskySolver
+ from sklearn.linear_model._linear_loss import LinearModelLoss
+ from sklearn.linear_model._sag import sag_solver
+-from sklearn.metrics import get_scorer, get_scorer_names
++from sklearn.metrics import get_scorer, get_scorer_names, make_scorer
+ from sklearn.model_selection import check_cv
+ from sklearn.preprocessing import LabelEncoder
+ from sklearn.svm._base import _fit_liblinear
+@@ -309,6 +309,7 @@
+         w0 = np.zeros(
+             n_features + int(fit_intercept), dtype=_matching_numpy_dtype(X, xp=xp)
+         )
++        # classes[1] is the "positive label"
+         mask = xp.asarray(y == classes[1], device=device_)
+         y_bin = xp.ones(y.shape, dtype=X.dtype, device=device_)
+         if solver == "liblinear":
+@@ -776,6 +777,22 @@
+         else:
+             sig = []
+ 
++        if (is_binary and "labels" in sig and "pos_label" in sig) or (
++            len(classes) >= 3 and "labels" in sig
++        ):
++            pos_label_kwarg = {}
++            if is_binary:
++                # see _logistic_regression_path
++                pos_label_kwarg["pos_label"] = classes[-1]
++            scoring = make_scorer(
++                scoring._score_func,
++                greater_is_better=True if scoring._sign == 1 else False,
++                response_method=scoring._response_method,
++                labels=classes,
++                **pos_label_kwarg,
++                **getattr(scoring, "_kwargs", {}),
++            )
++
+     for w, C in zip(coefs, Cs):
+         log_reg.C = C
+         if fit_intercept:

@@ -1,0 +1,12 @@
+diff --git a/sklearn/utils/_array_api.py b/sklearn/utils/_array_api.py
+--- a/sklearn/utils/_array_api.py
++++ b/sklearn/utils/_array_api.py
+@@ -574,7 +574,7 @@ def move_to(*arrays, xp, device, dtype):
+     device : device
+         Array API device to move arrays to.
+ 
+-    dytpe : dtype
++    dtype : dtype
+         Data type to convert to.
+ 
+     Returns

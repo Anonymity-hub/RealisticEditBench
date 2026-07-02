@@ -1,0 +1,55 @@
+diff --git a/sklearn/cluster/_bisect_k_means.py b/sklearn/cluster/_bisect_k_means.py
+--- a/sklearn/cluster/_bisect_k_means.py
++++ b/sklearn/cluster/_bisect_k_means.py
+@@ -94,7 +94,7 @@ class BisectingKMeans(_BaseKMeans):
+         centroids to generate.
+ 
+     init : {'k-means++', 'random'} or callable, default='random'
+-        Method for initialization:
++        Method for initialization for each bisection.
+ 
+         'k-means++' : selects initial cluster centers for k-mean
+         clustering in a smart way to speed up convergence. See section
+@@ -104,7 +104,9 @@ class BisectingKMeans(_BaseKMeans):
+         for the initial centroids.
+ 
+         If a callable is passed, it should take arguments X, n_clusters and a
+-        random state and return an initialization.
++        random state and return an initialization. Note that the bisecting algorithm
++        always performs a 2-way split, so the callable will always be called with
++        `n_clusters=2` and should return 2 centroids.
+ 
+     n_init : int, default=1
+         Number of time the inner k-means algorithm will be run with different
+diff --git a/sklearn/cluster/_kmeans.py b/sklearn/cluster/_kmeans.py
+--- a/sklearn/cluster/_kmeans.py
++++ b/sklearn/cluster/_kmeans.py
+@@ -933,12 +933,15 @@ def _check_mkl_vcomp(self, X, n_samples):
+             if has_vcomp and has_mkl:
+                 self._warn_mkl_vcomp(n_active_threads)
+ 
+-    def _validate_center_shape(self, X, centers):
+-        """Check if centers is compatible with X and n_clusters."""
+-        if centers.shape[0] != self.n_clusters:
++    def _validate_center_shape(self, X, centers, n_centroids=None):
++        """Check if the shape of the centers is correct."""
++        if n_centroids is None:
++            n_centroids = self.n_clusters
++
++        if centers.shape[0] != n_centroids:
+             raise ValueError(
+                 f"The shape of the initial centers {centers.shape} does not "
+-                f"match the number of clusters {self.n_clusters}."
++                f"match the number of clusters {n_centroids}."
+             )
+         if centers.shape[1] != X.shape[1]:
+             raise ValueError(
+@@ -1037,7 +1040,7 @@ def _init_centroids(
+         elif callable(init):
+             centers = init(X, n_clusters, random_state=random_state)
+             centers = check_array(centers, dtype=X.dtype, copy=False, order="C")
+-            self._validate_center_shape(X, centers)
++            self._validate_center_shape(X, centers, n_centroids=n_clusters)
+ 
+         if sp.issparse(centers):
+             centers = centers.toarray()

@@ -1,0 +1,46 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -306,6 +306,12 @@
+         """
+         output.rects.append((x, y, w, h))
+ 
++    def get_axis_height(self, font: str, fontsize: float, dpi: float) -> float:
++        """
++        Get the axis height for the given *font* and *fontsize*.
++        """
++        raise NotImplementedError()
++
+     def get_xheight(self, font: str, fontsize: float, dpi: float) -> float:
+         """
+         Get the xheight for the given *font* and *fontsize*.
+@@ -407,17 +413,19 @@
+             offset=offset
+         )
+ 
++    def get_axis_height(self, fontname: str, fontsize: float, dpi: float) -> float:
++        # The fraction line (if present) must be aligned with the minus sign. Therefore,
++        # the height of the latter from the baseline is the axis height.
++        metrics = self.get_metrics(
++            fontname, mpl.rcParams['mathtext.default'], '\u2212', fontsize, dpi)
++        return (metrics.ymax + metrics.ymin) / 2
++
+     def get_xheight(self, fontname: str, fontsize: float, dpi: float) -> float:
+-        font = self._get_font(fontname)
+-        font.set_size(fontsize, dpi)
+-        pclt = font.get_sfnt_table('pclt')
+-        if pclt is None:
+-            # Some fonts don't store the xHeight, so we do a poor man's xHeight
+-            metrics = self.get_metrics(
+-                fontname, mpl.rcParams['mathtext.default'], 'x', fontsize, dpi)
+-            return metrics.iceberg
+-        x_height = (pclt['xHeight'] / 64) * (fontsize / 12) * (dpi / 100)
+-        return x_height
++        # Some fonts report the wrong x-height, while some don't store it, so
++        # we do a poor man's x-height.
++        metrics = self.get_metrics(
++            fontname, mpl.rcParams['mathtext.default'], 'x', fontsize, dpi)
++        return metrics.iceberg
+ 
+     def get_underline_thickness(self, font: str, fontsize: float, dpi: float) -> float:
+         # This function used to grab underline thickness from the font

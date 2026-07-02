@@ -1,0 +1,12 @@
+diff --git a/sympy/vector/coordsysrect.py b/sympy/vector/coordsysrect.py
+--- a/sympy/vector/coordsysrect.py
++++ b/sympy/vector/coordsysrect.py
+@@ -258,7 +258,7 @@ def __new__(cls, name, transformation=None, parent=None, location=None,
+ 
+             # detects coordinate systems like spherical/cylindrical,
+             # where the Jacobian depends on the position
+-            is_curvilinear = len(J.atoms(BaseScalar)) > 0
++            is_curvilinear = J.has(BaseScalar)
+             if is_curvilinear:
+                 # normalized jacobian
+                 J = Matrix([(J.col(i) / h[i]).T for i in range(3)]).T

@@ -1,0 +1,21 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -1122,3 +1122,17 @@
+             if isinstance(obj, classmethod) and inspect.isproperty(obj.__func__):
+                 # priority must be higher than 'attribute'
+                 filtered.append((11, 'property'))
++
++    if not isinstance(parent_documenter, ModuleDocumenter):
++        if inspect.isattributedescriptor(member) or not (
++            inspect.isroutine(member) or isinstance(member, type)
++        ):
++            # priority must be higher than 'method', else it will recognise
++            # some non-data descriptors as methods
++            filtered.append((10, 'attribute'))
++
++    if inspect.isroutine(member) and not isinstance(
++        parent_documenter, ModuleDocumenter
++    ):
++        # priority must be higher than 'function'
++        filtered.append((1, 'method'))

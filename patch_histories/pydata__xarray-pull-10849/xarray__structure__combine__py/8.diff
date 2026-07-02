@@ -1,0 +1,23 @@
+diff --git a/xarray/structure/combine.py b/xarray/structure/combine.py
+--- a/xarray/structure/combine.py
++++ b/xarray/structure/combine.py
+@@ -1057,6 +1057,10 @@
+     Finally, if you attempt to combine a mix of unnamed DataArrays with either named
+     DataArrays or Datasets, a ValueError will be raised (as this is an ambiguous operation).
+     """
++    if any(isinstance(data_object, DataTree) for data_object in data_objects):
++        raise NotImplementedError(
++            "combine_by_coords() does not yet support DataTree objects."
++        )
+ 
+     if not data_objects:
+         return Dataset()
+@@ -1087,7 +1091,7 @@
+             # Must be a mix of unnamed dataarrays with either named dataarrays or with datasets
+             # Can't combine these as we wouldn't know whether to merge or concatenate the arrays
+             raise ValueError(
+-                "Can't automatically combine unnamed DataArrays with either named DataArrays or Datasets."
++                "Can't automatically combine unnamed DataArrays with named DataArrays or Datasets."
+             )
+     else:
+         # Promote any named DataArrays to single-variable Datasets to simplify combining

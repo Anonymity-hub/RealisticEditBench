@@ -1,0 +1,34 @@
+diff --git a/sphinx/ext/autodoc/_generate.py b/sphinx/ext/autodoc/_generate.py
+--- a/sphinx/ext/autodoc/_generate.py
++++ b/sphinx/ext/autodoc/_generate.py
+@@ -236,12 +236,13 @@
+         attr_docs=attr_docs,
+         config=config,
+         current_document=current_document,
+-        env=env,
+         events=events,
+         get_attr=get_attr,
+         options=options,
+         parent_modname=real_modname,
+         props=props,
++        ref_context=ref_context,
++        reread_always=reread_always,
+     )
+ 
+     # for implicit module members, check __module__ to avoid
+@@ -262,13 +263,14 @@
+             all_members=True,
+             config=config,
+             current_document=current_document,
+-            env=env,
+             events=events,
+             get_attr=get_attr,
+             indent=member_indent,
+             options=options,
+             props=member_props,
+             record_dependencies=record_dependencies,
++            ref_context=ref_context,
++            reread_always=reread_always,
+             result=result,
+         )
+ 

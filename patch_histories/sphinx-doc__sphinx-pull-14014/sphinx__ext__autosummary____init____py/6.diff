@@ -1,0 +1,20 @@
+diff --git a/sphinx/ext/autosummary/__init__.py b/sphinx/ext/autosummary/__init__.py
+--- a/sphinx/ext/autosummary/__init__.py
++++ b/sphinx/ext/autosummary/__init__.py
+@@ -301,6 +301,7 @@
+             )
+             raise ValueError(msg)
+ 
++        document_settings = self.state.document.settings
+         env = self.env
+         config = env.config
+         current_document = env.current_document
+@@ -395,7 +396,7 @@
+                 props=props,
+                 options=opts,
+             )
+-            summary = extract_summary(list(docstring_lines), self.state.document)
++            summary = extract_summary(list(docstring_lines), document_settings)
+ 
+             items.append((display_name, sig, summary, real_name))
+ 

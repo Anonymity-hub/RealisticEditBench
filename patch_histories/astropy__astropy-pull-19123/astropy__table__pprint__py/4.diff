@@ -1,0 +1,20 @@
+diff --git a/astropy/table/pprint.py b/astropy/table/pprint.py
+index 0f483d4..c9f0384 100644
+--- a/astropy/table/pprint.py
++++ b/astropy/table/pprint.py
+@@ -541,9 +541,12 @@ class TableFormatter:
+                 right = format_func(col_format, col[(idx,) + multidim1])
+                 result = f"{left} .. {right}"
+             else:
+-                left = format_func(col_format, col[(idx,) + multidim0])
+-                right = format_func(col_format, col[(idx,) + multidim1])
+-                result = f"{left} .. {right}"
++
++                def format_multidim(arr):
++                    """Recursively format multidimensional arrays."""
++                    pass
++
++                result = format_multidim(col[idx])
+ 
+             return result
+         # Add formatted values if within bounds allowed by max_lines

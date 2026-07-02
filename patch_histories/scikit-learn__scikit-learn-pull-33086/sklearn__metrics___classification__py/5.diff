@@ -1,0 +1,90 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -38,7 +38,6 @@
+     _is_xp_namespace,
+     _isin,
+     _max_precision_float_dtype,
+-    _union1d,
+     _xlogy,
+     get_namespace,
+     get_namespace_and_device,
+@@ -76,9 +75,14 @@
+     """Check that y_true and y_pred belong to the same classification task.
+ 
+     This converts multiclass or binary types to a common shape, and raises a
+-    ValueError for a mix of multilabel and multiclass targets, a mix of
+-    multilabel formats, for the presence of continuous-valued or multioutput
+-    targets, or for targets of different lengths.
++    ValueError for:
++
++        - targets of different lengths,
++        - a mix of multilabel and multiclass targets,
++        - a mix of multilabel target and anything else
++          (because there are no explicit labels),
++        - the presence of continuous-valued or multioutput (or 'unknown') targets,
++        - mix of string and integer labels.
+ 
+     Column vectors are squeezed to 1d, while multilabel formats are returned
+     as CSR sparse label indicators.
+@@ -96,6 +100,10 @@
+     type_true : one of {'multilabel-indicator', 'multiclass', 'binary'}
+         The type of the true target data, as output by
+         ``utils.multiclass.type_of_target``.
++
++    unique_labels : array
++        An ordered array of unique labels occurring either in `y_true`, `y_pred` or
++        both.
+ 
+     y_true : array or indicator matrix
+ 
+@@ -129,7 +137,7 @@
+             )
+         )
+ 
+-    # We can't have more than one value on y_type => The set is no more needed
++    # We can't have more than one value in y_type => The set is no more needed
+     y_type = y_type.pop()
+ 
+     # No metrics support "multiclass-multioutput" format
+@@ -148,25 +156,12 @@
+             else:
+                 raise
+ 
+-        xp, _ = get_namespace(y_true, y_pred)
+-        if y_type == "binary":
+-            try:
+-                unique_values = _union1d(y_true, y_pred, xp)
+-            except TypeError as e:
+-                # We expect y_true and y_pred to be of the same data type.
+-                # If `y_true` was provided to the classifier as strings,
+-                # `y_pred` given by the classifier will also be encoded with
+-                # strings. So we raise a meaningful error
+-                raise TypeError(
+-                    "Labels in y_true and y_pred should be of the same type. "
+-                    f"Got y_true={xp.unique(y_true)} and "
+-                    f"y_pred={xp.unique(y_pred)}. Make sure that the "
+-                    "predictions provided by the classifier coincides with "
+-                    "the true labels."
+-                ) from e
+-            if unique_values.shape[0] > 2:
+-                y_type = "multiclass"
+-
++    unique_labels_ = unique_labels(y_true, y_pred, ys_types={y_type})
++    if y_type == "binary":
++        if unique_labels_.shape[0] > 2:
++            y_type = "multiclass"
++
++    xp, _ = get_namespace(y_true, y_pred)
+     if y_type.startswith("multilabel"):
+         if _is_numpy_namespace(xp):
+             # XXX: do we really want to sparse-encode multilabel indicators when
+@@ -177,7 +172,7 @@
+             y_pred = _align_api_if_sparse(csr_array(y_pred))
+         y_type = "multilabel-indicator"
+ 
+-    return y_type, y_true, y_pred, sample_weight
++    return y_type, unique_labels_, y_true, y_pred, sample_weight
+ 
+ 
+ def _one_hot_encoding_multiclass_target(y_true, labels, target_xp, target_device):

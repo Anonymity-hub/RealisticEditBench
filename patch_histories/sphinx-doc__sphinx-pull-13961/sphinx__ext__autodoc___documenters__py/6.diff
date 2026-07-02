@@ -1,0 +1,115 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -81,8 +81,6 @@
+     objtype: ClassVar = 'object'
+     #: indentation by which to indent the directive content
+     content_indent: ClassVar = '   '
+-    #: priority if multiple documenters return True from can_document_member
+-    priority: ClassVar = 0
+     #: order if autodoc_member_order is set to 'groupwise'
+     member_order: ClassVar = 0
+     #: true if the generated content may contain titles
+@@ -100,14 +98,6 @@
+     def get_attr(self, obj: Any, name: str, *defargs: Any) -> Any:
+         """getattr() override for types such as Zope interfaces."""
+         return autodoc_attrgetter(obj, name, *defargs, registry=self.env._registry)
+-
+-    @classmethod
+-    def can_document_member(
+-        cls: type[Documenter], member: Any, membername: str, isattr: bool, parent: Any
+-    ) -> bool:
+-        """Called to see if a member can be documented by this Documenter."""
+-        msg = 'must be implemented in subclasses'
+-        raise NotImplementedError(msg)
+ 
+     def __init__(
+         self, directive: DocumenterBridge, name: str, indent: str = ''
+@@ -792,13 +782,6 @@
+         'noindex': bool_option,
+     }
+ 
+-    @classmethod
+-    def can_document_member(
+-        cls: type[Documenter], member: Any, membername: str, isattr: bool, parent: Any
+-    ) -> bool:
+-        # don't document submodules automatically
+-        return False
+-
+ 
+ class FunctionDocumenter(Documenter):
+     """Specialized Documenter subclass for functions."""
+@@ -808,17 +791,6 @@
+     objtype = 'function'
+     member_order = 30
+ 
+-    @classmethod
+-    def can_document_member(
+-        cls: type[Documenter], member: Any, membername: str, isattr: bool, parent: Any
+-    ) -> bool:
+-        # supports functions, builtins and bound methods exported at the module level
+-        return (
+-            inspect.isfunction(member)
+-            or inspect.isbuiltin(member)
+-            or (inspect.isroutine(member) and isinstance(parent, ModuleDocumenter))
+-        )
+-
+ 
+ class DecoratorDocumenter(FunctionDocumenter):
+     """Specialized Documenter subclass for decorator functions."""
+@@ -826,9 +798,6 @@
+     props: _FunctionDefProperties
+ 
+     objtype = 'decorator'
+-
+-    # must be lower than FunctionDocumenter
+-    priority = FunctionDocumenter.priority - 1
+ 
+ 
+ class ClassDocumenter(Documenter):
+@@ -853,19 +822,6 @@
+         'noindex': bool_option,
+     }
+ 
+-    # Must be higher than FunctionDocumenter, ClassDocumenter, and
+-    # AttributeDocumenter as NewType can be an attribute and is a class
+-    # after Python 3.10.
+-    priority = 15
+-
+-    @classmethod
+-    def can_document_member(
+-        cls: type[Documenter], member: Any, membername: str, isattr: bool, parent: Any
+-    ) -> bool:
+-        return isinstance(member, type) or (
+-            isattr and isinstance(member, (NewType, TypeVar))
+-        )
+-
+     def get_canonical_fullname(self) -> str | None:
+         __modname__ = safe_getattr(
+             self.props._obj, '__module__', self.props.module_name
+@@ -891,25 +847,6 @@
+     objtype = 'exception'
+     member_order = 10
+ 
+-    # needs a higher priority than ClassDocumenter
+-    priority = ClassDocumenter.priority + 5
+-
+-    @classmethod
+-    def can_document_member(
+-        cls: type[Documenter], member: Any, membername: str, isattr: bool, parent: Any
+-    ) -> bool:
+-        try:
+-            return isinstance(member, type) and issubclass(member, BaseException)
+-        except TypeError as exc:
+-            # It's possible for a member to be considered a type, but fail
+-            # issubclass checks due to not being a class. For example:
+-            # https://github.com/sphinx-doc/sphinx/issues/11654#issuecomment-1696790436
+-            msg = (
+-                f'{cls.__name__} failed to discern if member {member} with'
+-                f' membername {membername} is a BaseException subclass.'
+-            )
+-            raise ValueError(msg) from exc
+-
+ 
+ class DataDocumenter(Documenter):
+     """Specialized Documenter subclass for data items."""

@@ -1,0 +1,28 @@
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -55,7 +55,7 @@
+ 
+ import matplotlib as mpl
+ import numpy as np
+-from matplotlib import _api, _cm, cbook, scale, _image
++from matplotlib import _api, _cm, cbook, scale
+ from ._color_data import BASE_COLORS, TABLEAU_COLORS, CSS4_COLORS, XKCD_COLORS
+ 
+ 
+@@ -2233,6 +2233,15 @@
+         bl = self.patch[left, bottom, :]
+         br = self.patch[right, bottom, :]
+ 
++        # Interpolate between the corners
++        lut = (tl * (1 - row_frac) * (1 - col_frac) +
++               tr * row_frac * (1 - col_frac) +
++               bl * (1 - row_frac) * col_frac +
++               br * row_frac * col_frac)
++
++        # Add the alpha channel
++        self._lut = np.concatenate([lut, np.ones((self.N, self.N, 1))], axis=2)
++
+         self._isinit = True
+ 
+ 

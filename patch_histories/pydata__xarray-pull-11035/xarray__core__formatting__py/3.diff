@@ -1,0 +1,27 @@
+diff --git a/xarray/core/formatting.py b/xarray/core/formatting.py
+--- a/xarray/core/formatting.py
++++ b/xarray/core/formatting.py
+@@ -1006,6 +1006,23 @@
+                 indexes_equal = a_var.equals(b_var)
+ 
+         if not indexes_equal:
++            # Format the index values similar to variable diff
++            try:
++                a_repr = inline_index_repr(
++                    a_indexes.to_pandas_indexes()[key], max_width=70
++                )
++                b_repr = inline_index_repr(
++                    b_indexes.to_pandas_indexes()[key], max_width=70
++                )
++            except TypeError:
++                # Custom indexes may not support to_pandas_index()
++                a_repr = repr(a_idx)
++                b_repr = repr(b_idx)
++            diff_items.append(f"L   {key!s:<{col_width}} {a_repr}")
++            diff_items.append(f"R   {key!s:<{col_width}} {b_repr}")
++
++    if diff_items:
++        summary.append("Differing indexes:\n" + "\n".join(diff_items))
+ 
+     return "\n".join(summary)
+ 

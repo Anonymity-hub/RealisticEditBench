@@ -1,0 +1,89 @@
+diff --git a/xarray/core/formatting_html.py b/xarray/core/formatting_html.py
+--- a/xarray/core/formatting_html.py
++++ b/xarray/core/formatting_html.py
+@@ -392,7 +392,16 @@
+     return _obj_repr(ds, header_components, sections)
+ 
+ 
+-def datatree_node_sections(node: DataTree, root: bool = False) -> list[str]:
++inherited_coord_section = partial(
++    _mapping_section,
++    name="Inherited coordinates",
++    details_func=summarize_coords,
++    max_items_collapse=25,
++    expand_option_name="display_expand_coords",
++)
++
++
++def _datatree_node_sections(node: DataTree, root: bool) -> tuple[list[str], int]:
+     from xarray.core.coordinates import Coordinates
+ 
+     ds = node._to_dataset_view(rebuild_dims=False, inherit=True)
+@@ -405,37 +414,33 @@
+     )
+ 
+     # Only show dimensions if also showing a variable or coordinates section.
+-    show_dims = (
+-        node._node_coord_variables
+-        or (root and inherited_coords)
+-        or node._data_variables
+-    )
++    show_dims = node_coords or (root and inherited_coords) or ds.data_vars
+ 
+     sections = []
+-
+-    if node.children:
+-        children_max_items = 1 if ds.data_vars else 6
+-        sections.append(
+-            children_section(node.children, max_items_collapse=children_max_items)
+-        )
+-
+     if show_dims:
+         sections.append(dim_section(ds))
+-
+     if node_coords:
+         sections.append(coord_section(node_coords))
+-
+-    # only show inherited coordinates on the root
+     if root and inherited_coords:
+         sections.append(inherited_coord_section(inherited_coords))
+-
+     if ds.data_vars:
+         sections.append(datavar_section(ds.data_vars))
+-
+     if ds.attrs:
+         sections.append(attr_section(ds.attrs))
+ 
+-    return sections
++    displayed_line_count = (
++        len(node.children)
++        + int(bool(show_dims))
++        + int(bool(node_coords))
++        + len(node_coords)
++        + int(root) * (int(bool(inherited_coords)) + len(inherited_coords))
++        + int(bool(ds.data_vars))
++        + len(ds.data_vars)
++        + int(bool(ds.attrs))
++        + len(ds.attrs)
++    )
++
++    return sections, displayed_line_count
+ 
+ 
+ def summarize_datatree_children(children: Mapping[str, DataTree]) -> str:
+@@ -466,15 +471,6 @@
+     max_option_name="display_max_children",
+     expand_option_name="display_expand_groups",
+ )
+-
+-inherited_coord_section = partial(
+-    _mapping_section,
+-    name="Inherited coordinates",
+-    details_func=summarize_coords,
+-    max_items_collapse=25,
+-    expand_option_name="display_expand_coords",
+-)
+-
+ 
+ def datatree_child_repr(node: DataTree, end: bool = False) -> str:
+     # Wrap DataTree HTML representation with a tee to the left of it.

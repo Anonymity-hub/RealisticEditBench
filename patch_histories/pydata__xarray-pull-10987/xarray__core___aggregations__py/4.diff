@@ -1,0 +1,131 @@
+diff --git a/xarray/core/_aggregations.py b/xarray/core/_aggregations.py
+--- a/xarray/core/_aggregations.py
++++ b/xarray/core/_aggregations.py
+@@ -1351,6 +1351,17 @@
+     ) -> Self:
+         raise NotImplementedError()
+ 
++    @property
++    def coords(self) -> DatasetCoordinates:
++        raise NotImplementedError()
++
++    def assign_coords(
++        self,
++        coords: Mapping | None = None,
++        **coords_kwargs: Any,
++    ) -> Self:
++        raise NotImplementedError()
++
+     def count(
+         self,
+         dim: Dims = None,
+@@ -2415,18 +2426,22 @@
+             da       (time) float64 48B 1.0 2.0 3.0 0.0 2.0 nan
+ 
+         >>> ds.cumsum()
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[ns] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 3.0 6.0 6.0 8.0 8.0
+ 
+         Use ``skipna`` to control whether NaNs are ignored.
+ 
+         >>> ds.cumsum(skipna=False)
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[ns] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 3.0 6.0 6.0 8.0 nan
+         """
+@@ -2513,18 +2528,22 @@
+             da       (time) float64 48B 1.0 2.0 3.0 0.0 2.0 nan
+ 
+         >>> ds.cumprod()
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[ns] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 6.0 0.0 0.0 0.0
+ 
+         Use ``skipna`` to control whether NaNs are ignored.
+ 
+         >>> ds.cumprod(skipna=False)
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[ns] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 6.0 0.0 0.0 nan
+         """
+@@ -3660,6 +3679,28 @@
+     def _flox_reduce(
+         self,
+         dim: Dims,
++        **kwargs: Any,
++    ) -> Dataset:
++        raise NotImplementedError()
++
++    def _flox_scan(
++        self,
++        dim: Dims,
++        *,
++        func: str,
++        skipna: bool | None = None,
++        keep_attrs: bool | None = None,
++        **kwargs: Any,
++    ) -> Dataset:
++        raise NotImplementedError()
++
++    def _flox_scan(
++        self,
++        dim: Dims,
++        *,
++        func: str,
++        skipna: bool | None = None,
++        keep_attrs: bool | None = None,
+         **kwargs: Any,
+     ) -> Dataset:
+         raise NotImplementedError()
+@@ -5009,18 +5050,22 @@
+             da       (time) float64 48B 1.0 2.0 3.0 0.0 2.0 nan
+ 
+         >>> ds.groupby("labels").cumsum()
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[ns] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 3.0 3.0 4.0 1.0
+ 
+         Use ``skipna`` to control whether NaNs are ignored.
+ 
+         >>> ds.groupby("labels").cumsum(skipna=False)
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[ns] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 3.0 3.0 4.0 nan
+         """

@@ -1,0 +1,11 @@
+diff --git a/xarray/core/coordinates.py b/xarray/core/coordinates.py
+--- a/xarray/core/coordinates.py
++++ b/xarray/core/coordinates.py
+@@ -542,6 +542,7 @@ def _merge_inplace(self, other, compat: CompatOptions | CombineKwargDefault):
+     def merge(
+         self,
+         other: Mapping[Any, Any] | None,
++        *,
+         compat: CompatOptions | CombineKwargDefault = "minimal",
+     ) -> Dataset:
+         """Merge two sets of coordinates to create a new Dataset

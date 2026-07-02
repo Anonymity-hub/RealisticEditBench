@@ -1,0 +1,17 @@
+diff --git a/django/core/management/commands/inspectdb.py b/django/core/management/commands/inspectdb.py
+--- a/django/core/management/commands/inspectdb.py
++++ b/django/core/management/commands/inspectdb.py
+@@ -232,8 +232,12 @@
+                         "" if "." in field_type else "models.",
+                         field_type,
+                     )
++                    on_delete_qualname = extra_params.pop("on_delete", None)
+                     if field_type.startswith(("ForeignKey(", "OneToOneField(")):
+-                        field_desc += ", models.DO_NOTHING"
++                        if on_delete_qualname:
++                            field_desc += f", {on_delete_qualname}"
++                        else:
++                            field_desc += ", models.DO_NOTHING"
+ 
+                     # Add comment.
+                     if connection.features.supports_comments and row.comment:

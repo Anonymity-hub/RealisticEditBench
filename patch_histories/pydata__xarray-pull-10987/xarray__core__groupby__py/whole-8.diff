@@ -1,0 +1,23 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -252,9 +252,7 @@ def to_array(self) -> DataArray:
+ T_Group = Union["T_DataArray", _DummyGroup]
+ 
+ 
+-def _ensure_1d(
+-    group: T_Group, obj: T_DataWithCoords
+-) -> tuple[
++def _ensure_1d(group: T_Group, obj: T_DataWithCoords) -> tuple[
+     T_Group,
+     T_DataWithCoords,
+     Hashable | None,
+@@ -1213,7 +1211,7 @@ def _flox_scan(
+         *,
+         func: str,
+         keep_attrs: bool | None = None,
+-        skipna: bool | None = None
++        skipna: bool | None = None,
+         **kwargs: Any,
+     ) -> DataArray:
+         from flox import groupby_scan

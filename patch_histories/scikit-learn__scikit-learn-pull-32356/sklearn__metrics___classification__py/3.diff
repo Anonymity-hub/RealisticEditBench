@@ -1,0 +1,11 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -3774,7 +3774,6 @@
+     This metric is not well-defined for a single sample and will return a NaN
+     value if n_samples is less than two.
+     """
+-    y_pred = check_array(y_pred, ensure_2d=False, dtype="numeric")
+     check_consistent_length(y_pred, y_true, sample_weight)
+     if _num_samples(y_pred) < 2:
+         msg = "D^2 score is not well-defined with less than two samples."

@@ -1,0 +1,19 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -351,6 +351,15 @@
+ 
+         grid_kw = {k[5:]: v for k, v in kwargs.items()
+                    if k in _gridline_param_names}
++        # If grid_color has an alpha channel and grid_alpha is not explicitly
++        # set, extract the alpha from the color.
++        if 'color' in grid_kw and 'alpha' not in grid_kw:
++            grid_color = grid_kw['color']
++            if mcolors._has_alpha_channel(grid_color):
++                # Convert to rgba to extract alpha
++                rgba = mcolors.to_rgba(grid_color)
++                grid_kw['color'] = rgba[:3]  # RGB only
++                grid_kw['alpha'] = rgba[3]    # Alpha channel
+         self.gridline.set(**grid_kw)
+ 
+     def update_position(self, loc):

@@ -1,0 +1,12 @@
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -972,7 +972,7 @@
+         if dims is _default:
+             dims = copy.copy(self._dims)
+         if data is _default:
+-            data = copy.copy(self.data)
++            data = copy.copy(self._data)
+         if attrs is _default:
+             attrs = copy.copy(self._attrs)
+         if encoding is _default:

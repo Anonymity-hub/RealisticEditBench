@@ -1,0 +1,37 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -319,6 +319,7 @@
+         self._fields = None
+         self._defer_next_filter = False
+         self._deferred_filter = None
++        self._cloning_enabled = True
+ 
+     @property
+     def query(self):
+@@ -2134,6 +2135,25 @@
+                 )
+         return inserted_rows
+ 
++    def _disable_cloning(self):
++        """
++        Prevent calls to _chain() from creating a new QuerySet via _clone().
++        All subsequent QuerySet mutations will occur on this instance until
++        _enable_cloning() is used.
++        """
++        self._cloning_enabled = False
++        return self
++
++    def _enable_cloning(self):
++        """
++        Allow calls to _chain() to create a new QuerySet via _clone(). Restores
++        the default behavior where any QuerySet mutation will return a new
++        QuerySet instance. Necessary only when there has been a
++        _disable_cloning() call previously.
++        """
++        self._cloning_enabled = True
++        return self
++
+     def _chain(self):
+         """
+         Return a copy of the current QuerySet that's ready for another

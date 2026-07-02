@@ -1,0 +1,93 @@
+diff --git a/sklearn/linear_model/_ridge.py b/sklearn/linear_model/_ridge.py
+--- a/sklearn/linear_model/_ridge.py
++++ b/sklearn/linear_model/_ridge.py
+@@ -1823,7 +1823,7 @@
+ 
+     @staticmethod
+     def _decomp_diag(v_prime, Q):
+-        # compute diagonal of the matrix: dot(Q, dot(diag(v_prime), Q^T))
++        # compute diagonal of the matrix: dot(Q, dot(diag(v_prime), Q.T))
+         xp, _ = get_namespace(v_prime, Q)
+         return xp.sum(v_prime * Q**2, axis=1)
+ 
+@@ -1925,41 +1925,56 @@
+         )
+ 
+     def _sparse_multidot_diag(self, X, A, X_mean, sqrt_sw):
+-        """Compute the diagonal of (X - X_mean).dot(A).dot((X - X_mean).T)
+-        without explicitly centering X nor computing X.dot(A)
+-        when X is sparse.
++        """Compute the diagonal of X A X' with possible centering.
+ 
+         Parameters
+         ----------
+-        X : sparse matrix of shape (n_samples, n_features)
++        X : {ndarray, sparse matrix, sparse array} of shape (n_samples, n_features)
++            The preprocessed design matrix.
+ 
+         A : ndarray of shape (n_features, n_features)
+-
+-        X_mean : ndarray of shape (n_features,)
+-
+-        sqrt_sw : ndarray of shape (n_features,)
+-            square roots of sample weights
++            The inner matrix.
++
++        X_mean : ndarray of shape (n_feature,)
++            The weighted mean of X for each feature.
++
++        sqrt_sw : ndarray of shape (n_samples,)
++            Square roots of sample weights.
+ 
+         Returns
+         -------
+         diag : np.ndarray, shape (n_samples,)
+             The computed diagonal.
++
++        Notes
++        -----
++        When self.fit_intercept is False no centering is done.
++
++        When X is dense the centering has been done in preprocessing
++        so the mean is 0 and we just compute diag(X A X').
++
++        When X is sparse it has not been centered in preprocessing, but
++        it has been scaled by sqrt_sw. The centered X is never actually
++        computed because centering would break the sparsity of X.
+         """
+-        intercept_col = scale = sqrt_sw
+-        batch_size = X.shape[1]
+-        diag = np.empty(X.shape[0], dtype=X.dtype)
+-        for start in range(0, X.shape[0], batch_size):
+-            batch = slice(start, min(X.shape[0], start + batch_size), 1)
+-            X_batch = np.empty(
+-                (X[batch].shape[0], X.shape[1] + self.fit_intercept), dtype=X.dtype
+-            )
+-            if self.fit_intercept:
+-                X_batch[:, :-1] = X[batch].toarray() - X_mean * scale[batch][:, None]
+-                X_batch[:, -1] = intercept_col[batch]
+-            else:
+-                X_batch = X[batch].toarray()
+-            diag[batch] = (X_batch.dot(A) * X_batch).sum(axis=1)
+-        return diag
++        xp, _ = get_namespace(X)
++        XA = X @ A
++        if sparse.isspmatrix(X):
++            # sparse matrix use multiply for element wise multiplication
++            XAX = np.ravel(X.multiply(XA).sum(axis=1))
++        else:
++            XAX = xp.sum(XA * X, axis=1)
++        center = self.fit_intercept and sparse.issparse(X)
++        if not center:
++            # in this case centering has been done in preprocessing
++            # or we are not fitting an intercept.
++            return XAX
++        # X is sparse and fit_intercept is True
++        # centered matrix = X - sqrt_sw X_mean'
++        XA_Xm = XA @ X_mean
++        A_Xm = A @ X_mean
++        sw = sqrt_sw * sqrt_sw
++        return XAX - 2 * sqrt_sw * XA_Xm + sw * (X_mean @ A_Xm)
+ 
+     def _eigen_decompose_gram(self, X, y, sqrt_sw):
+         """Eigendecomposition of X.X^T, used when n_samples <= n_features."""

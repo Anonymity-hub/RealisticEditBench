@@ -1,0 +1,11 @@
+diff --git a/sympy/printing/rust.py b/sympy/printing/rust.py
+--- a/sympy/printing/rust.py
++++ b/sympy/printing/rust.py
+@@ -256,6 +256,7 @@
+         self._assumptions = expr._assumptions
+         if self.explicit:
+             setattr(self, 'precedence', PRECEDENCE["Func"] + 10)
++        else:
+ 
+     @property
+     def expr(self):

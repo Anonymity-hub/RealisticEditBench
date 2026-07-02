@@ -1,0 +1,40 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -903,7 +903,10 @@
+     # Percentage of x-height of additional horiz. space after sub/superscripts
+     script_space: T.ClassVar[float] = 0.05
+ 
+-    # Percentage of x-height that sub/superscripts drop below the baseline
++    # Percentage of x-height that superscripts drop below the top of large box
++    supdrop: T.ClassVar[float] = 0.4
++
++    # Percentage of x-height that subscripts drop below the bottom of large box
+     subdrop: T.ClassVar[float] = 0.4
+ 
+     # Percentage of x-height that superscripts are raised from the baseline
+@@ -928,6 +931,24 @@
+     # Percentage of x-height that superscripts and subscripts are offset for
+     # integrals
+     delta_integral: T.ClassVar[float] = 0.1
++
++    # Percentage of x-height the numerator is shifted up in display style.
++    num1: T.ClassVar[float] = 1.4
++
++    # Percentage of x-height the numerator is shifted up in text, script and
++    # scriptscript styles if there is a fraction line.
++    num2: T.ClassVar[float] = 1.5
++
++    # Percentage of x-height the numerator is shifted up in text, script and
++    # scriptscript styles if there is no fraction line.
++    num3: T.ClassVar[float] = 1.3
++
++    # Percentage of x-height the denominator is shifted down in display style.
++    denom1: T.ClassVar[float] = 1.3
++
++    # Percentage of x-height the denominator is shifted down in text, script
++    # and scriptscript styles.
++    denom2: T.ClassVar[float] = 1.1
+ 
+ 
+ class ComputerModernFontConstants(FontConstantsBase):

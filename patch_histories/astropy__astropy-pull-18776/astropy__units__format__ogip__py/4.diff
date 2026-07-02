@@ -1,0 +1,28 @@
+diff --git a/astropy/units/format/ogip.py b/astropy/units/format/ogip.py
+--- a/astropy/units/format/ogip.py
++++ b/astropy/units/format/ogip.py
+@@ -296,23 +296,7 @@
+             number : INT
+                    | FLOAT
+             """
+-            if len(p) == 2:
+-                p[0] = p[1]
+-            else:
+-                p[0] = 1.0
+-
+-        def p_signed_int(p):
+-            """
+-            signed_int : SIGN UINT
+-            """
+-            p[0] = p[1] * p[2]
+-
+-        def p_signed_float(p):
+-            """
+-            signed_float : sign UINT
+-                         | sign UFLOAT
+-            """
+-            p[0] = p[1] * p[2]
++            p[0] = p[1]
+ 
+         def p_error(p):
+             raise ValueError()

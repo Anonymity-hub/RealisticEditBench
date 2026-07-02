@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -345,7 +345,7 @@ def __post_init__(self) -> None:
+         if self.eagerly_compute_group is not None:
+             emit_user_level_warning(
+                 "Passing `eagerly_compute_group` is now deprecated. It has no effect.",
+-                DeprecationWarning,
++                FutureWarning,
+             )
+ 
+         if not isinstance(self.group, _DummyGroup) and is_chunked_array(

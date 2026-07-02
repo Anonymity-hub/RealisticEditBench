@@ -1,0 +1,21 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -10,7 +10,7 @@
+ 
+ from django.apps import apps
+ from django.conf import settings
+-from django.core.exceptions import ObjectDoesNotExist
++from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation
+ from django.core.serializers import base
+ from django.db import DEFAULT_DB_ALIAS, models
+ from django.utils.xmlutils import SimplerXMLGenerator, UnserializableContentError
+@@ -440,6 +440,8 @@
+ 
+ 
+ def check_element_type(element):
++    if element.childNodes:
++        raise SuspiciousOperation(f"Unexpected element: {element.tagName!r}")
+     return element.nodeType in (element.TEXT_NODE, element.CDATA_SECTION_NODE)
+ 
+ 

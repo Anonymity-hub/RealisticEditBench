@@ -1,0 +1,12 @@
+diff --git a/sympy/vector/coordsysrect.py b/sympy/vector/coordsysrect.py
+--- a/sympy/vector/coordsysrect.py
++++ b/sympy/vector/coordsysrect.py
+@@ -643,7 +643,7 @@ def transformation_matrix(self, other):
+         Matrix([
+         [                     1],
+         [-3*sin(q1) + 2*cos(q1)],
+-        [2*sin(q1) + 3*cos(q1)]])
++        [ 2*sin(q1) + 3*cos(q1)]])
+         >>> vA = A.i + 2 * A.j + 3 * A.k
+         >>> vN = express(vA, N)
+         >>> vN

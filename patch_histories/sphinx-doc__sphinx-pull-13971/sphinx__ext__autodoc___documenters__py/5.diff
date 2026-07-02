@@ -1,0 +1,22 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -85,10 +85,6 @@
+         'noindex': bool_option,
+     }
+ 
+-    def get_attr(self, obj: Any, name: str, *defargs: Any) -> Any:
+-        """getattr() override for types such as Zope interfaces."""
+-        return autodoc_attrgetter(obj, name, *defargs, registry=self.env._registry)
+-
+     def __init__(
+         self, directive: DocumenterBridge, name: str, indent: str = ''
+     ) -> None:
+@@ -98,6 +94,7 @@
+         self._current_document: _CurrentDocument = directive.env.current_document
+         self._events: EventManager = directive.env.events
+         self.options: _AutoDocumenterOptions = directive.genopt
++        self.get_attr = directive.get_attr
+         self.name = name
+         self.indent: Final = indent
+         self.module: ModuleType | None = None

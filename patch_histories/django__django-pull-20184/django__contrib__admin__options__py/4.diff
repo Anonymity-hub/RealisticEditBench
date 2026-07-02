@@ -1,0 +1,26 @@
+diff --git a/django/contrib/admin/options.py b/django/contrib/admin/options.py
+--- a/django/contrib/admin/options.py
++++ b/django/contrib/admin/options.py
+@@ -2050,11 +2050,6 @@
+             # me back" button on the action confirmation page.
+             return HttpResponseRedirect(request.get_full_path())
+ 
+-        # If we're allowing changelist editing, we need to construct a formset
+-        # for the changelist given all the fields to be edited. Then we'll
+-        # use the formset to validate/process POSTed data.
+-        formset = cl.formset = None
+-
+         # Handle POSTed bulk-edit data.
+         if request.method == "POST" and cl.list_editable and "_save" in request.POST:
+             if not self.has_change_permission(request):
+@@ -2096,8 +2091,8 @@
+             cl.formset = FormSet(queryset=cl.result_list)
+ 
+         # Build the list of media to be used by the formset.
+-        if formset:
+-            media = self.media + formset.media
++        if cl.formset:
++            media = self.media + cl.formset.media
+         else:
+             media = self.media
+ 

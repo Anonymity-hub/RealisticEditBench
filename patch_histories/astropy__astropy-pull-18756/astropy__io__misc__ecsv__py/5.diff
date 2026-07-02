@@ -1,0 +1,37 @@
+diff --git a/astropy/io/misc/ecsv.py b/astropy/io/misc/ecsv.py
+--- a/astropy/io/misc/ecsv.py
++++ b/astropy/io/misc/ecsv.py
+@@ -394,7 +394,6 @@
+         header: ECSVHeader,
+         null_values: list[str],
+     ) -> dict[str, Any]:
+-        kw = {}
+         fill_values = get_null_values_per_column(
+             header.cols, header.table_meta, null_values
+         )
+@@ -408,14 +407,17 @@
+                 for nan in ("nan", "NaN"):
+                     null_values[col_name].append(nan)
+ 
+-        kw["na_values"] = null_values
+-        kw["keep_default_na"] = False
+-        kw["comment"] = "#"
+-        # Would prefer `kw["skiprows"] = header.n_header` here, but there is a bug in
+-        # pandas.read_csv where skiprows does not behave expectedly.
+-        # https://github.com/pandas-dev/pandas/issues/62739
+-        kw["dtype"] = converters
+-        return kw
++        kw = {
++            "na_values": null_values,
++            "keep_default_na": False,
++            "comment": "#",
++            "dtype": converters,
++        }
++        # Would prefer setting `"skiprows": header.n_header` above (as in the original
++        # implementation prior to #18756) instead of "comment": "#". However there is a
++        # bug in pandas.read_csv where skiprows does not work when the line includes a
++        # quote character, see https://github.com/pandas-dev/pandas/issues/62739.
++        return kw  # noqa: RET504
+ 
+ 
+ def is_numpy_dtype(np_type: str) -> bool:

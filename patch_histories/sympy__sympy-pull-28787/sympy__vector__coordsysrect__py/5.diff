@@ -1,0 +1,50 @@
+diff --git a/sympy/vector/coordsysrect.py b/sympy/vector/coordsysrect.py
+--- a/sympy/vector/coordsysrect.py
++++ b/sympy/vector/coordsysrect.py
+@@ -761,14 +761,38 @@
+ 
+         """
+ 
+-        origin_coords = tuple(self.position_wrt(other).to_matrix(other))
+-        relocated_scalars = [x - origin_coords[i]
+-                             for i, x in enumerate(other.base_scalars())]
+-
+-        vars_matrix = (self.rotation_matrix(other) *
+-                       Matrix(relocated_scalars))
+-        return {x: trigsimp(vars_matrix[i])
+-                for i, x in enumerate(self.base_scalars())}
++        from sympy.vector.functions import _path
++
++        root_idx, systems = _path(other, self)
++        fx, fy, fz = self.base_scalars()
++        current = {fx: fx, fy: fy, fz: fz}
++
++        for system in systems[:root_idx]:
++            px, py, pz = system.transformation_to_parent()
++            parent = system._parent
++            px, py, pz = px.subs(current), py.subs(current), pz.subs(current)
++            pxs, pys, pzs = parent.base_scalars()
++            current = {pxs: px, pys: py, pzs: pz}
++
++        for system in systems[root_idx + 1:]:
++            if system._transformation_from_parent_lambda is None:
++                # for coordinate systems created with transformation=lambda...
++                # attempt to compute the transformation from parent
++                xp, yp, zp = system._parent.base_scalars()
++                equations = [bs - t for bs, t in zip(
++                    system._parent.base_scalars(),
++                    system.transformation_to_parent())]
++                xs, ys, zs = system.base_scalars()
++                sol = solve(equations, system.base_scalars(), dict=True)[0]
++                xs, ys, zs = [sol[k] for k in system.base_scalars()]
++            else:
++                xs, ys, zs = system.transformation_from_parent()
++            xs, ys, zs = [t.subs(current) for t in [xs, ys, zs]]
++            sx, sy, sz = system.base_scalars()
++            current = {sx: xs, sy: ys, sz: zs}
++
++        return current
++
+ 
+     def locate_new(self, name, position, vector_names=None,
+                    variable_names=None):

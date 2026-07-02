@@ -1,0 +1,16 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -285,7 +285,11 @@
+                 if value == base.DEFER_FIELD:
+                     deferred_fields[field] = [
+                         [
+-                            getInnerText(nat_node).strip()
++                            (
++                                None
++                                if nat_node.getElementsByTagName("None")
++                                else getInnerText(nat_node).strip()
++                            )
+                             for nat_node in obj_node.getElementsByTagName("natural")
+                         ]
+                         for obj_node in field_node.getElementsByTagName("object")

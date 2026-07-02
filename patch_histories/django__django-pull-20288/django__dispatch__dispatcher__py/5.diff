@@ -1,0 +1,32 @@
+diff --git a/django/dispatch/dispatcher.py b/django/dispatch/dispatcher.py
+--- a/django/dispatch/dispatcher.py
++++ b/django/dispatch/dispatcher.py
+@@ -295,6 +295,7 @@
+         ):
+             return []
+         sync_receivers, async_receivers = self._live_receivers(sender)
++
+         if sync_receivers:
+ 
+             @sync_to_async
+@@ -310,14 +311,12 @@
+             async def sync_send():
+                 return []
+ 
+-        responses, async_responses = await _gather(
+-            sync_send(),
+-            _gather(
+-                *(
+-                    receiver(signal=self, sender=sender, **named)
+-                    for receiver in async_receivers
+-                )
+-            ),
++        responses = await sync_send()
++        async_responses = await _run_parallel(
++            *(
++                receiver(signal=self, sender=sender, **named)
++                for receiver in async_receivers
++            )
+         )
+         responses.extend(zip(async_receivers, async_responses))
+         return responses

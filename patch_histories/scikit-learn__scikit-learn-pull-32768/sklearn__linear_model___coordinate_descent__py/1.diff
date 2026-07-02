@@ -1,0 +1,22 @@
+diff --git a/sklearn/linear_model/_coordinate_descent.py b/sklearn/linear_model/_coordinate_descent.py
+--- a/sklearn/linear_model/_coordinate_descent.py
++++ b/sklearn/linear_model/_coordinate_descent.py
+@@ -102,6 +102,8 @@
+     eps=1e-3,
+     n_alphas=100,
+     sample_weight=None,
++    *,
++    positive: bool = False,
+ ):
+     """Compute the grid of alpha values for elastic net parameter search
+ 
+@@ -139,6 +141,9 @@
+         Whether to fit an intercept or not
+ 
+     sample_weight : ndarray of shape (n_samples,), default=None
++
++    positive : bool, default=False
++        If set to True, forces coefficients to be positive.
+ 
+     Returns
+     -------

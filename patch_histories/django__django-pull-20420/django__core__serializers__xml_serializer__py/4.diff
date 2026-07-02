@@ -1,0 +1,16 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -302,7 +302,11 @@
+                 value = self._handle_fk_field_node(field_node, field)
+                 if value == base.DEFER_FIELD:
+                     deferred_fields[field] = [
+-                        getInnerText(k).strip()
++                        (
++                            None
++                            if k.getElementsByTagName("None")
++                            else getInnerText(k).strip()
++                        )
+                         for k in field_node.getElementsByTagName("natural")
+                     ]
+                 else:

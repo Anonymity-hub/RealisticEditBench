@@ -1,0 +1,21 @@
+diff --git a/sklearn/metrics/_scorer.py b/sklearn/metrics/_scorer.py
+--- a/sklearn/metrics/_scorer.py
++++ b/sklearn/metrics/_scorer.py
+@@ -34,6 +34,8 @@
+     brier_score_loss,
+     class_likelihood_ratios,
+     d2_absolute_error_score,
++    d2_brier_score,
++    d2_log_loss_score,
+     explained_variance_score,
+     f1_score,
+     jaccard_score,
+@@ -731,6 +733,8 @@
+     mean_gamma_deviance, greater_is_better=False
+ )
+ d2_absolute_error_scorer = make_scorer(d2_absolute_error_score)
++d2_brier_score_scorer = make_scorer(d2_brier_score, response_method="predict_proba")
++d2_log_loss_scorer = make_scorer(d2_log_loss_score, response_method="predict_proba")
+ 
+ # Standard Classification Scores
+ accuracy_scorer = make_scorer(accuracy_score)

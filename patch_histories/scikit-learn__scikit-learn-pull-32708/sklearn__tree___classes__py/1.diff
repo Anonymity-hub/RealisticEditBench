@@ -1,0 +1,11 @@
+diff --git a/sklearn/tree/_classes.py b/sklearn/tree/_classes.py
+--- a/sklearn/tree/_classes.py
++++ b/sklearn/tree/_classes.py
+@@ -74,7 +74,6 @@
+ }
+ CRITERIA_REG = {
+     "squared_error": _criterion.MSE,
+-    "friedman_mse": _criterion.FriedmanMSE,
+     "absolute_error": _criterion.MAE,
+     "poisson": _criterion.Poisson,
+ }

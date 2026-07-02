@@ -1,0 +1,19 @@
+diff --git a/astropy/nddata/ccddata.py b/astropy/nddata/ccddata.py
+--- a/astropy/nddata/ccddata.py
++++ b/astropy/nddata/ccddata.py
+@@ -429,10 +429,11 @@
+             )
+             hdus.append(hduUncert)
+ 
+-        if hdu_flags and self.flags:
+-            raise NotImplementedError(
+-                "adding the flags to a HDU is not supported at this time."
+-            )
++        if hdu_flags and self.flags is not None:
++            if isinstance(self.flags, np.ndarray):
++                # Simple numpy array of flags - save as a single ImageHDU
++                hduFlags = fits.ImageHDU(self.flags, name=hdu_flags)
++                hdus.append(hduFlags)
+ 
+         if hdu_psf and self.psf is not None:
+             # The PSF is an image, so write it as a separate ImageHDU.

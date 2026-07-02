@@ -1,0 +1,11 @@
+diff --git a/astropy/utils/iers/iers.py b/astropy/utils/iers/iers.py
+--- a/astropy/utils/iers/iers.py
++++ b/astropy/utils/iers/iers.py
+@@ -515,6 +516,7 @@ def pm_source(self, i):
+         return np.zeros_like(i)
+ 
+     @property
++    @deprecated(since="8.0", alternative="Time.now()", obj_type="property")
+     def time_now(self):
+         """
+         Property to provide the current time, but also allow for explicitly setting

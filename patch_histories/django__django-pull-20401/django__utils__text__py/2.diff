@@ -1,0 +1,11 @@
+diff --git a/django/utils/text.py b/django/utils/text.py
+--- a/django/utils/text.py
++++ b/django/utils/text.py
+@@ -399,6 +399,7 @@ async def acompress_sequence(sequence, *, max_random_bytes=None):
+         yield buf.read()
+         async for item in sequence:
+             zfile.write(item)
++            zfile.
+             data = buf.read()
+             if data:
+                 yield data

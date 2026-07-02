@@ -1,0 +1,14 @@
+diff --git a/sklearn/preprocessing/_target_encoder.py b/sklearn/preprocessing/_target_encoder.py
+--- a/sklearn/preprocessing/_target_encoder.py
++++ b/sklearn/preprocessing/_target_encoder.py
+@@ -399,8 +399,8 @@ def fit_transform(self, X, y, groups=None, **fit_params):
+                     )
+             if self.cv not in non_overlapping_splitters:
+                 raise ValueError(
+-                    "The `cv` object needs to be one in {`GroupKFold`, `KFold`, "
+-                    "`StratifiedKFold`, `StratifiedGroupKFold`}. Got {self.cv}."
++                    "The `cv` object needs to be one in [`GroupKFold`, `KFold`, "
++                    f"`StratifiedKFold`, `StratifiedGroupKFold`]. Got {self.cv}."
+                 )
+ 
+         else:  # cv is an Iterable

@@ -1,0 +1,102 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -920,17 +857,10 @@
+ 
+     objtype = 'data'
+     member_order = 40
+-    priority = -10
+     option_spec: ClassVar[OptionSpec] = dict(Documenter.option_spec)
+     option_spec['annotation'] = annotation_option
+     option_spec['no-value'] = bool_option
+ 
+-    @classmethod
+-    def can_document_member(
+-        cls: type[Documenter], member: Any, membername: str, isattr: bool, parent: Any
+-    ) -> bool:
+-        return isinstance(parent, ModuleDocumenter) and isattr
+-
+ 
+ class MethodDocumenter(Documenter):
+     """Specialized Documenter subclass for methods (normal, static and class)."""
+@@ -940,13 +870,6 @@
+     objtype = 'method'
+     directivetype = 'method'
+     member_order = 50
+-    priority = 1  # must be more than FunctionDocumenter
+-
+-    @classmethod
+-    def can_document_member(
+-        cls: type[Documenter], member: Any, membername: str, isattr: bool, parent: Any
+-    ) -> bool:
+-        return inspect.isroutine(member) and not isinstance(parent, ModuleDocumenter)
+ 
+ 
+ class AttributeDocumenter(Documenter):
+@@ -960,26 +883,12 @@
+     option_spec['annotation'] = annotation_option
+     option_spec['no-value'] = bool_option
+ 
+-    # must be higher than the MethodDocumenter, else it will recognize
+-    # some non-data descriptors as methods
+-    priority = 10
+-
+     @staticmethod
+     def is_function_or_method(obj: Any) -> bool:
+         return (
+             inspect.isfunction(obj) or inspect.isbuiltin(obj) or inspect.ismethod(obj)
+         )
+ 
+-    @classmethod
+-    def can_document_member(
+-        cls: type[Documenter], member: Any, membername: str, isattr: bool, parent: Any
+-    ) -> bool:
+-        if isinstance(parent, ModuleDocumenter):
+-            return False
+-        if inspect.isattributedescriptor(member):
+-            return True
+-        return not inspect.isroutine(member) and not isinstance(member, type)
+-
+ 
+ class PropertyDocumenter(Documenter):
+     """Specialized Documenter subclass for properties."""
+@@ -988,26 +897,6 @@
+ 
+     objtype = 'property'
+     member_order = 60
+-
+-    # before AttributeDocumenter
+-    priority = AttributeDocumenter.priority + 1
+-
+-    @classmethod
+-    def can_document_member(
+-        cls: type[Documenter], member: Any, membername: str, isattr: bool, parent: Any
+-    ) -> bool:
+-        if isinstance(parent, ClassDocumenter):
+-            if inspect.isproperty(member):
+-                return True
+-            else:
+-                # See FakeDirective &c in autosummary, parent might not be a
+-                # 'proper' Documenter.
+-                obj = parent.props._obj if hasattr(parent, 'props') else None
+-                __dict__ = safe_getattr(obj, '__dict__', {})
+-                obj = __dict__.get(membername)
+-                return isinstance(obj, classmethod) and inspect.isproperty(obj.__func__)
+-        else:
+-            return False
+ 
+ 
+ class TypeAliasDocumenter(Documenter):
+@@ -1023,12 +912,6 @@
+         'annotation': annotation_option,
+         'no-value': bool_option,
+     }
+-
+-    @classmethod
+-    def can_document_member(
+-        cls: type[Documenter], member: Any, membername: str, isattr: bool, parent: Any
+-    ) -> bool:
+-        return isinstance(member, AnyTypeAliasType)
+ 
+ 
+ class DocstringSignatureMixin:

@@ -1,0 +1,27 @@
+diff --git a/xarray/structure/merge.py b/xarray/structure/merge.py
+--- a/xarray/structure/merge.py
++++ b/xarray/structure/merge.py
+@@ -22,7 +22,12 @@
+     emit_user_level_warning,
+     equivalent,
+ )
+-from xarray.core.variable import Variable, as_variable, calculate_dimensions
++from xarray.core.variable import (
++    IndexVariable,
++    Variable,
++    as_variable,
++    calculate_dimensions,
++)
+ from xarray.structure.alignment import deep_align
+ from xarray.util.deprecation_helpers import (
+     _COMPAT_DEFAULT,
+@@ -1207,6 +1212,9 @@
+                 ]
+                 if coord_names:
+                     value = value.drop_vars(coord_names)
++                if isinstance(value.variable, IndexVariable):
++                    variable = value.variable.to_base_variable()
++                    value = value._replace(variable=variable)
+                 other[key] = value
+ 
+     return merge_core(

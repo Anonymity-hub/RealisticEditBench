@@ -1,0 +1,11 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -7314,6 +7314,7 @@ def _set_sparse_data_from_dataframe(
+     ) -> None:
+         from sparse import COO
+ 
++        coords: np.ndarray[tuple[int, int], np.dtype[np.signedinteger]]
+         if isinstance(idx, pd.MultiIndex):
+             coords = np.stack([np.asarray(code) for code in idx.codes], axis=0)
+             is_sorted = idx.is_monotonic_increasing

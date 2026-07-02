@@ -1,0 +1,13 @@
+diff --git a/astropy/wcs/wcsapi/high_level_api.py b/astropy/wcs/wcsapi/high_level_api.py
+--- a/astropy/wcs/wcsapi/high_level_api.py
++++ b/astropy/wcs/wcsapi/high_level_api.py
+@@ -366,7 +366,8 @@
+ 
+         # Finally we convert to pixel coordinates
+         pixel_values = self.low_level_wcs.world_to_pixel_values(*world_values)
+-
++        if (mask := combine_masks(masks)) is not False:
++            pixel_values = tuple(Masked(value, mask) for value in pixel_values)
+         return pixel_values
+ 
+     def pixel_to_world(self, *pixel_arrays):

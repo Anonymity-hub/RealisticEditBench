@@ -1,0 +1,12 @@
+diff --git a/sympy/logic/boolalg.py b/sympy/logic/boolalg.py
+--- a/sympy/logic/boolalg.py
++++ b/sympy/logic/boolalg.py
+@@ -2875,7 +2875,7 @@
+         elif form == 'dnf':
+             form_ok = is_dnf(expr)
+ 
+-        if form_ok and all(is_literal(a)
++        if form_ok and dontcare is None and all(is_literal(a)
+                 for a in expr.args):
+             return expr
+     from sympy.core.relational import Relational

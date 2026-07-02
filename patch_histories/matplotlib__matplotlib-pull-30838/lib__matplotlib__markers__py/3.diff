@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/markers.py b/lib/matplotlib/markers.py
+--- a/lib/matplotlib/markers.py
++++ b/lib/matplotlib/markers.py
+@@ -129,7 +129,7 @@
+ """
+ import copy
+ 
+-from collections.abc import Sized
++from collections.abc import Hashable, Sized
+ 
+ import numpy as np
+ 

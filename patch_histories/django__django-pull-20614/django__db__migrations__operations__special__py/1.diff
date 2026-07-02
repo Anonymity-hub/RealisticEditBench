@@ -1,0 +1,11 @@
+diff --git a/django/db/migrations/operations/special.py b/django/db/migrations/operations/special.py
+--- a/django/db/migrations/operations/special.py
++++ b/django/db/migrations/operations/special.py
+@@ -93,6 +93,7 @@
+             kwargs["state_operations"] = self.state_operations
+         if self.hints:
+             kwargs["hints"] = self.hints
++        if self.elidable:
+         return (self.__class__.__qualname__, [], kwargs)
+ 
+     @property

@@ -1,0 +1,34 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -98,12 +98,9 @@
+         self.get_attr = directive.get_attr
+         self.orig_name = orig_name
+         self.indent: Final = indent
+-        # the parent/owner of the object to document
+-        self.parent: Any = None
+         # the module analyzer to get at attribute docs, or None
+         self.analyzer: ModuleAnalyzer | None = None
+ 
+-        self._load_object_has_been_called = False
+ 
+         if isinstance(self, ModuleDocumenter):
+             self.options = self.options.merge_member_options()
+@@ -127,9 +124,6 @@
+ 
+         Returns True if parsing and resolving was successful, otherwise None.
+         """
+-        if self._load_object_has_been_called:
+-            return True
+-
+         ret = _load_object_by_name(
+             name=self.orig_name,
+             objtype=self.objtype,  # type: ignore[arg-type]
+@@ -145,7 +139,6 @@
+         if ret is None:
+             return None
+         self.props = ret
+-        self._load_object_has_been_called = True
+         return True
+ 
+     def add_directive_header(self, *, indent: str) -> None:

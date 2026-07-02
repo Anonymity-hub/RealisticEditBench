@@ -1,0 +1,12 @@
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -1228,7 +1228,7 @@
+         if fill_with_shape:
+             return [
+                 pad_option.get(d, (n, n))
+-                for d, n in zip(self.dims, self.data.shape, strict=True)
++                for d, n in zip(self.dims, self.shape, strict=True)
+             ]
+         return [pad_option.get(d, (0, 0)) for d in self.dims]
+ 

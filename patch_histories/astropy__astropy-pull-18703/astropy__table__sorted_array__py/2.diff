@@ -1,0 +1,13 @@
+diff --git a/astropy/table/sorted_array.py b/astropy/table/sorted_array.py
+--- a/astropy/table/sorted_array.py
++++ b/astropy/table/sorted_array.py
+@@ -328,5 +328,5 @@ def __repr__(self):
+         t["rows"] = self.row_index
+         return f"<{self.__class__.__name__} length={len(t)}>\n{t}"
+ 
+-    def __len__(self):
++    def __len__(self) -> int:
+         return len(self.row_index)
+
+
+

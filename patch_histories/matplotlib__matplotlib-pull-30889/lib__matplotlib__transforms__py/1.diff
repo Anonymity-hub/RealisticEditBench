@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/transforms.py b/lib/matplotlib/transforms.py
+--- a/lib/matplotlib/transforms.py
++++ b/lib/matplotlib/transforms.py
+@@ -2865,7 +2865,7 @@
+         super()._revalidate()
+ 
+ 
+-def nonsingular(vmin, vmax, expander=0.001, tiny=1e-15, increasing=True):
++def _nonsingular(vmin, vmax, expander=0.001, tiny=1e-15, increasing=True):
+     """
+     Modify the endpoints of a range as needed to avoid singularities.
+ 

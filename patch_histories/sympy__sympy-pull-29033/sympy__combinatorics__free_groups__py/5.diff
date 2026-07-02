@@ -1,0 +1,33 @@
+diff --git a/sympy/combinatorics/free_groups.py b/sympy/combinatorics/free_groups.py
+--- a/sympy/combinatorics/free_groups.py
++++ b/sympy/combinatorics/free_groups.py
+@@ -360,6 +360,7 @@
+                 array_form.append((letter, 1))
+             else:
+                 array_form.append((-letter, -1))
++        return _reduce_array_form(array_form)
+ 
+     def __new__(cls, init=(), *, reduced=False, boundary_index=None):
+         if not init:
+@@ -923,8 +924,8 @@
+             return group.identity
+         else:
+             letter_form = self.letter_form[from_i: to_j]
+-            array_form = letter_form_to_array_form(letter_form, group)
+-            return group.dtype(array_form)
++            array_form = self._array_form_from_letter_form(letter_form)
++            return group.dtype(array_form, reduced=True)
+ 
+     def subword_index(self, word, start = 0):
+         '''
+@@ -1024,8 +1025,8 @@
+         word = letter_form[from_i: to_j]
+         period2 = int(to_j/l) - 1
+         word += letter_form*period2 + letter_form[:diff-l+from_i-l*period2]
+-        word = letter_form_to_array_form(word, group)
+-        return group.dtype(word)
++        array_form = self._array_form_from_letter_form(word)
++        return group.dtype(array_form, reduced=True)
+ 
+     def cyclic_conjugates(self):
+         """Returns a words which are cyclic to the word `self`.

@@ -1,0 +1,12 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -10458,7 +10458,7 @@ def coarsen(
+             User guide describing :py:func:`~xarray.Dataset.coarsen`
+ 
+         :ref:`compute.coarsen`
+-            User guide on block arrgragation :py:func:`~xarray.Dataset.coarsen`
++            User guide on block aggregation :py:func:`~xarray.Dataset.coarsen`
+ 
+         :doc:`xarray-tutorial:fundamentals/03.3_windowed`
+             Tutorial on windowed computation using :py:func:`~xarray.Dataset.coarsen`

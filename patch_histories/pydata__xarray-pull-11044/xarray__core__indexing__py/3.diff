@@ -1,0 +1,12 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -303,7 +303,7 @@
+         # nothing left after applying first slice
+         return slice(0)
+ 
+-    applied_slice = normalize_slice(applied_slice, size_after_old_slice)
++    applied_slice = slice(*applied_slice.indices(size_after_old_slice))
+ 
+     start = old_slice.start + applied_slice.start * old_slice.step
+     if start < 0:

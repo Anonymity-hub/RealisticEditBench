@@ -1,0 +1,12 @@
+diff --git a/sklearn/linear_model/_coordinate_descent.py b/sklearn/linear_model/_coordinate_descent.py
+--- a/sklearn/linear_model/_coordinate_descent.py
++++ b/sklearn/linear_model/_coordinate_descent.py
+@@ -633,7 +633,7 @@
+ 
+     # X should have been passed through _pre_fit already if function is called
+     # from ElasticNet.fit
+-    if check_input:
++    if check_input or precompute is not False:
+         X, y, _, _, _, precompute, Xy = _pre_fit(
+             X,
+             y,

@@ -1,0 +1,14 @@
+diff --git a/lib/matplotlib/figure.py b/lib/matplotlib/figure.py
+--- a/lib/matplotlib/figure.py
++++ b/lib/matplotlib/figure.py
+@@ -3007,8 +3007,8 @@
+         orig_dpi = getattr(self, '_original_dpi', self._dpi)
+         FigureCanvasBase(self)  # Set self.canvas as a side-effect
+         # put it back to what it was
+-        if orig_dpi != self._dpi:
+-            self.dpi = orig_dpi
++        if self._dpi != self._original_dpi:
++            self.dpi = self._original_dpi
+ 
+     def set_canvas(self, canvas):
+         """

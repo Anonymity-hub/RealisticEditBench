@@ -1,0 +1,12 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -1366,7 +1366,7 @@
+         gains = [
+             (
+                 (np.max(k) - np.min(k) + 1.0) / len(np.unique(k))
+-                if isinstance(k, np.ndarray)
++                if isinstance(k, np.ndarray) and k.size != 0
+                 else 0
+             )
+             for k in indexer_elems

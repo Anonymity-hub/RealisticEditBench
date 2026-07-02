@@ -1,0 +1,14 @@
+diff --git a/lib/mpl_toolkits/mplot3d/art3d.py b/lib/mpl_toolkits/mplot3d/art3d.py
+--- a/lib/mpl_toolkits/mplot3d/art3d.py
++++ b/lib/mpl_toolkits/mplot3d/art3d.py
+@@ -60,9 +60,9 @@
+     """
+     if cbook._str_equal(zdir, 'x'):
+         return np.array((1, 0, 0))
+-    elif zdir == 'y':
++    elif cbook._str_equal(zdir, 'y'):
+         return np.array((0, 1, 0))
+     elif zdir == 'z':
+         return np.array((0, 0, 1))
+     elif zdir is None:
+         return np.array((0, 0, 0))

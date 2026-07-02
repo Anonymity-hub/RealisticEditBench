@@ -1,0 +1,13 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -1374,7 +1374,8 @@
+         array_index = np.argmax(np.array(gains)) if len(gains) > 0 else None
+ 
+         for i, (k, s) in enumerate(zip(indexer_elems, shape, strict=False)):
+-            if isinstance(k, np.ndarray) and i != array_index:
++            if isinstance(k, np.ndarray) and k.size == 0:
++            elif isinstance(k, np.ndarray) and i != array_index:
+                 # np.ndarray key is converted to slice that covers the entire
+                 # entries of this key.
+                 backend_indexer.append(slice(np.min(k), np.max(k) + 1))

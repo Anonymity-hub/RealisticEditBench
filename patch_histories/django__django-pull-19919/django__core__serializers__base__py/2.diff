@@ -1,0 +1,16 @@
+diff --git a/django/core/serializers/base.py b/django/core/serializers/base.py
+--- a/django/core/serializers/base.py
++++ b/django/core/serializers/base.py
+@@ -210,7 +210,11 @@
+             return self.stream.getvalue()
+ 
+     def _resolve_natural_key(self, obj):
+-        pass
++        """Return a natural key tuple for the given object when available."""
++        try:
++            return obj.natural_key()
++        except AttributeError:
++            return None
+ 
+ 
+ class Deserializer:

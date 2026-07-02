@@ -1,0 +1,34 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -1240,6 +1240,14 @@
+         # Only keep the return annotation
+         signatures = [('', retann) for _args, retann in signatures]
+ 
++    _record_typehints(
++        autodoc_annotations=autodoc_annotations,
++        name=props.full_name,
++        obj=props._obj,
++        short_literals=config.python_display_short_literal_types,
++        type_aliases=config.autodoc_type_aliases,
++        typehints_format=config.autodoc_typehints_format,
++    )
+     if result := events.emit_firstresult(
+         'autodoc-process-signature',
+         props.obj_type,
+@@ -1307,6 +1315,7 @@
+                     properties=frozenset(),
+                 )
+                 signatures += _format_signatures(
++                    autodoc_annotations=autodoc_annotations,
+                     config=config,
+                     docstrings=None,
+                     events=events,
+@@ -1418,6 +1427,7 @@
+                     properties=frozenset(),
+                 )
+                 signatures += _format_signatures(
++                    autodoc_annotations=autodoc_annotations,
+                     config=config,
+                     docstrings=None,
+                     events=events,

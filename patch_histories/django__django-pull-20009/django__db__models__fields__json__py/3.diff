@@ -1,0 +1,21 @@
+diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py
+--- a/django/db/models/fields/json.py
++++ b/django/db/models/fields/json.py
+@@ -373,6 +373,17 @@
+ 
+ class JSONIContains(CaseInsensitiveMixin, lookups.IContains):
+     pass
++
++
++class ProcessJSONLHSMixin:
++    def _get_json_path(self, connection, key_transforms):
++        if key_transforms is None:
++            return "$"
++        return connection.ops.compile_json_path(key_transforms)
++
++    def _process_as_mysql(self, sql, params, connection, key_transforms=None):
++        json_path = self._get_json_path(connection, key_transforms)
++        return "JSON_EXTRACT(%s, %%s)" % sql, (*params, json_path)
+ 
+ 
+ JSONField.register_lookup(DataContains)

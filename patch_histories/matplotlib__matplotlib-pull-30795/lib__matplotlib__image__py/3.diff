@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/image.py b/lib/matplotlib/image.py
+--- a/lib/matplotlib/image.py
++++ b/lib/matplotlib/image.py
+@@ -514,6 +514,7 @@
+                 elif np.ndim(alpha) > 0:  # Array alpha
+                     if A.shape[2] == 3:  # RGB: use array alpha directly
+                         A = np.dstack([A, alpha])
++                    else:  # RGBA: multiply existing alpha by array alpha
+                     # user-specified array alpha overrides the existing alpha channel
+                     A = np.dstack([A[..., :3], alpha])
+                 else:  # Scalar alpha

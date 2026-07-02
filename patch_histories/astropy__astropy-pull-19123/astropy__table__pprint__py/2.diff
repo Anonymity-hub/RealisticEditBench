@@ -1,0 +1,34 @@
+diff --git a/astropy/table/pprint.py b/astropy/table/pprint.py
+index 2151f66..4541022 100644
+--- a/astropy/table/pprint.py
++++ b/astropy/table/pprint.py
+@@ -519,22 +519,21 @@ class TableFormatter:
+ 
+         def format_col_str(idx):
+             if not multidims:
+-                if is_scalar:
+-                    return format_func(col_format, col)
+-                return format_func(col_format, col[idx])
++                return format_func(col_format, col if is_scalar else col[idx])
+ 
+             # Prevents columns like Column(data=[[(1,)],[(2,)]], name='a')
+             # with shape (n,1,...,1) from being printed as if there was
+             # more than one element in a row
+             if multidims_all_ones:
+                 return format_func(col_format, col[(idx,) + multidim0])
+-            elif multidims_has_zero:
++
++            if multidims_has_zero:
+                 # Any zero dimension means there is no data to print
+                 return ""
+-            else:
+-                left = format_func(col_format, col[(idx,) + multidim0])
+-                right = format_func(col_format, col[(idx,) + multidim1])
+-                return f"{left} .. {right}"
++
++            left = format_func(col_format, col[(idx,) + multidim0])
++            right = format_func(col_format, col[(idx,) + multidim1])
++            return f"{left} .. {right}"
+         # Add formatted values if within bounds allowed by max_lines
+         for idx in indices:
+             if idx == i0:

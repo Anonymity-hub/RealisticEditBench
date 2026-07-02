@@ -1,0 +1,30 @@
+diff --git a/astropy/units/quantity_helper/function_helpers.py b/astropy/units/quantity_helper/function_helpers.py
+--- a/astropy/units/quantity_helper/function_helpers.py
++++ b/astropy/units/quantity_helper/function_helpers.py
+@@ -568,6 +568,26 @@
+         case _:
+             qty_args = (start, stop)
+ 
++    step_val = step.to_value(expected_out_unit) if hasattr(step, "unit") else step
++
++    kwargs = {} if step == 1 else {"step": step_val}
++
++    # reverse positional arguments so `stop` always comes first
++    # this is done to ensure that the arrays are first converted to the
++    # expected unit, which we guarantee should be stop's
++    args_rev, out_unit = _quantities2arrays(*qty_args[::-1])
++    if expected_out_unit is not UNIT_FROM_LIKE_ARG:
++        assert out_unit == expected_out_unit
++    if hasattr(stop, "unit"):
++        assert out_unit == stop.unit
++
++    # reverse args again to restore initial order
++    args = args_rev[::-1]
++
++    if "step" in kwargs:
++        kwargs["step"] = step_val
++    return args, kwargs
++
+ 
+ def arange_impl(*args, start=None, stop=None, step=None, dtype=None, **kwargs):
+     # NumPy is supposed to validate the input parameters before this dispatched

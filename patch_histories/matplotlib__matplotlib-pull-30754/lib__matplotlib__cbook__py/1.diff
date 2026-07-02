@@ -1,0 +1,22 @@
+diff --git a/lib/matplotlib/cbook.py b/lib/matplotlib/cbook.py
+--- a/lib/matplotlib/cbook.py
++++ b/lib/matplotlib/cbook.py
+@@ -886,10 +886,15 @@
+         for group in unique_groups.values():
+             yield sorted(group, key=self._ordering.__getitem__)
+ 
+-    def get_siblings(self, a):
+-        """Return all of the items joined with *a*, including itself."""
++    def get_siblings(self, a, *, include_self=True):
++        """
++        Return all the items joined with *a*.
++
++        *a* is included in the list if *include_self* is True.
++        """
+         siblings = self._mapping.get(a, [a])
+-        return sorted(siblings, key=self._ordering.get)
++        result = sorted(siblings, key=self._ordering.get)
++        return result
+ 
+ 
+ class GrouperView:

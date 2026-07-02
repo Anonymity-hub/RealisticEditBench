@@ -1,0 +1,12 @@
+diff --git a/astropy/coordinates/spectral_coordinate.py b/astropy/coordinates/spectral_coordinate.py
+--- a/astropy/coordinates/spectral_coordinate.py
++++ b/astropy/coordinates/spectral_coordinate.py
+@@ -54,7 +54,7 @@
+     # since we can't guarantee that their metadata would be correct/consistent.
+     squantity = scoord.view(SpectralQuantity)
+ 
+-    beta = velocity / c
++    beta = (velocity / c).to_value(u.dimensionless_unscaled)
+     doppler_factor = np.sqrt((1 + beta) / (1 - beta))
+ 
+     if squantity.unit.is_equivalent(u.m):  # wavelength

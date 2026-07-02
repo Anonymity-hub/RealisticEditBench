@@ -1,0 +1,12 @@
+diff --git a/astropy/units/quantity_helper/function_helpers.py b/astropy/units/quantity_helper/function_helpers.py
+--- a/astropy/units/quantity_helper/function_helpers.py
++++ b/astropy/units/quantity_helper/function_helpers.py
+@@ -535,7 +535,7 @@ def arange(
+ else:
+ 
+     @function_helper
+-    def arange(start_or_stop, /, stop=None, step=1, dtype=None):
++    def arange(start_or_stop, /, stop=None, step=1, *, dtype=None):
+         return arange_impl(start_or_stop, stop=stop, step=step, dtype=dtype)
+ 
+ 

@@ -1,0 +1,11 @@
+diff --git a/sklearn/preprocessing/_target_encoder.py b/sklearn/preprocessing/_target_encoder.py
+--- a/sklearn/preprocessing/_target_encoder.py
++++ b/sklearn/preprocessing/_target_encoder.py
+@@ -630,7 +630,6 @@ def get_metadata_routing(self):
+             A :class:`~sklearn.utils.metadata_routing.MetadataRouter` encapsulating
+             routing information.
+         """
+-        from sklearn.model_selection import KFold  # avoid circular import
+ 
+         router = MetadataRouter(owner=self)
+ 

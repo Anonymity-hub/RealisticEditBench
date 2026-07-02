@@ -1,0 +1,23 @@
+diff --git a/sklearn/ensemble/_bagging.py b/sklearn/ensemble/_bagging.py
+--- a/sklearn/ensemble/_bagging.py
++++ b/sklearn/ensemble/_bagging.py
+@@ -80,6 +80,18 @@
+     elif isinstance(max_samples, Integral):
+         return max_samples
+ 
++    if sample_weight is None:
++        weighted_n_samples = n_samples
++        weighted_n_samples_msg = f"the number of samples is {weighted_n_samples} "
++    else:
++        weighted_n_samples = sample_weight.sum()
++        weighted_n_samples_msg = (
++            f"the total sum of sample weights is {weighted_n_samples} "
++        )
++
++    # max_samples Real fractional value relative to weighted_n_samples
++    n_samples_bootstrap = max(int(max_samples * weighted_n_samples), 1)
++
+ 
+ def _generate_indices(random_state, bootstrap, n_population, n_samples):
+     """Draw randomly sampled indices."""
+     # Draw sample indices

@@ -1,0 +1,35 @@
+diff --git a/xarray/structure/combine.py b/xarray/structure/combine.py
+--- a/xarray/structure/combine.py
++++ b/xarray/structure/combine.py
+@@ -425,8 +425,21 @@
+ ) -> Dataset: ...
+ 
+ 
++@overload
+ def combine_nested(
+-    datasets: DATASET_HYPERCUBE,
++    datasets: DataTreeHyperCube,
++    concat_dim: str | DataArray | Sequence[str | DataArray | pd.Index | None] | None,
++    compat: str | CombineKwargDefault = ...,
++    data_vars: str | CombineKwargDefault = ...,
++    coords: str | CombineKwargDefault = ...,
++    fill_value: object = ...,
++    join: JoinOptions | CombineKwargDefault = ...,
++    combine_attrs: CombineAttrsOptions = ...,
++) -> DataTree: ...
++
++
++def combine_nested(
++    datasets: DatasetHyperCube | DataTreeHyperCube,
+     concat_dim: str | DataArray | Sequence[str | DataArray | pd.Index | None] | None,
+     compat: str | CombineKwargDefault = _COMPAT_DEFAULT,
+     data_vars: str | CombineKwargDefault = _DATA_VARS_DEFAULT,
+@@ -434,7 +447,7 @@
+     fill_value: object = dtypes.NA,
+     join: JoinOptions | CombineKwargDefault = _JOIN_DEFAULT,
+     combine_attrs: CombineAttrsOptions = "drop",
+-) -> Dataset:
++) -> Dataset | DataTree:
+     """
+     Explicitly combine an N-dimensional grid of datasets into one by using a
+     succession of concat and merge operations along each dimension of the grid.

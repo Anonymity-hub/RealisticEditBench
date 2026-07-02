@@ -1,0 +1,39 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -402,7 +402,7 @@
+     y_true, sample_weight = move_to(y_true, sample_weight, xp=xp, device=device)
+     # Compute accuracy for each possible representation
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred, sample_weight = _check_targets(
++    y_type, _, y_true, y_pred, sample_weight = _check_targets(
+         y_true, y_pred, sample_weight
+     )
+ 
+@@ -1313,7 +1313,7 @@
+     -0.33
+     """
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred, sample_weight = _check_targets(
++    y_type, _, y_true, y_pred, sample_weight = _check_targets(
+         y_true, y_pred, sample_weight
+     )
+     if y_type not in {"binary", "multiclass"}:
+@@ -2360,7 +2360,7 @@
+     (1.5, 0.75)
+     """
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred, sample_weight = _check_targets(
++    y_type, _, y_true, y_pred, sample_weight = _check_targets(
+         y_true, y_pred, sample_weight
+     )
+     if y_type != "binary":
+@@ -3280,7 +3280,7 @@
+     0.75
+     """
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred, sample_weight = _check_targets(
++    y_type, _, y_true, y_pred, sample_weight = _check_targets(
+         y_true, y_pred, sample_weight
+     )
+ 

@@ -1,0 +1,21 @@
+diff --git a/sympy/physics/vector/dyadic.py b/sympy/physics/vector/dyadic.py
+--- a/sympy/physics/vector/dyadic.py
++++ b/sympy/physics/vector/dyadic.py
+@@ -243,12 +243,11 @@
+                             p_c = prettyForm(*p_c.parens())
+                         p_term = prettyForm(*p_c.right(" ", p_dyad))
+ 
+-                outstr = "".join(ol)
+-                if outstr.startswith(" + "):
+-                    outstr = outstr[3:]
+-                elif outstr.startswith(" "):
+-                    outstr = outstr[1:]
+-                return outstr
++                    if outstr is None:
++                        outstr = prettyForm(*p_term.left(sign))
++                    else:
++                        outstr = prettyForm(*outstr.right(sign, p_term))
++                return outstr.__str__()
+         return Fake()
+ 
+     def __rsub__(self, other):

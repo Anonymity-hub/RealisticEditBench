@@ -1,0 +1,21 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -444,16 +444,8 @@
+ 
+ 
+ def getInnerText(node):
+-    """Get the inner text of a DOM node and any children one level deep."""
+-    # inspired by
+-    # https://mail.python.org/pipermail/xml-sig/2005-March/011022.html
+     return "".join(
+-        [
+-            element.data
+-            for child in node.childNodes
+-            for element in (child, *child.childNodes)
+-            if element.nodeType in (element.TEXT_NODE, element.CDATA_SECTION_NODE)
+-        ]
++        [child.data for child in node.childNodes if check_element_type(child)]
+     )
+ 
+ 

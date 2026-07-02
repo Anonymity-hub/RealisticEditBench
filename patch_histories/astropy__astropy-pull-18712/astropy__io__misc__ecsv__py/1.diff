@@ -1,0 +1,20 @@
+diff --git a/astropy/io/misc/ecsv.py b/astropy/io/misc/ecsv.py
+--- a/astropy/io/misc/ecsv.py
++++ b/astropy/io/misc/ecsv.py
+@@ -64,14 +64,14 @@
+ import re
+ import warnings
+ from collections.abc import Iterable
+-from contextlib import ExitStack
+ from dataclasses import dataclass
+-from pathlib import Path
+ from typing import TYPE_CHECKING, Any, Final, NamedTuple
+ 
+ import numpy as np
+ import numpy.typing as npt
+ 
++from astropy.utils.data import get_readable_fileobj
++
+ if TYPE_CHECKING:
+     from astropy.table import SerializedColumn, Table
+ 

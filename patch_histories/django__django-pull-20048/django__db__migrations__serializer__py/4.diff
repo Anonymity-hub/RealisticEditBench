@@ -1,0 +1,11 @@
+diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py
+--- a/django/db/migrations/serializer.py
++++ b/django/db/migrations/serializer.py
+@@ -375,6 +375,7 @@
+         decimal.Decimal: DecimalSerializer,
+         (functools.partial, functools.partialmethod): FunctoolsPartialSerializer,
+         FUNCTION_TYPES: FunctionTypeSerializer,
++        types.GenericAlias: GenericAliasSerializer,
+         collections.abc.Iterable: IterableSerializer,
+         (COMPILED_REGEX_TYPE, RegexObject): RegexSerializer,
+         uuid.UUID: UUIDSerializer,

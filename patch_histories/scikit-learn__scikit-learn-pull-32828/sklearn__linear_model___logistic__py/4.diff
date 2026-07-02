@@ -1,0 +1,32 @@
+diff --git a/sklearn/linear_model/_logistic.py b/sklearn/linear_model/_logistic.py
+--- a/sklearn/linear_model/_logistic.py
++++ b/sklearn/linear_model/_logistic.py
+@@ -5,6 +5,7 @@
+ # Authors: The scikit-learn developers
+ # SPDX-License-Identifier: BSD-3-Clause
+ 
++import inspect
+ import numbers
+ import warnings
+ from numbers import Integral, Real
+@@ -760,6 +761,20 @@
+         is_binary = len(classes) <= 2
+         score_params = score_params or {}
+         score_params = _check_method_params(X=X, params=score_params, indices=test)
++        # We need to pass the classes as "labels" argument to scorers that support
++        # it, e.g. scoring = "neg_brier_score", because y_test may not contain all
++        # class labels.
++        # There are at least 2 possibilities:
++        # 1. Metadata routing is enabled: A try except clause is possible with
++        #   adding labels to score_params. We could then pass the already instantiated
++        #   log_reg instance to scoring.
++        # 2. We reconstruct the scorer and pass labels as kwargs explicitly.
++        # We implement the 2nd option even if it seems a bit hacky because it works
++        # with and without metadata routing.
++        if hasattr(scoring, "_score_func"):
++            sig = inspect.signature(scoring._score_func).parameters
++        else:
++            sig = []
+ 
+     for w, C in zip(coefs, Cs):
+         log_reg.C = C

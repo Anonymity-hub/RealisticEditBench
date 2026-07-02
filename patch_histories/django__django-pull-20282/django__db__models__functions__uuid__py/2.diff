@@ -1,0 +1,16 @@
+diff --git a/django/db/models/functions/uuid.py b/django/db/models/functions/uuid.py
+--- a/django/db/models/functions/uuid.py
++++ b/django/db/models/functions/uuid.py
+@@ -37,8 +37,11 @@
+ 
+ class UUID7(Func):
+     function = "UUIDV7"
+-    arity = 0
++    arity = 1
+     output_field = UUIDField()
++
++    def __init__(self, shift=None, **extra):
++        super().__init__(shift, **extra)
+ 
+     def as_sql(self, compiler, connection, **extra_context):
+         if connection.features.supports_uuid7_function:

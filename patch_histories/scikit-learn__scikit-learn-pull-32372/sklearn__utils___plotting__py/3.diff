@@ -1,0 +1,11 @@
+diff --git a/sklearn/utils/_plotting.py b/sklearn/utils/_plotting.py
+--- a/sklearn/utils/_plotting.py
++++ b/sklearn/utils/_plotting.py
+@@ -77,7 +77,6 @@
+         y,
+         *,
+         sample_weight,
+-        pos_label,
+     ):
+         check_matplotlib_support(f"{cls.__name__}.from_cv_results")
+ 

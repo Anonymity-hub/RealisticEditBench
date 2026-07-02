@@ -1,0 +1,15 @@
+diff --git a/lib/matplotlib/widgets.py b/lib/matplotlib/widgets.py
+--- a/lib/matplotlib/widgets.py
++++ b/lib/matplotlib/widgets.py
+@@ -2027,6 +2027,11 @@
+         # - change the signature to __init__(self, axes, *, ...)
+         # - delete the "Call signatures" block in the docstring
+         # - delete this block
++        kwargs = {k: lineprops.pop(k)
++                  for k in list(lineprops) if k in ("canvas", "axes")}
++        params = _api.select_matching_signature(
++            [lambda axes: locals(), lambda canvas, axes: locals()], *args, **kwargs)
++        axes = params["axes"]
+ 
+         self.axes = axes
+         self.horizOn = horizOn

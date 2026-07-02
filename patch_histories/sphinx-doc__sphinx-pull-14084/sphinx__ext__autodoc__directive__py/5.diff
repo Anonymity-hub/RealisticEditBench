@@ -1,0 +1,44 @@
+diff --git a/sphinx/ext/autodoc/directive.py b/sphinx/ext/autodoc/directive.py
+--- a/sphinx/ext/autodoc/directive.py
++++ b/sphinx/ext/autodoc/directive.py
+@@ -73,18 +73,19 @@
+             source, lineno = (None, None)
+         logger.debug('[autodoc] %s:%s: input:\n%s', source, lineno, self.block_text)
+ 
+-        registry = self.env._registry
++        # get target object type / strip prefix (auto-)
++        assert self.name.startswith('auto')
++        objtype: _AutodocObjType = self.name[4:]  # type: ignore[assignment]
+ 
+-        # look up target object type
+-        objtype = self.name[4:]  # strip prefix (auto-).
++        env = self.env
+ 
+         #: true if the generated content may contain titles
+         titles_allowed = True
+ 
+-        # process the options with the selected object types's option_spec
++        # process the options with the selected object type's option_spec
+         try:
+             documenter_options = _process_documenter_options(
+-                obj_type=objtype,  # type: ignore[arg-type]
++                obj_type=objtype,
+                 default_options=self.config.autodoc_default_options,
+                 options=self.options,
+             )
+@@ -94,10 +95,14 @@
+                 'An option to %s is either unknown or has an invalid value: %s',
+                 self.name,
+                 exc,
+-                location=(self.env.current_document.docname, lineno),
++                location=(env.current_document.docname, lineno),
+             )
+             return []
+         documenter_options._tab_width = self.state.document.settings.tab_width
++
++        # record all filenames as dependencies -- this will at least
++        # partially make automatic invalidation possible
++        record_dependencies = self.state.document.settings.record_dependencies
+ 
+         # generate the output
+         get_attr = _AutodocAttrGetter(registry.autodoc_attrgetters)

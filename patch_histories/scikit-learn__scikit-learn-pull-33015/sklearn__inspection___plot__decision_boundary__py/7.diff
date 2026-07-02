@@ -1,0 +1,88 @@
+diff --git a/sklearn/inspection/_plot/decision_boundary.py b/sklearn/inspection/_plot/decision_boundary.py
+--- a/sklearn/inspection/_plot/decision_boundary.py
++++ b/sklearn/inspection/_plot/decision_boundary.py
+@@ -150,6 +150,7 @@
+ 
+     Examples
+     --------
++    >>> import matplotlib as mpl
+     >>> import matplotlib.pyplot as plt
+     >>> import numpy as np
+     >>> from sklearn.datasets import load_iris
+@@ -169,7 +170,11 @@
+     >>> display.plot()
+     <...>
+     >>> display.ax_.scatter(
+-    ...     iris.data[:, 0], iris.data[:, 1], c=iris.target, edgecolor="black"
++    ...     iris.data[:, 0],
++    ...     iris.data[:, 1],
++    ...     c=iris.target,
++    ...     cmap=mpl.colors.ListedColormap(display.multiclass_colors_),
++    ...     edgecolor="black"
+     ... )
+     <...>
+     >>> plt.show()
+@@ -263,13 +268,13 @@
+                 # discrete set of colors that are easily distinguishable
+                 # contrary to other colormaps that are continuous.
+                 if cmap == "tab10" and self.n_classes <= 10:
+-                    colors = plt.get_cmap("tab10", 10).colors[:self.n_classes]
++                    colors = plt.get_cmap("tab10", 10).colors[: self.n_classes]
+                 elif cmap == "tab20" and self.n_classes <= 20:
+-                    colors = plt.get_cmap("tab20", 20).colors[:self.n_classes]
++                    colors = plt.get_cmap("tab20", 20).colors[: self.n_classes]
+                 else:
+                     cmap = plt.get_cmap(cmap, self.n_classes)
+                     if not hasattr(cmap, "colors"):
+-                        # For LinearSegmentedColormap
++                        # Get `LinearSegmentedColormap` for non-qualitative cmaps
+                         colors = cmap(np.linspace(0, 1, self.n_classes))
+                     else:
+                         colors = cmap.colors
+@@ -406,11 +411,17 @@
+                 classes is less than or equal to 10, otherwise 'gist_rainbow'
+                 colormap.
+ 
+-            Single color colormaps will be generated from the colors in the list or
+-            colors taken from the colormap, and passed to the `cmap` parameter of
+-            the `plot_method`.
++            Single color (fading to white) colormaps will be generated from the colors
++            in the list or colors taken from the colormap, and passed to the `cmap`
++            parameter of the `plot_method`.
++
++            For :term:`binary` problems, this is ignored and `cmap` or `colors` can be
++            passed as kwargs instead, otherwise, the default colormap ('viridis') is
++            used.
+ 
+             .. versionadded:: 1.7
++            .. versionchanged:: 1.9
++               `multiclass_colors` is now also used when `response_method="predict"`
+ 
+         xlabel : str, default=None
+             The label used for the x-axis. If `None`, an attempt is made to
+@@ -444,6 +455,7 @@
+ 
+         Examples
+         --------
++        >>> import matplotlib as mpl
+         >>> import matplotlib.pyplot as plt
+         >>> from sklearn.datasets import load_iris
+         >>> from sklearn.linear_model import LogisticRegression
+@@ -456,7 +468,8 @@
+         ...     xlabel=iris.feature_names[0], ylabel=iris.feature_names[1],
+         ...     alpha=0.5,
+         ... )
+-        >>> disp.ax_.scatter(X[:, 0], X[:, 1], c=iris.target, edgecolor="k")
++        >>> cmap = mpl.colors.ListedColormap(disp.multiclass_colors_)
++        >>> disp.ax_.scatter(X[:, 0], X[:, 1], c=iris.target, edgecolor="k", cmap=cmap)
+         <...>
+         >>> plt.show()
+         """
+@@ -578,7 +591,6 @@
+             else:
+                 response = response.reshape(*xx0.shape, response.shape[-1])
+ 
+-
+         if (
+             class_of_interest is not None
+             or is_regressor(estimator)

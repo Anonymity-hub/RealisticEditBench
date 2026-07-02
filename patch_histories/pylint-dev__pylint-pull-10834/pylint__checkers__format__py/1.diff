@@ -1,0 +1,22 @@
+diff --git a/pylint/checkers/format.py b/pylint/checkers/format.py
+--- a/pylint/checkers/format.py
++++ b/pylint/checkers/format.py
+@@ -181,6 +181,18 @@
+                 "default": r"^\s*(# )?<?https?://\S+>?$",
+                 "help": (
+                     "Regexp for a line that is allowed to be longer than the limit."
++                ),
++            },
++        ),
++        (
++            "ignore-pattern-in-long-lines",
++            {
++                "type": "regexp",
++                "metavar": "<regexp>",
++                "default": None,
++                "help": (
++                    "Regexp for a part of a line that will not be counted when "
++                    "calculating the line length."
+                 ),
+             },
+         ),

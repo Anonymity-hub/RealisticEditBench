@@ -1,0 +1,22 @@
+diff --git a/sympy/solvers/ode/single.py b/sympy/solvers/ode/single.py
+--- a/sympy/solvers/ode/single.py
++++ b/sympy/solvers/ode/single.py
+@@ -2812,6 +2812,18 @@
+         # Get linear coefficients
+         match = self.ode_problem.get_linear_coefficients(eq, f, order)
+         if not match:
++            return False
++
++        # We need: a3*y'' + b3*y' + c3*y = 0
++        # For Bessel with symbolic exponent: y'' + 0*y' + (x^k)*y = 0
++        a3 = match[2]  # coefficient of y''
++        b3 = match[1]  # coefficient of y'
++        c3 = match[0]  # coefficient of y
++        rhs = match[-1]  # right-hand side
++
++        # Check if b3 = 0 (no first derivative term) or a3 = 0  (no second derivative term)
++        # or rhs != 0 (non-homogeneous)
++        if b3 != 0 or a3 == 0 or rhs != 0:
+ 
+ 
+ class SecondLinearAiry(SingleODESolver):

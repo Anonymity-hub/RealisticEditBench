@@ -1,0 +1,18 @@
+diff --git a/sympy/solvers/ode/single.py b/sympy/solvers/ode/single.py
+--- a/sympy/solvers/ode/single.py
++++ b/sympy/solvers/ode/single.py
+@@ -2844,6 +2844,14 @@
+         if k_val == -2:
+             # Special case: k = -2 is an Euler equation, better handled by other solvers.
+             return False
++
++        # Store the matched values
++        self.match_dict = {
++            'A': A_val,
++            'k': k_val,
++        }
++
++        return True
+ 
+ 
+ class SecondLinearAiry(SingleODESolver):

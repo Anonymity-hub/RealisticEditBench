@@ -1,0 +1,27 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -1102,3 +1102,23 @@
+         # https://github.com/sphinx-doc/sphinx/issues/11654#issuecomment-1696790436
+         msg = f'Failed to discern if member {member} is a BaseException subclass.'
+         raise ValueError(msg) from exc
++
++    if isinstance(member, type) or (is_attr and isinstance(member, (NewType, TypeVar))):
++        # priority must be higher than 'function', 'class', and 'attribute'
++        # as NewType can be an attribute and is a class after Python 3.10.
++        filtered.append((15, 'class'))
++
++    if isinstance(parent_documenter, ClassDocumenter):
++        if inspect.isproperty(member):
++            # priority must be higher than 'attribute'
++            filtered.append((11, 'property'))
++
++        # Support for class properties. Note: these only work on Python 3.9.
++        elif hasattr(parent_documenter, 'props'):
++            # See FakeDirective &c in autosummary, parent might not be a
++            # 'proper' Documenter.
++            __dict__ = safe_getattr(parent_documenter.props._obj, '__dict__', {})
++            obj = __dict__.get(member_name)
++            if isinstance(obj, classmethod) and inspect.isproperty(obj.__func__):
++                # priority must be higher than 'attribute'
++                filtered.append((11, 'property'))

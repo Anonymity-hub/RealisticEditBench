@@ -1,0 +1,11 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -1646,6 +1646,7 @@
+                         and not isinstance(condition.rhs, (str, bytes))
+                         and any(v is None for v in condition.rhs)
+                     ):
++                        clause.add(lookup_class(col, True), OR)
+                 # If someval is a nullable column, someval IS NOT NULL is
+                 # added.
+                 if isinstance(value, Col) and self.is_nullable(value.target):

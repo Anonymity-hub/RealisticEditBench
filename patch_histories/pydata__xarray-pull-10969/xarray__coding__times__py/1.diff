@@ -1,0 +1,16 @@
+diff --git a/xarray/coding/times.py b/xarray/coding/times.py
+--- a/xarray/coding/times.py
++++ b/xarray/coding/times.py
+@@ -1379,9 +1379,9 @@
+         self.time_unit = time_unit
+ 
+     def encode(self, variable: Variable, name: T_Name = None) -> Variable:
+-        if np.issubdtype(
+-            variable.data.dtype, np.datetime64
+-        ) or contains_cftime_datetimes(variable):
++        if np.issubdtype(variable.dtype, np.datetime64) or contains_cftime_datetimes(
++            variable
++        ):
+             dims, data, attrs, encoding = unpack_for_encoding(variable)
+ 
+             units = encoding.pop("units", None)

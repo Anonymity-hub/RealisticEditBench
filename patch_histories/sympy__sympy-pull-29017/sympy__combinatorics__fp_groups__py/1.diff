@@ -1,0 +1,30 @@
+diff --git a/sympy/combinatorics/fp_groups.py b/sympy/combinatorics/fp_groups.py
+--- a/sympy/combinatorics/fp_groups.py
++++ b/sympy/combinatorics/fp_groups.py
+@@ -565,8 +565,26 @@
+         self.normal = normal
+ 
+     def __contains__(self, g):
++        '''
++        When parent is a FreeGroup, use Stallings folding algorithm described
++        in detail in [1].
++
++        References
++        ==========
++
++        .. [1] Kapovich, I., Myasnikov, A. (2002).
++        Stallings foldings and the subgroup structure of free groups.
++        arXiv preprint math/0202285.
++        '''
+ 
+         if isinstance(self.parent, FreeGroup):
++            def _inverse_label(label):
++                return -label
++
++            def _add_edge(graph, u, v, label):
++                graph[u][label].add(v)
++                graph[v][_inverse_label(label)].add(u)
++
+             if self._min_words is None:
+                 # make _min_words - a list of subwords such that
+                 # g is in the subgroup if and only if it can be

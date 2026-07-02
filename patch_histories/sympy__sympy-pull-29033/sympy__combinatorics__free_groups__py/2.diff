@@ -1,0 +1,17 @@
+diff --git a/sympy/combinatorics/free_groups.py b/sympy/combinatorics/free_groups.py
+--- a/sympy/combinatorics/free_groups.py
++++ b/sympy/combinatorics/free_groups.py
+@@ -350,6 +350,13 @@
+     """
+     __slots__ = ()
+     is_assoc_word = True
++
++    def __new__(cls, init=(), *, reduced=False, boundary_index=None):
++        if not init:
++            return tuple.__new__(cls, ())
++        if boundary_index is not None:
++            init = _reduce_array_form(init, boundary_index=boundary_index)
++            return tuple.__new__(cls, init)
+ 
+     def new(self, init):
+         return self.__class__(init)

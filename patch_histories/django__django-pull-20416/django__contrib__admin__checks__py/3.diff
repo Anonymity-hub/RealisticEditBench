@@ -1,0 +1,12 @@
+diff --git a/django/contrib/admin/checks.py b/django/contrib/admin/checks.py
+--- a/django/contrib/admin/checks.py
++++ b/django/contrib/admin/checks.py
+@@ -249,7 +249,7 @@
+                         'An admin for model "%s" has to be registered '
+                         "to be referenced by %s.autocomplete_fields."
+                         % (
+-                            field.remote_field.model.__name__,
++                            remote_model,
+                             type(obj).__name__,
+                         ),
+                         obj=obj.__class__,

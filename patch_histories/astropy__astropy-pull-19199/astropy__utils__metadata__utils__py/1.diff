@@ -1,0 +1,31 @@
+diff --git a/astropy/utils/metadata/utils.py b/astropy/utils/metadata/utils.py
+--- a/astropy/utils/metadata/utils.py
++++ b/astropy/utils/metadata/utils.py
+@@ -60,3 +60,27 @@ def common_dtype(arrs):
+         if arr_common.dtype.names is None
+         else arr_common.dtype.descr
+     )
++
++
++def result_type(arrs):
++    """
++    Use numpy to find the common type for a list of ndarray.
++
++    The difference with `numpy.result_type` is that all arrays should
++    share the same fundamental numpy data type, one of:
++    ``np.bool_``, ``np.object_``, ``np.number``, ``np.character``, ``np.void``
++    Hence, a mix like integer and string will raise instead of resulting
++    in a string type.
++
++    Parameters
++    ----------
++    arrs : list of ndarray
++        Array likes for which to find the common dtype. Anything not
++        an array (e.g, |Time|), will be considered an object array.
++
++    Returns
++    -------
++    dtype : ~numpy.dtype
++        The common type.
++    """
++    pass

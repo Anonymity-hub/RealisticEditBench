@@ -1,0 +1,51 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -1735,9 +1735,11 @@
+         base_line = cur_v
+         left_edge = cur_h
+ 
++        phantom.append(box.is_phantom)
++
+         for p in box.children:
+             if isinstance(p, Char):
+-                p.render(output, cur_h + off_h, cur_v + off_v)
++                render(p, output, cur_h + off_h, cur_v + off_v)
+                 cur_h += p.width
+             elif isinstance(p, Kern):
+                 cur_h += p.width
+@@ -1768,9 +1770,9 @@
+                     rule_depth = box.depth
+                 if rule_height > 0 and rule_width > 0:
+                     cur_v = base_line + rule_depth
+-                    p.render(output,
+-                             cur_h + off_h, cur_v + off_v,
+-                             rule_width, rule_height)
++                    render(p, output,
++                           cur_h + off_h, cur_v + off_v,
++                           rule_width, rule_height)
+                     cur_v = base_line
+                 cur_h += rule_width
+             elif isinstance(p, Glue):
+@@ -1787,6 +1789,8 @@
+                         cur_g = round(clamp(box.glue_set * cur_glue))
+                 rule_width += cur_g
+                 cur_h += rule_width
++
++        phantom.pop()
+ 
+     def vlist_out(box: Vlist) -> None:
+         nonlocal cur_v, cur_h
+@@ -1827,9 +1831,9 @@
+                 rule_height += rule_depth
+                 if rule_height > 0 and rule_depth > 0:
+                     cur_v += rule_height
+-                    p.render(output,
+-                             cur_h + off_h, cur_v + off_v,
+-                             rule_width, rule_height)
++                    render(p, output,
++                           cur_h + off_h, cur_v + off_v,
++                           rule_width, rule_height)
+             elif isinstance(p, Glue):
+                 glue_spec = p.glue_spec
+                 rule_height = glue_spec.width - cur_g

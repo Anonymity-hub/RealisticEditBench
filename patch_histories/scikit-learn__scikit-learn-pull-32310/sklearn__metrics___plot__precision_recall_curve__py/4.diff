@@ -1,0 +1,12 @@
+diff --git a/sklearn/metrics/_plot/precision_recall_curve.py b/sklearn/metrics/_plot/precision_recall_curve.py
+--- a/sklearn/metrics/_plot/precision_recall_curve.py
++++ b/sklearn/metrics/_plot/precision_recall_curve.py
+@@ -163,7 +163,7 @@
+ 
+         name : str, default=None
+             Name of precision recall curve for labeling. If `None`, use
+-            `estimator_name` if not `None`, otherwise no labeling is shown.
++            `name` if not `None`, otherwise no labeling is shown.
+ 
+         plot_chance_level : bool, default=False
+             Whether to plot the chance level. The chance level is the prevalence

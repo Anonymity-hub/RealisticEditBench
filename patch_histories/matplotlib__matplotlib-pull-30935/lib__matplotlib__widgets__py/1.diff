@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/widgets.py b/lib/matplotlib/widgets.py
+--- a/lib/matplotlib/widgets.py
++++ b/lib/matplotlib/widgets.py
+@@ -164,7 +164,8 @@ def _save_blit_background(self, background):
+         good enough for all existing widgets.
+         """
+         if self._blit_background_id is None:
+-            self._blit_background_id = self.canvas._get_blit_background_id()
++            bbid = self.canvas._get_blit_background_id()
++            self._blit_background_id = bbid
+         self.canvas._blit_backgrounds[self._blit_background_id] = background
+ 
+     def _load_blit_background(self):

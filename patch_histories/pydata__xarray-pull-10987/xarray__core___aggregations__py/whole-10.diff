@@ -1,0 +1,64 @@
+diff --git a/xarray/core/_aggregations.py b/xarray/core/_aggregations.py
+--- a/xarray/core/_aggregations.py
++++ b/xarray/core/_aggregations.py
+@@ -3678,6 +3678,17 @@ def _flox_scan(
+     ) -> Dataset:
+         raise NotImplementedError()
+ 
++    def _flox_scan(
++        self,
++        dim: Dims,
++        *,
++        func: str,
++        skipna: bool | None = None,
++        keep_attrs: bool | None = None,
++        **kwargs: Any,
++    ) -> Dataset:
++        raise NotImplementedError()
++
+     def count(
+         self,
+         dim: Dims = None,
+@@ -6481,6 +6492,7 @@ def median(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def cumsum(
+         self,
+@@ -6753,6 +6765,17 @@ def _flox_scan(
+     ) -> DataArray:
+         raise NotImplementedError()
+ 
++    def _flox_scan(
++        self,
++        dim: Dims,
++        *,
++        func: str,
++        skipna: bool | None = None,
++        keep_attrs: bool | None = None,
++        **kwargs: Any,
++    ) -> DataArray:
++        raise NotImplementedError()
++
+     def count(
+         self,
+         dim: Dims = None,
+@@ -8872,14 +8895,15 @@ def prod(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.prod,
+                 dim=dim,
+                 skipna=skipna,
+                 min_count=min_count,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def sum(
+         self,

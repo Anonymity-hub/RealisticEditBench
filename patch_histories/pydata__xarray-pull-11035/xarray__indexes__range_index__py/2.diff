@@ -1,0 +1,25 @@
+diff --git a/xarray/indexes/range_index.py b/xarray/indexes/range_index.py
+--- a/xarray/indexes/range_index.py
++++ b/xarray/indexes/range_index.py
+@@ -102,9 +102,18 @@
+         if not isinstance(other, RangeCoordinateTransform):
+             return False
+ 
+-        return (
+-            self.start == other.start
+-            and self.stop == other.stop
++        if exact:
++            return (
++                self.start == other.start
++                and self.stop == other.stop
++                and self.size == other.size
++            )
++
++        # Use np.isclose for floating point comparisons to handle accumulated
++        # floating point errors (e.g., from slicing operations)
++        return bool(
++            np.isclose(self.start, other.start)
++            and np.isclose(self.stop, other.stop)
+             and self.size == other.size
+         )
+ 

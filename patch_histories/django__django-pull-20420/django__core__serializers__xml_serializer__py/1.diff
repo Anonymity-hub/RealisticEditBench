@@ -1,0 +1,15 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -134,7 +134,10 @@
+                 # Iterable natural keys are rolled out as subelements
+                 for key_value in natural_key_value:
+                     self.xml.startElement("natural", {})
+-                    self.xml.characters(str(key_value))
++                    if key_value is None:
++                        self.xml.addQuickElement("None")
++                    else:
++                        self.xml.characters(str(key_value))
+                     self.xml.endElement("natural")
+             else:
+                 self.xml.characters(str(related_att))

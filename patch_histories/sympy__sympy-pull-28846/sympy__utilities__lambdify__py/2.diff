@@ -1,0 +1,12 @@
+diff --git a/sympy/utilities/lambdify.py b/sympy/utilities/lambdify.py
+--- a/sympy/utilities/lambdify.py
++++ b/sympy/utilities/lambdify.py
+@@ -1439,7 +1439,7 @@
+     if namespace is None:
+         namespace = {}
+     # tuples, lists, dicts are valid expressions
+-    if isinstance(expr,
++    if isinstance(expr, (list, tuple)):
+         for arg in expr:
+             _imp_namespace(arg, namespace)
+         return namespace

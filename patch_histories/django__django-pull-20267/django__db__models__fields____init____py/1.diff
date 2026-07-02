@@ -1,0 +1,18 @@
+diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py
+--- a/django/db/models/fields/__init__.py
++++ b/django/db/models/fields/__init__.py
+@@ -316,11 +316,11 @@
+         if not self.choices:
+             return []
+ 
+-        if not isinstance(self.choices, Iterable) or isinstance(self.choices, str):
++        if not isinstance(self.choices, Iterable) or isinstance(self.choices, (str, set)):
+             return [
+                 checks.Error(
+-                    "'choices' must be a mapping (e.g. a dictionary) or an iterable "
+-                    "(e.g. a list or tuple).",
++                    "'choices' must be a mapping (e.g. a dictionary) or an "
++                    "ordered iterable (e.g. a list or tuple, but not a set).",
+                     obj=self,
+                     id="fields.E004",
+                 )

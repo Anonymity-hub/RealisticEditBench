@@ -1,0 +1,32 @@
+diff --git a/django/contrib/admin/options.py b/django/contrib/admin/options.py
+--- a/django/contrib/admin/options.py
++++ b/django/contrib/admin/options.py
+@@ -1186,10 +1186,24 @@
+             for bit in smart_split(search_term):
+                 if bit.startswith(('"', "'")) and bit[0] == bit[-1]:
+                     bit = unescape_string_literal(bit)
+-                or_queries = models.Q.create(
+-                    [(orm_lookup, bit) for orm_lookup in orm_lookups],
+-                    connector=models.Q.OR,
+-                )
++                # Build term lookups, skipping values invalid for their field.
++                bit_lookups = []
++                for orm_lookup, validate_field in orm_lookups:
++                    if validate_field is not None:
++                        formfield = validate_field.formfield()
++                        try:
++                            if formfield is not None:
++                                value = formfield.to_python(bit)
++                            else:
++                                # Fields like AutoField lack a form field.
++                                value = validate_field.to_python(bit)
++                        except ValidationError:
++                            # Skip this lookup for invalid values.
++                            continue
++                    else:
++                        value = bit
++                    bit_lookups.append((orm_lookup, value))
++                or_queries = models.Q.create(bit_lookups, connector=models.Q.OR)
+                 term_queries.append(or_queries)
+             queryset = queryset.filter(models.Q.create(term_queries))
+             may_have_duplicates |= any(

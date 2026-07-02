@@ -1,0 +1,29 @@
+diff --git a/sklearn/linear_model/_logistic.py b/sklearn/linear_model/_logistic.py
+--- a/sklearn/linear_model/_logistic.py
++++ b/sklearn/linear_model/_logistic.py
+@@ -793,6 +793,9 @@
+                 **getattr(scoring, "_kwargs", {}),
+             )
+ 
++        def calc_score(log_reg):
++            return scoring(log_reg, X_test, y_test, **score_params)
++
+     for w, C in zip(coefs, Cs):
+         log_reg.C = C
+         if fit_intercept:
+@@ -802,13 +805,8 @@
+             log_reg.coef_ = w
+             log_reg.intercept_ = 0.0
+ 
+-        if scoring is None:
+-            scores.append(calc_score(log_reg))
+-        else:
+-            # FIXME: If scoring = "neg_brier_score" and if not all class labels
+-            # are present in y_test, the following fails. Maybe we can pass
+-            # "labels=classes" to the call of scoring.
+-            scores.append(scoring(log_reg, X_test, y_test, **score_params))
++        scores.append(calc_score(log_reg))
++
+     return coefs, Cs, np.array(scores), n_iter
+ 
+ 

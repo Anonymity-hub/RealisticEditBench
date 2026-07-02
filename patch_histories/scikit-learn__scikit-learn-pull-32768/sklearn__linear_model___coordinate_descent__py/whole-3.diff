@@ -1,0 +1,12 @@
+diff --git a/sklearn/linear_model/_coordinate_descent.py b/sklearn/linear_model/_coordinate_descent.py
+--- a/sklearn/linear_model/_coordinate_descent.py
++++ b/sklearn/linear_model/_coordinate_descent.py
+@@ -1812,7 +1812,7 @@ def fit(self, X, y, sample_weight=None, **params):
+                     y,
+                     l1_ratio=l1_ratio,
+                     fit_intercept=self.fit_intercept,
+-                    # TODO: MultiTaskElasticNetCV has no attribute 'positive'
++                    # Note: MultiTaskElasticNetCV has no attribute 'positive'
+                     positive=getattr(self, "positive", False),
+                     eps=self.eps,
+                     n_alphas=self._alphas,

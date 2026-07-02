@@ -1,0 +1,15 @@
+diff --git a/sympy/integrals/rationaltools.py b/sympy/integrals/rationaltools.py
+--- a/sympy/integrals/rationaltools.py
++++ b/sympy/integrals/rationaltools.py
+@@ -340,7 +340,10 @@
+     reals = {}
+     complexes = {}
+ 
+-    for r, m in list(rs.items()):
++    remaining = list(rs)
++
++    while remaining:
++        r = remaining.pop()
+         r_c = r.conjugate()
+         if r != r_c and r_c in rs:
+             assert rs.pop(r_c) == m

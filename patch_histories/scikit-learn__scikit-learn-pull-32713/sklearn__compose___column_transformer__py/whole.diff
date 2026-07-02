@@ -1,0 +1,12 @@
+diff --git a/sklearn/compose/_column_transformer.py b/sklearn/compose/_column_transformer.py
+--- a/sklearn/compose/_column_transformer.py
++++ b/sklearn/compose/_column_transformer.py
+@@ -1238,7 +1238,7 @@ def _sk_visual_block_(self):
+                 self.transformers, [("remainder", self.remainder, remainder_columns)]
+             )
+         else:
+-            transformers = chain(self.transformers, [("remainder", self.remainder, "")])
++            transformers = chain(self.transformers, [("remainder", self.remainder, [])])
+ 
+         names, transformers, name_details = zip(*transformers)
+         return _VisualBlock(

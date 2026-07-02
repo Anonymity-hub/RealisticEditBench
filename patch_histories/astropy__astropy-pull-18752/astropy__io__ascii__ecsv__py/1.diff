@@ -1,0 +1,20 @@
+diff --git a/astropy/io/ascii/ecsv.py b/astropy/io/ascii/ecsv.py
+--- a/astropy/io/ascii/ecsv.py
++++ b/astropy/io/ascii/ecsv.py
+@@ -44,6 +44,16 @@
+     """
+ 
+ 
++class ECSVHeaderSplitter(core.DefaultSplitter):
++    """Splitter for reading header that does not strip column names.
++
++    For instance column names like " # weird "" name ", the ECSV header preserves
++    leading and trailing whitespace.
++    """
++
++    process_val = None
++
++
+ class EcsvHeader(basic.BasicHeader):
+     """Header class for which the column definition line starts with the
+     comment character.  See the :class:`CommentedHeader` class  for an example.

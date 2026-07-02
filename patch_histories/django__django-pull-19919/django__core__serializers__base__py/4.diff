@@ -1,0 +1,13 @@
+diff --git a/django/core/serializers/base.py b/django/core/serializers/base.py
+--- a/django/core/serializers/base.py
++++ b/django/core/serializers/base.py
+@@ -219,6 +219,9 @@
+     def _resolve_fk_natural_key(self, obj, field):
+         pass
+ 
++    def _model_supports_natural_key(self, model):
++        pass
++
+ 
+ class Deserializer:
+     """

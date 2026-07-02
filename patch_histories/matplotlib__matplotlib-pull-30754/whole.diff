@@ -1,0 +1,88 @@
+diff --git a/lib/matplotlib/axes/_base.py b/lib/matplotlib/axes/_base.py
+--- a/lib/matplotlib/axes/_base.py
++++ b/lib/matplotlib/axes/_base.py
+@@ -4756,13 +4756,15 @@ def twiny(self, axes_class=None, **kwargs):
+         ax2.yaxis.units = self.yaxis.units
+         return ax2
+ 
+-    def get_shared_x_axes(self):
++    @classmethod
++    def get_shared_x_axes(cls):
+         """Return an immutable view on the shared x-axes Grouper."""
+-        return cbook.GrouperView(self._shared_axes["x"])
++        return cbook.GrouperView(cls._shared_axes["x"])
+ 
+-    def get_shared_y_axes(self):
++    @classmethod
++    def get_shared_y_axes(cls):
+         """Return an immutable view on the shared y-axes Grouper."""
+-        return cbook.GrouperView(self._shared_axes["y"])
++        return cbook.GrouperView(cls._shared_axes["y"])
+ 
+     def label_outer(self, remove_inner_ticks=False):
+         """
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -703,7 +703,7 @@ def isDefault_minfmt(self, value):
+         self.minor._formatter_is_default = value
+ 
+     def _get_shared_axes(self):
+-        """Return Grouper of shared Axes for current axis."""
++        """Return a list of shared Axes for current axis."""
+         return self.axes._shared_axes[
+             self._get_axis_name()].get_siblings(self.axes)
+ 
+diff --git a/lib/matplotlib/cbook.py b/lib/matplotlib/cbook.py
+--- a/lib/matplotlib/cbook.py
++++ b/lib/matplotlib/cbook.py
+@@ -886,10 +886,17 @@ def __iter__(self):
+         for group in unique_groups.values():
+             yield sorted(group, key=self._ordering.__getitem__)
+ 
+-    def get_siblings(self, a):
+-        """Return all of the items joined with *a*, including itself."""
++    def get_siblings(self, a, *, include_self=True):
++        """
++        Return all the items joined with *a*.
++
++        *a* is included in the list if *include_self* is True.
++        """
+         siblings = self._mapping.get(a, [a])
+-        return sorted(siblings, key=self._ordering.get)
++        result = sorted(siblings, key=self._ordering.get)
++        if not include_self:
++            result.remove(a)
++        return result
+ 
+ 
+ class GrouperView:
+@@ -905,11 +912,13 @@ def joined(self, a, b):
+         """
+         return self._grouper.joined(a, b)
+ 
+-    def get_siblings(self, a):
++    def get_siblings(self, a, *, include_self=True):
+         """
+-        Return all of the items joined with *a*, including itself.
++        Return all the items joined with *a*.
++
++        *a* is included in the list if *include_self* is True.
+         """
+-        return self._grouper.get_siblings(a)
++        return self._grouper.get_siblings(a, include_self=include_self)
+ 
+ 
+ def simple_linear_interpolation(a, steps):
+diff --git a/lib/matplotlib/figure.py b/lib/matplotlib/figure.py
+--- a/lib/matplotlib/figure.py
++++ b/lib/matplotlib/figure.py
+@@ -947,7 +947,7 @@ def _remove_axes(self, ax, owners):
+ 
+         for name in ax._axis_names:  # Break link between any shared Axes
+             grouper = ax._shared_axes[name]
+-            siblings = [other for other in grouper.get_siblings(ax) if other is not ax]
++            siblings = grouper.get_siblings(ax, include_self=False)
+             if not siblings:  # Axes was not shared along this axis; we're done.
+                 continue
+             grouper.remove(ax)

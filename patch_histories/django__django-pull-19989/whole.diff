@@ -1,0 +1,288 @@
+diff --git a/django/core/management/commands/inspectdb.py b/django/core/management/commands/inspectdb.py
+--- a/django/core/management/commands/inspectdb.py
++++ b/django/core/management/commands/inspectdb.py
+@@ -4,6 +4,7 @@
+ from django.core.management.base import BaseCommand, CommandError
+ from django.db import DEFAULT_DB_ALIAS, connections
+ from django.db.models.constants import LOOKUP_SEP
++from django.db.models.deletion import DatabaseOnDelete
+ 
+ 
+ class Command(BaseCommand):
+@@ -163,7 +164,9 @@ def handle_inspection(self, options):
+                         extra_params["unique"] = True
+ 
+                     if is_relation:
+-                        ref_db_column, ref_db_table = relations[column_name]
++                        ref_db_column, ref_db_table, db_on_delete = relations[
++                            column_name
++                        ]
+                         if extra_params.pop("unique", False) or extra_params.get(
+                             "primary_key"
+                         ):
+@@ -191,6 +194,8 @@ def handle_inspection(self, options):
+                                 model_name.lower(),
+                                 att_name,
+                             )
++                        if db_on_delete and isinstance(db_on_delete, DatabaseOnDelete):
++                            extra_params["on_delete"] = f"models.{db_on_delete}"
+                         used_relations.add(rel_to)
+                     else:
+                         # Calling `get_field_type` to get the field type string
+@@ -227,8 +232,12 @@ def handle_inspection(self, options):
+                         "" if "." in field_type else "models.",
+                         field_type,
+                     )
++                    on_delete_qualname = extra_params.pop("on_delete", None)
+                     if field_type.startswith(("ForeignKey(", "OneToOneField(")):
+-                        field_desc += ", models.DO_NOTHING"
++                        if on_delete_qualname:
++                            field_desc += f", {on_delete_qualname}"
++                        else:
++                            field_desc += ", models.DO_NOTHING"
+ 
+                     # Add comment.
+                     if connection.features.supports_comments and row.comment:
+diff --git a/django/db/backends/base/introspection.py b/django/db/backends/base/introspection.py
+--- a/django/db/backends/base/introspection.py
++++ b/django/db/backends/base/introspection.py
+@@ -1,5 +1,7 @@
+ from collections import namedtuple
+ 
++from django.db.models import DB_CASCADE, DB_SET_DEFAULT, DB_SET_NULL, DO_NOTHING
++
+ # Structure returned by DatabaseIntrospection.get_table_list()
+ TableInfo = namedtuple("TableInfo", ["name", "type"])
+ 
+@@ -15,6 +17,13 @@ class BaseDatabaseIntrospection:
+     """Encapsulate backend-specific introspection utilities."""
+ 
+     data_types_reverse = {}
++    on_delete_types = {
++        "CASCADE": DB_CASCADE,
++        "NO ACTION": DO_NOTHING,
++        "SET DEFAULT": DB_SET_DEFAULT,
++        "SET NULL": DB_SET_NULL,
++        # DB_RESTRICT - "RESTRICT" is not supported.
++    }
+ 
+     def __init__(self, connection):
+         self.connection = connection
+@@ -169,8 +178,11 @@ def get_sequences(self, cursor, table_name, table_fields=()):
+ 
+     def get_relations(self, cursor, table_name):
+         """
+-        Return a dictionary of {field_name: (field_name_other_table,
+-        other_table)} representing all foreign keys in the given table.
++        Return a dictionary of
++            {
++                field_name: (field_name_other_table, other_table, db_on_delete)
++            }
++        representing all foreign keys in the given table.
+         """
+         raise NotImplementedError(
+             "subclasses of BaseDatabaseIntrospection may require a "
+diff --git a/django/db/backends/mysql/base.py b/django/db/backends/mysql/base.py
+--- a/django/db/backends/mysql/base.py
++++ b/django/db/backends/mysql/base.py
+@@ -334,6 +334,7 @@ def check_constraints(self, table_names=None):
+                 for column_name, (
+                     referenced_column_name,
+                     referenced_table_name,
++                    _,
+                 ) in relations.items():
+                     cursor.execute(
+                         """
+diff --git a/django/db/backends/mysql/introspection.py b/django/db/backends/mysql/introspection.py
+--- a/django/db/backends/mysql/introspection.py
++++ b/django/db/backends/mysql/introspection.py
+@@ -196,24 +196,36 @@ def get_sequences(self, cursor, table_name, table_fields=()):
+ 
+     def get_relations(self, cursor, table_name):
+         """
+-        Return a dictionary of {field_name: (field_name_other_table,
+-        other_table)} representing all foreign keys in the given table.
++        Return a dictionary of
++            {
++                field_name: (field_name_other_table, other_table, db_on_delete)
++            }
++        representing all foreign keys in the given table.
+         """
+         cursor.execute(
+             """
+-            SELECT column_name, referenced_column_name, referenced_table_name
+-            FROM information_schema.key_column_usage
+-            WHERE table_name = %s
+-                AND table_schema = DATABASE()
+-                AND referenced_table_schema = DATABASE()
+-                AND referenced_table_name IS NOT NULL
+-                AND referenced_column_name IS NOT NULL
++            SELECT
++                kcu.column_name,
++                kcu.referenced_column_name,
++                kcu.referenced_table_name,
++                rc.delete_rule
++            FROM
++                information_schema.key_column_usage kcu
++            JOIN
++                information_schema.referential_constraints rc
++                ON rc.constraint_name = kcu.constraint_name
++                AND rc.constraint_schema = kcu.constraint_schema
++            WHERE kcu.table_name = %s
++                AND kcu.table_schema = DATABASE()
++                AND kcu.referenced_table_schema = DATABASE()
++                AND kcu.referenced_table_name IS NOT NULL
++                AND kcu.referenced_column_name IS NOT NULL
+             """,
+             [table_name],
+         )
+         return {
+-            field_name: (other_field, other_table)
+-            for field_name, other_field, other_table in cursor.fetchall()
++            field_name: (other_field, other_table, self.on_delete_types.get(on_delete))
++            for field_name, other_field, other_table, on_delete in cursor.fetchall()
+         }
+ 
+     def get_storage_engine(self, cursor, table_name):
+diff --git a/django/db/backends/oracle/introspection.py b/django/db/backends/oracle/introspection.py
+--- a/django/db/backends/oracle/introspection.py
++++ b/django/db/backends/oracle/introspection.py
+@@ -254,13 +254,16 @@ def get_sequences(self, cursor, table_name, table_fields=()):
+ 
+     def get_relations(self, cursor, table_name):
+         """
+-        Return a dictionary of {field_name: (field_name_other_table,
+-        other_table)} representing all foreign keys in the given table.
++        Return a dictionary of
++            {
++                field_name: (field_name_other_table, other_table, db_on_delete)
++            }
++        representing all foreign keys in the given table.
+         """
+         table_name = table_name.upper()
+         cursor.execute(
+             """
+-    SELECT ca.column_name, cb.table_name, cb.column_name
++    SELECT ca.column_name, cb.table_name, cb.column_name, user_constraints.delete_rule
+     FROM   user_constraints, USER_CONS_COLUMNS ca, USER_CONS_COLUMNS cb
+     WHERE  user_constraints.table_name = %s AND
+            user_constraints.constraint_name = ca.constraint_name AND
+@@ -273,8 +276,14 @@ def get_relations(self, cursor, table_name):
+             self.identifier_converter(field_name): (
+                 self.identifier_converter(rel_field_name),
+                 self.identifier_converter(rel_table_name),
++                self.on_delete_types.get(on_delete),
+             )
+-            for field_name, rel_table_name, rel_field_name in cursor.fetchall()
++            for (
++                field_name,
++                rel_table_name,
++                rel_field_name,
++                on_delete,
++            ) in cursor.fetchall()
+         }
+ 
+     def get_primary_key_columns(self, cursor, table_name):
+diff --git a/django/db/backends/postgresql/introspection.py b/django/db/backends/postgresql/introspection.py
+--- a/django/db/backends/postgresql/introspection.py
++++ b/django/db/backends/postgresql/introspection.py
+@@ -3,7 +3,7 @@
+ from django.db.backends.base.introspection import BaseDatabaseIntrospection
+ from django.db.backends.base.introspection import FieldInfo as BaseFieldInfo
+ from django.db.backends.base.introspection import TableInfo as BaseTableInfo
+-from django.db.models import Index
++from django.db.models import DB_CASCADE, DB_SET_DEFAULT, DB_SET_NULL, DO_NOTHING, Index
+ 
+ FieldInfo = namedtuple("FieldInfo", [*BaseFieldInfo._fields, "is_autofield", "comment"])
+ TableInfo = namedtuple("TableInfo", [*BaseTableInfo._fields, "comment"])
+@@ -38,6 +38,14 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
+ 
+     ignored_tables = []
+ 
++    on_delete_types = {
++        "a": DO_NOTHING,
++        "c": DB_CASCADE,
++        "d": DB_SET_DEFAULT,
++        "n": DB_SET_NULL,
++        # DB_RESTRICT - "r" is not supported.
++    }
++
+     def get_field_type(self, data_type, description):
+         field_type = super().get_field_type(data_type, description)
+         if description.is_autofield or (
+@@ -154,12 +162,15 @@ def get_sequences(self, cursor, table_name, table_fields=()):
+ 
+     def get_relations(self, cursor, table_name):
+         """
+-        Return a dictionary of {field_name: (field_name_other_table,
+-        other_table)} representing all foreign keys in the given table.
++        Return a dictionary of
++            {
++                field_name: (field_name_other_table, other_table, db_on_delete)
++            }
++        representing all foreign keys in the given table.
+         """
+         cursor.execute(
+             """
+-            SELECT a1.attname, c2.relname, a2.attname
++            SELECT a1.attname, c2.relname, a2.attname, con.confdeltype
+             FROM pg_constraint con
+             LEFT JOIN pg_class c1 ON con.conrelid = c1.oid
+             LEFT JOIN pg_class c2 ON con.confrelid = c2.oid
+@@ -175,7 +186,10 @@ def get_relations(self, cursor, table_name):
+         """,
+             [table_name],
+         )
+-        return {row[0]: (row[2], row[1]) for row in cursor.fetchall()}
++        return {
++            row[0]: (row[2], row[1], self.on_delete_types.get(row[3]))
++            for row in cursor.fetchall()
++        }
+ 
+     def get_constraints(self, cursor, table_name):
+         """
+diff --git a/django/db/backends/sqlite3/introspection.py b/django/db/backends/sqlite3/introspection.py
+--- a/django/db/backends/sqlite3/introspection.py
++++ b/django/db/backends/sqlite3/introspection.py
+@@ -153,20 +153,27 @@ def get_sequences(self, cursor, table_name, table_fields=()):
+ 
+     def get_relations(self, cursor, table_name):
+         """
+-        Return a dictionary of {column_name: (ref_column_name, ref_table_name)}
++        Return a dictionary of
++            {column_name: (ref_column_name, ref_table_name, db_on_delete)}
+         representing all foreign keys in the given table.
+         """
+         cursor.execute(
+             "PRAGMA foreign_key_list(%s)" % self.connection.ops.quote_name(table_name)
+         )
+         return {
+-            column_name: (ref_column_name, ref_table_name)
++            column_name: (
++                ref_column_name,
++                ref_table_name,
++                self.on_delete_types.get(on_delete),
++            )
+             for (
+                 _,
+                 _,
+                 ref_table_name,
+                 column_name,
+                 ref_column_name,
++                _,
++                on_delete,
+                 *_,
+             ) in cursor.fetchall()
+         }
+@@ -407,7 +414,10 @@ def get_constraints(self, cursor, table_name):
+                     "check": False,
+                     "index": False,
+                 }
+-                for index, (column_name, (ref_column_name, ref_table_name)) in relations
++                for index, (
++                    column_name,
++                    (ref_column_name, ref_table_name, _),
++                ) in relations
+             }
+         )
+         return constraints

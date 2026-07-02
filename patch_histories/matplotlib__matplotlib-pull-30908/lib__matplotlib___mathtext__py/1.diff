@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -1326,6 +1326,7 @@ def __init__(self, elements: T.Sequence[Node], w: float = 0.0,
+         if do_kern:
+             self.kern()
+         self.hpack(w=w, m=m)
++        self.is_phantom = False
+ 
+     def is_char_node(self) -> bool:
+         # See description in Node.is_char_node.

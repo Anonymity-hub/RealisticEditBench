@@ -1,0 +1,30 @@
+diff --git a/sphinx/ext/autosummary/__init__.py b/sphinx/ext/autosummary/__init__.py
+--- a/sphinx/ext/autosummary/__init__.py
++++ b/sphinx/ext/autosummary/__init__.py
+@@ -537,7 +537,7 @@
+     return '(%s)' % sig
+ 
+ 
+-def extract_summary(doc: list[str], document: Any) -> str:
++def extract_summary(doc: Sequence[str], settings: Any) -> str:
+     """Extract summary from docstring."""
+     # Find the first stanza (heading, sentence, paragraph, etc.).
+     # If there's a blank line, then we can assume that the stanza has ended,
+@@ -560,7 +560,7 @@
+         return ''
+ 
+     # parse the docstring
+-    node = _parse_summary(first_stanza, document.settings)
++    node = _parse_summary(first_stanza, settings)
+     if isinstance(node[0], nodes.section):
+         # document starts with a section heading, so use that.
+         summary = node[0].astext().strip()
+@@ -577,7 +577,7 @@
+             for i in range(len(sentences)):
+                 summary = '. '.join(sentences[: i + 1]).rstrip('.') + '.'
+                 node[:] = []
+-                node = _parse_summary(first_stanza, document.settings)
++                node = _parse_summary(first_stanza, settings)
+                 if summary.endswith(WELL_KNOWN_ABBREVIATIONS):
+                     pass
+                 elif not any(node.findall(nodes.system_message)):

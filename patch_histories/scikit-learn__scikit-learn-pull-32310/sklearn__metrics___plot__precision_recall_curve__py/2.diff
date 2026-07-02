@@ -1,0 +1,20 @@
+diff --git a/sklearn/metrics/_plot/precision_recall_curve.py b/sklearn/metrics/_plot/precision_recall_curve.py
+--- a/sklearn/metrics/_plot/precision_recall_curve.py
++++ b/sklearn/metrics/_plot/precision_recall_curve.py
+@@ -6,6 +6,7 @@
+ from sklearn.metrics._ranking import average_precision_score, precision_recall_curve
+ from sklearn.utils._plotting import (
+     _BinaryClassifierCurveDisplayMixin,
++    _deprecate_estimator_name,
+     _deprecate_y_pred_parameter,
+     _despine,
+     _validate_style_kwargs,
+@@ -123,7 +124,7 @@
+         prevalence_pos_label=None,
+         estimator_name="deprecated",
+     ):
+-        self.estimator_name = estimator_name
++        self.name = _deprecate_estimator_name(estimator_name, name, "1.8")
+         self.precision = precision
+         self.recall = recall
+         self.average_precision = average_precision

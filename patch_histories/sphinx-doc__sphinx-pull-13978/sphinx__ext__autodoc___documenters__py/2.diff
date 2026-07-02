@@ -1,0 +1,15 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -144,10 +144,7 @@
+         )
+         if ret is None:
+             return None
+-        props, parent = ret
+-
+-        self.props = props
+-        self.parent = parent
++        self.props = ret
+         self._load_object_has_been_called = True
+         return True
+ 

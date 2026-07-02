@@ -1,0 +1,24 @@
+diff --git a/sympy/physics/vector/dyadic.py b/sympy/physics/vector/dyadic.py
+--- a/sympy/physics/vector/dyadic.py
++++ b/sympy/physics/vector/dyadic.py
+@@ -221,6 +221,20 @@
+                     p_v2 = mpp._print(v[2])
+                     p_dyad = prettyForm(*p_v1.right(bar, p_v2))
+ 
++                    c = v[0]
++                    if i == 0:
++                        sign = ""
++                    else:
++                        sign = " + "
++
++                    coeff, rest = c.as_coeff_Mul()
++                    if coeff < 0:
++                        if i == 0:
++                            sign = "- "
++                        else:
++                            sign = " - "
++                        c = -c
++
+                 outstr = "".join(ol)
+                 if outstr.startswith(" + "):
+                     outstr = outstr[3:]

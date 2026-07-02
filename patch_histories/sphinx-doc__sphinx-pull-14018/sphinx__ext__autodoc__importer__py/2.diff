@@ -1,0 +1,35 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -493,18 +493,19 @@
+     type_aliases: dict[str, Any] | None,
+     current_document: _CurrentDocument,
+     config: Config,
+-    env: BuildEnvironment,
+     events: EventManager,
+     get_attr: _AttrGetter,
+     options: _AutoDocumenterOptions,
+     parent_modname: str | None = None,
++    ref_context: Mapping[str, str | None],
++    reread_always: MutableSet[str],
+ ) -> _ItemProperties | None:
+     """Import and load the object given by *name*."""
+     parsed = _parse_name(
+         name=name,
+         objtype=objtype,
+         current_document=current_document,
+-        env=env,
++        ref_context=ref_context,
+     )
+     if parsed is None:
+         return None
+@@ -538,7 +539,8 @@
+             im_ = None
+         if im_ is None:
+             logger.warning(exc.args[0], type='autodoc', subtype='import_object')
+-            env.note_reread()
++            # See BuildEnvironment.note_reread()
++            reread_always.add(current_document.docname)
+             return None
+         else:
+             im = im_

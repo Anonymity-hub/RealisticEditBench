@@ -1,0 +1,18 @@
+diff --git a/sklearn/utils/metaestimators.py b/sklearn/utils/metaestimators.py
+--- a/sklearn/utils/metaestimators.py
++++ b/sklearn/utils/metaestimators.py
+@@ -100,6 +100,14 @@ def _validate_names(self, names):
+                 "Estimator names must not contain __: got {0!r}".format(invalid_names)
+             )
+ 
++    def _check_estimators_are_instances(self, estimators):
++        for estimator in estimators:
++            if isinstance(estimator, type):
++                raise TypeError(
++                    "Expected an estimator instance ({estimator.__name__}()), got "
++                    "estimator class instead ({estimator.__name__})."
++                )
++
+ 
+ def _safe_split(estimator, X, y, indices, train_indices=None):
+     """Create subset of dataset and properly handle kernels.

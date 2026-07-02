@@ -1,0 +1,37 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -2083,21 +2083,20 @@
+                     )
+             val = field.get_db_prep_save(val, connection=self.connection)
+ 
+-            # Getting the placeholder for the field.
+-            if hasattr(field, "get_placeholder"):
+-                placeholder = field.get_placeholder(val, self, self.connection)
++            quoted_name = qn(field.column)
++            if (
++                get_placeholder_sql := getattr(field, "get_placeholder_sql", None)
++            ) is not None:
++                sql, params = get_placeholder_sql(val, self, self.connection)
++                values.append(f"{quoted_name} = {sql}")
++                update_params.extend(params)
++            elif hasattr(val, "as_sql"):
++                sql, params = self.compile(val)
++                values.append(f"{quoted_name} = {sql}")
++                update_params.extend(params)
+             else:
+-                placeholder = "%s"
+-            name = field.column
+-            if hasattr(val, "as_sql"):
+-                sql, params = self.compile(val)
+-                values.append("%s = %s" % (qn(name), placeholder % sql))
+-                update_params.extend(params)
+-            elif val is not None:
+-                values.append("%s = %s" % (qn(name), placeholder))
++                values.append(f"{quoted_name} = %s")
+                 update_params.append(val)
+-            else:
+-                values.append("%s = NULL" % qn(name))
+         table = self.query.base_table
+         result = [
+             "UPDATE %s SET" % qn(table),

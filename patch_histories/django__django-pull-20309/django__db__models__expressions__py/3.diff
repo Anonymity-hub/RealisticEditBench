@@ -1,0 +1,12 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1141,7 +1141,7 @@
+ 
+ 
+ @deconstructible(path="django.db.models.Value")
+-class Value(SQLiteNumericMixin, Expression):
++class Value(Expression):
+     """Represent a wrapped value as a node within an expression."""
+ 
+     # Provide a default value for `for_save` in order to allow unresolved

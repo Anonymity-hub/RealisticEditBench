@@ -1,0 +1,12 @@
+diff --git a/xarray/core/utils.py b/xarray/core/utils.py
+--- a/xarray/core/utils.py
++++ b/xarray/core/utils.py
+@@ -271,7 +271,7 @@
+         return False
+ 
+     # Check for NaN equivalence
+-    return result or (pd.isnull(first) and pd.isnull(second))  # type: ignore[call-overload]
++    return result
+ 
+ 
+ def list_equiv(first: Sequence[T], second: Sequence[T]) -> bool:

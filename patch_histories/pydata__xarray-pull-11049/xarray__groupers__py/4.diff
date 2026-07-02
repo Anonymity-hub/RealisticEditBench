@@ -1,0 +1,28 @@
+diff --git a/xarray/groupers.py b/xarray/groupers.py
+--- a/xarray/groupers.py
++++ b/xarray/groupers.py
+@@ -12,7 +12,7 @@
+ import operator
+ from abc import ABC, abstractmethod
+ from collections import defaultdict
+-from collections.abc import Hashable, Mapping, Sequence
++from collections.abc import Callable, Hashable, Mapping, Sequence
+ from dataclasses import dataclass, field
+ from functools import partial
+ from itertools import chain, pairwise
+@@ -39,6 +39,7 @@
+ from xarray.core.resample_cftime import CFTimeGrouper
+ from xarray.core.types import (
+     Bins,
++    CFTimeDatetime,
+     DatetimeLike,
+     GroupIndices,
+     PDDatetimeUnitOptions,
+@@ -966,6 +967,7 @@
+         counts = agged["count"]
+ 
+         index_class: type[CFTimeIndex | pd.DatetimeIndex]
++        datetime_class: CFTimeDatetime | Callable[..., np.datetime64]
+         if _contains_cftime_datetimes(group.data):
+             index_class = CFTimeIndex
+             datetime_class = type(first_n_items(group.data, 1).item())

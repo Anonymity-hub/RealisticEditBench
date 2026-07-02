@@ -1,0 +1,12 @@
+diff --git a/xarray/backends/zarr.py b/xarray/backends/zarr.py
+--- a/xarray/backends/zarr.py
++++ b/xarray/backends/zarr.py
+@@ -1560,7 +1560,7 @@
+     if from_array_kwargs is None:
+         from_array_kwargs = {}
+ 
+-    if chunks == "auto":
++    if chunks is _default:
+         try:
+             guess_chunkmanager(
+                 chunked_array_type

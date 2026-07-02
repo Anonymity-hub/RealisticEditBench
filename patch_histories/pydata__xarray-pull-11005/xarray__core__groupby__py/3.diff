@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -991,7 +991,7 @@
+             if (has_missing_groups and index is not None) or (
+                 len(self.groupers) > 1
+                 and not isinstance(grouper.full_index, pd.RangeIndex)
+-                and not index.index.equals(grouper.full_index)
++                and not (index is not None and index.index.equals(grouper.full_index))
+             ):
+                 indexers[grouper.name] = grouper.full_index
+         if indexers:

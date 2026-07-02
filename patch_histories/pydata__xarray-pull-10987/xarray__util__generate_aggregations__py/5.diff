@@ -1,0 +1,81 @@
+diff --git a/xarray/util/generate_aggregations.py b/xarray/util/generate_aggregations.py
+--- a/xarray/util/generate_aggregations.py
++++ b/xarray/util/generate_aggregations.py
+@@ -33,6 +33,7 @@
+ from xarray.core.utils import contains_only_chunked_or_numpy, module_available
+ 
+ if TYPE_CHECKING:
++    from xarray.core.coordinates import DatasetCoordinates
+     from xarray.core.dataarray import DataArray
+     from xarray.core.dataset import Dataset
+ 
+@@ -84,6 +85,10 @@
+         keepdims: bool = False,
+         **kwargs: Any,
+     ) -> Self:
++        raise NotImplementedError()
++
++    @property
++    def coords(self) -> DatasetCoordinates:
+         raise NotImplementedError()
+ 
+     def assign_coords(
+@@ -563,13 +568,20 @@
+         keep_attrs = (
+             "\n" + 12 * " " + "keep_attrs=keep_attrs," if has_keep_attrs else ""
+         )
++
++        if method.aggregation_type == "scan" and self.datastructure.name == "Dataset":
++            # Scans retain dimensions, datasets drops them somehow:
++            out_finalized = "out.assign_coords(self._obj.coords)"
++        else:
++            out_finalized = "out"
++
+         return f"""\
+         out = self.reduce(
+             duck_array_ops.{method.array_method},
+             dim=dim,{extra_kwargs}{keep_attrs}
+             **kwargs,
+         )
+-        return out"""
++        return {out_finalized}"""
+ 
+ 
+ AGGREGATION_METHODS = (
+@@ -587,7 +599,7 @@
+     Method(
+         "median", extra_kwargs=(skipna,), numeric_only=True, min_flox_version="0.9.2"
+     ),
+-    # Cumulatives:
++    # Scans:
+     Method(
+         "cumsum",
+         extra_kwargs=(skipna,),
+@@ -760,8 +772,11 @@
+     from pathlib import Path
+ 
+     p = Path(os.getcwd())
++
++    filepath = p.parent / "xarray" / "xarray" / "core" / "_aggregations.py"
++    # filepath = p.parent / "core" / "_aggregations.py"  # Run from script location
+     write_methods(
+-        filepath=p.parent / "xarray" / "xarray" / "core" / "_aggregations.py",
++        filepath=filepath,
+         generators=[
+             DATATREE_GENERATOR,
+             DATASET_GENERATOR,
+@@ -773,9 +788,12 @@
+         ],
+         preamble=MODULE_PREAMBLE,
+     )
++
++    # NamedArray:
++    filepath = p.parent / "xarray" / "xarray" / "namedarray" / "_aggregations.py"
++    # filepath = p.parent / "namedarray" / "_aggregations.py"  # Run from script location
+     write_methods(
+-        filepath=p.parent / "xarray" / "xarray" / "namedarray" / "_aggregations.py",
++        filepath=filepath,
+         generators=[NAMED_ARRAY_GENERATOR],
+         preamble=NAMED_ARRAY_MODULE_PREAMBLE,
+     )
+-    # filepath = p.parent / "core" / "_aggregations.py"  # Run from script location

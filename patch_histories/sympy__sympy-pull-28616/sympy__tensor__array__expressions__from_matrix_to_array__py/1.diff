@@ -1,0 +1,13 @@
+diff --git a/sympy/tensor/array/expressions/from_matrix_to_array.py b/sympy/tensor/array/expressions/from_matrix_to_array.py
+--- a/sympy/tensor/array/expressions/from_matrix_to_array.py
++++ b/sympy/tensor/array/expressions/from_matrix_to_array.py
+@@ -56,7 +56,8 @@ def convert_matrix_to_array(expr: Basic) -> Basic:
+     elif isinstance(expr, Pow):
+         base = convert_matrix_to_array(expr.base)
+         if (expr.exp > 0) == True:
+-            return _array_tensor_product(*[base for i in range(expr.exp)])
++            base_conv = convert_matrix_to_array(base)
++            return _array_tensor_product(*[base for i in range(expr.exp)])
+         elif get_shape(base) == ():
+             d = Dummy("d")
+             return ArrayElementwiseApplyFunc(Lambda(d, d**expr.exp), base)

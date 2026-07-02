@@ -1,0 +1,14 @@
+diff --git a/sympy/polys/matrices/sdm.py b/sympy/polys/matrices/sdm.py
+--- a/sympy/polys/matrices/sdm.py
++++ b/sympy/polys/matrices/sdm.py
+@@ -846,7 +846,9 @@
+             raise DMDomainError
+         if A.shape != B.shape:
+             raise DMShapeError
+-        zero = A.domain.zero
++
++        K = A.domain
++        zero = K.zero
+         fzero = lambda e: zero
+         Csdm = binop_dict(A, B, mul, fzero, fzero)
+         return A.new(Csdm, A.shape, A.domain)

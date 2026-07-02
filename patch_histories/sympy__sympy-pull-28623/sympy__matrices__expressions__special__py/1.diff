@@ -1,0 +1,12 @@
+diff --git a/sympy/matrices/expressions/special.py b/sympy/matrices/expressions/special.py
+--- a/sympy/matrices/expressions/special.py
++++ b/sympy/matrices/expressions/special.py
+@@ -328,7 +328,7 @@
+ 
+ class MatrixUnit(MatrixExpr):
+     """
+-    Matrix with only one nonzero entry with value 1.
++    Matrix with only one nonzero entry with value 1. Also called single-entry matrix.
+ 
+     https://en.wikipedia.org/wiki/Matrix_unit
+ 

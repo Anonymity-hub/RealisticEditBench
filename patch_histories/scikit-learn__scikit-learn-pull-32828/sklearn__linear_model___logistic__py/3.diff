@@ -1,0 +1,24 @@
+diff --git a/sklearn/linear_model/_logistic.py b/sklearn/linear_model/_logistic.py
+--- a/sklearn/linear_model/_logistic.py
++++ b/sklearn/linear_model/_logistic.py
+@@ -756,6 +756,11 @@
+         def calc_score(log_reg):
+             return log_reg.score(X_test, y_test, sample_weight=sw_test)
+ 
++    else:
++        is_binary = len(classes) <= 2
++        score_params = score_params or {}
++        score_params = _check_method_params(X=X, params=score_params, indices=test)
++
+     for w, C in zip(coefs, Cs):
+         log_reg.C = C
+         if fit_intercept:
+@@ -768,8 +773,6 @@
+         if scoring is None:
+             scores.append(calc_score(log_reg))
+         else:
+-            score_params = score_params or {}
+-            score_params = _check_method_params(X=X, params=score_params, indices=test)
+             # FIXME: If scoring = "neg_brier_score" and if not all class labels
+             # are present in y_test, the following fails. Maybe we can pass
+             # "labels=classes" to the call of scoring.

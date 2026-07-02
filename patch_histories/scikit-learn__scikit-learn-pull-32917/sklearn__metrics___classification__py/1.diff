@@ -1,0 +1,14 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -1862,9 +1862,7 @@
+ 
+     y_true, y_pred = attach_unique(y_true, y_pred)
+     y_type, y_true, y_pred, _ = _check_targets(y_true, y_pred)
+-    # Convert to Python primitive type to avoid NumPy type / Python str
+-    # comparison. See https://github.com/numpy/numpy/issues/6784
+-    present_labels = _tolist(unique_labels(y_true, y_pred))
++    present_labels = unique_labels(y_true, y_pred)
+     if average == "binary":
+         if y_type == "binary":
+             if pos_label not in present_labels:

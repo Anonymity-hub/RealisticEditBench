@@ -1,0 +1,22 @@
+diff --git a/xarray/core/formatting.py b/xarray/core/formatting.py
+--- a/xarray/core/formatting.py
++++ b/xarray/core/formatting.py
+@@ -1056,10 +1056,14 @@
+         ):
+             summary.append(coords_diff)
+ 
+-    if compat == "identical" and (
+-        attrs_diff := diff_attrs_repr(a.attrs, b.attrs, compat)
+-    ):
+-        summary.append(attrs_diff)
++    if compat == "identical":
++        if hasattr(a, "xindexes") and (
++            indexes_diff := diff_indexes_repr(a.xindexes, b.xindexes)
++        ):
++            summary.append(indexes_diff)
++
++        if attrs_diff := diff_attrs_repr(a.attrs, b.attrs, compat):
++            summary.append(attrs_diff)
+ 
+     return "\n".join(summary)
+ 

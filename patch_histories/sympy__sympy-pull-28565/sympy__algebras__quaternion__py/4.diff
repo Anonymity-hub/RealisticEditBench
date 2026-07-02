@@ -1,0 +1,15 @@
+diff --git a/sympy/algebras/quaternion.py b/sympy/algebras/quaternion.py
+--- a/sympy/algebras/quaternion.py
++++ b/sympy/algebras/quaternion.py
+@@ -1044,6 +1044,11 @@
+         if vector_norm.is_zero:
+             return Quaternion(a, 0, 0, 0)
+ 
++        angle_over_norm = acos(q.a / q_norm) / vector_norm
++        b = q.b * angle_over_norm
++        c = q.c * angle_over_norm
++        d = q.d * angle_over_norm
++
+         return Quaternion(a, b, c, d)
+ 
+     def _eval_subs(self, old: Expr, new: Expr) -> Quaternion: # type: ignore

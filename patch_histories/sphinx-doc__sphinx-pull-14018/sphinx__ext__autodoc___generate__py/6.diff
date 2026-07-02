@@ -1,0 +1,20 @@
+diff --git a/sphinx/ext/autodoc/_generate.py b/sphinx/ext/autodoc/_generate.py
+--- a/sphinx/ext/autodoc/_generate.py
++++ b/sphinx/ext/autodoc/_generate.py
+@@ -206,7 +206,6 @@
+     attr_docs: dict[tuple[str, str], list[str]],
+     config: Config,
+     current_document: _CurrentDocument,
+-    env: BuildEnvironment,
+     events: EventManager,
+     get_attr: _AttrGetter,
+     indent: str,
+@@ -214,6 +213,8 @@
+     props: _ItemProperties,
+     real_modname: str,
+     record_dependencies: set[str],
++    ref_context: Mapping[str, str | None],
++    reread_always: MutableSet[str],
+     result: StringList,
+ ) -> None:
+     """Generate reST for member documentation.

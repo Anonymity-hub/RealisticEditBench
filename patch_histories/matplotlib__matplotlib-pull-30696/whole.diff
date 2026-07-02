@@ -1,0 +1,60 @@
+diff --git a/lib/matplotlib/axes/_base.py b/lib/matplotlib/axes/_base.py
+--- a/lib/matplotlib/axes/_base.py
++++ b/lib/matplotlib/axes/_base.py
+@@ -4632,9 +4632,7 @@ def get_tightbbox(self, renderer=None, *, call_axes_locator=True,
+ 
+         for a in bbox_artists:
+             bbox = a.get_tightbbox(renderer)
+-            if (bbox is not None
+-                    and 0 < bbox.width < np.inf
+-                    and 0 < bbox.height < np.inf):
++            if bbox is not None and bbox._is_finite():
+                 bb.append(bbox)
+         return mtransforms.Bbox.union(
+             [b for b in bb if b.width != 0 or b.height != 0])
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -1383,8 +1383,7 @@ def get_tightbbox(self, renderer=None, *, for_layout_only=False):
+                     bb.y0 = (bb.y0 + bb.y1) / 2 - 0.5
+                     bb.y1 = bb.y0 + 1.0
+             bboxes.append(bb)
+-        bboxes = [b for b in bboxes
+-                  if 0 < b.width < np.inf and 0 < b.height < np.inf]
++        bboxes = [b for b in bboxes if b._is_finite()]
+         if bboxes:
+             return mtransforms.Bbox.union(bboxes)
+         else:
+diff --git a/lib/matplotlib/transforms.py b/lib/matplotlib/transforms.py
+--- a/lib/matplotlib/transforms.py
++++ b/lib/matplotlib/transforms.py
+@@ -377,6 +377,29 @@ def extents(self):
+     def get_points(self):
+         raise NotImplementedError
+ 
++    def _is_finite(self):
++        """
++        Return whether the bounding box is finite and not degenerate to a
++        single point.
++
++        We count the box as finite if neither width nor height are infinite
++        and at least one direction is non-zero; i.e. a point is not finite,
++        but a horizontal or vertical line is.
++
++        .. versionadded:: 3.11
++
++        Notes
++        -----
++        We keep this private for now because concise naming is hard and
++        because we are not sure how universal the concept is. It is
++        currently used only for filtering bboxes to be included in
++        tightbbox calculation, but I'm unsure whether single points
++        should be included there as well.
++        """
++        width = self.width
++        height = self.height
++        return (width > 0 or height > 0) and width < np.inf and height < np.inf
++
+     def containsx(self, x):
+         """
+         Return whether *x* is in the closed (:attr:`x0`, :attr:`x1`) interval.

@@ -1,0 +1,249 @@
+diff --git a/sklearn/metrics/_base.py b/sklearn/metrics/_base.py
+--- a/sklearn/metrics/_base.py
++++ b/sklearn/metrics/_base.py
+@@ -12,7 +12,11 @@
+ 
+ import sklearn.externals.array_api_extra as xpx
+ from sklearn.utils import check_array, check_consistent_length
+-from sklearn.utils._array_api import _average, _ravel, get_namespace_and_device
++from sklearn.utils._array_api import (
++    _average,
++    _ravel,
++    get_namespace_and_device,
++)
+ from sklearn.utils.multiclass import type_of_target
+ 
+ 
+@@ -59,7 +63,7 @@ def _average_binary_score(binary_metric, y_true, y_score, average, sample_weight
+         classes.
+ 
+     """
+-    xp, _, _device = get_namespace_and_device(y_true, y_score, sample_weight)
++    xp, _, _device = get_namespace_and_device(y_score, sample_weight)
+     average_options = (None, "micro", "macro", "weighted", "samples")
+     if average not in average_options:
+         raise ValueError("average has to be one of {0}".format(average_options))
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -225,7 +225,7 @@ def _one_hot_encoding_multiclass_target(y_true, labels, target_xp, target_device
+             )
+ 
+     transformed_labels = lb.transform(y_true)
+-    transformed_labels = target_xp.asarray(transformed_labels, device=target_device)
++    transformed_labels = move_to(transformed_labels, xp=target_xp, device=target_device)
+     if transformed_labels.shape[1] == 1:
+         transformed_labels = target_xp.concat(
+             (1 - transformed_labels, transformed_labels), axis=1
+@@ -3607,7 +3607,7 @@ def _one_hot_encoding_binary_target(y_true, pos_label, target_xp, target_device)
+     """
+     xp_y_true, _ = get_namespace(y_true)
+     y_true_pos = xp_y_true.asarray(y_true == pos_label, dtype=xp_y_true.int64)
+-    y_true_pos = target_xp.asarray(y_true_pos, device=target_device)
++    y_true_pos = move_to(y_true_pos, xp=target_xp, device=target_device)
+     return target_xp.stack((1 - y_true_pos, y_true_pos), axis=1)
+ 
+ 
+diff --git a/sklearn/metrics/_ranking.py b/sklearn/metrics/_ranking.py
+--- a/sklearn/metrics/_ranking.py
++++ b/sklearn/metrics/_ranking.py
+@@ -30,6 +30,7 @@
+ )
+ from sklearn.utils._array_api import (
+     _max_precision_float_dtype,
++    get_namespace,
+     get_namespace_and_device,
+     move_to,
+     size,
+@@ -231,7 +232,10 @@ def average_precision_score(
+     0.77
+     """
+     xp, _, device = get_namespace_and_device(y_score)
+-    y_true, sample_weight = move_to(y_true, sample_weight, xp=xp, device=device)
++    # To allow mixed string `y_true`/numeric `y_score` input, cannot move `y_true`
++    # until it has been converted to an integer (e.g., via `label_binarize`)
++    # Ensures `test_array_api_classification_mixed_string_numeric_input` passes.
++    sample_weight = move_to(sample_weight, xp=xp, device=device)
+ 
+     if sample_weight is not None:
+         sample_weight = column_or_1d(sample_weight)
+@@ -256,7 +260,8 @@ def _binary_uninterpolated_average_precision(
+         return float(max(0.0, -xp.sum(xp.diff(recall) * precision[:-1])))
+ 
+     y_type = type_of_target(y_true, input_name="y_true")
+-    present_labels = xp.unique_values(y_true)
++    xp_y_true, _ = get_namespace(y_true)
++    present_labels = xp_y_true.unique_values(y_true)
+ 
+     if y_type == "binary":
+         if present_labels.shape[0] == 2 and pos_label not in present_labels:
+@@ -278,6 +283,7 @@ def _binary_uninterpolated_average_precision(
+                 "Do not set pos_label or set pos_label to 1."
+             )
+         y_true = label_binarize(y_true, classes=present_labels)
++        y_true = move_to(y_true, xp=xp, device=device)
+         if not y_score.shape == y_true.shape:
+             raise ValueError(
+                 "`y_score` needs to be of shape `(n_samples, n_classes)`, since "
+@@ -956,7 +962,14 @@ def confusion_matrix_at_thresholds(
+     if not (y_type == "binary" or (y_type == "multiclass" and pos_label is not None)):
+         raise ValueError("{0} format is not supported".format(y_type))
+ 
+-    xp, _, device = get_namespace_and_device(y_true, y_score, sample_weight)
++    xp, _, device = get_namespace_and_device(y_score)
++    pos_label = _check_pos_label_consistency(pos_label, y_true)
++    xp_y_true, _ = get_namespace(y_true)
++    # Make `y_true` a boolean vector. Use `asarray` as `y_true` could be a list
++    y_true = xp_y_true.asarray(
++        xp_y_true.asarray(y_true) == pos_label, dtype=xp_y_true.int32
++    )
++    y_true, sample_weight = move_to(y_true, sample_weight, xp=xp, device=device)
+ 
+     check_consistent_length(y_true, y_score, sample_weight)
+     y_true = column_or_1d(y_true)
+@@ -973,11 +986,6 @@ def confusion_matrix_at_thresholds(
+         y_score = y_score[nonzero_weight_mask]
+         sample_weight = sample_weight[nonzero_weight_mask]
+ 
+-    pos_label = _check_pos_label_consistency(pos_label, y_true)
+-
+-    # make y_true a boolean vector
+-    y_true = y_true == pos_label
+-
+     # sort scores and corresponding truth values
+     desc_score_indices = xp.argsort(y_score, stable=True, descending=True)
+     y_score = y_score[desc_score_indices]
+@@ -1126,7 +1134,7 @@ def precision_recall_curve(
+     >>> thresholds
+     array([0.1 , 0.35, 0.4 , 0.8 ])
+     """
+-    xp, _, device = get_namespace_and_device(y_true, y_score)
++    xp, _, device = get_namespace_and_device(y_score)
+ 
+     _, fps, _, tps, thresholds = confusion_matrix_at_thresholds(
+         y_true, y_score, pos_label=pos_label, sample_weight=sample_weight
+diff --git a/sklearn/metrics/_regression.py b/sklearn/metrics/_regression.py
+--- a/sklearn/metrics/_regression.py
++++ b/sklearn/metrics/_regression.py
+@@ -22,6 +22,7 @@
+     _median,
+     get_namespace,
+     get_namespace_and_device,
++    move_to,
+     size,
+ )
+ from sklearn.utils._array_api import _xlogy as xlogy
+@@ -1345,7 +1346,8 @@ def max_error(y_true, y_pred):
+     >>> max_error(y_true, y_pred)
+     1.0
+     """
+-    xp, _ = get_namespace(y_true, y_pred)
++    xp, _, device = get_namespace_and_device(y_pred)
++    y_true = move_to(y_true, xp=xp, device=device)
+     y_type, y_true, y_pred, _, _ = _check_reg_targets(
+         y_true, y_pred, sample_weight=None, multioutput=None, xp=xp
+     )
+diff --git a/sklearn/utils/_array_api.py b/sklearn/utils/_array_api.py
+--- a/sklearn/utils/_array_api.py
++++ b/sklearn/utils/_array_api.py
+@@ -6,6 +6,7 @@
+ import itertools
+ import math
+ import os
++from collections import namedtuple
+ 
+ import numpy
+ import scipy
+@@ -129,6 +130,61 @@ def _get_namespace_device_dtype_ids(param):
+             return "device2"
+ 
+ 
++def yield_mixed_namespace_input_permutations():
++    """Yield mixed namespace and device inputs for testing.
++
++    We do not test for all possible permutations of namespace/device from
++    `yield_namespace_device_dtype_combinations` (excluding dtype variations, this is
++    P(8,2)=56), to avoid slow testing and maintenance burden.
++
++    The included selection ensures that the following conversions are tested:
++
++    * non-NumPy to NumPy (including GPU to CPU)
++    * NumPy to non-NumPy (including CPU to GPU)
++    * non-NumPy to non-NumPy (GPU to GPU)
++    * array-api-strict to non-NumPy (this pair also has no special hardware
++      requirements to allow for local testing)
++    """
++
++    NamespaceAndDevice = namedtuple("NamespaceAndDevice", ["xp", "device"])
++
++    yield (
++        NamespaceAndDevice("cupy", None),
++        NamespaceAndDevice("torch", "cuda"),
++        "cupy to torch cuda",
++    )
++    yield (
++        NamespaceAndDevice("torch", "mps"),
++        NamespaceAndDevice("numpy", None),
++        "torch mps to numpy",
++    )
++    yield (
++        NamespaceAndDevice("numpy", None),
++        NamespaceAndDevice("torch", "cuda"),
++        "numpy to torch cuda",
++    )
++    yield (
++        NamespaceAndDevice("numpy", None),
++        NamespaceAndDevice("torch", "mps"),
++        "numpy to torch mps",
++    )
++
++    try:
++        import array_api_strict
++
++        device = array_api_strict.Device("device1")
++    except ImportError:
++        # This case will generally be skipped when `array_api_strict` is not installed
++        # but we still include it so it shows in the test output.
++        device = None
++
++    yield (
++        NamespaceAndDevice("array_api_strict", device),
++        NamespaceAndDevice("torch", "cpu"),
++        "array_api_strict to torch cpu",
++    )
++
++
+ def _check_array_api_dispatch(array_api_dispatch):
+     """Checks that array API support is functional.
+ 
+@@ -532,9 +588,19 @@ def move_to(*arrays, xp, device):
+             "namespace is Numpy"
+         )
+ 
+-    converted_arrays = []
++    arrays_ = arrays
++    # Down cast float64 `arrays` when highest precision of `xp`/`device` is float32
++    if _max_precision_float_dtype(xp, device) == xp.float32:
++        arrays_ = []
++        for array in arrays:
++            xp_array, _ = get_namespace(array)
++            if getattr(array, "dtype", None) == xp_array.float64:
++                arrays_.append(xp_array.astype(array, xp_array.float32))
++            else:
++                arrays_.append(array)
+ 
+-    for array, is_sparse, is_none in zip(arrays, sparse_mask, none_mask):
++    converted_arrays = []
++    for array, is_sparse, is_none in zip(arrays_, sparse_mask, none_mask):
+         if is_none:
+             converted_arrays.append(None)
+         elif is_sparse:
+@@ -562,7 +628,7 @@ def move_to(*arrays, xp, device):
+                     # kwargs in the from_dlpack method and their expected
+                     # meaning by namespaces implementing the array API spec.
+                     # TODO: try removing this once DLPack v1 more widely supported
+-                    # TODO: ValueError should not be needed but is in practice:
++                    # TODO: ValueError not needed once min NumPy >=2.4.0:
+                     # https://github.com/numpy/numpy/issues/30341
+                 except (
+                     AttributeError,

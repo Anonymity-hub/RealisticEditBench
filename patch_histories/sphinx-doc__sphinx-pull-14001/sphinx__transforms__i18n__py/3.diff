@@ -1,0 +1,12 @@
+diff --git a/sphinx/transforms/i18n.py b/sphinx/transforms/i18n.py
+--- a/sphinx/transforms/i18n.py
++++ b/sphinx/transforms/i18n.py
+@@ -137,7 +137,7 @@
+         """Warn about mismatches between references in original and translated content."""
+         old_ref_rawsources = [ref.rawsource for ref in old_refs]
+         new_ref_rawsources = [ref.rawsource for ref in new_refs]
+-        if not self.noqa and len(old_refs) != len(new_refs):
++        if not self.noqa and old_ref_rawsources != new_ref_rawsources:
+             logger.warning(
+                 warning_msg.format(old_ref_rawsources, new_ref_rawsources),
+                 location=self.node,

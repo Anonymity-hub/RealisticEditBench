@@ -1,0 +1,18 @@
+diff --git a/django/contrib/auth/checks.py b/django/contrib/auth/checks.py
+--- a/django/contrib/auth/checks.py
++++ b/django/contrib/auth/checks.py
+@@ -1,5 +1,4 @@
+ from itertools import chain
+-from types import MethodType
+ 
+ from django.apps import apps
+ from django.conf import settings
+@@ -108,7 +107,7 @@ def check_user_model(app_configs, **kwargs):
+                 id="auth.C009",
+             )
+         )
+-    if isinstance(cls().is_authenticated, MethodType):
++    if callable(cls().is_authenticated):
+         errors.append(
+             checks.Critical(
+                 "%s.is_authenticated must be an attribute or property rather "

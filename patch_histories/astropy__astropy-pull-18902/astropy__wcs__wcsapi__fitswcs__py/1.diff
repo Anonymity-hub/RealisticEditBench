@@ -1,0 +1,16 @@
+diff --git a/astropy/wcs/wcsapi/fitswcs.py b/astropy/wcs/wcsapi/fitswcs.py
+--- a/astropy/wcs/wcsapi/fitswcs.py
++++ b/astropy/wcs/wcsapi/fitswcs.py
+@@ -592,6 +592,12 @@
+                         or spectralcoord.observer is None
+                         or spectralcoord.target is None
+                     ):
++                        # Note that if observer and spectralcoord.observer are
++                        # both None, we don't emit any warning since this is
++                        # likely to be fine and is a very common use case. It
++                        # is more important to emit a warning if one has
++                        # observer information and the other does not.
++                        if not
+                         if observer is None:
+                             msg = "No observer defined on WCS"
+                         elif spectralcoord.observer is None:

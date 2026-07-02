@@ -1,0 +1,14 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -1552,8 +1552,10 @@
+         events=events,
+         get_attr=get_attr,
+         parent=parent,
++        preserve_defaults=config.autodoc_preserve_defaults,
+         props=props,
+         type_aliases=config.autodoc_type_aliases,
++        use_type_comments=config.autodoc_use_type_comments,
+     )
+     if sig is None:
+         return []

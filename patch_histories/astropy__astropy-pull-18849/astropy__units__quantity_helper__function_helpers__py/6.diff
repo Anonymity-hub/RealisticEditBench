@@ -1,0 +1,75 @@
+diff --git a/astropy/units/quantity_helper/function_helpers.py b/astropy/units/quantity_helper/function_helpers.py
+--- a/astropy/units/quantity_helper/function_helpers.py
++++ b/astropy/units/quantity_helper/function_helpers.py
+@@ -589,53 +589,37 @@
+     return args, kwargs
+ 
+ 
+-def arange_impl(*args, start=None, stop=None, step=None, dtype=None, **kwargs):
+-    # NumPy is supposed to validate the input parameters before this dispatched
+-    # function is reached. Nevertheless, we'll sprinkle a few rundundant
+-    # sanity checks in the form of `assert` statements.
+-    # As they are not part of the business logic, it is fine if they are
+-    # compiled-away (e.g. the Python interpreter runs with -O)
+-    assert len(args) <= 4
+-
+-    # bind positional arguments to their meaningful names
+-    # following the (complex) logic of np.arange
+-    match args:
+-        case (pos1,):
+-            assert stop is None or start is None
+-            if stop is None:
+-                stop = pos1
+-            elif start is None:
+-                start = pos1
+-        case start, stop, *rest:
+-            if start is not None and stop is None:
+-                start, stop = stop, start
+-            match rest:
+-                # rebind step and dtype if possible
+-                case (step,):
+-                    pass
+-                case step, dtype:
+-                    pass
++def arange_impl(start_or_stop, /, *, stop, step, dtype, device=None):
++    # Because this wrapper requires exceptional amounts of additional logic
++    # to unwrap/wrap its complicated signature, we'll sprinkle a few
++    # sanity checks in the form of `assert` statements, which should help making
++    # heads or tails of what's happening in the event of an unexpected exception.
++    start, stop, step = unwrap_arange_args(
++        start_or_stop=start_or_stop, stop_=stop, step_=step
++    )
++    out_unit = getattr(stop, "unit", UNIT_FROM_LIKE_ARG)
++
++    if out_unit is UNIT_FROM_LIKE_ARG and (
++        hasattr(start, "unit") or hasattr(step, "unit")
++    ):
++        raise TypeError(
++            "stop without a unit cannot be combined with start or step with a unit."
++        )
+ 
+-    # as the only required argument, we want stop to set the unit of the output
+-    # so it's important that it comes first in the qty_kwargs
+     qty_kwargs = {
+         k: v
+         for k, v in (("stop", stop), ("start", start), ("step", step))
+         if v is not None
+     }
+-    out_unit = getattr(stop, "unit", UNIT_FROM_LIKE_ARG)
+     if out_unit is UNIT_FROM_LIKE_ARG:
+-        if hasattr(start, "unit") or hasattr(step, "unit"):
+-            raise TypeError(
+-                "stop without a unit cannot be combined with start or step with a unit."
+-            )
+         kwargs.update(qty_kwargs)
+     else:
+-        # Convert possible start, step to stop units.
+         new_values, _ = _quantities2arrays(*qty_kwargs.values())
+         kwargs.update(zip(qty_kwargs.keys(), new_values))
+ 
+     kwargs["dtype"] = dtype
++    if not NUMPY_LT_2_0:
++        kwargs["device"] = device
+     return (), kwargs, out_unit, None
+ 
+ 

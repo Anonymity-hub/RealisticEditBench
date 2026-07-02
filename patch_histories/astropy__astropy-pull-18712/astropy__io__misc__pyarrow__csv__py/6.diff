@@ -1,0 +1,38 @@
+diff --git a/astropy/io/misc/pyarrow/csv.py b/astropy/io/misc/pyarrow/csv.py
+--- a/astropy/io/misc/pyarrow/csv.py
++++ b/astropy/io/misc/pyarrow/csv.py
+@@ -388,29 +389,26 @@ def strip_comment_lines(
+     """
+     comment_encode = comment.encode(encoding)
+ 
+-    with ExitStack() as stack:
+-        if isinstance(input_file, (str, os.PathLike)):
+-            input_file = stack.enter_context(open(input_file, "rb"))
+-
++    with get_readable_fileobj(input_file, encoding="binary") as f:
+         if header_start in (None, 0) and data_start is None:
+             idx_last_comment = -1
+-            for idx, line in enumerate(input_file):
++            for idx, line in enumerate(f):
+                 if line.lstrip().startswith(comment_encode):
+                     if idx - idx_last_comment == 1:
+                         idx_last_comment = idx
+                     else:
+                         # Gap between comment lines, need to reset input file handle and
+                         # break out to the logic below.
+-                        input_file.seek(0)
++                        f.seek(0)
+                         break
+             else:
+-                input_file.seek(0)
++                f.seek(0)
+                 return None, idx_last_comment + 1
+ 
+         # If we get here, we need to read the whole file and remove comment lines and
+         # write into an output BytesIO file.
+         output = io.BytesIO()
+-        for idx, line in enumerate(input_file):
++        for idx, line in enumerate(f):
+             if not line.lstrip().startswith(comment_encode):
+                 output.write(line)
+ 

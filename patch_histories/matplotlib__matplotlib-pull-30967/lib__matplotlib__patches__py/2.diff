@@ -1,0 +1,54 @@
+diff --git a/lib/matplotlib/patches.py b/lib/matplotlib/patches.py
+--- a/lib/matplotlib/patches.py
++++ b/lib/matplotlib/patches.py
+@@ -97,6 +97,7 @@
+         self.set_hatch(hatch)
+         self.set_capstyle(capstyle)
+         self.set_joinstyle(joinstyle)
++        self.set_edgegapcolor(edgegapcolor)
+ 
+         if len(kwargs):
+             self._internal_update(kwargs)
+@@ -444,6 +445,42 @@
+         """
+         self._original_hatchcolor = color
+         self._set_hatchcolor(color)
++
++    def get_edgegapcolor(self):
++        """
++        Return the edge gap color.
++
++        .. versionadded:: 3.11
++
++        See also `~.Patch.set_edgegapcolor`.
++        """
++        return self._gapcolor
++
++    def set_edgegapcolor(self, edgegapcolor):
++        """
++        Set a color to fill the gaps in the dashed edge style.
++
++        .. versionadded:: 3.11
++
++        .. note::
++
++            Striped edges are created by drawing two interleaved dashed lines.
++            There can be overlaps between those two, which may result in
++            artifacts when using transparency.
++
++            This functionality is experimental and may change.
++
++        Parameters
++        ----------
++        edgegapcolor : :mpltype:`color` or None
++            The color with which to fill the gaps. If None, the gaps are
++            unfilled.
++        """
++        if edgegapcolor is not None:
++            self._gapcolor = colors.to_rgba(edgegapcolor, self._alpha)
++        else:
++            self._gapcolor = None
++        self.stale = True
+ 
+     def set_alpha(self, alpha):
+         # docstring inherited

@@ -1,0 +1,12 @@
+diff --git a/sympy/combinatorics/perm_groups.py b/sympy/combinatorics/perm_groups.py
+--- a/sympy/combinatorics/perm_groups.py
++++ b/sympy/combinatorics/perm_groups.py
+@@ -144,7 +144,7 @@
+             args = list(uniq([_af_new(list(a)) for a in args]))
+         if len(args) > 1:
+             non_identity = [g for g in args if not g.is_identity]
+-            args = non_identity
++            args = non_identity if non_identity else [args[0]]
+         return Basic.__new__(cls, *args, **kwargs)
+ 
+     def __init__(self, *args, **kwargs):

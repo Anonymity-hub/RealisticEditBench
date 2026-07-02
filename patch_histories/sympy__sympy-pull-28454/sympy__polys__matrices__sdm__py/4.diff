@@ -1,0 +1,13 @@
+diff --git a/sympy/polys/matrices/sdm.py b/sympy/polys/matrices/sdm.py
+--- a/sympy/polys/matrices/sdm.py
++++ b/sympy/polys/matrices/sdm.py
+@@ -1598,6 +1598,9 @@
+     zero = K.zero
+     if K.is_EXRAW and op(zero, b) != zero:
+         Csdm = sdm_scalar_mul_exraw(A, b, op, K)
++    else:
++        Csdm = unop_dict(A, lambda aij: op(aij, b))
++    return Csdm
+ 
+ 
+ def sdm_scalar_mul_exraw(A, b, op, K):

@@ -1,0 +1,24 @@
+diff --git a/sympy/solvers/ode/single.py b/sympy/solvers/ode/single.py
+--- a/sympy/solvers/ode/single.py
++++ b/sympy/solvers/ode/single.py
+@@ -15,7 +15,7 @@
+ from sympy.core.relational import Equality, Eq
+ from sympy.core.symbol import Symbol, Dummy, Wild
+ from sympy.core.mul import Mul
+-from sympy.functions import exp, tan, log, sqrt, besselj, bessely, cbrt, airyai, airybi
++from sympy.functions import exp, tan, log, sqrt, besselj, bessely, cbrt, airyai, airybi, Abs
+ from sympy.integrals import Integral
+ from sympy.polys import Poly
+ from sympy.polys.polytools import cancel, factor, factor_list, degree
+@@ -2864,6 +2864,11 @@
+         # For y'' + A*x^k*y = 0
+         # The Bessel order and argument are:
+         nu = 1 / (k + 2)
++
++        z = (2 * sqrt(Abs(A)) / (k + 2)) * x**((k + 2)/2)
++
++        # General solution
++        return [Eq(f(x), sqrt(x) * (C1*besselj(nu, z) + C2*bessely(nu, z)))]
+ 
+ 
+ class SecondLinearAiry(SingleODESolver):

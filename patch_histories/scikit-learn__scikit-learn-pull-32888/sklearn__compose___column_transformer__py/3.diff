@@ -1,0 +1,11 @@
+diff --git a/sklearn/compose/_column_transformer.py b/sklearn/compose/_column_transformer.py
+--- a/sklearn/compose/_column_transformer.py
++++ b/sklearn/compose/_column_transformer.py
+@@ -513,6 +513,7 @@ def _validate_transformers(self):
+         self._validate_names(names)
+ 
+         # validate estimators
++        self._check_estimators_are_instances(transformers)
+         for t in transformers:
+             if t in ("drop", "passthrough"):
+                 continue

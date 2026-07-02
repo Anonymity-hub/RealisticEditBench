@@ -1,0 +1,14 @@
+diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py
+--- a/sklearn/model_selection/_split.py
++++ b/sklearn/model_selection/_split.py
+@@ -2687,7 +2687,9 @@
+             yield train, test
+ 
+ 
+-def check_cv(cv=5, y=None, *, classifier=False):
++def check_cv(
++    cv=5, y=None, *, classifier=False, groups=None, shuffle=False, random_state=0
++):
+     """Input checker utility for building a cross-validator.
+ 
+     Parameters

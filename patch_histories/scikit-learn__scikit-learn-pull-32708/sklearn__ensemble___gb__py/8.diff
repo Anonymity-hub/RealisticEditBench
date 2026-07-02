@@ -1,0 +1,43 @@
+diff --git a/sklearn/ensemble/_gb.py b/sklearn/ensemble/_gb.py
+--- a/sklearn/ensemble/_gb.py
++++ b/sklearn/ensemble/_gb.py
+@@ -386,7 +386,6 @@
+         loss,
+         learning_rate,
+         n_estimators,
+-        criterion,
+         min_samples_split,
+         min_samples_leaf,
+         min_weight_fraction_leaf,
+@@ -404,6 +403,7 @@
+         validation_fraction=0.1,
+         n_iter_no_change=None,
+         tol=1e-4,
++        criterion="deprecated",
+     ):
+         self.n_estimators = n_estimators
+         self.learning_rate = learning_rate
+@@ -479,7 +479,7 @@
+ 
+             # induce regression tree on the negative gradient
+             tree = DecisionTreeRegressor(
+-                criterion=self.criterion,
++                criterion="squared_error",
+                 splitter="best",
+                 max_depth=self.max_depth,
+                 min_samples_split=self.min_samples_split,
+@@ -661,6 +661,14 @@
+         """
+         if not self.warm_start:
+             self._clear_state()
++
++        if self.criterion != "deprecated":
++            warnings.warn(
++                "The parameter `criterion` is deprecated and will be "
++                "removed in 1.11. It has no effect. Leave it to its default value to "
++                "avoid this warning.",
++                FutureWarning,
++            )
+ 
+         # Check input
+         # Since check_array converts both X and y to the same dtype, but the

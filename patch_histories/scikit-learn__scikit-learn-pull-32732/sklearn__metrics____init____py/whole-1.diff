@@ -1,0 +1,19 @@
+diff --git a/sklearn/metrics/__init__.py b/sklearn/metrics/__init__.py
+--- a/sklearn/metrics/__init__.py
++++ b/sklearn/metrics/__init__.py
+@@ -91,6 +91,7 @@
+     silhouette_score,
+     v_measure_score,
+ )
++from sklearn.metrics.decision_threshold import metric_threshold_curve
+ from sklearn.metrics.pairwise import (
+     euclidean_distances,
+     nan_euclidean_distances,
+@@ -161,6 +162,7 @@
+     "mean_squared_log_error",
+     "mean_tweedie_deviance",
+     "median_absolute_error",
++    "metric_threshold_curve",
+     "multilabel_confusion_matrix",
+     "mutual_info_score",
+     "nan_euclidean_distances",

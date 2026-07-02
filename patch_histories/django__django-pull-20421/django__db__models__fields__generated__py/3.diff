@@ -1,0 +1,20 @@
+diff --git a/django/db/models/fields/generated.py b/django/db/models/fields/generated.py
+--- a/django/db/models/fields/generated.py
++++ b/django/db/models/fields/generated.py
+@@ -192,6 +192,16 @@
+     def _check_ignored_options(self, databases):
+         warnings = []
+ 
++        if self.has_null_arg:
++            warnings.append(
++                checks.Warning(
++                    "null has no effect on GeneratedField.",
++                    obj=self,
++                    id="fields.W225",
++                )
++            )
++
++        return warnings
+ 
+     def deconstruct(self):
+         name, path, args, kwargs = super().deconstruct()

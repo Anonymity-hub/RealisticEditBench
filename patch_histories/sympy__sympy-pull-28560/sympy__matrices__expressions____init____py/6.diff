@@ -1,0 +1,11 @@
+diff --git a/sympy/matrices/expressions/__init__.py b/sympy/matrices/expressions/__init__.py
+--- a/sympy/matrices/expressions/__init__.py
++++ b/sympy/matrices/expressions/__init__.py
+@@ -34,6 +34,7 @@
+     'MatAdd',
+ 
+     'Identity', 'MatrixExpr', 'MatrixSymbol', 'ZeroMatrix', 'OneMatrix',
++    'MatrixUnit',
+     'matrix_symbols', 'MatrixSet',
+ 
+     'MatMul',

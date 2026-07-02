@@ -1,0 +1,21 @@
+diff --git a/xarray/plot/dataset_plot.py b/xarray/plot/dataset_plot.py
+--- a/xarray/plot/dataset_plot.py
++++ b/xarray/plot/dataset_plot.py
+@@ -753,7 +753,7 @@ def _temp_dataarray(ds: Dataset, y: Hashable, locals_: dict[str, Any]) -> DataAr
+ @overload
+ def scatter(  # type: ignore[misc,unused-ignore]  # None is hashable :(
+     ds: Dataset,
+-    *args: Any,
++    *,
+     x: Hashable | None = None,
+     y: Hashable | None = None,
+     z: Hashable | None = None,
+@@ -794,7 +794,7 @@ def scatter(  # type: ignore[misc,unused-ignore]  # None is hashable :(
+ @overload
+ def scatter(
+     ds: Dataset,
+-    *args: Any,
++    *,
+     x: Hashable | None = None,
+     y: Hashable | None = None,
+     z: Hashable | None = None,

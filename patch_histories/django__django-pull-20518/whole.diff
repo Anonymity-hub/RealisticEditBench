@@ -1,0 +1,172 @@
+diff --git a/django/contrib/admin/views/main.py b/django/contrib/admin/views/main.py
+--- a/django/contrib/admin/views/main.py
++++ b/django/contrib/admin/views/main.py
+@@ -417,72 +417,9 @@ def get_ordering(self, request, queryset):
+         # Add the given query's ordering fields, if any.
+         ordering.extend(queryset.query.order_by)
+ 
+-        return self._get_deterministic_ordering(ordering)
+-
+-    def _get_deterministic_ordering(self, ordering):
+-        """
+-        Ensure a deterministic order across all database backends. Search for a
+-        single field or unique together set of fields providing a total
+-        ordering. If these are missing, augment the ordering with a descendant
+-        primary key.
+-        """
+-        ordering = list(ordering)
+-        ordering_fields = set()
+-        total_ordering_fields = {"pk"} | {
+-            field.attname
+-            for field in self.lookup_opts.fields
+-            if field.unique and not field.null
+-        }
+-        for part in ordering:
+-            # Search for single field providing a total ordering.
+-            field_name = None
+-            if isinstance(part, str):
+-                field_name = part.lstrip("-")
+-            elif isinstance(part, F):
+-                field_name = part.name
+-            elif isinstance(part, OrderBy) and isinstance(part.expression, F):
+-                field_name = part.expression.name
+-            if field_name:
+-                # Normalize attname references by using get_field().
+-                try:
+-                    field = self.lookup_opts.get_field(field_name)
+-                except FieldDoesNotExist:
+-                    # Could be "?" for random ordering or a related field
+-                    # lookup. Skip this part of introspection for now.
+-                    continue
+-                # Ordering by a related field name orders by the referenced
+-                # model's ordering. Skip this part of introspection for now.
+-                if field.remote_field and field_name == field.name:
+-                    continue
+-                if field.attname in total_ordering_fields:
+-                    break
+-                ordering_fields.add(field.attname)
+-        else:
+-            # No single total ordering field, try unique_together and total
+-            # unique constraints.
+-            constraint_field_names = (
+-                *self.lookup_opts.unique_together,
+-                *(
+-                    constraint.fields
+-                    for constraint in self.lookup_opts.total_unique_constraints
+-                ),
+-            )
+-            for field_names in constraint_field_names:
+-                # Normalize attname references by using get_field().
+-                fields = [
+-                    self.lookup_opts.get_field(field_name) for field_name in field_names
+-                ]
+-                # Composite unique constraints containing a nullable column
+-                # cannot ensure total ordering.
+-                if any(field.null for field in fields):
+-                    continue
+-                if ordering_fields.issuperset(field.attname for field in fields):
+-                    break
+-            else:
+-                # If no set of unique fields is present in the ordering, rely
+-                # on the primary key to provide total ordering.
+-                ordering.append("-pk")
+-        return ordering
++        if queryset.order_by(*ordering).totally_ordered:
++            return ordering
++        return ordering + ["-pk"]
+ 
+     def get_ordering_field_columns(self):
+         """
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -26,7 +26,7 @@
+ from django.db.models import AutoField, DateField, DateTimeField, Field, Max, sql
+ from django.db.models.constants import LOOKUP_SEP, OnConflict
+ from django.db.models.deletion import Collector
+-from django.db.models.expressions import Case, DatabaseDefault, F, Value, When
++from django.db.models.expressions import Case, DatabaseDefault, F, OrderBy, Value, When
+ from django.db.models.fetch_modes import FETCH_ONE
+ from django.db.models.functions import Cast, Trunc
+ from django.db.models.query_utils import FilteredRelation, Q
+@@ -1974,6 +1974,80 @@ def ordered(self):
+         else:
+             return False
+ 
++    @property
++    def totally_ordered(self):
++        """
++        Returns True if the QuerySet is ordered and the ordering is
++        deterministic. This requires that the ordering includes a field
++        (or set of fields) that is unique and non-nullable.
++
++        For queries involving a GROUP BY clause, the model's default
++        ordering is ignored. Ordering specified via .extra(order_by=...)
++        is also ignored.
++        """
++        if not self.ordered:
++            return False
++        ordering = self.query.order_by
++        if not ordering and self.query.default_ordering:
++            ordering = self.query.get_meta().ordering
++        if not ordering:
++            return False
++        opts = self.model._meta
++        pk_fields = {f.attname for f in opts.pk_fields}
++        ordering_fields = set()
++        for part in ordering:
++            # Search for single field providing a total ordering.
++            field_name = None
++            if isinstance(part, str):
++                field_name = part.lstrip("-")
++            elif isinstance(part, F):
++                field_name = part.name
++            elif isinstance(part, OrderBy) and isinstance(part.expression, F):
++                field_name = part.expression.name
++            if field_name:
++                if field_name == "pk":
++                    return True
++                # Normalize attname references by using get_field().
++                try:
++                    field = opts.get_field(field_name)
++                except exceptions.FieldDoesNotExist:
++                    # Could be "?" for random ordering or a related field
++                    # lookup. Skip this part of introspection for now.
++                    continue
++                # Ordering by a related field name orders by the referenced
++                # model's ordering. Skip this part of introspection for now.
++                if field.remote_field and field_name == field.name:
++                    continue
++                if field.attname in pk_fields and len(pk_fields) == 1:
++                    return True
++                if field.unique and not field.null:
++                    return True
++                ordering_fields.add(field.attname)
++
++        # Account for members of a CompositePrimaryKey.
++        if ordering_fields.issuperset(pk_fields):
++            return True
++        # No single total ordering field, try unique_together and total
++        # unique constraints.
++        constraint_field_names = (
++            *opts.unique_together,
++            *(constraint.fields for constraint in opts.total_unique_constraints),
++        )
++        for field_names in constraint_field_names:
++            # Normalize attname references by using get_field().
++            try:
++                fields = [opts.get_field(field_name) for field_name in field_names]
++            except exceptions.FieldDoesNotExist:
++                continue
++            # Composite unique constraints containing a nullable column
++            # cannot ensure total ordering.
++            if any(field.null for field in fields):
++                continue
++            if ordering_fields.issuperset(field.attname for field in fields):
++                return True
++
++        return False
++
+     @property
+     def db(self):
+         """Return the database used if this query is executed now."""

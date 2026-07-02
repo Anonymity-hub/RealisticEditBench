@@ -1,0 +1,21 @@
+diff --git a/sympy/polys/matrices/sdm.py b/sympy/polys/matrices/sdm.py
+--- a/sympy/polys/matrices/sdm.py
++++ b/sympy/polys/matrices/sdm.py
+@@ -1587,6 +1587,17 @@
+                                 C.pop(i, None)
+ 
+     return C
++
++
++def sdm_scalar_mul(A, b, op, K):
++    """
++    Handles special cases like 0 * oo -> nan by creating a dense result
++    when necessary. For all other cases, it uses the fast sparse approach.
++    """
++
++    zero = K.zero
++    if K.is_EXRAW and op(zero, b) != zero:
++        Csdm = sdm_scalar_mul_exraw(A, b, op, K)
+ 
+ 
+ def sdm_scalar_mul_exraw(A, b, op, K):

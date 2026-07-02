@@ -1,0 +1,52 @@
+diff --git a/xarray/util/generate_aggregations.py b/xarray/util/generate_aggregations.py
+--- a/xarray/util/generate_aggregations.py
++++ b/xarray/util/generate_aggregations.py
+@@ -4,8 +4,10 @@
+ 
+ Usage:
+     python xarray/util/generate_aggregations.py
+-    pytest --doctest-modules xarray/{core,namedarray}/_aggregations.py --accept || true
+-    pytest --doctest-modules xarray/{core,namedarray}/_aggregations.py
++    pytest --doctest-modules xarray/core/_aggregations.py --accept
++    pytest --doctest-modules xarray/core/_aggregations.py
++    pytest --doctest-modules xarray/namedarray/_aggregations.py --accept
++    pytest --doctest-modules xarray/namedarray/_aggregations.py
+ 
+ This requires [pytest-accept](https://github.com/max-sixty/pytest-accept).
+ The second run of pytest is deliberate, since the first will return an error
+@@ -24,7 +26,7 @@
+ 
+ from __future__ import annotations
+ 
+-from collections.abc import Callable, Sequence
++from collections.abc import Callable, Mapping, Sequence
+ from typing import TYPE_CHECKING, Any
+ 
+ from xarray.core import duck_array_ops
+@@ -182,7 +184,7 @@
+         skipna: bool | None = None,
+         keep_attrs: bool | None = None,
+         **kwargs: Any,
+-    ) -> DataArray:
++    ) -> {obj}:
+         raise NotImplementedError()"""
+ 
+ TEMPLATE_REDUCTION_SIGNATURE = '''
+@@ -510,7 +512,7 @@
+ 
+         if method.aggregation_type == "scan":
+             # Scans retain dimensions.
+-            out_finalized = "out.assign_coords(self._original_obj.coords)"
++            out_finalized = "out.assign_coords(self._obj.coords)"
+         else:
+             out_finalized = "out"
+ 
+@@ -571,7 +573,7 @@
+ 
+         if method.aggregation_type == "scan" and self.datastructure.name == "Dataset":
+             # Scans retain dimensions, datasets drops them somehow:
+-            out_finalized = "out.assign_coords(self._obj.coords)"
++            out_finalized = "out.assign_coords(self.coords)"
+         else:
+             out_finalized = "out"
+ 

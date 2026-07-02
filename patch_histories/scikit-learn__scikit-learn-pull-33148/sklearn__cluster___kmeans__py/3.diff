@@ -1,0 +1,12 @@
+diff --git a/sklearn/cluster/_kmeans.py b/sklearn/cluster/_kmeans.py
+--- a/sklearn/cluster/_kmeans.py
++++ b/sklearn/cluster/_kmeans.py
+@@ -1040,7 +1040,7 @@
+         elif callable(init):
+             centers = init(X, n_clusters, random_state=random_state)
+             centers = check_array(centers, dtype=X.dtype, copy=False, order="C")
+-            self._validate_center_shape(X, centers)
++            self._validate_center_shape(X, centers, n_centroids=n_clusters)
+ 
+         if sp.issparse(centers):
+             centers = centers.toarray()

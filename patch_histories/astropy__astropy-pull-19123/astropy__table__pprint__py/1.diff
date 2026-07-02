@@ -1,0 +1,44 @@
+diff --git a/astropy/table/pprint.py b/astropy/table/pprint.py
+index 92946c0..2151f66 100644
+--- a/astropy/table/pprint.py
++++ b/astropy/table/pprint.py
+@@ -518,24 +518,23 @@ class TableFormatter:
+             indices = np.arange(n_rows)
+ 
+         def format_col_str(idx):
+-            if multidims:
+-                # Prevents columns like Column(data=[[(1,)],[(2,)]], name='a')
+-                # with shape (n,1,...,1) from being printed as if there was
+-                # more than one element in a row
+-                if multidims_all_ones:
+-                    return format_func(col_format, col[(idx,) + multidim0])
+-                elif multidims_has_zero:
+-                    # Any zero dimension means there is no data to print
+-                    return ""
+-                else:
+-                    left = format_func(col_format, col[(idx,) + multidim0])
+-                    right = format_func(col_format, col[(idx,) + multidim1])
+-                    return f"{left} .. {right}"
+-            elif is_scalar:
+-                return format_func(col_format, col)
+-            else:
++            if not multidims:
++                if is_scalar:
++                    return format_func(col_format, col)
+                 return format_func(col_format, col[idx])
+ 
++            # Prevents columns like Column(data=[[(1,)],[(2,)]], name='a')
++            # with shape (n,1,...,1) from being printed as if there was
++            # more than one element in a row
++            if multidims_all_ones:
++                return format_func(col_format, col[(idx,) + multidim0])
++            elif multidims_has_zero:
++                # Any zero dimension means there is no data to print
++                return ""
++            else:
++                left = format_func(col_format, col[(idx,) + multidim0])
++                right = format_func(col_format, col[(idx,) + multidim1])
++                return f"{left} .. {right}"
+         # Add formatted values if within bounds allowed by max_lines
+         for idx in indices:
+             if idx == i0:

@@ -1,0 +1,31 @@
+diff --git a/astropy/io/misc/ecsv.py b/astropy/io/misc/ecsv.py
+--- a/astropy/io/misc/ecsv.py
++++ b/astropy/io/misc/ecsv.py
+@@ -1230,7 +1232,7 @@
+     return table  # noqa: RET504
+ 
+ 
+-def write_ecsv(tbl, output, **kwargs):
++def write_ecsv(tbl, output, engine="io.ascii", **kwargs):
+     """Thin wrapper around the ``io.ascii`` ECSV writer to write ECSV files.
+ 
+     Parameters
+@@ -1239,11 +1241,18 @@
+         The table to write to ECSV format.
+     output : str or os.PathLike or file-like object
+         The output file path or file-like object to write the ECSV data to.
++    engine : str, optional
++        The engine to use for writing the CSV data. Default is "io.ascii", which uses
++        astropy to write the CSV data. Currently this is the only option.
+     **kwargs : dict, optional
+         Additional keyword arguments passed to the ECSV writer. These can include
+         options like ``delimiter``, ``encoding``, and others supported by the
+         `astropy.io.ascii.Ecsv` writer.
+     """
++    if engine != "io.ascii":
++        raise ValueError(
++            f"{engine=} is not a supported engine for writing, use 'io.ascii'"
++        )
+     tbl.write(output, format="ascii.ecsv", **kwargs)
+ 
+ 

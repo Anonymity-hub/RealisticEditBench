@@ -1,0 +1,12 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -1963,7 +1963,7 @@ def __array__(
+             return np.asarray(array.values, dtype=dtype)
+ 
+     def get_duck_array(self) -> np.ndarray | PandasExtensionArray:
+-        # We return an PandasExtensionArray wrapper type that satisfies
++        # We return a PandasExtensionArray wrapper type that satisfies
+         # duck array protocols.
+         # `NumpyExtensionArray` is excluded
+         if is_allowed_extension_array(self.array):

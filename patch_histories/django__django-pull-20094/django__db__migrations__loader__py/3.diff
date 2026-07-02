@@ -1,0 +1,17 @@
+diff --git a/django/db/migrations/loader.py b/django/db/migrations/loader.py
+--- a/django/db/migrations/loader.py
++++ b/django/db/migrations/loader.py
+@@ -356,11 +356,8 @@
+                 if parent not in applied:
+                     # Skip unapplied squashed migrations that have all of their
+                     # `replaces` applied.
+-                    if parent in self.replacements:
+-                        if all(
+-                            m in applied for m in self.replacements[parent].replaces
+-                        ):
+-                            continue
++                    if self.all_replaced_applied(parent.key, applied):
++                        continue
+                     raise InconsistentMigrationHistory(
+                         "Migration {}.{} is applied before its dependency "
+                         "{}.{} on database '{}'.".format(

@@ -1,0 +1,21 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -362,14 +362,16 @@
+             attr_docs=analyzer.attr_docs if analyzer is not None else {},
+             config=self.config,
+             current_document=self._current_document,
+-            directive=self.directive,
++            env=self.env,
+             events=self._events,
+             get_attr=self.get_attr,
+             indent=indent,
+             options=self.options,
+             props=self.props,
+             real_modname=self.real_modname,
++            record_dependencies=self.record_dependencies,
+             registry=self.env._registry,
++            result=self.result,
+         )
+ 
+ 

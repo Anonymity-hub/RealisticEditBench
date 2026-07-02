@@ -1,0 +1,11 @@
+diff --git a/sympy/polys/rootoftools.py b/sympy/polys/rootoftools.py
+--- a/sympy/polys/rootoftools.py
++++ b/sympy/polys/rootoftools.py
+@@ -114,6 +114,7 @@
+ 
+ _reals_cache = _pure_key_dict()
+ _complexes_cache = _pure_key_dict()
++_rootof_dummy = Dummy('x')
+ 
+ 
+ def _pure_factors(poly):

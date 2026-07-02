@@ -1,0 +1,11 @@
+diff --git a/sympy/combinatorics/perm_groups.py b/sympy/combinatorics/perm_groups.py
+--- a/sympy/combinatorics/perm_groups.py
++++ b/sympy/combinatorics/perm_groups.py
+@@ -1325,6 +1325,7 @@
+         transversals = self.basic_transversals
+         basic_orbits = self.basic_orbits
+         m = len(base)
++        if m == 0:
+         v = [0]*m
+         for i in range(m):
+             rank, c = divmod(rank, len(transversals[i]))

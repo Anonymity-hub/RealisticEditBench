@@ -1,0 +1,98 @@
+diff --git a/lib/matplotlib/_mathtext.py b/lib/matplotlib/_mathtext.py
+--- a/lib/matplotlib/_mathtext.py
++++ b/lib/matplotlib/_mathtext.py
+@@ -1483,7 +1483,7 @@
+ 
+     def render(self, output: Output,  # type: ignore[override]
+                x: float, y: float, w: float, h: float) -> None:
+-        self.fontset.render_rect_filled(output, x, y, w, h)
++        self.fontset.render_rect_filled(output, x, y - h, w, h)
+ 
+ 
+ class Hrule(Rule):
+@@ -2701,7 +2701,13 @@
+         state = self.get_state()
+         thickness = state.get_current_underline_thickness()
+ 
++        axis_height = state.fontset.get_axis_height(
++            state.font, state.fontsize, state.dpi)
++        consts = _get_font_constant_set(state)
++        x_height = state.fontset.get_xheight(state.font, state.fontsize, state.dpi)
++
+         for _ in range(style.value):
++            x_height *= SHRINK_FACTOR
+             num.shrink()
+             den.shrink()
+         cnum = HCentered([num])
+@@ -2709,24 +2715,53 @@
+         width = max(num.width, den.width)
+         cnum.hpack(width, 'exactly')
+         cden.hpack(width, 'exactly')
+-        vlist = Vlist([
+-            cnum,                    # numerator
+-            Vbox(0, 2 * thickness),  # space
+-            Hrule(state, rule),      # rule
+-            Vbox(0, 2 * thickness),  # space
+-            cden,                    # denominator
+-        ])
+-
+-        # Shift so the fraction line sits in the middle of the
+-        # equals sign
+-        metrics = state.fontset.get_metrics(
+-            state.font, mpl.rcParams['mathtext.default'],
+-            '=', state.fontsize, state.dpi)
+-        shift = (cden.height -
+-                 ((metrics.ymax + metrics.ymin) / 2 - 3 * thickness))
+-        vlist.shift_amount = shift
+-
+-        result: list[Box | Char | str] = [Hlist([vlist, Hbox(2 * thickness)])]
++
++        # Align the fraction with a fraction line (node743, node744 and node746).
++        if rule:
++            if style is self._MathStyle.DISPLAYSTYLE:
++                num_shift_up = consts.num1 * x_height
++                den_shift_down = consts.denom1 * x_height
++                clr = 3 * rule  # The minimum clearance.
++            else:
++                num_shift_up = consts.num2 * x_height
++                den_shift_down = consts.denom2 * x_height
++                clr = rule  # The minimum clearance.
++            delta = rule / 2
++            num_clr = max((num_shift_up - cnum.depth) - (axis_height + delta), clr)
++            den_clr = max((axis_height - delta) - (cden.height - den_shift_down), clr)
++            vlist = Vlist([cnum,                # numerator
++                           Vbox(0, num_clr),    # space
++                           Hrule(state, rule),  # rule
++                           Vbox(0, den_clr),    # space
++                           cden                 # denominator
++                           ])
++            vlist.shift_amount = cden.height + den_clr + delta - axis_height
++
++        # Align the fraction without a fraction line (node743, node744 and node745).
++        else:
++            if style is self._MathStyle.DISPLAYSTYLE:
++                num_shift_up = consts.num1 * x_height
++                den_shift_down = consts.denom1 * x_height
++                min_clr = 7 * thickness  # The minimum clearance.
++            else:
++                num_shift_up = consts.num3 * x_height
++                den_shift_down = consts.denom2 * x_height
++                min_clr = 3 * thickness  # The minimum clearance.
++            def_clr = (num_shift_up - cnum.depth) - (cden.height - den_shift_down)
++            clr = max(def_clr, min_clr)
++            vlist = Vlist([cnum,          # numerator
++                           Vbox(0, clr),  # space
++                           cden           # denominator
++                           ])
++            vlist.shift_amount = den_shift_down
++            if def_clr < min_clr:
++                vlist.shift_amount += (min_clr - def_clr) / 2
++
++        result: list[Box | Char | str] = [Hlist([
++            Hbox(thickness),
++            vlist,
++            Hbox(thickness)
++        ])]
+         if ldelim or rdelim:
+             return self._auto_sized_delimiter(ldelim or ".", result, rdelim or ".")
+         return result

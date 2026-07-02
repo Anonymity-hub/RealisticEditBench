@@ -1,0 +1,14 @@
+diff --git a/sklearn/cluster/_kmeans.py b/sklearn/cluster/_kmeans.py
+--- a/sklearn/cluster/_kmeans.py
++++ b/sklearn/cluster/_kmeans.py
+@@ -933,8 +933,8 @@
+             if has_vcomp and has_mkl:
+                 self._warn_mkl_vcomp(n_active_threads)
+ 
+-    def _validate_center_shape(self, X, centers):
+-        """Check if centers is compatible with X and n_clusters."""
++    def _validate_center_shape(self, X, centers, n_centroids=None):
++        """Check if the shape of the centers is correct."""
+         if centers.shape[0] != self.n_clusters:
+             raise ValueError(
+                 f"The shape of the initial centers {centers.shape} does not "

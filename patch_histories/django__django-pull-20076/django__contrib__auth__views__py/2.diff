@@ -1,0 +1,14 @@
+diff --git a/django/contrib/auth/views.py b/django/contrib/auth/views.py
+--- a/django/contrib/auth/views.py
++++ b/django/contrib/auth/views.py
+@@ -53,8 +53,8 @@
+         )
+         url_is_safe = url_has_allowed_host_and_scheme(
+             url=redirect_to,
+-            allowed_hosts=self.get_success_url_allowed_hosts(),
+-            require_https=self.request.is_secure(),
++            allowed_hosts=self.get_success_url_allowed_hosts(request),
++            require_https=request.is_secure(),
+         )
+         return redirect_to if url_is_safe else ""
+ 

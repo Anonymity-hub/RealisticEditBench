@@ -1,0 +1,20 @@
+diff --git a/astropy/nddata/ccddata.py b/astropy/nddata/ccddata.py
+--- a/astropy/nddata/ccddata.py
++++ b/astropy/nddata/ccddata.py
+@@ -694,7 +694,15 @@
+             mask = None
+ 
+         if hdu_flags is not None:
+-            if hdu_flags in hdus:
++            # Check if there's a simple flags extension or multiple flag
++            # extensions (FlagCollection)
++            # First, look for extensions that start with hdu_flags prefix
++            flag_extensions = [
++                hdu.name for hdu in hdus if hdu.name.startswith(f"{hdu_flags}_")
++            ]
++
++            if hdu_flags in hdus and not flag_extensions:
++                # Simple case: single flags array
+                 flags = hdus[hdu_flags].data
+             else:
+                 flags = None

@@ -1,0 +1,11 @@
+diff --git a/django/forms/widgets.py b/django/forms/widgets.py
+--- a/django/forms/widgets.py
++++ b/django/forms/widgets.py
+@@ -530,6 +530,7 @@
+     input_text = _("Change")
+     template_name = "django/forms/widgets/clearable_file_input.html"
+     checked = False
++    use_fieldset = False
+ 
+     def clear_checkbox_name(self, name):
+         """

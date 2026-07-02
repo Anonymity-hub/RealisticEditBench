@@ -1,0 +1,36 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -308,15 +308,15 @@
+                         and module_spec.has_location
+                         and module_spec.origin
+                     ):
+-                        self.directive.record_dependencies.add(module_spec.origin)
++                        self.record_dependencies.add(module_spec.origin)
+         else:
+-            self.directive.record_dependencies.add(self.analyzer.srcname)
++            self.record_dependencies.add(self.analyzer.srcname)
+ 
+         if self.real_modname != guess_modname:
+             # Add module to dependency list if target object is defined in other module.
+             try:
+                 srcname = ModuleAnalyzer.for_module(guess_modname).srcname
+-                self.directive.record_dependencies.add(srcname)
++                self.record_dependencies.add(srcname)
+             except PycodeError:
+                 pass
+ 
+@@ -343,11 +343,11 @@
+         # make sure that the result starts with an empty line.  This is
+         # necessary for some situations where another directive preprocesses
+         # reST and no starting newline is present
+-        self.directive.result.append('', source_name)
++        self.result.append('', source_name)
+ 
+         # generate the directive header and options, if applicable
+         self.add_directive_header(indent=indent)
+-        self.directive.result.append('', source_name)
++        self.result.append('', source_name)
+ 
+         # add all content (from docstrings, attribute docs etc.)
+         self.add_content(more_content, indent=indent)

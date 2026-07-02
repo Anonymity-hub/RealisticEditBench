@@ -1,0 +1,26 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -37,7 +37,9 @@
+     UNINITIALIZED_ATTR,
+ )
+ from sphinx.ext.autodoc.mock import ismock, mock, undecorate
+-from sphinx.ext.autodoc.type_comment import update_annotations_using_type_comments
++from sphinx.ext.autodoc.preserve_defaults import update_default_value
++from sphinx.ext.autodoc.type_comment import _update_annotations_using_type_comments
++from sphinx.ext.autodoc.typehints import _record_typehints
+ from sphinx.locale import __
+ from sphinx.pycode import ModuleAnalyzer
+ from sphinx.util import inspect, logging
+@@ -694,9 +696,9 @@
+         else:
+             func = None
+         if func is not None:
+-            app = SimpleNamespace(config=config)
+             # update the annotations of the property getter
+-            update_annotations_using_type_comments(app, func, False)  # type: ignore[arg-type]
++            if config.autodoc_use_type_comments:
++                _update_annotations_using_type_comments(func, False)
+ 
+             try:
+                 signature = inspect.signature(

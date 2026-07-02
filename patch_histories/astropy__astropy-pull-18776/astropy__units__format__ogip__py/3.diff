@@ -1,0 +1,17 @@
+diff --git a/astropy/units/format/ogip.py b/astropy/units/format/ogip.py
+--- a/astropy/units/format/ogip.py
++++ b/astropy/units/format/ogip.py
+@@ -291,10 +291,10 @@
+                         )
+                     )
+ 
+-        def p_sign(p):
++        def p_number(p):
+             """
+-            sign : SIGN
+-                 |
++            number : INT
++                   | FLOAT
+             """
+             if len(p) == 2:
+                 p[0] = p[1]

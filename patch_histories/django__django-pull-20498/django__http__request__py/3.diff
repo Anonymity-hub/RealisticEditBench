@@ -1,0 +1,14 @@
+diff --git a/django/http/request.py b/django/http/request.py
+--- a/django/http/request.py
++++ b/django/http/request.py
+@@ -369,6 +369,10 @@
+     def multipart_parser_class(self):
+         return self._multipart_parser_class
+ 
++    @multipart_parser_class.setter
++    def multipart_parser_class(self, multipart_parser_class):
++        if hasattr(self, "_files"):
++
+     def parse_file_upload(self, META, post_data):
+         """Return a tuple of (POST QueryDict, FILES MultiValueDict)."""
+         self.upload_handlers = ImmutableList(

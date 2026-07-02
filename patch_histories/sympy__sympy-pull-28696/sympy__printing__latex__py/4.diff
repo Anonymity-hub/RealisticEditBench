@@ -1,0 +1,14 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -691,6 +691,10 @@
+                     else:
+                         base_tex = self._print(expr.base)
+                         return r"\frac{1}{%s}" % base_tex
++                pos_pow = Pow(expr.base, abs(expr.exp), evaluate=False)
++                tex = self._helper_print_standard_power(pos_pow, r"%s^{%s}")
++                return r"\frac{1}{%s}" % tex
++
+         if expr.base.is_Function:
+             return self._print(expr.base, exp=self._print(expr.exp))
+         tex = r"%s^{%s}"

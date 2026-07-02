@@ -1,0 +1,27 @@
+diff --git a/django/contrib/contenttypes/fields.py b/django/contrib/contenttypes/fields.py
+--- a/django/contrib/contenttypes/fields.py
++++ b/django/contrib/contenttypes/fields.py
+@@ -672,12 +672,17 @@ def get_queryset(self):
+                 return self._apply_rel_filters(queryset)
+ 
+         def get_prefetch_querysets(self, instances, querysets=None):
+-            if querysets and len(querysets) != 1:
+-                raise ValueError(
+-                    "querysets argument of get_prefetch_querysets() should have a "
+-                    "length of 1."
+-                )
+-            queryset = querysets[0] if querysets else super().get_queryset()
++            _cloning_disabled = False
++            if querysets:
++                if len(querysets) != 1:
++                    raise ValueError(
++                        "querysets argument of get_prefetch_querysets() should have a "
++                        "length of 1."
++                    )
++                queryset = querysets[0]
++            else:
++                _cloning_disabled = True
++                queryset = super().get_queryset()._disable_cloning()
+             queryset._add_hints(instance=instances[0])
+             queryset = queryset.using(queryset._db or self._db)
+             # Group instances by content types.

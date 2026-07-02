@@ -1,0 +1,30 @@
+diff --git a/sympy/combinatorics/free_groups.py b/sympy/combinatorics/free_groups.py
+--- a/sympy/combinatorics/free_groups.py
++++ b/sympy/combinatorics/free_groups.py
+@@ -677,6 +677,8 @@ def eliminate_word(self, gen, by=None, _all=False, inverse=True):
+         """
+         if by is None:
+             by = self.group.identity
++        if not gen:
++            raise ValueError("gen must be a non-empty word")
+         if self.is_independent(gen) or gen == by:
+             return self
+         if gen == self:
+@@ -1016,6 +1018,8 @@ def contains_generators(self):
+     def cyclic_subword(self, from_i, to_j):
+         group = self.group
+         l = len(self)
++        if l == 0:
++            return group.identity
+         letter_form = self.letter_form
+         period1 = int(from_i/l)
+         if from_i >= l:
+@@ -1049,7 +1053,7 @@ def cyclic_conjugates(self):
+         .. [1] https://planetmath.org/cyclicpermutation
+ 
+         """
+-        return {self.cyclic_subword(i, i+len(self)) for i in range(len(self))}
++        return {self, *(self.cyclic_subword(i, i+len(self)) for i in range(1,len(self)))}
+ 
+     def is_cyclic_conjugate(self, w):
+         """

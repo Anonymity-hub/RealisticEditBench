@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -703,7 +703,7 @@ def isDefault_minfmt(self, value):
+         self.minor._formatter_is_default = value
+ 
+     def _get_shared_axes(self):
+-        """Return Grouper of shared Axes for current axis."""
++        """Return a list of shared Axes for current axis."""
+         return self.axes._shared_axes[
+             self._get_axis_name()].get_siblings(self.axes)
+ 

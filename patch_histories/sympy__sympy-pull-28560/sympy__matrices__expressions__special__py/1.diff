@@ -1,0 +1,15 @@
+diff --git a/sympy/matrices/expressions/special.py b/sympy/matrices/expressions/special.py
+--- a/sympy/matrices/expressions/special.py
++++ b/sympy/matrices/expressions/special.py
+@@ -20,6 +20,11 @@
+     A
+     >>> Z*A.T
+     0
++    >>> Z.as_explicit()
++    Matrix([
++    [0, 0, 0, 0, 0],
++    [0, 0, 0, 0, 0],
++    [0, 0, 0, 0, 0]])
+     """
+     is_ZeroMatrix = True
+ 

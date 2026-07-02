@@ -1,0 +1,16 @@
+diff --git a/django/utils/text.py b/django/utils/text.py
+--- a/django/utils/text.py
++++ b/django/utils/text.py
+@@ -401,6 +401,12 @@
+     ) as zfile:
+         # Output headers...
+         yield buf.read()
++        async for item in sequence:
++            zfile.write(item)
++            data = buf.read()
++            if data:
++                yield data
++    yield buf.read()
+ 
+ 
+ # Expression to match some_token and some_token="with spaces" (and similarly

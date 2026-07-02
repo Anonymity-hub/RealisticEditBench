@@ -1,0 +1,87 @@
+diff --git a/lib/matplotlib/bezier.py b/lib/matplotlib/bezier.py
+--- a/lib/matplotlib/bezier.py
++++ b/lib/matplotlib/bezier.py
+@@ -9,53 +9,6 @@
+ import numpy as np
+ 
+ from matplotlib import _api
+-from numpy.polynomial.polynomial import polyval as _polyval
+-
+-
+-def _bisect_root_finder(f, a, b, tol=1e-12, max_iter=64):
+-    """Find root of f in [a, b] using bisection. Assumes sign change exists."""
+-    fa = f(a)
+-    for _ in range(max_iter):
+-        mid = (a + b) * 0.5
+-        fm = f(mid)
+-        if abs(fm) < tol or (b - a) < tol:
+-            return mid
+-        if fa * fm < 0:
+-            b = mid
+-        else:
+-            a, fa = mid, fm
+-    return (a + b) * 0.5
+-
+-
+-def _bisected_roots_in_01(coeffs):
+-    """
+-    Find real roots of polynomial in [0, 1] using sampling and bisection.
+-    coeffs in ascending order: c0 + c1*x + c2*x**2 + ...
+-    """
+-    deg = len(coeffs) - 1
+-    n_samples = max(8, deg * 2)
+-    ts = np.linspace(0, 1, n_samples)
+-    vals = _polyval(ts, coeffs)
+-
+-    signs = np.sign(vals)
+-    sign_changes = np.where((signs[:-1] != signs[1:]) & (signs[:-1] != 0))[0]
+-
+-    roots = []
+-
+-    def f(t):
+-        return _polyval(t, coeffs)
+-
+-    max_iter = 53  # float64 fractional precision for [0, 1] interval
+-    for i in sign_changes:
+-        roots.append(_bisect_root_finder(f, ts[i], ts[i + 1], max_iter=max_iter))
+-
+-    # Check endpoints
+-    if abs(vals[0]) < 1e-12:
+-        roots.insert(0, 0.0)
+-    if abs(vals[-1]) < 1e-12 and (not roots or abs(roots[-1] - 1.0) > 1e-10):
+-        roots.append(1.0)
+-
+-    return np.asarray(roots)
+ 
+ 
+ def _quadratic_roots_in_01(c0, c1, c2):
+@@ -91,10 +44,10 @@ def _real_roots_in_01(coeffs):
+     """
+     Find real roots of a polynomial in the interval [0, 1].
+ 
+-    This is optimized for finding roots only in [0, 1], which is faster than
+-    computing all roots with `numpy.roots` and filtering. For polynomials of
+-    degree <= 2, closed-form solutions are used. For higher degrees, sampling
+-    and bisection are used.
++    For polynomials of degree <= 2, closed-form solutions are used.
++    For higher degrees, `numpy.roots` is used as a fallback. In practice,
++    matplotlib only ever uses cubic bezier curves and axis_aligned_extrema()
++    differentiates, so we only ever find roots for degree <= 2.
+ 
+     Parameters
+     ----------
+@@ -123,7 +76,13 @@ def _real_roots_in_01(coeffs):
+     elif deg == 2:
+         roots = _quadratic_roots_in_01(coeffs[0], coeffs[1], coeffs[2])
+     else:
+-        roots = _bisected_roots_in_01(coeffs[:deg + 1])
++        # np.roots expects descending order (highest power first)
++        eps = 1e-10
++        all_roots = np.roots(coeffs[deg::-1])
++        real_mask = np.abs(all_roots.imag) < eps
++        real_roots = all_roots[real_mask].real
++        in_range = (real_roots >= -eps) & (real_roots <= 1 + eps)
++        roots = np.clip(real_roots[in_range], 0, 1)
+ 
+     return np.sort(roots)
+ 

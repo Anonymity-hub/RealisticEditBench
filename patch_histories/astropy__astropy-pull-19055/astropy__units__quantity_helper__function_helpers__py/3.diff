@@ -1,0 +1,20 @@
+diff --git a/astropy/units/quantity_helper/function_helpers.py b/astropy/units/quantity_helper/function_helpers.py
+--- a/astropy/units/quantity_helper/function_helpers.py
++++ b/astropy/units/quantity_helper/function_helpers.py
+@@ -468,6 +468,16 @@
+ 
+ @function_helper
+ def average(a, axis=None, weights=None, returned=False, *, keepdims=np._NoValue):
++    # This override should no longer be needed once
++    # https://github.com/numpy/numpy/pull/30522 is merged (likely for
++    # "not NUMPY_LT_2_4_1").
++
++    a_value, a_unit = (_a := _as_quantity(a)).value, _a.unit
++    w_value, w_unit = (
++        (None, dimensionless_unscaled)
++        if weights is None
++        else ((_w := _as_quantity(weights)).value, _w.unit)
++    )
+     return (
+         (a,),
+         {

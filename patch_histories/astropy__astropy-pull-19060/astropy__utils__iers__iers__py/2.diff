@@ -1,0 +1,12 @@
+diff --git a/astropy/utils/iers/iers.py b/astropy/utils/iers/iers.py
+--- a/astropy/utils/iers/iers.py
++++ b/astropy/utils/iers/iers.py
+@@ -885,7 +885,7 @@ def _refresh_table_as_needed(self, mjd):
+ 
+         # Pass in initial to np.max to allow things to work for empty mjd.
+         max_input_mjd = np.max(mjd, initial=50000)
+-        now_mjd = self.time_now.mjd
++        now_mjd = Time.now().mjd
+ 
+         # IERS-A table contains predictive data out for a year after
+         # the available definitive values.

@@ -1,0 +1,13 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -1375,6 +1375,9 @@
+ 
+         for i, (k, s) in enumerate(zip(indexer_elems, shape, strict=False)):
+             if isinstance(k, np.ndarray) and k.size == 0:
++                # empty np.ndarray key is converted to empty slice
++                # see https://github.com/pydata/xarray/issues/10867
++                backend_indexer.append(slice(0, 0))
+             elif isinstance(k, np.ndarray) and i != array_index:
+                 # np.ndarray key is converted to slice that covers the entire
+                 # entries of this key.

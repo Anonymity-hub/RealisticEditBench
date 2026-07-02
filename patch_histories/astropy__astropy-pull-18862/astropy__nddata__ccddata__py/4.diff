@@ -1,0 +1,27 @@
+diff --git a/astropy/nddata/ccddata.py b/astropy/nddata/ccddata.py
+--- a/astropy/nddata/ccddata.py
++++ b/astropy/nddata/ccddata.py
+@@ -693,8 +693,13 @@
+         else:
+             mask = None
+ 
+-        if hdu_flags is not None and hdu_flags in hdus:
+-            raise NotImplementedError("loading flags is currently not supported.")
++        if hdu_flags is not None:
++            if hdu_flags in hdus:
++                flags = hdus[hdu_flags].data
++            else:
++                flags = None
++        else:
++            flags = None
+ 
+         if hdu_psf is not None and hdu_psf in hdus:
+             psf = hdus[hdu_psf].data
+@@ -760,6 +765,7 @@
+             mask=mask,
+             uncertainty=uncertainty,
+             wcs=wcs,
++            flags=flags,
+             psf=psf,
+         )
+ 

@@ -1,0 +1,12 @@
+diff --git a/sympy/combinatorics/perm_groups.py b/sympy/combinatorics/perm_groups.py
+--- a/sympy/combinatorics/perm_groups.py
++++ b/sympy/combinatorics/perm_groups.py
+@@ -1329,6 +1329,8 @@
+             h = list(range(self._degree))
+             if af:
+                 return h
++            else:
++                return _af_new(h)
+         v = [0]*m
+         for i in range(m):
+             rank, c = divmod(rank, len(transversals[i]))

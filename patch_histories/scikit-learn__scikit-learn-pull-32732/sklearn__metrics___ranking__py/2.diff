@@ -1,0 +1,27 @@
+diff --git a/sklearn/metrics/_ranking.py b/sklearn/metrics/_ranking.py
+--- a/sklearn/metrics/_ranking.py
++++ b/sklearn/metrics/_ranking.py
+@@ -903,6 +903,23 @@
+         y_true = y_true[nonzero_weight_mask]
+         y_score = y_score[nonzero_weight_mask]
+         sample_weight = sample_weight[nonzero_weight_mask]
++
++    # sort scores and corresponding truth values
++    desc_score_indices = xp.argsort(y_score, stable=True, descending=True)
++    y_score = y_score[desc_score_indices]
++    y_true = y_true[desc_score_indices]
++    if sample_weight is not None:
++        sample_weight = sample_weight[desc_score_indices]
++
++    # y_score typically has many tied values. Here we extract
++    # the indices associated with the distinct values. We also
++    # concatenate a value for the end of the curve.
++    distinct_value_indices = xp.nonzero(xp.diff(y_score))[0]
++    threshold_idxs = xp.concat(
++        [distinct_value_indices, xp.asarray([size(y_true) - 1], device=device)]
++    )
++    return y_true, y_score, sample_weight, threshold_idxs
++
+ 
+ @_deprecate_positional_args(version="1.11")
+ @validate_params(

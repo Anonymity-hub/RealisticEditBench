@@ -1,0 +1,11 @@
+diff --git a/sklearn/pipeline.py b/sklearn/pipeline.py
+--- a/sklearn/pipeline.py
++++ b/sklearn/pipeline.py
+@@ -1699,6 +1699,7 @@
+         self._validate_names(names)
+ 
+         # validate estimators
++        self._check_estimators_are_instances(transformers)
+         for t in transformers:
+             if t in ("drop", "passthrough"):
+                 continue

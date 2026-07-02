@@ -1,0 +1,19 @@
+diff --git a/sympy/tensor/array/expressions/arrayexpr_derivatives.py b/sympy/tensor/array/expressions/arrayexpr_derivatives.py
+--- a/sympy/tensor/array/expressions/arrayexpr_derivatives.py
++++ b/sympy/tensor/array/expressions/arrayexpr_derivatives.py
+@@ -40,6 +40,15 @@
+ @array_derive.register(Mul)
+ def _(expr: Mul, x: _ArrayExpr):
+     args = expr.args
++    return ArrayAdd.fromiter([
++        _array_tensor_product(Mul.fromiter(args[:i]), array_derive(arg, x), Mul.fromiter(args[(i+1):]))
++        for i, arg in enumerate(args)
++    ])
++
++
++@array_derive.register(Pow)
++def _(expr: Pow, x: _ArrayExpr):
++    return Pow._eval_derivative(expr, x)
+ 
+ 
+ @array_derive.register(Function)

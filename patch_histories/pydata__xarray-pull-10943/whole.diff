@@ -1,0 +1,230 @@
+diff --git a/xarray/core/coordinates.py b/xarray/core/coordinates.py
+--- a/xarray/core/coordinates.py
++++ b/xarray/core/coordinates.py
+@@ -21,7 +21,14 @@
+     assert_no_index_corrupted,
+     create_default_index_implicit,
+ )
+-from xarray.core.types import DataVars, ErrorOptions, Self, T_DataArray, T_Xarray
++from xarray.core.types import (
++    CompatOptions,
++    DataVars,
++    ErrorOptions,
++    Self,
++    T_DataArray,
++    T_Xarray,
++)
+ from xarray.core.utils import (
+     Frozen,
+     ReprObject,
+@@ -31,6 +38,7 @@
+ from xarray.core.variable import Variable, as_variable, calculate_dimensions
+ from xarray.structure.alignment import Aligner
+ from xarray.structure.merge import merge_coordinates_without_align, merge_coords
++from xarray.util.deprecation_helpers import CombineKwargDefault
+ 
+ if TYPE_CHECKING:
+     from xarray.core.common import DataWithCoords
+@@ -500,18 +508,20 @@ def _drop_coords(self, coord_names):
+         # redirect to DatasetCoordinates._drop_coords
+         self._data.coords._drop_coords(coord_names)
+ 
+-    def _merge_raw(self, other, reflexive):
++    def _merge_raw(self, other, reflexive, compat: CompatOptions | CombineKwargDefault):
+         """For use with binary arithmetic."""
+         if other is None:
+             variables = dict(self.variables)
+             indexes = dict(self.xindexes)
+         else:
+             coord_list = [self, other] if not reflexive else [other, self]
+-            variables, indexes = merge_coordinates_without_align(coord_list)
++            variables, indexes = merge_coordinates_without_align(
++                coord_list, compat=compat
++            )
+         return variables, indexes
+ 
+     @contextmanager
+-    def _merge_inplace(self, other):
++    def _merge_inplace(self, other, compat: CompatOptions | CombineKwargDefault):
+         """For use with in-place binary arithmetic."""
+         if other is None:
+             yield
+@@ -524,12 +534,17 @@ def _merge_inplace(self, other):
+                 if k not in self.xindexes
+             }
+             variables, indexes = merge_coordinates_without_align(
+-                [self, other], prioritized
++                [self, other], prioritized, compat=compat
+             )
+             yield
+             self._update_coords(variables, indexes)
+ 
+-    def merge(self, other: Mapping[Any, Any] | None) -> Dataset:
++    def merge(
++        self,
++        other: Mapping[Any, Any] | None,
++        *,
++        compat: CompatOptions | CombineKwargDefault = "minimal",
++    ) -> Dataset:
+         """Merge two sets of coordinates to create a new Dataset
+ 
+         The method implements the logic used for joining coordinates in the
+@@ -546,6 +561,8 @@ def merge(self, other: Mapping[Any, Any] | None) -> Dataset:
+         other : dict-like, optional
+             A :py:class:`Coordinates` object or any mapping that can be turned
+             into coordinates.
++        compat : {"identical", "equals", "broadcast_equals", "no_conflicts", "override", "minimal"}, default: "minimal"
++            Compatibility checks to use between coordinate variables.
+ 
+         Returns
+         -------
+@@ -560,7 +577,7 @@ def merge(self, other: Mapping[Any, Any] | None) -> Dataset:
+         if not isinstance(other, Coordinates):
+             other = Dataset(coords=other).coords
+ 
+-        coords, indexes = merge_coordinates_without_align([self, other])
++        coords, indexes = merge_coordinates_without_align([self, other], compat=compat)
+         coord_names = set(coords)
+         return Dataset._construct_direct(
+             variables=coords, coord_names=coord_names, indexes=indexes
+diff --git a/xarray/core/dataarray.py b/xarray/core/dataarray.py
+--- a/xarray/core/dataarray.py
++++ b/xarray/core/dataarray.py
+@@ -4906,7 +4906,9 @@ def _binary_op(
+             if not reflexive
+             else f(other_variable_or_arraylike, self.variable)
+         )
+-        coords, indexes = self.coords._merge_raw(other_coords, reflexive)
++        coords, indexes = self.coords._merge_raw(
++            other_coords, reflexive, compat=OPTIONS["arithmetic_compat"]
++        )
+         name = result_name([self, other])
+ 
+         return self._replace(variable, coords, name, indexes=indexes)
+@@ -4926,7 +4928,9 @@ def _inplace_binary_op(self, other: DaCompatible, f: Callable) -> Self:
+         other_coords = getattr(other, "coords", None)
+         other_variable = getattr(other, "variable", other)
+         try:
+-            with self.coords._merge_inplace(other_coords):
++            with self.coords._merge_inplace(
++                other_coords, compat=OPTIONS["arithmetic_compat"]
++            ):
+                 f(self.variable, other_variable)
+         except MergeError as exc:
+             raise MergeError(
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -7763,7 +7763,7 @@ def apply_over_both(lhs_data_vars, rhs_data_vars, lhs_vars, rhs_vars):
+             return type(self)(new_data_vars)
+ 
+         other_coords: Coordinates | None = getattr(other, "coords", None)
+-        ds = self.coords.merge(other_coords)
++        ds = self.coords.merge(other_coords, compat=OPTIONS["arithmetic_compat"])
+ 
+         if isinstance(other, Dataset):
+             new_vars = apply_over_both(
+diff --git a/xarray/core/options.py b/xarray/core/options.py
+--- a/xarray/core/options.py
++++ b/xarray/core/options.py
+@@ -2,14 +2,16 @@
+ 
+ import warnings
+ from collections.abc import Sequence
+-from typing import TYPE_CHECKING, Any, Literal, TypedDict
++from typing import TYPE_CHECKING, Any, Literal, TypedDict, get_args
+ 
++from xarray.core.types import CompatOptions
+ from xarray.core.utils import FrozenDict
+ 
+ if TYPE_CHECKING:
+     from matplotlib.colors import Colormap
+ 
+     Options = Literal[
++        "arithmetic_compat",
+         "arithmetic_join",
+         "chunk_manager",
+         "cmap_divergent",
+@@ -40,6 +42,7 @@
+ 
+     class T_Options(TypedDict):
+         arithmetic_broadcast: bool
++        arithmetic_compat: CompatOptions
+         arithmetic_join: Literal["inner", "outer", "left", "right", "exact"]
+         chunk_manager: str
+         cmap_divergent: str | Colormap
+@@ -70,6 +73,7 @@ class T_Options(TypedDict):
+ 
+ OPTIONS: T_Options = {
+     "arithmetic_broadcast": True,
++    "arithmetic_compat": "minimal",
+     "arithmetic_join": "inner",
+     "chunk_manager": "dask",
+     "cmap_divergent": "RdBu_r",
+@@ -109,6 +113,7 @@ def _positive_integer(value: Any) -> bool:
+ 
+ _VALIDATORS = {
+     "arithmetic_broadcast": lambda value: isinstance(value, bool),
++    "arithmetic_compat": get_args(CompatOptions).__contains__,
+     "arithmetic_join": _JOIN_OPTIONS.__contains__,
+     "display_max_children": _positive_integer,
+     "display_max_rows": _positive_integer,
+@@ -178,18 +183,34 @@ class set_options:
+ 
+     Parameters
+     ----------
++    arithmetic_broadcast : bool, default: True
++        Whether to perform automatic broadcasting in binary operations.
++    arithmetic_compat: {"identical", "equals", "broadcast_equals", "no_conflicts", "override", "minimal"}, default: "minimal"
++        How to compare non-index coordinates of the same name for potential
++        conflicts when performing binary operations. (For the alignment of index
++        coordinates in binary operations, see `arithmetic_join`.)
++
++        - "identical": all values, dimensions and attributes of the coordinates
++          must be the same.
++        - "equals": all values and dimensions of the coordinates must be the
++          same.
++        - "broadcast_equals": all values of the coordinates must be equal after
++          broadcasting to ensure common dimensions.
++        - "no_conflicts": only values which are not null in both coordinates
++          must be equal. The returned coordinate then contains the combination
++          of all non-null values.
++        - "override": skip comparing and take the coordinates from the first
++          operand.
++        - "minimal": drop conflicting coordinates.
+     arithmetic_join : {"inner", "outer", "left", "right", "exact"}, default: "inner"
+-        DataArray/Dataset alignment in binary operations:
++        DataArray/Dataset index alignment in binary operations:
+ 
+         - "outer": use the union of object indexes
+         - "inner": use the intersection of object indexes
+         - "left": use indexes from the first object with each dimension
+         - "right": use indexes from the last object with each dimension
+         - "exact": instead of aligning, raise `ValueError` when indexes to be
+           aligned are not equal
+-        - "override": if indexes are of same size, rewrite indexes to be
+-          those of the first object with that dimension. Indexes for the same
+-          dimension must have the same size in all objects.
+     chunk_manager : str, default: "dask"
+         Chunk manager to use for chunked array computations when multiple
+         options are installed.
+diff --git a/xarray/structure/merge.py b/xarray/structure/merge.py
+--- a/xarray/structure/merge.py
++++ b/xarray/structure/merge.py
+@@ -438,6 +438,7 @@ def merge_coordinates_without_align(
+     prioritized: Mapping[Any, MergeElement] | None = None,
+     exclude_dims: AbstractSet = frozenset(),
+     combine_attrs: CombineAttrsOptions = "override",
++    compat: CompatOptions | CombineKwargDefault = "minimal",
+ ) -> tuple[dict[Hashable, Variable], dict[Hashable, Index]]:
+     """Merge variables/indexes from coordinates without automatic alignments.
+ 
+@@ -462,7 +463,7 @@ def merge_coordinates_without_align(
+     # TODO: indexes should probably be filtered in collected elements
+     # before merging them
+     merged_coords, merged_indexes = merge_collected(
+-        filtered, prioritized, combine_attrs=combine_attrs
++        filtered, prioritized, compat=compat, combine_attrs=combine_attrs
+     )
+     merged_indexes = filter_indexes_from_coords(merged_indexes, set(merged_coords))
+ 

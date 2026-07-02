@@ -1,0 +1,95 @@
+diff --git a/galleries/examples/color/color_sequences.py b/galleries/examples/color/color_sequences.py
+--- a/galleries/examples/color/color_sequences.py
++++ b/galleries/examples/color/color_sequences.py
+@@ -38,8 +38,8 @@ def plot_color_sequences(names, ax):
+ 
+ built_in_color_sequences = [
+     'tab10', 'tab20', 'tab20b', 'tab20c', 'Pastel1', 'Pastel2', 'Paired',
+-    'Accent', 'Dark2', 'Set1', 'Set2', 'Set3', 'petroff6', 'petroff8',
+-    'petroff10']
++    'Accent', 'okabe_ito', 'Dark2', 'Set1', 'Set2', 'Set3', 'petroff6',
++    'petroff8', 'petroff10']
+ 
+ 
+ fig, ax = plt.subplots(figsize=(6.4, 9.6), layout='constrained')
+diff --git a/galleries/examples/color/colormap_reference.py b/galleries/examples/color/colormap_reference.py
+--- a/galleries/examples/color/colormap_reference.py
++++ b/galleries/examples/color/colormap_reference.py
+@@ -32,7 +32,7 @@
+             'berlin', 'managua', 'vanimo']),
+          ('Cyclic', ['twilight', 'twilight_shifted', 'hsv']),
+          ('Qualitative', [
+-            'Pastel1', 'Pastel2', 'Paired', 'Accent',
++            'Pastel1', 'Pastel2', 'Paired', 'Accent', 'okabe_ito',
+             'Dark2', 'Set1', 'Set2', 'Set3',
+             'tab10', 'tab20', 'tab20b', 'tab20c']),
+          ('Miscellaneous', [
+diff --git a/galleries/users_explain/colors/colormaps.py b/galleries/users_explain/colors/colormaps.py
+--- a/galleries/users_explain/colors/colormaps.py
++++ b/galleries/users_explain/colors/colormaps.py
+@@ -230,9 +230,9 @@ def plot_color_gradients(category, cmap_list):
+ # These would not be good options for use as perceptual colormaps.
+ 
+ plot_color_gradients('Qualitative',
+-                     ['Pastel1', 'Pastel2', 'Paired', 'Accent', 'Dark2',
+-                      'Set1', 'Set2', 'Set3', 'tab10', 'tab20', 'tab20b',
+-                      'tab20c'])
++                     ['Pastel1', 'Pastel2', 'Paired', 'Accent', 'okabe_ito',
++                      'Dark2', 'Set1', 'Set2', 'Set3', 'tab10', 'tab20',
++                      'tab20b', 'tab20c'])
+ 
+ # %%
+ # Miscellaneous
+diff --git a/lib/matplotlib/_cm.py b/lib/matplotlib/_cm.py
+--- a/lib/matplotlib/_cm.py
++++ b/lib/matplotlib/_cm.py
+@@ -852,7 +852,6 @@ def _g36(x): return 2 * x - 1
+     (0.50196078431372548, 0.0                 , 0.14901960784313725)
+     )
+ 
+-
+ # ColorBrewer's qualitative maps, implemented using ListedColormap
+ # for use with mpl.colors.NoNorm
+ 
+@@ -878,6 +877,22 @@ def _g36(x): return 2 * x - 1
+     (0.4,                 0.4,                 0.4                ),
+     )
+ 
++# Okabe-Ito accessible and print-friendly color palette.
++# By Masataka Okabe (Jikei Medical School) and Kei Ito (University of Tokyo).
++# Qualitative color palette that is unambiguous regardless of whether
++# the viewer has colorblindness. https://jfly.uni-koeln.de/color/#pallet
++
++_okabe_ito_data = (
++    (0.0, 0.0, 0.0),                                                # black
++    (0.9019607843137255, 0.6235294117647059, 0.0),                  # e69f00
++    (0.33725490196078434, 0.7058823529411765, 0.9137254901960784),  # 56b4e9
++    (0.0, 0.6196078431372549, 0.45098039215686275),                 # 009e73
++    (0.9411764705882353, 0.8941176470588236, 0.25882352941176473),  # f0e442
++    (0.0, 0.4470588235294118, 0.6980392156862745),                  # 0072b2
++    (0.8352941176470589, 0.3686274509803922, 0.0),                  # d55e00
++    (0.8, 0.4745098039215686, 0.6549019607843137),                  # cc79a7
++)
++
+ _Paired_data = (
+     (0.65098039215686276, 0.80784313725490198, 0.8901960784313725 ),
+     (0.12156862745098039, 0.47058823529411764, 0.70588235294117652),
+@@ -1469,6 +1484,7 @@ def _gist_yarg(x): return 1 - x
+     'winter': _winter_data,
+     # Qualitative
+     'Accent': {'listed': _Accent_data},
++    'okabe_ito': {'listed': _okabe_ito_data},
+     'Dark2': {'listed': _Dark2_data},
+     'Paired': {'listed': _Paired_data},
+     'Pastel1': {'listed': _Pastel1_data},
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -128,6 +128,7 @@ class ColorSequenceRegistry(Mapping):
+         'Pastel2': _cm._Pastel2_data,
+         'Paired': _cm._Paired_data,
+         'Accent': _cm._Accent_data,
++        'okabe_ito': _cm._okabe_ito_data,
+         'Dark2': _cm._Dark2_data,
+         'Set1': _cm._Set1_data,
+         'Set2': _cm._Set2_data,

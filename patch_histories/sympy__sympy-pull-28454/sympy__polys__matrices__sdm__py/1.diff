@@ -1,0 +1,17 @@
+diff --git a/sympy/polys/matrices/sdm.py b/sympy/polys/matrices/sdm.py
+--- a/sympy/polys/matrices/sdm.py
++++ b/sympy/polys/matrices/sdm.py
+@@ -1587,6 +1587,13 @@
+                                 C.pop(i, None)
+ 
+     return C
++
++
++def sdm_scalar_mul_exraw(A, b, op, K):
++    zero = K.zero
++    zero_prod = op(zero, b)
++    m, n = A.shape
++    Csdm = {i: dict.fromkeys(range(n), zero_prod) for i in range(m)}
+ 
+ 
+ def sdm_irref(A):

@@ -1,0 +1,13 @@
+diff --git a/xarray/structure/merge.py b/xarray/structure/merge.py
+--- a/xarray/structure/merge.py
++++ b/xarray/structure/merge.py
+@@ -1206,7 +1206,8 @@
+                     if c not in value.dims and c in dataset.coords
+                 ]
+                 if coord_names:
+-                    other[key] = value.drop_vars(coord_names)
++                    value = value.drop_vars(coord_names)
++                other[key] = value
+ 
+     return merge_core(
+         [dataset, other],

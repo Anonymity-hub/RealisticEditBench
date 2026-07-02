@@ -1,0 +1,19 @@
+diff --git a/sympy/polys/rootoftools.py b/sympy/polys/rootoftools.py
+--- a/sympy/polys/rootoftools.py
++++ b/sympy/polys/rootoftools.py
+@@ -106,6 +106,7 @@ def __contains__(self, k):
+ 
+ _reals_cache = _pure_key_dict()
+ _complexes_cache = _pure_key_dict()
++_rootof_dummy = Dummy('x')
+ 
+ 
+ def _pure_factors(poly):
+@@ -366,6 +367,7 @@ def _new(cls, poly, index):
+         """Construct new ``CRootOf`` object from raw data. """
+         obj = Expr.__new__(cls)
+ 
++        poly = poly.replace(poly.gen, _rootof_dummy)
+         obj.poly = PurePoly(poly)
+         obj.index = index
+ 

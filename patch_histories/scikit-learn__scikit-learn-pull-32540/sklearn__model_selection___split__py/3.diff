@@ -1,0 +1,13 @@
+diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py
+--- a/sklearn/model_selection/_split.py
++++ b/sklearn/model_selection/_split.py
+@@ -1055,6 +1055,9 @@
+             perm = np.arange(len(groups_cnt))
+             rng.shuffle(perm)
+             y_counts_per_group = y_counts_per_group[perm]
++            inv_perm = np.empty_like(perm)
++            inv_perm[perm] = np.arange(perm.size)
++            groups_inv = inv_perm[groups_inv]
+ 
+         # Stable sort to keep shuffled order for groups with the same
+         # class distribution variance

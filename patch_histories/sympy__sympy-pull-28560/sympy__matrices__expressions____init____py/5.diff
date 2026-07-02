@@ -1,0 +1,12 @@
+diff --git a/sympy/matrices/expressions/__init__.py b/sympy/matrices/expressions/__init__.py
+--- a/sympy/matrices/expressions/__init__.py
++++ b/sympy/matrices/expressions/__init__.py
+@@ -19,7 +19,7 @@
+ from .kronecker import kronecker_product, KroneckerProduct, combine_kronecker
+ from .permutation import PermutationMatrix, MatrixPermute
+ from .sets import MatrixSet
+-from .special import ZeroMatrix, Identity, OneMatrix
++from .special import ZeroMatrix, Identity, OneMatrix, MatrixUnit
+ 
+ __all__ = [
+     'MatrixSlice',

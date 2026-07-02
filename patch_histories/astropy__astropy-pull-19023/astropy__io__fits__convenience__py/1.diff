@@ -1,0 +1,11 @@
+diff --git a/astropy/io/fits/convenience.py b/astropy/io/fits/convenience.py
+--- a/astropy/io/fits/convenience.py
++++ b/astropy/io/fits/convenience.py
+@@ -252,6 +252,7 @@
+             # this data does not have fields
+             return
+         data.dtype.names = [trans(n) for n in data.dtype.names]
++        for
+ 
+     # allow different views into the underlying ndarray.  Keep the original
+     # view just in case there is a problem

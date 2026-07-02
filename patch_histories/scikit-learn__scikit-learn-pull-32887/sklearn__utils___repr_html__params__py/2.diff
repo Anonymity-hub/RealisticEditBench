@@ -1,0 +1,13 @@
+diff --git a/sklearn/utils/_repr_html/params.py b/sklearn/utils/_repr_html/params.py
+--- a/sklearn/utils/_repr_html/params.py
++++ b/sklearn/utils/_repr_html/params.py
+@@ -92,7 +92,8 @@
+             style="anchor-name: --doc-link-{param_name};"
+             rel="noreferrer" target="_blank" href="{link}">
+             {param_name}
+-            <span class="param-doc-description">{param_description}</span>
++            <span class="param-doc-description"
++            {param_description}</span>
+         </a>
+     """
+     estimator_class_docs = inspect.getdoc(params.estimator_class)

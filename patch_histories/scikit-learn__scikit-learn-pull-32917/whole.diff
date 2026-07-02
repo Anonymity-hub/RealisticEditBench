@@ -1,0 +1,54 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -39,7 +39,6 @@
+     _is_xp_namespace,
+     _isin,
+     _max_precision_float_dtype,
+-    _tolist,
+     _union1d,
+     get_namespace,
+     get_namespace_and_device,
+@@ -1862,9 +1861,7 @@ def _check_set_wise_labels(y_true, y_pred, average, labels, pos_label):
+ 
+     y_true, y_pred = attach_unique(y_true, y_pred)
+     y_type, y_true, y_pred, _ = _check_targets(y_true, y_pred)
+-    # Convert to Python primitive type to avoid NumPy type / Python str
+-    # comparison. See https://github.com/numpy/numpy/issues/6784
+-    present_labels = _tolist(unique_labels(y_true, y_pred))
++    present_labels = unique_labels(y_true, y_pred)
+     if average == "binary":
+         if y_type == "binary":
+             if pos_label not in present_labels:
+diff --git a/sklearn/metrics/_ranking.py b/sklearn/metrics/_ranking.py
+--- a/sklearn/metrics/_ranking.py
++++ b/sklearn/metrics/_ranking.py
+@@ -239,9 +239,7 @@ def _binary_uninterpolated_average_precision(
+ 
+     y_type = type_of_target(y_true, input_name="y_true")
+ 
+-    # Convert to Python primitive type to avoid NumPy type / Python str
+-    # comparison. See https://github.com/numpy/numpy/issues/6784
+-    present_labels = np.unique(y_true).tolist()
++    present_labels = np.unique(y_true)
+ 
+     if y_type == "binary":
+         if len(present_labels) == 2 and pos_label not in present_labels:
+diff --git a/sklearn/utils/_array_api.py b/sklearn/utils/_array_api.py
+--- a/sklearn/utils/_array_api.py
++++ b/sklearn/utils/_array_api.py
+@@ -1104,14 +1104,6 @@ def _bincount(array, weights=None, minlength=None, xp=None):
+     return xp.asarray(bin_out, device=device(array))
+ 
+ 
+-def _tolist(array, xp=None):
+-    xp, _ = get_namespace(array, xp=xp)
+-    if _is_numpy_namespace(xp):
+-        return array.tolist()
+-    array_np = _convert_to_numpy(array, xp=xp)
+-    return [element.item() for element in array_np]
+-
+-
+ def _logsumexp(array, axis=None, xp=None):
+     # TODO replace by scipy.special.logsumexp when
+     # https://github.com/scipy/scipy/pull/22683 is part of a release.

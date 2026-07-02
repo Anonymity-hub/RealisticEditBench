@@ -1,0 +1,67 @@
+diff --git a/xarray/core/formatting_html.py b/xarray/core/formatting_html.py
+--- a/xarray/core/formatting_html.py
++++ b/xarray/core/formatting_html.py
+@@ -525,6 +525,63 @@
+         root = False
+ 
+     return displays
++
++def _ellipsis_element() -> str:
++    """Create an ellipsis element for truncated children."""
++    return (
++        "<div class='xr-group-box'>"
++        "<div class='xr-group-box-vline' style='height: 100%'></div>"
++        "<div class='xr-group-box-contents'>"
++        "<div class='xr-group-box-ellipsis'>⋮</div>"
++        "</div>"
++        "</div>"
++    )
++
++
++def children_section(
++    children: Mapping[str, DataTree], displays: dict[str, _DataTreeDisplay]
++) -> str:
++    child_elements = []
++    children_list = list(children.values())
++    nchildren = len(children_list)
++    max_children = int(OPTIONS["display_max_children"])
++
++    if nchildren <= max_children:
++        # Render all children
++        for i, child in enumerate(children_list):
++            is_last = i == nchildren - 1
++            child_elements.append(datatree_child_repr(child, displays, end=is_last))
++    else:
++        # Truncate: show first ceil(max/2), ellipsis, last floor(max/2)
++        first_n = ceil(max_children / 2)
++        last_n = max_children - first_n
++
++        child_elements.extend(
++            datatree_child_repr(children_list[i], displays, end=False)
++            for i in range(first_n)
++        )
++
++        child_elements.append(_ellipsis_element())
++
++        child_elements.extend(
++            datatree_child_repr(children_list[i], displays, end=(i == nchildren - 1))
++            for i in range(nchildren - last_n, nchildren)
++        )
++
++    children_html = "".join(child_elements)
++    return f"<div class='xr-children'>{children_html}</div>"
++
++
++def datatree_sections(
++    node: DataTree, displays: dict[str, _DataTreeDisplay]
++) -> list[str]:
++    display = displays[node.path]
++    sections = []
++    if node.children and not display.disabled:
++        sections.append(children_section(node.children, displays))
++    sections.extend(display.sections)
++    return sections
++
+ 
+ def datatree_child_repr(node: DataTree, end: bool = False) -> str:
+     # Wrap DataTree HTML representation with a tee to the left of it.

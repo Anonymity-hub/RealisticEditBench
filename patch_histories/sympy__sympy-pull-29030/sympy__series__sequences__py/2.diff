@@ -1,0 +1,33 @@
+diff --git a/sympy/series/sequences.py b/sympy/series/sequences.py
+--- a/sympy/series/sequences.py
++++ b/sympy/series/sequences.py
+@@ -621,6 +621,29 @@
+             except (TypeError, ValueError):
+                 return None
+ 
++        def _shift(seq):
++            if align_to_stop:
++                if seq.start is S.NegativeInfinity:
++                    shift_expr = seq.stop - stop
++                    direction = 1
++                else:
++                    shift_expr = stop - seq.start
++                    direction = -1
++            else:
++                if seq.start is S.NegativeInfinity:
++                    shift_expr = seq.stop - start
++                    direction = -1
++                else:
++                    shift_expr = start - seq.start
++                    direction = 1
++            shift_int = _as_int(shift_expr)
++            return shift_int, direction
++
++        shift1, dir1 = _shift(self)
++        shift2, dir2 = _shift(other)
++        if shift1 is None or shift2 is None:
++            return None
++
+     def coeff_mul(self, coeff):
+         """See docstring of SeqBase.coeff_mul"""
+         coeff = sympify(coeff)

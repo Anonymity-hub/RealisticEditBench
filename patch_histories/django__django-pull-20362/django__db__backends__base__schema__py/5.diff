@@ -1,0 +1,19 @@
+diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py
+--- a/django/db/backends/base/schema.py
++++ b/django/db/backends/base/schema.py
+@@ -910,6 +910,15 @@
+             else:
+                 new_field_sql = new_field.generated_sql(self.connection)
+                 modifying_generated_field = old_field_sql != new_field_sql
++                db_features = self.connection.features
++                # Some databases (e.g. Oracle) don't allow altering a data type
++                # for generated columns.
++                if (
++                    not modifying_generated_field
++                    and old_type != new_type
++                    and not db_features.supports_alter_generated_column_data_type
++                ):
++                    modifying_generated_field = True
+         if modifying_generated_field:
+             raise ValueError(
+                 f"Modifying GeneratedFields is not supported - the field {new_field} "

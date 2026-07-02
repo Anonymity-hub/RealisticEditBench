@@ -1,0 +1,11 @@
+diff --git a/astropy/io/ascii/ecsv.py b/astropy/io/ascii/ecsv.py
+--- a/astropy/io/ascii/ecsv.py
++++ b/astropy/io/ascii/ecsv.py
+@@ -4,6 +4,7 @@
+ writing all the meta data associated with an astropy Table object.
+ """
+ 
++import csv
+ import json
+ import re
+ import warnings

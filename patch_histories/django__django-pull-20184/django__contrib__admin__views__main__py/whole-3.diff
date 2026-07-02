@@ -1,0 +1,12 @@
+diff --git a/django/contrib/admin/views/main.py b/django/contrib/admin/views/main.py
+--- a/django/contrib/admin/views/main.py
++++ b/django/contrib/admin/views/main.py
+@@ -64,7 +64,7 @@ def __init__(self, *args, **kwargs):
+ 
+ class ChangeList:
+     search_form_class = ChangeListSearchForm
+-    formset = None  # noqa: F841
++    formset = None
+ 
+     def __init__(
+         self,

@@ -1,0 +1,20 @@
+diff --git a/sympy/polys/agca/extensions.py b/sympy/polys/agca/extensions.py
+--- a/sympy/polys/agca/extensions.py
++++ b/sympy/polys/agca/extensions.py
+@@ -3,7 +3,7 @@
+ from sympy.polys.domains.domain import Domain
+ from sympy.polys.domains.domainelement import DomainElement
+ from sympy.polys.polyerrors import (CoercionFailed, NotInvertible,
+-        GeneratorsError)
++        GeneratorsError, ExactQuotientFailed)
+ from sympy.polys.polytools import Poly
+ from sympy.printing.defaults import DefaultPrinting
+ 
+@@ -344,6 +344,7 @@
+         ring = self.ring
+         try:
+             rep = ring.exquo(f.rep, g.rep)
++        except ExactQuotientFailed:
+         return ExtElem(rep % self.mod, self)
+ 
+     def is_negative(self, a):

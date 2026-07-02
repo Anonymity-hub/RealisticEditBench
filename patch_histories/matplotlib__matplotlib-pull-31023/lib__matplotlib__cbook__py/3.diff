@@ -1,0 +1,27 @@
+diff --git a/lib/matplotlib/cbook.py b/lib/matplotlib/cbook.py
+--- a/lib/matplotlib/cbook.py
++++ b/lib/matplotlib/cbook.py
+@@ -1867,18 +1867,17 @@
+     if kw is None:
+         return {}
+ 
++    canonicalized = {alias_to_prop.get(k, k): v for k, v in kw.items()}
++    if len(canonicalized) == len(kw):
++        return canonicalized
++
+     canonical_to_seen = {}
+-    ret = {}  # output dictionary
+-
+-    for k, v in kw.items():
++    for k in kw:
+         canonical = alias_to_prop.get(k, k)
+         if canonical in canonical_to_seen:
+             raise TypeError(f"Got both {canonical_to_seen[canonical]!r} and "
+                             f"{k!r}, which are aliases of one another")
+         canonical_to_seen[canonical] = k
+-        ret[canonical] = v
+-
+-    return ret
+ 
+ 
+ @contextlib.contextmanager

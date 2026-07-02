@@ -1,0 +1,45 @@
+diff --git a/astropy/wcs/wcsapi/high_level_api.py b/astropy/wcs/wcsapi/high_level_api.py
+--- a/astropy/wcs/wcsapi/high_level_api.py
++++ b/astropy/wcs/wcsapi/high_level_api.py
+@@ -282,8 +282,8 @@
+     """
+     Convert low level values into high level objects.
+ 
+-    This function uses the information in ``wcs.world_axis_object_classes`` and
+-    ``wcs.world_axis_object_components`` to convert low level "values"
++    This function uses the information in ``low_level_wcs.world_axis_object_classes``
++    and ``low_level_wcs.world_axis_object_components`` to convert low level "values"
+     `~.Quantity` objects, to high level objects (such as `~.SkyCoord`).
+ 
+     This is used in `.HighLevelWCSMixin.pixel_to_world`, but provided as a
+@@ -291,11 +291,18 @@
+ 
+     Parameters
+     ----------
+-    *world_values: object
++    *world_values : object
+         Low level, "values" representations of the world coordinates.
+ 
+-    low_level_wcs: `.BaseLowLevelWCS`
+-        The WCS object to use to interpret the coordinates.
++    low_level_wcs : `.BaseLowLevelWCS` or object
++        Source of the world axis metadata to use for the conversion. A full
++        `.BaseLowLevelWCS` instance is accepted, but any object exposing
++        ``world_axis_object_classes`` and ``world_axis_object_components``
++        attributes also works (for example a `types.SimpleNamespace` or a
++        namedtuple). The ``serialized_classes`` attribute is read if present
++        and otherwise treated as ``False``. This is useful when the metadata
++        for the intended conversion direction does not match what a WCS
++        exposes by default.
+     """
+     # Check the type of the input values - should be scalars or plain Numpy
+     # arrays, not e.g. Quantity. Note that we deliberately use type(w) because
+@@ -312,7 +319,7 @@
+     classes = low_level_wcs.world_axis_object_classes
+ 
+     # Deserialize classes
+-    if low_level_wcs.serialized_classes:
++    if getattr(low_level_wcs, "serialized_classes", False):
+         classes_new = {}
+         for key, value in classes.items():
+             classes_new[key] = deserialize_class(value, construct=False)

@@ -1,0 +1,11 @@
+diff --git a/sympy/combinatorics/perm_groups.py b/sympy/combinatorics/perm_groups.py
+--- a/sympy/combinatorics/perm_groups.py
++++ b/sympy/combinatorics/perm_groups.py
+@@ -1326,6 +1326,7 @@
+         basic_orbits = self.basic_orbits
+         m = len(base)
+         if m == 0:
++            h = list(range(self._degree))
+         v = [0]*m
+         for i in range(m):
+             rank, c = divmod(rank, len(transversals[i]))

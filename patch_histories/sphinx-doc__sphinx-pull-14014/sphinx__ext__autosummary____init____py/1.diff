@@ -1,0 +1,19 @@
+diff --git a/sphinx/ext/autosummary/__init__.py b/sphinx/ext/autosummary/__init__.py
+--- a/sphinx/ext/autosummary/__init__.py
++++ b/sphinx/ext/autosummary/__init__.py
+@@ -592,6 +592,15 @@
+     summary = literal_re.sub('.', summary)
+ 
+     return summary
++
++
++def _parse_summary(doc: Sequence[str], settings: Any) -> nodes.document:
++    state_machine = RSTStateMachine(state_classes, 'Body')
++    node = new_document('', settings)
++    node.reporter = NullReporter()
++    state_machine.run(doc, node)
++
++    return node
+ 
+ 
+ def limited_join(

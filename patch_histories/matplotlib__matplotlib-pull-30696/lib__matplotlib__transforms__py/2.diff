@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/transforms.py b/lib/matplotlib/transforms.py
+--- a/lib/matplotlib/transforms.py
++++ b/lib/matplotlib/transforms.py
+@@ -398,6 +398,7 @@
+         """
+         width = self.width
+         height = self.height
++        return (width > 0 or height > 0) and width < np.inf and height < np.inf
+ 
+     def containsx(self, x):
+         """

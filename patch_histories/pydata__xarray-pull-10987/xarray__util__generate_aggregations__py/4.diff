@@ -1,0 +1,43 @@
+diff --git a/xarray/util/generate_aggregations.py b/xarray/util/generate_aggregations.py
+--- a/xarray/util/generate_aggregations.py
++++ b/xarray/util/generate_aggregations.py
+@@ -66,6 +66,30 @@
+         keep_attrs: bool | None = None,
+         keepdims: bool = False,
+         **kwargs: Any,
++    ) -> Self:
++        raise NotImplementedError()"""
++
++DATASET_PREAMBLE = """
++
++class {obj}{cls}Aggregations:
++    __slots__ = ()
++
++    def reduce(
++        self,
++        func: Callable[..., Any],
++        dim: Dims = None,
++        *,
++        axis: int | Sequence[int] | None = None,
++        keep_attrs: bool | None = None,
++        keepdims: bool = False,
++        **kwargs: Any,
++    ) -> Self:
++        raise NotImplementedError()
++
++    def assign_coords(
++        self,
++        coords: Mapping | None = None,
++        **coords_kwargs: Any,
+     ) -> Self:
+         raise NotImplementedError()"""
+ 
+@@ -647,7 +671,7 @@
+     docref="agg",
+     docref_description="reduction or aggregation operations",
+     example_call_preamble="",
+-    definition_preamble=AGGREGATIONS_PREAMBLE,
++    definition_preamble=DATASET_PREAMBLE,
+ )
+ DATAARRAY_GENERATOR = GenericAggregationGenerator(
+     cls="",

@@ -1,0 +1,31 @@
+diff --git a/xarray/core/formatting.py b/xarray/core/formatting.py
+--- a/xarray/core/formatting.py
++++ b/xarray/core/formatting.py
+@@ -986,6 +986,27 @@
+     if only_b := b_keys - a_keys:
+         summary.append(f"Indexes only on the right object: {sorted(only_b)}")
+ 
++    # Check for indexes on the same coordinates but with different types or values
++    common_keys = a_keys & b_keys
++    diff_items = []
++
++    for key in sorted(common_keys):
++        a_idx = a_indexes[key]
++        b_idx = b_indexes[key]
++
++        # Check if indexes differ
++        indexes_equal = False
++        if type(a_idx) is type(b_idx):
++            try:
++                indexes_equal = a_idx.equals(b_idx)
++            except NotImplementedError:
++                # Fall back to variable comparison
++                a_var = a_indexes.variables[key]
++                b_var = b_indexes.variables[key]
++                indexes_equal = a_var.equals(b_var)
++
++        if not indexes_equal:
++
+     return "\n".join(summary)
+ 
+ 

@@ -1,0 +1,18 @@
+diff --git a/xarray/core/_aggregations.py b/xarray/core/_aggregations.py
+--- a/xarray/core/_aggregations.py
++++ b/xarray/core/_aggregations.py
+@@ -7911,14 +7911,6 @@ def cumsum(
+           * time     (time) datetime64[ns] 48B 2001-01-31 2001-02-28 ... 2001-06-30
+             labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         """
+-        # return self.reduce(
+-        #     duck_array_ops.cumsum,
+-        #     dim=dim,
+-        #     skipna=skipna,
+-        #     keep_attrs=keep_attrs,
+-        #     **kwargs,
+-        # )
+-
+         if (
+             flox_available
+             and OPTIONS["use_flox"]

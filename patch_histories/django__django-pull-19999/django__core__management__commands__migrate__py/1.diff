@@ -1,0 +1,11 @@
+diff --git a/django/core/management/commands/migrate.py b/django/core/management/commands/migrate.py
+--- a/django/core/management/commands/migrate.py
++++ b/django/core/management/commands/migrate.py
+@@ -447,6 +447,7 @@
+         def model_installed(model):
+             opts = model._meta
+             converter = connection.introspection.identifier_converter
++            max_name_length = connection.ops.max_name_length()
+             return not (
+                 (converter(opts.db_table) in tables)
+                 or (

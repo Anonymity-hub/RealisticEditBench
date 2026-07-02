@@ -1,0 +1,14 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -439,6 +439,10 @@ def _get_model_from_node(self, node, attr):
+             )
+ 
+ 
++def check_element_type(element):
++    return element.nodeType in (element.TEXT_NODE, element.CDATA_SECTION_NODE)
++
++
+ def getInnerText(node):
+     """Get the inner text of a DOM node and any children one level deep."""
+     # inspired by

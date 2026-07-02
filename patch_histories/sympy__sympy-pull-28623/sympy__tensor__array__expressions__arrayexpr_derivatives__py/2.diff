@@ -1,0 +1,12 @@
+diff --git a/sympy/tensor/array/expressions/arrayexpr_derivatives.py b/sympy/tensor/array/expressions/arrayexpr_derivatives.py
+--- a/sympy/tensor/array/expressions/arrayexpr_derivatives.py
++++ b/sympy/tensor/array/expressions/arrayexpr_derivatives.py
+@@ -41,6 +41,8 @@
+ def _(expr: Function, x: _ArrayExpr):
+     if len(expr.args) != 1:
+         raise NotImplementedError("only 1-parameter functions are supported")
++    dexpr = array_derive(expr.args[0], x)
++    return _array_tensor_product(expr.fdiff(), dexpr)
+ 
+ 
+ @array_derive.register(ArrayTensorProduct)

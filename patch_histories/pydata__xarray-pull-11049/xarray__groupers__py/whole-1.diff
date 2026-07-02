@@ -1,0 +1,41 @@
+diff --git a/xarray/groupers.py b/xarray/groupers.py
+--- a/xarray/groupers.py
++++ b/xarray/groupers.py
+@@ -14,6 +14,7 @@
+ from collections import defaultdict
+ from collections.abc import Hashable, Mapping, Sequence
+ from dataclasses import dataclass, field
++from functools import partial
+ from itertools import chain, pairwise
+ from typing import TYPE_CHECKING, Any, Literal, cast
+ 
+@@ -40,6 +41,7 @@
+     Bins,
+     DatetimeLike,
+     GroupIndices,
++    PDDatetimeUnitOptions,
+     ResampleCompatible,
+     Self,
+     SideOptions,
+@@ -61,6 +63,11 @@
+ RESAMPLE_DIM = "__resample_dim__"
+ 
+ 
++def _construct_timestamp_as_unit(unit: PDDatetimeUnitOptions, **kwargs) -> pd.Timestamp:
++    """Construct a pandas.Timestamp object with a specific resolution."""
++    return pd.Timestamp(**kwargs).as_unit(unit)
++
++
+ @dataclass(init=False)
+ class EncodedGroups:
+     """
+@@ -960,7 +967,8 @@ def factorize(self, group: T_Group) -> EncodedGroups:
+             datetime_class = type(first_n_items(group.data, 1).item())
+         else:
+             index_class = pd.DatetimeIndex
+-            datetime_class = datetime.datetime
++            unit, _ = np.datetime_data(group.dtype)
++            datetime_class = partial(_construct_timestamp_as_unit, unit)
+ 
+         # these are the seasons that are present
+         unique_coord = index_class(

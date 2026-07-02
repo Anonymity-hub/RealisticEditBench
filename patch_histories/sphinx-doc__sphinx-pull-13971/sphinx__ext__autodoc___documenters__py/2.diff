@@ -1,0 +1,18 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -635,3 +635,14 @@
+                 return func(obj, name, *defargs)
+ 
+         return safe_getattr(obj, name, *defargs)
++
++    def __repr__(self) -> str:
++        return f'_AutodocAttrGetter({dict(self._attr_getters)!r})'
++
++    def __setattr__(self, key: str, value: Any) -> NoReturn:
++        msg = f'{self.__class__.__name__} is immutable'
++        raise AttributeError(msg)
++
++    def __delattr__(self, key: str) -> NoReturn:
++        msg = f'{self.__class__.__name__} is immutable'
++        raise AttributeError(msg)

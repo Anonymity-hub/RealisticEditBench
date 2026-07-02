@@ -1,0 +1,21 @@
+diff --git a/xarray/core/coordinates.py b/xarray/core/coordinates.py
+--- a/xarray/core/coordinates.py
++++ b/xarray/core/coordinates.py
+@@ -561,6 +561,8 @@
+         other : dict-like, optional
+             A :py:class:`Coordinates` object or any mapping that can be turned
+             into coordinates.
++        compat : {"identical", "equals", "broadcast_equals", "no_conflicts", "override", "minimal"}, default: "minimal"
++            Compatibility checks to use between coordinate variables.
+ 
+         Returns
+         -------
+@@ -575,7 +577,7 @@
+         if not isinstance(other, Coordinates):
+             other = Dataset(coords=other).coords
+ 
+-        coords, indexes = merge_coordinates_without_align([self, other])
++        coords, indexes = merge_coordinates_without_align([self, other], compat=compat)
+         coord_names = set(coords)
+         return Dataset._construct_direct(
+             variables=coords, coord_names=coord_names, indexes=indexes

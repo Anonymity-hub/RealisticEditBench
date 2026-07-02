@@ -1,0 +1,15 @@
+diff --git a/sympy/matrices/decompositions.py b/sympy/matrices/decompositions.py
+--- a/sympy/matrices/decompositions.py
++++ b/sympy/matrices/decompositions.py
+@@ -1377,7 +1377,10 @@
+ 
+         Q[:, j] = dps(Q[:, j])
+         z = Q[:, j].is_zero_matrix
+-        if z is True
++        if z is True or dps(dot(Q[:, j], Q[:, j])).equals(0):
++            continue
++        ranked.append(j)
++        R[j, j] = M.one
+ 
+     Q = Q.extract(range(Q.rows), ranked)
+     R = R.extract(ranked, range(R.cols))

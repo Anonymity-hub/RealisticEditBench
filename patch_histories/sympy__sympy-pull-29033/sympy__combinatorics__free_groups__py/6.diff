@@ -1,0 +1,72 @@
+diff --git a/sympy/combinatorics/free_groups.py b/sympy/combinatorics/free_groups.py
+--- a/sympy/combinatorics/free_groups.py
++++ b/sympy/combinatorics/free_groups.py
+@@ -1340,7 +1340,15 @@
+         return ()
+     if boundary_index is not None:
+         reduced = list(array_form)
+-        zero_mul_simp(reduced, boundary_index)
++        index = boundary_index
++        while index >= 0 and index < len(reduced) - 1 and reduced[index][0] == reduced[index + 1][0]:
++            exp = reduced[index][1] + reduced[index + 1][1]
++            base = reduced[index][0]
++            reduced[index] = (base, exp)
++            del reduced[index + 1]
++            if reduced[index][1] == 0:
++                del reduced[index]
++                index -= 1
+         return tuple(reduced)
+ 
+     reduced = []
+@@ -1356,51 +1364,3 @@
+         else:
+             reduced.append((gen, exp))
+     return tuple(reduced)
+-
+-
+-def letter_form_to_array_form(array_form, group):
+-    """
+-    This method converts a list given with possible repetitions of elements in
+-    it. It returns a new list such that repetitions of consecutive elements is
+-    removed and replace with a tuple element of size two such that the first
+-    index contains `value` and the second index contains the number of
+-    consecutive repetitions of `value`.
+-
+-    """
+-    a = list(array_form[:])
+-    new_array = []
+-    n = 1
+-    symbols = group.symbols
+-    for i in range(len(a)):
+-        if i == len(a) - 1:
+-            if a[i] == a[i - 1]:
+-                if (-a[i]) in symbols:
+-                    new_array.append((-a[i], -n))
+-                else:
+-                    new_array.append((a[i], n))
+-            else:
+-                if (-a[i]) in symbols:
+-                    new_array.append((-a[i], -1))
+-                else:
+-                    new_array.append((a[i], 1))
+-            return new_array
+-        elif a[i] == a[i + 1]:
+-            n += 1
+-        else:
+-            if (-a[i]) in symbols:
+-                new_array.append((-a[i], -n))
+-            else:
+-                new_array.append((a[i], n))
+-            n = 1
+-
+-
+-def zero_mul_simp(l, index):
+-    """Used to combine two reduced words."""
+-    while index >=0 and index < len(l) - 1 and l[index][0] == l[index + 1][0]:
+-        exp = l[index][1] + l[index + 1][1]
+-        base = l[index][0]
+-        l[index] = (base, exp)
+-        del l[index + 1]
+-        if l[index][1] == 0:
+-            del l[index]
+-            index -= 1

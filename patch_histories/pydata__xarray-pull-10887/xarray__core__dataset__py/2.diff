@@ -1,0 +1,18 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -1511,10 +1511,13 @@
+     ) -> bool:
+         """Helper function for equals and identical"""
+ 
++        if not callable(compat):
++            compat_str = compat
++
+         # some stores (e.g., scipy) do not seem to preserve order, so don't
+         # require matching order for equality
+         def compat(x: Variable, y: Variable) -> bool:
+-            return getattr(x, compat)(y)
++            return getattr(x, compat_str)(y)
+ 
+         return self._coord_names == other._coord_names and utils.dict_equiv(
+             self._variables, other._variables, compat=compat

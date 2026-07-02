@@ -1,0 +1,16 @@
+diff --git a/sklearn/inspection/_plot/decision_boundary.py b/sklearn/inspection/_plot/decision_boundary.py
+--- a/sklearn/inspection/_plot/decision_boundary.py
++++ b/sklearn/inspection/_plot/decision_boundary.py
+@@ -232,10 +232,9 @@
+             _, ax = plt.subplots()
+ 
+         plot_func = getattr(ax, plot_method)
+-        if self.response.ndim == 2:
++        if self.n_classes == 2:
+             self.surface_ = plot_func(self.xx0, self.xx1, self.response, **kwargs)
+-        else:  # self.response.ndim == 3
+-            n_responses = self.response.shape[-1]
++        else:  # multiclass
+             for kwarg in ("cmap", "colors"):
+                 if kwarg in kwargs:
+                     warnings.warn(

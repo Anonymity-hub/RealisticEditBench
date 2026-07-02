@@ -1,0 +1,12 @@
+diff --git a/sklearn/metrics/_plot/roc_curve.py b/sklearn/metrics/_plot/roc_curve.py
+--- a/sklearn/metrics/_plot/roc_curve.py
++++ b/sklearn/metrics/_plot/roc_curve.py
+@@ -730,7 +730,7 @@
+         <...>
+         >>> plt.show()
+         """
+-        pos_label_ = cls._validate_from_cv_results_params(
++        cls._validate_from_cv_results_params(
+             cv_results,
+             X,
+             y,

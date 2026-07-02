@@ -1,0 +1,16 @@
+diff --git a/sympy/integrals/rationaltools.py b/sympy/integrals/rationaltools.py
+--- a/sympy/integrals/rationaltools.py
++++ b/sympy/integrals/rationaltools.py
+@@ -350,10 +350,10 @@
+             remaining.remove(r_c)
+             r_re, r_im = r.as_real_imag()
+             _, r_im = ordered([r_im, -r_im])
+-            complexes[(r_re, r_im)] = m
++            complexes[(r_re, r_im)] = rs[r]
+         else:
+             # If we didn't find a conjugate just treat as real
+-            reals[r] = m
++            reals[r] = rs[r]
+ 
+     return reals, complexes
+ 

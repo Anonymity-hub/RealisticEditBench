@@ -1,0 +1,53 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -1047,6 +1047,17 @@
+         else:
+             parsed_dim = tuple(dim)
+ 
++        # Do this so we raise the same error message whether flox is present or not.
++        # Better to control it here than in flox.
++        for grouper in self.groupers:
++            if any(
++                d not in grouper.codes.dims and d not in self._original_obj.dims
++                for d in parsed_dim
++            ):
++                # TODO: Not a helpful error, it's a sanity check that dim actually exist
++                # either in self.groupers or self._original_obj
++                raise ValueError(f"cannot reduce over dimensions {dim}.")
++
+         return parsed_dim
+ 
+     def _flox_reduce(
+@@ -1109,30 +1120,7 @@
+                 # set explicitly to avoid unnecessarily accumulating count
+                 kwargs["min_count"] = 0
+ 
+-        parsed_dim: tuple[Hashable, ...]
+-        if isinstance(dim, str):
+-            parsed_dim = (dim,)
+-        elif dim is None:
+-            parsed_dim_list = list()
+-            # preserve order
+-            for dim_ in itertools.chain(
+-                *(grouper.codes.dims for grouper in self.groupers)
+-            ):
+-                if dim_ not in parsed_dim_list:
+-                    parsed_dim_list.append(dim_)
+-            parsed_dim = tuple(parsed_dim_list)
+-        elif dim is ...:
+-            parsed_dim = tuple(obj.dims)
+-        else:
+-            parsed_dim = tuple(dim)
+-
+-        # Do this so we raise the same error message whether flox is present or not.
+-        # Better to control it here than in flox.
+-        for grouper in self.groupers:
+-            if any(
+-                d not in grouper.codes.dims and d not in obj.dims for d in parsed_dim
+-            ):
+-                raise ValueError(f"cannot reduce over dimensions {dim}.")
++        parsed_dim = self._parse_dim(dim)
+ 
+         has_missing_groups = (
+             self.encoded.unique_coord.size != self.encoded.full_index.size

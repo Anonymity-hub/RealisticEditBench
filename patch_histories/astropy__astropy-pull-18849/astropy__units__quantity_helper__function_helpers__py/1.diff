@@ -1,0 +1,38 @@
+diff --git a/astropy/units/quantity_helper/function_helpers.py b/astropy/units/quantity_helper/function_helpers.py
+--- a/astropy/units/quantity_helper/function_helpers.py
++++ b/astropy/units/quantity_helper/function_helpers.py
+@@ -514,18 +514,27 @@
+ 
+ UNIT_FROM_LIKE_ARG = object()
+ 
+-if NUMPY_LT_2_0:
++if not NUMPY_LT_2_0:
+ 
+     @function_helper
+-    def arange(*args, start=None, stop=None, step=None, dtype=None):
+-        return arange_impl(*args, start=start, stop=stop, step=step, dtype=dtype)
++    def arange(
++        start_or_stop,
++        /,
++        stop=None,
++        step=1,
++        *,
++        dtype=None,
++        device=None,
++    ):
++        return arange_impl(
++            start_or_stop, stop=stop, step=step, dtype=dtype, device=device
++        )
++
+ else:
+ 
+     @function_helper
+-    def arange(*args, start=None, stop=None, step=None, dtype=None, device=None):
+-        return arange_impl(
+-            *args, start=start, stop=stop, step=step, dtype=dtype, device=device
+-        )
++    def arange(start_or_stop, /, stop=None, step=1, *, dtype=None):
++        return arange_impl(start_or_stop, stop=stop, step=step, dtype=dtype)
+ 
+ 
+ def arange_impl(*args, start=None, stop=None, step=None, dtype=None, **kwargs):

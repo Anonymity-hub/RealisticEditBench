@@ -1,0 +1,125 @@
+diff --git a/pylint/config/config_initialization.py b/pylint/config/config_initialization.py
+--- a/pylint/config/config_initialization.py
++++ b/pylint/config/config_initialization.py
+@@ -6,6 +6,7 @@
+ 
+ import sys
+ import warnings
++from copy import copy
+ from glob import glob
+ from itertools import chain
+ from pathlib import Path
+@@ -58,8 +59,12 @@ def _config_initialization(  # pylint: disable=too-many-statements
+         exec(utils._unquote(config_data["init-hook"]))  # pylint: disable=exec-used
+ 
+     # Load plugins if specified in the config file
++    default_checkers = copy(linter._registered_checkers)
+     if "load-plugins" in config_data:
+         linter.load_plugin_modules(utils._splitstrip(config_data["load-plugins"]))
++    linter._registered_dynamic_plugin_checkers = linter._registered_checkers.difference(
++        default_checkers
++    )
+ 
+     unrecognized_options_message = None
+     # First we parse any options from a configuration file
+diff --git a/pylint/lint/parallel.py b/pylint/lint/parallel.py
+--- a/pylint/lint/parallel.py
++++ b/pylint/lint/parallel.py
+@@ -54,6 +54,12 @@ def _worker_initialize(
+ 
+     # Re-register dynamic plugins, since the pool does not have access to the
+     # astroid module that existed when the linter was pickled.
++    # Freeze register new messages to prevent overwriting enabled and disabled messaged
++    # during dynamic plugin re-load.
++    _worker_linter._freeze_register_msgs = True
++    _worker_linter._deregister_checkers(
++        _worker_linter._registered_dynamic_plugin_checkers
++    )
+     _worker_linter.load_plugin_modules(_worker_linter._dynamic_plugins, force=True)
+     _worker_linter.load_plugin_configuration()
+ 
+diff --git a/pylint/lint/pylinter.py b/pylint/lint/pylinter.py
+--- a/pylint/lint/pylinter.py
++++ b/pylint/lint/pylinter.py
+@@ -14,7 +14,7 @@
+ import traceback
+ import warnings
+ from collections import defaultdict
+-from collections.abc import Callable, Iterable, Iterator, Sequence
++from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
+ from io import TextIOWrapper
+ from pathlib import Path
+ from re import Pattern
+@@ -323,6 +323,16 @@ def __init__(
+         """Dictionary of registered and initialized checkers."""
+         self._dynamic_plugins: dict[str, ModuleType | ModuleNotFoundError | bool] = {}
+         """Set of loaded plugin names."""
++        self._registered_checkers: set[tuple[str, checkers.BaseChecker, int]] = set()
++        """Set of tuples with loaded checker name, reference to checker
++        and checker object id.
++        """
++        self._registered_dynamic_plugin_checkers: set[
++            tuple[str, checkers.BaseChecker, int]
++        ] = set()
++        """Set of tuples with loaded dynamic plugin checker name, reference to
++        checker and checker object id.
++        """
+ 
+         # Attributes related to stats
+         self.stats = LinterStats()
+@@ -356,6 +366,7 @@ def __init__(
+         self.msgs_store = MessageDefinitionStore(self.config.py_version)
+         self.msg_status = 0
+         self._by_id_managed_msgs: list[ManagedMessage] = []
++        self._freeze_register_msgs = False
+ 
+         # Attributes related to visiting files
+         self.file_state = FileState("", self.msgs_store, is_base_filestate=True)
+@@ -495,17 +506,30 @@ def report_order(self) -> list[BaseChecker]:
+     def register_checker(self, checker: checkers.BaseChecker) -> None:
+         """This method auto registers the checker."""
+         self._checkers[checker.name].append(checker)
++        self._registered_checkers.add((checker.name, checker, id(checker)))
+         for r_id, r_title, r_cb in checker.reports:
+             self.register_report(r_id, r_title, r_cb, checker)
+-        if hasattr(checker, "msgs"):
++        if not self._freeze_register_msgs and hasattr(checker, "msgs"):
+             self.msgs_store.register_messages_from_checker(checker)
+             for message in checker.messages:
+                 if not message.default_enabled:
+                     self.disable(message.msgid)
+         # Register the checker, but disable all of its messages.
+-        if not getattr(checker, "enabled", True):
++        if not (self._freeze_register_msgs or getattr(checker, "enabled", True)):
+             self.disable(checker.name)
+ 
++    def _deregister_checkers(
++        self, checker_collection: Collection[tuple[str, checkers.BaseChecker, int]]
++    ) -> None:
++        """De-registered a collection of checkers with its reports.
++
++        Leave messages in place as re-registering them is a no-op.
++        """
++        for checker_name, checker, _ in checker_collection:
++            self._checkers[checker_name].remove(checker)
++            if checker.reports:
++                self.deregister_reports(checker)
++
+     def enable_fail_on_messages(self) -> None:
+         """Enable 'fail on' msgs.
+ 
+diff --git a/pylint/reporters/reports_handler_mix_in.py b/pylint/reporters/reports_handler_mix_in.py
+--- a/pylint/reporters/reports_handler_mix_in.py
++++ b/pylint/reporters/reports_handler_mix_in.py
+@@ -48,6 +48,11 @@ def register_report(
+         reportid = reportid.upper()
+         self._reports[checker].append((reportid, r_title, r_cb))
+ 
++    def deregister_reports(self, checker: BaseChecker) -> None:
++        """De-register all reports for a checker."""
++        for r_id, r_title, r_cb in checker.reports:
++            self._reports[checker].remove((r_id, r_title, r_cb))
++
+     def enable_report(self, reportid: str) -> None:
+         """Enable the report of the given id."""
+         reportid = reportid.upper()

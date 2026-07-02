@@ -1,0 +1,39 @@
+diff --git a/lib/matplotlib/widgets.py b/lib/matplotlib/widgets.py
+--- a/lib/matplotlib/widgets.py
++++ b/lib/matplotlib/widgets.py
+@@ -1989,12 +1989,19 @@
+     Provide a vertical (default) and/or horizontal line cursor shared between
+     multiple Axes.
+ 
++    Call signatures::
++
++        MultiCursor(axes, *, ...)
++        MultiCursor(canvas, axes, *, ...)  # deprecated
++
+     For the cursor to remain responsive you must keep a reference to it.
+ 
+     Parameters
+     ----------
+     canvas : object
+-        This parameter is entirely unused and only kept for back-compatibility.
++        This parameter is entirely unused.
++
++        .. deprecated:: 3.11
+ 
+     axes : list of `~matplotlib.axes.Axes`
+         The `~.axes.Axes` to attach the cursor to.
+@@ -2031,6 +2038,14 @@
+                   for k in list(lineprops) if k in ("canvas", "axes")}
+         params = _api.select_matching_signature(
+             [lambda axes: locals(), lambda canvas, axes: locals()], *args, **kwargs)
++        if "canvas" in params:
++            _api.warn_deprecated(
++                "3.11",
++                message="The canvas parameter in MultiCursor is unused and deprecated "
++                "since  %(since)s. Please remove it and call MultiCursor(axes) "
++                "instead of MultiCursor(canvas, axes). The latter will start raising "
++                "an error in %(removal)s"
++            )
+         axes = params["axes"]
+ 
+         self.axes = axes

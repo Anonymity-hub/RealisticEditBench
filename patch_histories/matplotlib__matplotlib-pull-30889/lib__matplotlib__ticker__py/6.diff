@@ -1,0 +1,30 @@
+diff --git a/lib/matplotlib/ticker.py b/lib/matplotlib/ticker.py
+--- a/lib/matplotlib/ticker.py
++++ b/lib/matplotlib/ticker.py
+@@ -1029,7 +1029,7 @@
+             return ''
+ 
+         vmin, vmax = self.axis.get_view_interval()
+-        vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)
++        vmin, vmax = mtransforms._nonsingular(vmin, vmax, expander=0.05)
+         s = self._num_to_string(x, vmin, vmax)
+         return self.fix_minus(s)
+ 
+@@ -1730,7 +1730,7 @@
+           default view limits.
+         - Otherwise, ``(v0, v1)`` is returned without modification.
+         """
+-        return mtransforms.nonsingular(v0, v1, expander=.05)
++        return mtransforms._nonsingular(v0, v1, expander=.05)
+ 
+     def view_limits(self, vmin, vmax):
+         """
+@@ -1738,7 +1738,7 @@
+ 
+         Subclasses should override this method to change locator behaviour.
+         """
+-        return mtransforms.nonsingular(vmin, vmax)
++        return mtransforms._nonsingular(vmin, vmax)
+ 
+ 
+ class IndexLocator(Locator):

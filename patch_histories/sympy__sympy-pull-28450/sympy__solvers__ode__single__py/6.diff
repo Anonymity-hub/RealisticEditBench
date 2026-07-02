@@ -1,0 +1,22 @@
+diff --git a/sympy/solvers/ode/single.py b/sympy/solvers/ode/single.py
+--- a/sympy/solvers/ode/single.py
++++ b/sympy/solvers/ode/single.py
+@@ -2852,6 +2852,18 @@
+         }
+ 
+         return True
++
++    def _get_general_solution(self, *, simplify_flag: bool = True):
++        f = self.ode_problem.func.func
++        x = self.ode_problem.sym
++        (C1, C2) = self.ode_problem.get_numbered_constants(num=2)
++
++        A = self.match_dict['A']
++        k = self.match_dict['k']
++
++        # For y'' + A*x^k*y = 0
++        # The Bessel order and argument are:
++        nu = 1 / (k + 2)
+ 
+ 
+ class SecondLinearAiry(SingleODESolver):

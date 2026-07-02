@@ -1,0 +1,21 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -2353,6 +2353,17 @@
+             # Although an empty set is always a subset, there's no point in
+             # clearing ordering when there isn't any. Avoid the clone() below.
+             return True
++        # Don't pollute the original query (might disrupt joins).
++        q = self.clone()
++        order_by_set = {
++            (
++                order_by.resolve_expression(q)
++                if hasattr(order_by, "resolve_expression")
++                else F(order_by).resolve_expression(q)
++            )
++            for order_by in q.order_by
++        }
++        return order_by_set.issubset(self.group_by)
+ 
+     def clear_ordering(self, force=False, clear_default=True):
+         """

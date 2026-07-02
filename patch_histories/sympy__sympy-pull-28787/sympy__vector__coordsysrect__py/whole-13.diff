@@ -1,0 +1,12 @@
+diff --git a/sympy/vector/coordsysrect.py b/sympy/vector/coordsysrect.py
+--- a/sympy/vector/coordsysrect.py
++++ b/sympy/vector/coordsysrect.py
+@@ -531,7 +531,7 @@ def rotation_matrix(self, other):
+         ========
+ 
+         >>> from sympy.vector import CoordSys3D
+-        >>> from sympy import symbols, Matrix
++        >>> from sympy import symbols
+ 
+         Let's consider two Cartesian systems connected by rotations:
+ 

@@ -1,0 +1,90 @@
+diff --git a/django/db/backends/base/features.py b/django/db/backends/base/features.py
+--- a/django/db/backends/base/features.py
++++ b/django/db/backends/base/features.py
+@@ -373,6 +373,8 @@ class BaseDatabaseFeatures:
+     supports_stored_generated_columns = False
+     # Does the backend support virtual generated columns?
+     supports_virtual_generated_columns = False
++    # Does the backend support altering data types of generated columns?
++    supports_alter_generated_column_data_type = True
+ 
+     # Does the backend support the logical XOR operator?
+     supports_logical_xor = False
+diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py
+--- a/django/db/backends/base/schema.py
++++ b/django/db/backends/base/schema.py
+@@ -452,10 +452,14 @@ def db_default_sql(self, field):
+             params = []
+         return sql % default_sql, params
+ 
++    def _column_generated_persistency_sql(self, field):
++        """Return the SQL to define the persistency of generated fields."""
++        return "STORED" if field.db_persist else "VIRTUAL"
++
+     def _column_generated_sql(self, field):
+         """Return the SQL to use in a GENERATED ALWAYS clause."""
+         expression_sql, params = field.generated_sql(self.connection)
+-        persistency_sql = "STORED" if field.db_persist else "VIRTUAL"
++        persistency_sql = self._column_generated_persistency_sql(field)
+         if self.connection.features.requires_literal_defaults:
+             expression_sql = expression_sql % tuple(self.quote_value(p) for p in params)
+             params = ()
+@@ -906,6 +910,15 @@ def alter_field(self, model, old_field, new_field, strict=False):
+             else:
+                 new_field_sql = new_field.generated_sql(self.connection)
+                 modifying_generated_field = old_field_sql != new_field_sql
++                db_features = self.connection.features
++                # Some databases (e.g. Oracle) don't allow altering a data type
++                # for generated columns.
++                if (
++                    not modifying_generated_field
++                    and old_type != new_type
++                    and not db_features.supports_alter_generated_column_data_type
++                ):
++                    modifying_generated_field = True
+         if modifying_generated_field:
+             raise ValueError(
+                 f"Modifying GeneratedFields is not supported - the field {new_field} "
+diff --git a/django/db/backends/oracle/features.py b/django/db/backends/oracle/features.py
+--- a/django/db/backends/oracle/features.py
++++ b/django/db/backends/oracle/features.py
+@@ -69,8 +69,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
+     supports_ignore_conflicts = False
+     max_query_params = 2**16 - 1
+     supports_partial_indexes = False
+-    supports_stored_generated_columns = False
+     supports_virtual_generated_columns = True
++    supports_alter_generated_column_data_type = False
+     can_rename_index = True
+     supports_slicing_ordering_in_compound = True
+     requires_compound_order_by_subquery = True
+@@ -131,6 +131,11 @@ def django_test_skips(self):
+             "Oracle doesn't support casting filters to NUMBER.": {
+                 "lookup.tests.LookupQueryingTests.test_aggregate_combined_lookup",
+             },
++            "Oracle doesn't support some data types (e.g. BOOLEAN, BLOB) in "
++            "GeneratedField expressions (ORA-54003).": {
++                "schema.tests.SchemaTests.test_add_generated_field_contains",
++                "schema.tests.SchemaTests.test_add_generated_field_with_kt_model",
++            },
+         }
+         if self.connection.oracle_version < (23,):
+             skips.update(
+@@ -228,3 +233,7 @@ def supports_tuple_lookups(self):
+     @cached_property
+     def supports_uuid4_function(self):
+         return self.connection.oracle_version >= (23, 9)
++
++    @cached_property
++    def supports_stored_generated_columns(self):
++        return self.connection.oracle_version >= (23, 7)
+diff --git a/django/db/backends/oracle/schema.py b/django/db/backends/oracle/schema.py
+--- a/django/db/backends/oracle/schema.py
++++ b/django/db/backends/oracle/schema.py
+@@ -251,3 +251,6 @@ def _collate_sql(self, collation, old_collation=None, table_name=None):
+         if collation is None and old_collation is not None:
+             collation = self._get_default_collation(table_name)
+         return super()._collate_sql(collation, old_collation, table_name)
++
++    def _column_generated_persistency_sql(self, field):
++        return "MATERIALIZED" if field.db_persist else "VIRTUAL"

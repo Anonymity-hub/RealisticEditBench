@@ -1,0 +1,12 @@
+diff --git a/django/utils/text.py b/django/utils/text.py
+--- a/django/utils/text.py
++++ b/django/utils/text.py
+@@ -399,7 +399,7 @@
+         yield buf.read()
+         async for item in sequence:
+             zfile.write(item)
+-            zfile.
++            zfile.flush()
+             data = buf.read()
+             if data:
+                 yield data

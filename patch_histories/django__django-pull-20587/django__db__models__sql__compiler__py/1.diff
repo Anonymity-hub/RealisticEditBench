@@ -1,0 +1,21 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -547,7 +547,7 @@
+                     extra_select.append((expr, (without_ordering, params), None))
+         return extra_select
+ 
+-    def quote_name_unless_alias(self, name):
++    def quote_name(self, name):
+         """
+         A wrapper around connection.ops.quote_name that doesn't quote aliases
+         for table names. This avoids problems with some SQL dialects that treat
+@@ -576,6 +576,8 @@
+         r = self.connection.ops.quote_name(name)
+         self.quote_cache[name] = r
+         return r
++
++    quote_name_unless_alias = quote_name
+ 
+     def compile(self, node):
+         vendor_impl = getattr(node, "as_" + self.connection.vendor, None)

@@ -1,0 +1,27 @@
+diff --git a/sphinx/ext/autodoc/typehints.py b/sphinx/ext/autodoc/typehints.py
+--- a/sphinx/ext/autodoc/typehints.py
++++ b/sphinx/ext/autodoc/typehints.py
+@@ -55,7 +55,7 @@
+         pass
+ 
+ 
+-def merge_typehints(
++def _merge_typehints(
+     app: Sphinx, domain: str, obj_type: _AutodocObjType, contentnode: Element
+ ) -> None:
+     if domain != 'py':
+@@ -226,14 +226,3 @@
+             field += nodes.field_name('', 'rtype')
+             field += nodes.field_body('', nodes.paragraph('', rtype))
+             node += field
+-
+-
+-def setup(app: Sphinx) -> ExtensionMetadata:
+-    app.connect('autodoc-process-signature', record_typehints)
+-    app.connect('object-description-transform', merge_typehints)
+-
+-    return {
+-        'version': sphinx.__display_version__,
+-        'parallel_read_safe': True,
+-        'parallel_write_safe': True,
+-    }

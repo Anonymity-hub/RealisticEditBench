@@ -1,0 +1,266 @@
+diff --git a/sympy/integrals/manualintegrate.py b/sympy/integrals/manualintegrate.py
+--- a/sympy/integrals/manualintegrate.py
++++ b/sympy/integrals/manualintegrate.py
+@@ -2211,7 +2211,7 @@ def manualintegrate(f, var):
+     >>> manualintegrate(exp(x) / (1 + exp(2 * x)), x)
+     atan(exp(x))
+     >>> integrate(exp(x) / (1 + exp(2 * x)))
+-    RootSum(4*_z**2 + 1, Lambda(_i, _i*log(2*_i + exp(x))))
++    RootSum(4*w**2 + 1, Lambda(w, w*log(2*w + exp(x))))
+     >>> manualintegrate(cos(x)**4 * sin(x), x)
+     -cos(x)**5/5
+     >>> integrate(cos(x)**4 * sin(x), x)
+diff --git a/sympy/polys/partfrac.py b/sympy/polys/partfrac.py
+--- a/sympy/polys/partfrac.py
++++ b/sympy/polys/partfrac.py
+@@ -52,7 +52,7 @@ def apart(f, x=None, full=False, **options):
+     You can choose Bronstein's algorithm by setting ``full=True``:
+ 
+     >>> apart(y/(x**2 + x + 1), x, full=True)
+-    RootSum(_w**2 + _w + 1, Lambda(_a, (-2*_a*y/3 - y/3)/(-_a + x)))
++    RootSum(w**2 + w + 1, Lambda(w, (-2*w*y/3 - y/3)/(-w + x)))
+ 
+     Calling ``doit()`` yields a human-readable result:
+ 
+@@ -286,7 +286,7 @@ def apart_list(f, x=None, dummies=None, **options):
+     1)])
+ 
+     >>> assemble_partfrac_list(pfd)
+-    RootSum(_w**2 + _w + t, Lambda(_a, (-2*_a*t/(4*t - 1) - t/(4*t - 1))/(-_a + x)))
++    RootSum(t + w**2 + w, Lambda(w, (-2*t*w/(4*t - 1) - t/(4*t - 1))/(-w + x)))
+ 
+     This example is taken from Bronstein's original paper:
+ 
+@@ -454,7 +454,7 @@ def assemble_partfrac_list(partial_list):
+ 
+     >>> pfda = assemble_partfrac_list(pfd)
+     >>> pfda
+-    RootSum(_w**2 - 2, Lambda(_a, _a/(-_a + x)))/2
++    RootSum(w**2 - 2, Lambda(w, w/(-w + x)))/2
+ 
+     >>> pfda.doit()
+     -sqrt(2)/(2*(x + sqrt(2))) + sqrt(2)/(2*(x - sqrt(2)))
+diff --git a/sympy/polys/rootoftools.py b/sympy/polys/rootoftools.py
+--- a/sympy/polys/rootoftools.py
++++ b/sympy/polys/rootoftools.py
+@@ -19,7 +19,7 @@
+ from sympy.polys.polyroots import (
+     roots_linear, roots_quadratic, roots_binomial,
+     preprocess_roots, roots)
+-from sympy.polys.polytools import Poly, PurePoly, factor
++from sympy.polys.polytools import Poly, factor
+ from sympy.polys.rationaltools import together
+ from sympy.polys.rootisolation import (
+     dup_isolate_complex_roots_sqf,
+@@ -51,26 +51,33 @@ class _pure_key_dict:
+ 
+     >>> P = _pure_key_dict()
+ 
+-    2) assignment for a PurePoly or univariate polynomial
++    2) assignment for a Poly or univariate polynomial
+ 
+     >>> P[x] = 1
+     >>> P[PurePoly(x - y, x)] = 2
+ 
+-    3) retrieval based on PurePoly key comparison (use this
+-       instead of the get method)
++    3) retrieval based on Poly key comparison
+ 
+-    >>> P[y]
++    >>> P[x]
+     1
+ 
+-    4) KeyError when trying to retrieve a nonexisting key
++    4) KeyError when trying to retrieve with different symbol or nonexisting key
+ 
++    >>> P[y]  # Different symbol, not found
++    Traceback (most recent call last):
++    ...
++    KeyError: Poly(y, y, domain='ZZ')
+     >>> P[y + 1]
+     Traceback (most recent call last):
+     ...
+-    KeyError: PurePoly(y + 1, y, domain='ZZ')
++    KeyError: Poly(y + 1, y, domain='ZZ')
+ 
+     5) ability to query with ``in``
+ 
++    >>> x in P
++    True
++    >>> y in P  # Different symbol
++    False
+     >>> x + 1 in P
+     False
+ 
+@@ -83,17 +90,19 @@ def __init__(self):
+         self._dict = {}
+ 
+     def __getitem__(self, k):
+-        if not isinstance(k, PurePoly):
+-            if not (isinstance(k, Expr) and len(k.free_symbols) == 1):
++        if not isinstance(k, Poly):
++            try:
++                k = Poly(k, expand=False)
++            except (GeneratorsNeeded, PolynomialError):
+                 raise KeyError
+-            k = PurePoly(k, expand=False)
+         return self._dict[k]
+ 
+     def __setitem__(self, k, v):
+-        if not isinstance(k, PurePoly):
+-            if not (isinstance(k, Expr) and len(k.free_symbols) == 1):
++        if not isinstance(k, Poly):
++            try:
++                k = Poly(k, expand=False)
++            except (GeneratorsNeeded, PolynomialError):
+                 raise ValueError('expecting univariate expression')
+-            k = PurePoly(k, expand=False)
+         self._dict[k] = v
+ 
+     def __contains__(self, k):
+@@ -105,11 +114,13 @@ def __contains__(self, k):
+ 
+ _reals_cache = _pure_key_dict()
+ _complexes_cache = _pure_key_dict()
++_rootof_dummy = Dummy('x')
++_rootsum_dummy = Dummy('w')
+ 
+ 
+ def _pure_factors(poly):
+     _, factors = poly.factor_list()
+-    return [(PurePoly(f, expand=False), m) for f, m in factors]
++    return [(Poly(f, expand=False).retract(), m) for f, m in factors]
+ 
+ 
+ def _imag_count_of_factor(f):
+@@ -320,7 +331,7 @@ def __new__(cls, f, x, index=None, radicals=False, expand=True):
+         else:
+             raise ValueError("expected an integer root index, got %s" % index)
+ 
+-        poly = PurePoly(f, x, greedy=False, expand=expand)
++        poly = Poly(f, x, greedy=False, expand=expand)
+ 
+         if not poly.is_univariate:
+             raise PolynomialError("only univariate polynomials are allowed")
+@@ -357,6 +368,7 @@ def __new__(cls, f, x, index=None, radicals=False, expand=True):
+         if not dom.is_ZZ:
+             raise NotImplementedError("CRootOf is not supported over %s" % dom)
+ 
++        poly = Poly(poly.replace(poly.gen, _rootof_dummy))
+         root = cls._indexed_root(poly, index, lazy=True)
+         return coeff * cls._postprocess_root(root, radicals)
+ 
+@@ -365,7 +377,8 @@ def _new(cls, poly, index):
+         """Construct new ``CRootOf`` object from raw data. """
+         obj = Expr.__new__(cls)
+ 
+-        obj.poly = PurePoly(poly)
++        poly = poly.replace(poly.gen, _rootof_dummy)
++        obj.poly = Poly(poly)
+         obj.index = index
+ 
+         try:
+@@ -1131,14 +1144,15 @@ def __new__(cls, expr, func=None, x=None, auto=True, quadratic=False):
+             raise MultivariatePolynomialError(
+                 "only univariate polynomials are allowed")
+ 
++        poly = Poly(poly.replace(poly.gen, _rootsum_dummy))
++
+         if func is None:
+-            func = Lambda(poly.gen, poly.gen)
++            func = Lambda(_rootsum_dummy, _rootsum_dummy)
+         else:
+             is_func = getattr(func, 'is_Function', False)
+ 
+             if is_func and 1 in func.nargs:
+-                if not isinstance(func, Lambda):
+-                    func = Lambda(poly.gen, func(poly.gen))
++                func = Lambda(_rootsum_dummy, func(_rootsum_dummy))
+             else:
+                 raise ValueError(
+                     "expected a univariate function, got %s" % func)
+@@ -1210,7 +1224,7 @@ def new(cls, poly, func, auto=True):
+     @classmethod
+     def _transform(cls, expr, x):
+         """Transform an expression to a polynomial. """
+-        poly = PurePoly(expr, x, greedy=False)
++        poly = Poly(expr, x, greedy=False)
+         return preprocess_roots(poly)
+ 
+     @classmethod
+@@ -1286,7 +1300,8 @@ def args(self):
+ 
+     @property
+     def free_symbols(self):
+-        return self.poly.free_symbols | self.fun.free_symbols
++        poly_syms = self.poly.free_symbols - {self.poly.gen}
++        return poly_syms | self.fun.free_symbols
+ 
+     @property
+     def is_commutative(self):
+diff --git a/sympy/printing/str.py b/sympy/printing/str.py
+--- a/sympy/printing/str.py
++++ b/sympy/printing/str.py
+@@ -6,16 +6,22 @@
+ from typing import Any
+ 
+ from sympy.core import S, Rational, Pow, Basic, Mul, Number
++from sympy.core.function import Lambda
+ from sympy.core.mul import _keep_coeff
+ from sympy.core.numbers import Integer
+ from sympy.core.relational import Relational
+ from sympy.core.sorting import default_sort_key
++from sympy.core.symbol import Symbol
+ from sympy.external.mpmath import prec_to_dps, to_str as mlib_to_str
+ from sympy.utilities.iterables import sift
+ from .precedence import precedence, PRECEDENCE
+ from .printer import Printer, print_function
+ 
+ 
++_rootof_x = Symbol('x')
++_rootsum_w = Symbol('w')
++
++
+ class StrPrinter(Printer):
+     printmethod = "_sympystr"
+     _default_settings: dict[str, Any] = {
+@@ -777,14 +783,15 @@ def _print_Relational(self, expr):
+                            self.parenthesize(expr.rhs, precedence(expr)))
+ 
+     def _print_ComplexRootOf(self, expr):
+-        return "CRootOf(%s, %d)" % (self._print_Add(expr.expr,  order='lex'),
+-                                    expr.index)
++        poly_expr = expr.poly(_rootof_x)
++        return "CRootOf(%s, %d)" % (self._print_Add(poly_expr, order='lex'), expr.index)
+ 
+     def _print_RootSum(self, expr):
+-        args = [self._print_Add(expr.expr, order='lex')]
++        args = [self._print_Add(expr.poly(_rootsum_w), order='lex')]
+ 
+         if expr.fun is not S.IdentityFunction:
+-            args.append(self._print(expr.fun))
++            func = Lambda(_rootsum_w, expr.fun(_rootsum_w))
++            args.append(self._print(func))
+ 
+         return "RootSum(%s)" % ", ".join(args)
+ 
+diff --git a/sympy/solvers/ode/single.py b/sympy/solvers/ode/single.py
+--- a/sympy/solvers/ode/single.py
++++ b/sympy/solvers/ode/single.py
+@@ -2112,11 +2112,11 @@ class NthLinearConstantCoeffHomogeneous(SingleODESolver):
+     >>> dsolve(f(x).diff(x, 5) + 10*f(x).diff(x) - 2*f(x), f(x),
+     ... hint='nth_linear_constant_coeff_homogeneous')
+     ... # doctest: +NORMALIZE_WHITESPACE
+-    Eq(f(x), C5*exp(x*CRootOf(_x**5 + 10*_x - 2, 0))
+-    + (C1*sin(x*im(CRootOf(_x**5 + 10*_x - 2, 1)))
+-    + C2*cos(x*im(CRootOf(_x**5 + 10*_x - 2, 1))))*exp(x*re(CRootOf(_x**5 + 10*_x - 2, 1)))
+-    + (C3*sin(x*im(CRootOf(_x**5 + 10*_x - 2, 3)))
+-    + C4*cos(x*im(CRootOf(_x**5 + 10*_x - 2, 3))))*exp(x*re(CRootOf(_x**5 + 10*_x - 2, 3))))
++    Eq(f(x), C5*exp(x*CRootOf(x**5 + 10*x - 2, 0))
++    + (C1*sin(x*im(CRootOf(x**5 + 10*x - 2, 1)))
++    + C2*cos(x*im(CRootOf(x**5 + 10*x - 2, 1))))*exp(x*re(CRootOf(x**5 + 10*x - 2, 1)))
++    + (C3*sin(x*im(CRootOf(x**5 + 10*x - 2, 3)))
++    + C4*cos(x*im(CRootOf(x**5 + 10*x - 2, 3))))*exp(x*re(CRootOf(x**5 + 10*x - 2, 3))))
+ 
+     Note that because this method does not involve integration, there is no
+     ``nth_linear_constant_coeff_homogeneous_Integral`` hint.

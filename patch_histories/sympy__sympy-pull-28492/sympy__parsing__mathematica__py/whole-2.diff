@@ -1,0 +1,11 @@
+diff --git a/sympy/parsing/mathematica.py b/sympy/parsing/mathematica.py
+--- a/sympy/parsing/mathematica.py
++++ b/sympy/parsing/mathematica.py
+@@ -1143,7 +1143,6 @@ def converter(expr):
+         "Not": Not,
+         "Function": _parse_Function,
+         "Factorial": factorial,
+-        "Factorial2": lambda x: factorial(x) * factorial(x - 1),
+     }
+ 
+     _atom_conversions = {

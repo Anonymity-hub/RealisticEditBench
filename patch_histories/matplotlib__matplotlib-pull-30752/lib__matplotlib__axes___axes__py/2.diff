@@ -1,0 +1,15 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -9064,6 +9064,11 @@
+         pos0 = positions[0]
+         width0 = widths[0]
+         if (isinstance(pos0, (datetime.datetime, datetime.date))
++                and not isinstance(width0, datetime.timedelta)):
++            raise TypeError(
++                "datetime/date 'position' values require timedelta 'widths'. "
++                "For example, use positions=[datetime.date(2024, 1, 1)] "
++                "and widths=[datetime.timedelta(days=1)].")
+         _api.check_in_list(["both", "low", "high"], side=side)
+ 
+         # Calculate ranges for statistics lines (shape (2, N)).

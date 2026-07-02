@@ -1,0 +1,12 @@
+diff --git a/sklearn/linear_model/_logistic.py b/sklearn/linear_model/_logistic.py
+--- a/sklearn/linear_model/_logistic.py
++++ b/sklearn/linear_model/_logistic.py
+@@ -276,7 +276,7 @@
+ 
+     random_state = check_random_state(random_state)
+ 
+-    le = LabelEncoder()
++    le = LabelEncoder().fit(classes)
+     if class_weight is not None:
+         class_weight_ = compute_class_weight(
+             class_weight, classes=classes, y=y, sample_weight=sample_weight

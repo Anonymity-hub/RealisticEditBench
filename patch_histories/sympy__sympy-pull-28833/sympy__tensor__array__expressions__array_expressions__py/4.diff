@@ -1,0 +1,13 @@
+diff --git a/sympy/tensor/array/expressions/array_expressions.py b/sympy/tensor/array/expressions/array_expressions.py
+--- a/sympy/tensor/array/expressions/array_expressions.py
++++ b/sympy/tensor/array/expressions/array_expressions.py
+@@ -1016,6 +1016,9 @@
+             expr = expr.as_explicit()
+         return expr.applyfunc(self.function)
+ 
++    def _canonicalize(self):
++        return self
++
+ 
+ class ArrayContraction(_CodegenArrayAbstract):
+     r"""

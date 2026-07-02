@@ -1,0 +1,19 @@
+diff --git a/sklearn/utils/multiclass.py b/sklearn/utils/multiclass.py
+--- a/sklearn/utils/multiclass.py
++++ b/sklearn/utils/multiclass.py
+@@ -430,15 +430,6 @@
+     if issparse(first_row_or_val):
+         first_row_or_val = first_row_or_val.data
+     classes = cached_unique(y)
+-    if y.shape[0] > 20 and y.shape[0] > classes.shape[0] > round(0.5 * y.shape[0]):
+-        # Only raise the warning when we have at least 20 samples.
+-        warnings.warn(
+-            "The number of unique classes is greater than 50% of the number "
+-            "of samples. `y` could represent a regression problem, not a "
+-            "classification problem.",
+-            UserWarning,
+-            stacklevel=2,
+-        )
+     if classes.shape[0] > 2 or (y.ndim == 2 and len(first_row_or_val) > 1):
+         # [1, 2, 3] or [[1., 2., 3]] or [[1, 2]]
+         return "multiclass" + suffix

@@ -1,0 +1,36 @@
+diff --git a/lib/matplotlib/transforms.py b/lib/matplotlib/transforms.py
+--- a/lib/matplotlib/transforms.py
++++ b/lib/matplotlib/transforms.py
+@@ -44,7 +44,7 @@
+ import numpy as np
+ from numpy.linalg import inv
+ 
+-from matplotlib import _api
++from matplotlib import _api, _docstring
+ from matplotlib._path import affine_transform, count_bboxes_overlapping_bbox
+ from .path import Path
+ 
+@@ -2924,6 +2924,7 @@
+ 
+ 
+ @_api.deprecated("3.11")
++@_docstring.copy(_nonsingular)
+ def nonsingular(vmin, vmax, expander=0.001, tiny=1e-15, increasing=True):
+     return _nonsingular(vmin, vmax, expander, tiny, increasing)
+ 
+@@ -2951,6 +2952,7 @@
+ 
+ 
+ @_api.deprecated("3.11")
++@_docstring.copy(_interval_contains)
+ def interval_contains(interval, val):
+     return _interval_contains(interval, val)
+ 
+@@ -3005,6 +3007,7 @@
+ 
+ 
+ @_api.deprecated("3.11")
++@_docstring.copy(_interval_contains_open)
+ def interval_contains_open(interval, val):
+     return _interval_contains_open(interval, val)
+ 

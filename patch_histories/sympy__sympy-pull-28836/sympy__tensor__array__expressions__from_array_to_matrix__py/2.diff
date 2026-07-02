@@ -1,0 +1,12 @@
+diff --git a/sympy/tensor/array/expressions/from_array_to_matrix.py b/sympy/tensor/array/expressions/from_array_to_matrix.py
+--- a/sympy/tensor/array/expressions/from_array_to_matrix.py
++++ b/sympy/tensor/array/expressions/from_array_to_matrix.py
+@@ -445,7 +445,7 @@
+         else:
+             newargs.append(arg)
+             pending = None
+-    newexpr, newremoved = _a2m_tensor_product(*newargs), sorted(removed)
++    newexpr, newremoved = _a2m_tensor_product(*newargs), sorted(set(removed))
+     if isinstance(newexpr, ArrayTensorProduct):
+         newexpr, newremoved2 = _find_trivial_matrices_rewrite(newexpr)
+         newremoved = _combine_removed(-1, newremoved, newremoved2)

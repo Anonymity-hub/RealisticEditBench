@@ -1,0 +1,73 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -540,7 +540,7 @@
+         sample_weight = move_to(sample_weight, xp=np, device="cpu")
+ 
+     if len(sample_weight) > 0:
+-        y_type, y_true, y_pred, sample_weight = _check_targets(
++        y_type, unique_labels, y_true, y_pred, sample_weight = _check_targets(
+             y_true, y_pred, sample_weight
+         )
+     else:
+@@ -549,14 +549,14 @@
+         # In this case we don't pass sample_weight to _check_targets that would
+         # check that sample_weight is not empty and we don't reuse the returned
+         # sample_weight
+-        y_type, y_true, y_pred, _ = _check_targets(y_true, y_pred)
++        y_type, unique_labels, y_true, y_pred, _ = _check_targets(y_true, y_pred)
+ 
+     y_true, y_pred = attach_unique(y_true, y_pred)
+     if y_type not in ("binary", "multiclass"):
+         raise ValueError("%s is not supported" % y_type)
+ 
+     if labels is None:
+-        labels = unique_labels(y_true, y_pred)
++        labels = unique_labels
+     else:
+         labels = move_to(labels, xp=np, device="cpu")
+         n_labels = labels.size
+@@ -736,16 +736,16 @@
+             [1, 2]]])
+     """
+     y_true, y_pred = attach_unique(y_true, y_pred)
++
+     xp, _, device_ = get_namespace_and_device(y_pred)
+     y_true, sample_weight = move_to(y_true, sample_weight, xp=xp, device=device_)
+-    y_type, y_true, y_pred, sample_weight = _check_targets(
++    y_type, present_labels, y_true, y_pred, sample_weight = _check_targets(
+         y_true, y_pred, sample_weight
+     )
+ 
+     if y_type not in ("binary", "multiclass", "multilabel-indicator"):
+         raise ValueError("%s is not supported" % y_type)
+ 
+-    present_labels = unique_labels(y_true, y_pred)
+     if labels is None:
+         labels = present_labels
+         n_labels = None
+@@ -1907,8 +1907,7 @@
+         raise ValueError("average has to be one of " + str(average_options))
+ 
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred, _ = _check_targets(y_true, y_pred)
+-    present_labels = unique_labels(y_true, y_pred)
++    y_type, present_labels, y_true, y_pred, _ = _check_targets(y_true, y_pred)
+     if average == "binary":
+         if y_type == "binary":
+             if pos_label not in present_labels:
+@@ -3086,12 +3085,12 @@
+     """
+ 
+     y_true, y_pred = attach_unique(y_true, y_pred)
+-    y_type, y_true, y_pred, sample_weight = _check_targets(
++    y_type, unique_labels_, y_true, y_pred, sample_weight = _check_targets(
+         y_true, y_pred, sample_weight
+     )
+ 
+     if labels is None:
+-        labels = unique_labels(y_true, y_pred)
++        labels = unique_labels_
+         labels_given = False
+     else:
+         labels = np.asarray(labels)

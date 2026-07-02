@@ -1,0 +1,26 @@
+diff --git a/sklearn/utils/_plotting.py b/sklearn/utils/_plotting.py
+--- a/sklearn/utils/_plotting.py
++++ b/sklearn/utils/_plotting.py
+@@ -77,7 +77,6 @@ def _validate_from_cv_results_params(
+         y,
+         *,
+         sample_weight,
+-        pos_label,
+     ):
+         check_matplotlib_support(f"{cls.__name__}.from_cv_results")
+ 
+@@ -107,14 +106,6 @@ def _validate_from_cv_results_params(
+             )
+         check_consistent_length(X, y, sample_weight)
+ 
+-        try:
+-            pos_label = _check_pos_label_consistency(pos_label, y)
+-        except ValueError as e:
+-            # Adapt error message
+-            raise ValueError(str(e).replace("y_true", "y"))
+-
+-        return pos_label
+-
+     @staticmethod
+     def _get_legend_label(curve_legend_metric, curve_name, legend_metric_name):
+         """Helper to get legend label using `name` and `legend_metric`"""

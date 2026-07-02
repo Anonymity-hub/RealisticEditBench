@@ -1,0 +1,11 @@
+diff --git a/sympy/functions/elementary/piecewise.py b/sympy/functions/elementary/piecewise.py
+--- a/sympy/functions/elementary/piecewise.py
++++ b/sympy/functions/elementary/piecewise.py
+@@ -579,6 +579,7 @@
+                 return Piecewise((sum, hi <= upto), (Undefined, True))
+             k = abei[i][-2]._eval_interval(x, a, b)
+             if k is Undefined:
++                return Piecewise((sum, hi <= upto), (Undefined, True))
+             sum += k
+             upto = b
+         return sum

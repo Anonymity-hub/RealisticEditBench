@@ -1,0 +1,13 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -534,7 +534,8 @@
+             # Queries with distinct_fields need ordering and when a limit is
+             # applied we must take the slice from the ordered query. Otherwise
+             # no need for ordering.
+-            inner_query.clear_ordering(force=False)
++            if inner_query.orderby_issubset_groupby:
++                inner_query.clear_ordering(force=False)
+             if not inner_query.distinct:
+                 # If the inner query uses default select and it has some
+                 # aggregate annotations, then we must make sure the inner

@@ -1,0 +1,36 @@
+diff --git a/lib/matplotlib/patches.py b/lib/matplotlib/patches.py
+--- a/lib/matplotlib/patches.py
++++ b/lib/matplotlib/patches.py
+@@ -683,13 +683,10 @@
+         renderer.open_group('patch', self.get_gid())
+         gc = renderer.new_gc()
+ 
+-        gc.set_foreground(self._edgecolor, isRGBA=True)
+-
+         lw = self._linewidth
+         if self._edgecolor[3] == 0 or self._linestyle == 'None':
+             lw = 0
+         gc.set_linewidth(lw)
+-        gc.set_dashes(*self._dash_pattern)
+         gc.set_capstyle(self._capstyle)
+         gc.set_joinstyle(self._joinstyle)
+ 
+@@ -712,6 +709,18 @@
+             from matplotlib.patheffects import PathEffectRenderer
+             renderer = PathEffectRenderer(self.get_path_effects(), renderer)
+ 
++        # Draw the gaps first if gapcolor is set
++        if self._has_dashed_edge() and self._gapcolor is not None:
++            gc.set_foreground(self._gapcolor, isRGBA=True)
++            offset_gaps, gaps = mlines._get_inverse_dash_pattern(
++                *self._dash_pattern)
++            gc.set_dashes(offset_gaps, gaps)
++            for draw_path_args in draw_path_args_list:
++                renderer.draw_path(gc, *draw_path_args)
++
++        # Draw the main edge
++        gc.set_foreground(self._edgecolor, isRGBA=True)
++        gc.set_dashes(*self._dash_pattern)
+         for draw_path_args in draw_path_args_list:
+             renderer.draw_path(gc, *draw_path_args)
+ 

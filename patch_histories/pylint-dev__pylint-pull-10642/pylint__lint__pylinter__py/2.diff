@@ -1,0 +1,11 @@
+diff --git a/pylint/lint/pylinter.py b/pylint/lint/pylinter.py
+--- a/pylint/lint/pylinter.py
++++ b/pylint/lint/pylinter.py
+@@ -505,6 +505,7 @@
+     def register_checker(self, checker: checkers.BaseChecker) -> None:
+         """This method auto registers the checker."""
+         self._checkers[checker.name].append(checker)
++        self._registered_checkers.add((checker.name, checker, id(checker)))
+         for r_id, r_title, r_cb in checker.reports:
+             self.register_report(r_id, r_title, r_cb, checker)
+         if hasattr(checker, "msgs"):

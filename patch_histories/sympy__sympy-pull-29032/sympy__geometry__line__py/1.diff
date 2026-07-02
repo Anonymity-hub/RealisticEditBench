@@ -1,0 +1,12 @@
+diff --git a/sympy/geometry/line.py b/sympy/geometry/line.py
+--- a/sympy/geometry/line.py
++++ b/sympy/geometry/line.py
+@@ -201,7 +201,7 @@ def angle_between(l1, l2):
+         >>> l1.smallest_angle_between(l2)
+         acos(sqrt(2)/3)
+         """
+-        if not isinstance(l1, LinearEntity) and not isinstance(l2, LinearEntity):
++        if not isinstance(l1, LinearEntity) or not isinstance(l2, LinearEntity):
+             raise TypeError('Must pass only LinearEntity objects')
+ 
+         v1, v2 = l1.direction, l2.direction

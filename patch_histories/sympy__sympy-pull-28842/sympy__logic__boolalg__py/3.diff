@@ -1,0 +1,12 @@
+diff --git a/sympy/logic/boolalg.py b/sympy/logic/boolalg.py
+--- a/sympy/logic/boolalg.py
++++ b/sympy/logic/boolalg.py
+@@ -2884,7 +2884,7 @@
+         from sympy.simplify.simplify import simplify
+         s = tuple(map(simplify, variables))
+         expr = expr.xreplace(dict(zip(variables, s)))
+-    if not isinstance(expr, BooleanFunction):
++    if not isinstance(expr, BooleanFunction) and dontcare is None:
+         return expr
+     # Replace Relationals with Dummys to possibly
+     # reduce the number of variables

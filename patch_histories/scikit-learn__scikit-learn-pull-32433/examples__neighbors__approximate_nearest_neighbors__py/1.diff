@@ -1,0 +1,12 @@
+diff --git a/examples/neighbors/approximate_nearest_neighbors.py b/examples/neighbors/approximate_nearest_neighbors.py
+--- a/examples/neighbors/approximate_nearest_neighbors.py
++++ b/examples/neighbors/approximate_nearest_neighbors.py
+@@ -121,7 +121,7 @@
+     ("MNIST_20000", load_mnist(n_samples=20_000)),
+ ]
+ 
+-n_iter = 500
++max_iter = 500
+ perplexity = 30
+ metric = "euclidean"
+ # TSNE requires a certain number of neighbors which depends on the

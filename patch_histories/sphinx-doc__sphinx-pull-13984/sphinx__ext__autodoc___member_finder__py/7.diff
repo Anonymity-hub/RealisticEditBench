@@ -1,0 +1,80 @@
+diff --git a/sphinx/ext/autodoc/_member_finder.py b/sphinx/ext/autodoc/_member_finder.py
+--- a/sphinx/ext/autodoc/_member_finder.py
++++ b/sphinx/ext/autodoc/_member_finder.py
+@@ -142,13 +142,23 @@
+         and want_all
+         and (options.ignore_module_all or props.all is None)  # type: ignore[attr-defined]
+     )
+-    for documenter, is_attr in member_documenters:
+-        assert documenter.props.module_name
++    for member_props, is_attr, member_indent in member_documenters:
++        assert member_props.module_name
+         # We can directly call ._generate() since the documenters
+         # already called ``_load_object_by_name()`` before.
+         #
+         # Note that those two methods above do not emit events, so
+         # whatever objects we deduced should not have changed.
++        doccls = registry.documenters[member_props.obj_type]
++        documenter = doccls(
++            env=env,
++            options=options,
++            get_attr=get_attr,
++            record_dependencies=record_dependencies,
++            result=result,
++            indent=member_indent,
++        )
++        documenter.props = member_props
+         documenter._generate(
+             all_members=True,
+             real_modname=real_modname,
+@@ -646,18 +656,18 @@
+ 
+ 
+ def _sort_members(
+-    documenters: list[tuple[Documenter, bool]],
++    documenters: list[tuple[_ItemProperties, bool, str]],
+     order: Literal['alphabetical', 'bysource', 'groupwise'],
+     *,
+     ignore_module_all: bool,
+     analyzer_order: dict[str, int],
+     props: _ItemProperties,
+-) -> list[tuple[Documenter, bool]]:
++) -> list[tuple[_ItemProperties, bool, str]]:
+     """Sort the given member list."""
+     if order == 'groupwise':
+         # sort by group; alphabetically within groups
+-        def group_order(entry: tuple[Documenter, bool]) -> tuple[int, str]:
+-            return entry[0].props._groupwise_order_key, entry[0].props.full_name
++        def group_order(entry: tuple[_ItemProperties, bool, str]) -> tuple[int, str]:
++            return entry[0]._groupwise_order_key, entry[0].full_name
+ 
+         documenters.sort(key=group_order)
+     elif order == 'bysource':
+@@ -670,8 +680,8 @@
+             module_all_idx = {name: idx for idx, name in enumerate(module_all)}
+             module_all_len = len(module_all)
+ 
+-            def source_order(entry: tuple[Documenter, bool]) -> int:
+-                fullname = entry[0].props.dotted_parts
++            def source_order(entry: tuple[_ItemProperties, bool, str]) -> int:
++                fullname = entry[0].dotted_parts
+                 return module_all_idx.get(fullname, module_all_len)
+ 
+             documenters.sort(key=source_order)
+@@ -682,13 +692,13 @@
+             # sort by source order, by virtue of the module analyzer
+             order_len = len(analyzer_order)
+ 
+-            def source_order(entry: tuple[Documenter, bool]) -> int:
+-                fullname = entry[0].props.dotted_parts
++            def source_order(entry: tuple[_ItemProperties, bool, str]) -> int:
++                fullname = entry[0].dotted_parts
+                 return analyzer_order.get(fullname, order_len)
+ 
+             documenters.sort(key=source_order)
+     else:  # alphabetical
+-        documenters.sort(key=lambda entry: entry[0].props.full_name)
++        documenters.sort(key=lambda entry: entry[0].full_name)
+ 
+     return documenters
+ 

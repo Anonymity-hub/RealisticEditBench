@@ -1,0 +1,33 @@
+diff --git a/sympy/combinatorics/free_groups.py b/sympy/combinatorics/free_groups.py
+--- a/sympy/combinatorics/free_groups.py
++++ b/sympy/combinatorics/free_groups.py
+@@ -1306,6 +1306,29 @@
+             return rest.power_of(other)
+         return False
+ 
++def _reduce_array_form(array_form, boundary_index=None):
++    """Return a reduced array form.
++
++    When ``boundary_index`` is provided, ``array_form`` is assumed to be the
++    concatenation of two reduced words and only the collision at the boundary
++    is reduced.
++    """
++    if not array_form:
++        return ()
++    reduced = []
++    for gen, exp in array_form:
++        if exp == 0:
++            continue
++        if reduced and reduced[-1][0] == gen:
++            exp = reduced[-1][1] + exp
++            if exp == 0:
++                reduced.pop()
++            else:
++                reduced[-1] = (gen, exp)
++        else:
++            reduced.append((gen, exp))
++    return tuple(reduced)
++
+ 
+ def letter_form_to_array_form(array_form, group):
+     """

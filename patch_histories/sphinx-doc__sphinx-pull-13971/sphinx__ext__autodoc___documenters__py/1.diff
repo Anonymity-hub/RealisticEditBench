@@ -1,0 +1,54 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -26,9 +26,9 @@
+ from sphinx.util.typing import restify, stringify_annotation
+ 
+ if TYPE_CHECKING:
+-    from collections.abc import Iterator
++    from collections.abc import Callable, Iterator, Sequence
+     from types import ModuleType
+-    from typing import Any, ClassVar, Final, Literal
++    from typing import Any, ClassVar, Final, Literal, NoReturn
+ 
+     from sphinx.config import Config
+     from sphinx.environment import BuildEnvironment, _CurrentDocument
+@@ -43,7 +43,6 @@
+         _TypeStatementProperties,
+     )
+     from sphinx.ext.autodoc.directive import DocumenterBridge
+-    from sphinx.registry import SphinxComponentRegistry
+     from sphinx.util.typing import OptionSpec, _RestifyMode
+ 
+ logger = logging.getLogger('sphinx.ext.autodoc')
+@@ -618,12 +617,21 @@
+     }
+ 
+ 
+-def autodoc_attrgetter(
+-    obj: Any, name: str, *defargs: Any, registry: SphinxComponentRegistry
+-) -> Any:
+-    """Alternative getattr() for types"""
+-    for typ, func in registry.autodoc_attrgetters.items():
+-        if isinstance(obj, typ):
+-            return func(obj, name, *defargs)
+-
+-    return safe_getattr(obj, name, *defargs)
++class _AutodocAttrGetter:
++    """getattr() override for types such as Zope interfaces."""
++
++    _attr_getters: Sequence[tuple[type, Callable[[Any, str, Any], Any]]]
++
++    __slots__ = ('_attr_getters',)
++
++    def __init__(
++        self, attr_getters: dict[type, Callable[[Any, str, Any], Any]], /
++    ) -> None:
++        super().__setattr__('_attr_getters', tuple(attr_getters.items()))
++
++    def __call__(self, obj: Any, name: str, *defargs: Any) -> Any:
++        for typ, func in self._attr_getters:
++            if isinstance(obj, typ):
++                return func(obj, name, *defargs)
++
++        return safe_getattr(obj, name, *defargs)

@@ -1,0 +1,12 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1171,7 +1171,7 @@
+ 
+     def last(self):
+         """Return the last object of a query or None if no match is found."""
+-        if self.ordered or not
++        if self.ordered or not self.query.default_ordering:
+             queryset = self.reverse()
+         else:
+             self._check_ordering_first_last_queryset_aggregation(method="last")

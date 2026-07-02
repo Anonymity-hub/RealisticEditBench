@@ -1,0 +1,20 @@
+diff --git a/django/contrib/admin/templatetags/admin_modify.py b/django/contrib/admin/templatetags/admin_modify.py
+--- a/django/contrib/admin/templatetags/admin_modify.py
++++ b/django/contrib/admin/templatetags/admin_modify.py
+@@ -116,7 +116,7 @@
+ @register.tag(name="submit_row")
+ def submit_row_tag(parser, token):
+     return InclusionAdminNode(
+-        parser, token, func=submit_row, template_name="submit_line.html"
++        "submit_row", parser, token, func=submit_row, template_name="submit_line.html"
+     )
+ 
+ 
+@@ -124,6 +124,7 @@
+ def change_form_object_tools_tag(parser, token):
+     """Display the row of change form object tools."""
+     return InclusionAdminNode(
++        "change_form_object_tools",
+         parser,
+         token,
+         func=lambda context: context,

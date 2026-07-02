@@ -1,0 +1,13 @@
+diff --git a/sklearn/linear_model/_logistic.py b/sklearn/linear_model/_logistic.py
+--- a/sklearn/linear_model/_logistic.py
++++ b/sklearn/linear_model/_logistic.py
+@@ -750,7 +750,8 @@
+     scores = list()
+ 
+     scoring = get_scorer(scoring)
+-    for w in coefs:
++    for w, C in zip(coefs, Cs):
++        log_reg.C = C
+         if fit_intercept:
+             log_reg.coef_ = w[..., :-1]
+             log_reg.intercept_ = w[..., -1]

@@ -1,0 +1,14 @@
+diff --git a/sklearn/base.py b/sklearn/base.py
+--- a/sklearn/base.py
++++ b/sklearn/base.py
+@@ -304,7 +304,9 @@
+                 init_default_params[param_name]
+             ):
+                 return True
+-            if is_pandas_na(param_value):
++            if is_pandas_na(param_value) and not is_pandas_na(
++                init_default_params[param_name]
++            ):
+                 return True
+             if not np.array_equal(
+                 param_value, init_default_params[param_name]

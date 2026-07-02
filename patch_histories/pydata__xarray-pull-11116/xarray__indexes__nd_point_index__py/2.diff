@@ -1,0 +1,12 @@
+diff --git a/xarray/indexes/nd_point_index.py b/xarray/indexes/nd_point_index.py
+--- a/xarray/indexes/nd_point_index.py
++++ b/xarray/indexes/nd_point_index.py
+@@ -244,7 +244,7 @@
+         assert isinstance(tree_obj, TreeAdapter)
+         self._tree_obj = tree_obj
+ 
+-        assert len(coord_names) == len(dims)
++        assert len(dims) == len(shape)
+         self._coord_names = coord_names
+         self._dims = dims
+         self._shape = shape

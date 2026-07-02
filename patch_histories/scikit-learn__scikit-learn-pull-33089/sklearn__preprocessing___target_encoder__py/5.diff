@@ -1,0 +1,55 @@
+diff --git a/sklearn/preprocessing/_target_encoder.py b/sklearn/preprocessing/_target_encoder.py
+--- a/sklearn/preprocessing/_target_encoder.py
++++ b/sklearn/preprocessing/_target_encoder.py
+@@ -10,6 +10,14 @@
+ from sklearn.preprocessing._target_encoder_fast import (
+     _fit_encoding_fast,
+     _fit_encoding_fast_auto_smooth,
++)
++from sklearn.utils import Bunch, indexable
++from sklearn.utils._metadata_requests import (
++    MetadataRouter,
++    MethodMapping,
++    _raise_for_params,
++    _routing_enabled,
++    process_routing,
+ )
+ from sklearn.utils._param_validation import Interval, StrOptions
+ from sklearn.utils.multiclass import type_of_target
+@@ -304,22 +312,26 @@
+                     (n_samples, (n_features * n_classes))
+             Transformed input.
+         """
+-        from sklearn.model_selection import (  # avoid circular import
++        # avoid circular imports
++        from sklearn.model_selection import (
++            GroupKFold,
+             KFold,
++            StratifiedGroupKFold,
+             StratifiedKFold,
+         )
++        from sklearn.model_selection._split import check_cv
++
++        _raise_for_params(params, self, "fit_transform")
+ 
+         X_ordinal, X_known_mask, y_encoded, n_categories = self._fit_encodings_all(X, y)
+ 
+-        # The cv splitter is voluntarily restricted to *KFold to enforce non
+-        # overlapping validation folds, otherwise the fit_transform output will
+-        # not be well-specified.
+-        if self.target_type_ == "continuous":
+-            cv = KFold(self.cv, shuffle=self.shuffle, random_state=self.random_state)
+-        else:
+-            cv = StratifiedKFold(
+-                self.cv, shuffle=self.shuffle, random_state=self.random_state
+-            )
++        cv = check_cv(
++            self.cv,
++            y,
++            classifier=self.target_type_ != "continuous",
++            shuffle=self.shuffle,
++            random_state=self.random_state,
++        )
+ 
+         # If 'multiclass' multiply axis=1 by num classes else keep shape the same
+         if self.target_type_ == "multiclass":

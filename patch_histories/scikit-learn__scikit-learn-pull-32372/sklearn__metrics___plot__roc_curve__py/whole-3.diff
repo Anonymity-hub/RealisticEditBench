@@ -1,0 +1,12 @@
+diff --git a/sklearn/metrics/_plot/roc_curve.py b/sklearn/metrics/_plot/roc_curve.py
+--- a/sklearn/metrics/_plot/roc_curve.py
++++ b/sklearn/metrics/_plot/roc_curve.py
+@@ -665,7 +665,7 @@ def from_cv_results(
+ 
+         pos_label : int, float, bool or str, default=None
+             The class considered as the positive class when computing the ROC AUC
+-            metrics. By default, `estimator.classes_[-1]` (using `estimator` from
++            metrics. By default, `estimator.classes_[1]` (using `estimator` from
+             `cv_results`) is considered as the positive class.
+ 
+         ax : matplotlib axes, default=None

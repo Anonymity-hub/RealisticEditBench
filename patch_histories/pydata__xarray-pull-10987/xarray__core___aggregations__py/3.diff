@@ -1,0 +1,65 @@
+diff --git a/xarray/core/_aggregations.py b/xarray/core/_aggregations.py
+--- a/xarray/core/_aggregations.py
++++ b/xarray/core/_aggregations.py
+@@ -32,17 +32,6 @@
+         keep_attrs: bool | None = None,
+         keepdims: bool = False,
+         **kwargs: Any,
+-    ) -> Self:
+-        raise NotImplementedError()
+-
+-    @property
+-    def coords(self) -> DatasetCoordinates:
+-        raise NotImplementedError()
+-
+-    def assign_coords(
+-        self,
+-        coords: Mapping | None = None,
+-        **coords_kwargs: Any,
+     ) -> Self:
+         raise NotImplementedError()
+ 
+@@ -1210,7 +1199,9 @@
+         <xarray.DataTree>
+         Group: /
+             Dimensions:  (time: 6)
+-            Dimensions without coordinates: time
++            Coordinates:
++              * time     (time) datetime64[ns] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++                labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+             Data variables:
+                 foo      (time) float64 48B 1.0 3.0 6.0 6.0 8.0 8.0
+ 
+@@ -1220,7 +1211,9 @@
+         <xarray.DataTree>
+         Group: /
+             Dimensions:  (time: 6)
+-            Dimensions without coordinates: time
++            Coordinates:
++              * time     (time) datetime64[ns] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++                labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+             Data variables:
+                 foo      (time) float64 48B 1.0 3.0 6.0 6.0 8.0 nan
+         """
+@@ -1315,7 +1308,9 @@
+         <xarray.DataTree>
+         Group: /
+             Dimensions:  (time: 6)
+-            Dimensions without coordinates: time
++            Coordinates:
++              * time     (time) datetime64[ns] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++                labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+             Data variables:
+                 foo      (time) float64 48B 1.0 2.0 6.0 0.0 0.0 0.0
+ 
+@@ -1325,7 +1320,9 @@
+         <xarray.DataTree>
+         Group: /
+             Dimensions:  (time: 6)
+-            Dimensions without coordinates: time
++            Coordinates:
++              * time     (time) datetime64[ns] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++                labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+             Data variables:
+                 foo      (time) float64 48B 1.0 2.0 6.0 0.0 0.0 nan
+         """

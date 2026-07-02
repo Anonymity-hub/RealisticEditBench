@@ -1,0 +1,11 @@
+diff --git a/django/shortcuts.py b/django/shortcuts.py
+--- a/django/shortcuts.py
++++ b/django/shortcuts.py
+@@ -59,6 +59,7 @@
+     return redirect_class(
+         resolve_url(to, *args, **kwargs),
+         preserve_request=preserve_request,
++        max_length=max_length,
+     )
+ 
+ 

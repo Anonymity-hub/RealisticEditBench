@@ -1,0 +1,11 @@
+diff --git a/sklearn/manifold/_t_sne.py b/sklearn/manifold/_t_sne.py
+--- a/sklearn/manifold/_t_sne.py
++++ b/sklearn/manifold/_t_sne.py
+@@ -1002,7 +1002,6 @@
+         elif self.init == "pca":
+             pca = PCA(
+                 n_components=self.n_components,
+-                svd_solver="randomized",
+                 random_state=random_state,
+             )
+             # Always output a numpy array, no matter what is configured globally

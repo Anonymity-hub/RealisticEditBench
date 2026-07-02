@@ -1,0 +1,11 @@
+diff --git a/xarray/core/utils.py b/xarray/core/utils.py
+--- a/xarray/core/utils.py
++++ b/xarray/core/utils.py
+@@ -270,7 +270,6 @@
+         # Reject any other non-boolean type (Dataset, Series, custom objects, etc.)
+         return False
+ 
+-    # Check for NaN equivalence
+     return result
+ 
+ 

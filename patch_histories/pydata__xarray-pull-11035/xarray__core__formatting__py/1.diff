@@ -1,0 +1,26 @@
+diff --git a/xarray/core/formatting.py b/xarray/core/formatting.py
+--- a/xarray/core/formatting.py
++++ b/xarray/core/formatting.py
+@@ -973,6 +973,22 @@
+         return compat
+ 
+ 
++def diff_indexes_repr(a_indexes, b_indexes, col_width: int = 20) -> str:
++    """Generate diff representation for indexes."""
++    a_keys = set(a_indexes.keys())
++    b_keys = set(b_indexes.keys())
++
++    summary = []
++
++    if only_a := a_keys - b_keys:
++        summary.append(f"Indexes only on the left object:  {sorted(only_a)}")
++
++    if only_b := b_keys - a_keys:
++        summary.append(f"Indexes only on the right object: {sorted(only_b)}")
++
++    return "\n".join(summary)
++
++
+ def diff_array_repr(a, b, compat):
+     # used for DataArray, Variable and IndexVariable
+     summary = [

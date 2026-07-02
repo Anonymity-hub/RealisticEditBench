@@ -1,0 +1,55 @@
+diff --git a/sympy/combinatorics/fp_groups.py b/sympy/combinatorics/fp_groups.py
+--- a/sympy/combinatorics/fp_groups.py
++++ b/sympy/combinatorics/fp_groups.py
+@@ -590,6 +590,51 @@
+                 letters = word.letter_form
+                 if not letters:
+                     return next_vertex_id
++                for i, label in enumerate(letters):
++                    if i == len(letters) - 1:
++                        nxt = base
++                    else:
++                        nxt = next_vertex_id
++                        next_vertex_id += 1
++                    _add_edge(graph, current, nxt, label)
++                    current = nxt
++                return next_vertex_id
++
++            def _merge_vertices(graph, u, v):
++                if u == v:
++                    return
++                nodes = list(graph.keys())
++                for node in nodes:
++                    if node == v:
++                        for label, targets in list(graph[v].items()):
++                            for target in list(targets):
++                                if target == v:
++                                    target = u
++                                _add_edge(graph, u, target, label)
++                        if v in graph:
++                            del graph[v]
++                    else:
++                        for label, targets in list(graph[node].items()):
++                            if v in targets:
++                                targets.discard(v)
++                                targets.add(u)
++                                _add_edge(graph, node, u, label)
++
++            def _fold(graph):
++                folded = False
++                while not folded:
++                    folded = True
++                    for u in list(graph.keys()):
++                        for label, targets in list(graph[u].items()):
++                            if len(targets) > 1:
++                                v1, v2 = sorted(targets)[:2]
++                                keep = min(v1, v2)
++                                discard = max(v1, v2)
++                                _merge_vertices(graph, keep, discard)
++                                folded = False
++                                break
++                        if not folded:
++                            break
+ 
+             if self._min_words is None:
+                 # make _min_words - a list of subwords such that

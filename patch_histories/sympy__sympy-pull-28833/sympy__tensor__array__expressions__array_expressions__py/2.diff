@@ -1,0 +1,14 @@
+diff --git a/sympy/tensor/array/expressions/array_expressions.py b/sympy/tensor/array/expressions/array_expressions.py
+--- a/sympy/tensor/array/expressions/array_expressions.py
++++ b/sympy/tensor/array/expressions/array_expressions.py
+@@ -891,6 +891,10 @@
+         inddown = tuple(i for i in inddown if i)
+         inddow2 = ArrayDiagonal._push_indices_down(expr.diagonal_indices, inddown, get_rank(expr.expr))
+         new_diag_indices = []
++        for i in inddow2:
++            if not isinstance(i, (tuple, Tuple)):
++                continue
++            diag_group = []
+ 
+     @classmethod
+     def _ArrayDiagonal_denest_ArrayAdd(cls, expr, *diagonal_indices):

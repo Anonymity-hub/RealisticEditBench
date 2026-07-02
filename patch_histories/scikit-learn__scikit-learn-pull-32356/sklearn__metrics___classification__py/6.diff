@@ -1,0 +1,11 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -3870,6 +3870,7 @@
+     .. [1] `Wikipedia entry for the Brier Skill Score (BSS)
+             <https://en.wikipedia.org/wiki/Brier_score>`_.
+     """
++    check_consistent_length(y_proba, y_true, sample_weight)
+     if _num_samples(y_proba) < 2:
+         msg = "D^2 score is not well-defined with less than two samples."
+         warnings.warn(msg, UndefinedMetricWarning)

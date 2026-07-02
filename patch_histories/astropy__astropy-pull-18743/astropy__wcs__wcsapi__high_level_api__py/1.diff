@@ -1,0 +1,16 @@
+diff --git a/astropy/wcs/wcsapi/high_level_api.py b/astropy/wcs/wcsapi/high_level_api.py
+--- a/astropy/wcs/wcsapi/high_level_api.py
++++ b/astropy/wcs/wcsapi/high_level_api.py
+@@ -261,7 +261,11 @@
+     # arrays, not e.g. Quantity. Note that we deliberately use type(w) because
+     # we don't want to match Numpy subclasses.
+     for w in world:
+-        if not isinstance(w, numbers.Number) and not type(w) == np.ndarray:
++        if (
++            not isinstance(w, numbers.Number)
++            and not type(w) == np.ndarray
++            and not type(w) == MaskedNDArray
++        ):
+             raise TypeError(
+                 f"WCS world_axis_object_components results in "
+                 f"values which are not scalars or plain Numpy "

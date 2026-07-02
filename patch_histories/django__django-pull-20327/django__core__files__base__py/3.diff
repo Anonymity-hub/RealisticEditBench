@@ -1,0 +1,13 @@
+diff --git a/django/core/files/base.py b/django/core/files/base.py
+--- a/django/core/files/base.py
++++ b/django/core/files/base.py
+@@ -134,9 +134,6 @@
+     def __str__(self):
+         return "Raw content"
+ 
+-    def __bool__(self):
+-        return True
+-
+     def open(self, mode=None):
+         self.seek(0)
+         return self

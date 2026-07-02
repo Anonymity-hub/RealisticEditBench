@@ -1,0 +1,12 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -173,7 +173,7 @@
+ 
+     if isinstance(positions[0], slice):
+         positions = _consolidate_slices(positions)
+-        if positions == slice(None):
++        if positions == [slice(None)] or positions == [slice(0, None)]:
+             return None
+         positions = [np.arange(sl.start, sl.stop, sl.step) for sl in positions]
+ 

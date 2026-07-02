@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/image.py b/lib/matplotlib/image.py
+--- a/lib/matplotlib/image.py
++++ b/lib/matplotlib/image.py
+@@ -512,6 +512,7 @@
+                     if A.shape[2] == 3:  # image has no alpha channel
+                         A = np.dstack([A, np.ones(A.shape[:2])])
+                 elif np.ndim(alpha) > 0:  # Array alpha
++                    if A.shape[2] == 3:
+                     # user-specified array alpha overrides the existing alpha channel
+                     A = np.dstack([A[..., :3], alpha])
+                 else:  # Scalar alpha

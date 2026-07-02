@@ -1,0 +1,15 @@
+diff --git a/django/http/response.py b/django/http/response.py
+--- a/django/http/response.py
++++ b/django/http/response.py
+@@ -643,9 +643,9 @@
+         super().__init__(*args, **kwargs)
+         self["Location"] = iri_to_uri(redirect_to)
+         redirect_to_str = str(redirect_to)
+-        if len(redirect_to_str) > MAX_URL_REDIRECT_LENGTH:
++        if max_length is not None and len(redirect_to_str) > max_length:
+             raise DisallowedRedirect(
+-                f"Unsafe redirect exceeding {MAX_URL_REDIRECT_LENGTH} characters"
++                f"Unsafe redirect exceeding {max_length} characters"
+             )
+         parsed = urlsplit(redirect_to_str)
+         if preserve_request:

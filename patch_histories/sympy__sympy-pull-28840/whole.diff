@@ -1,0 +1,130 @@
+diff --git a/sympy/tensor/array/expressions/array_expressions.py b/sympy/tensor/array/expressions/array_expressions.py
+--- a/sympy/tensor/array/expressions/array_expressions.py
++++ b/sympy/tensor/array/expressions/array_expressions.py
+@@ -850,7 +850,7 @@ def _canonicalize(self):
+         if isinstance(expr, ArrayAdd):
+             return self._ArrayDiagonal_denest_ArrayAdd(expr, *diagonal_indices)
+         if isinstance(expr, ArrayDiagonal):
+-            return self._ArrayDiagonal_denest_ArrayDiagonal(expr, *diagonal_indices)
++            return self._ArrayDiagonal_denest_ArrayDiagonal(expr, get_rank(self), *diagonal_indices)
+         if isinstance(expr, PermuteDims):
+             return self._ArrayDiagonal_denest_PermuteDims(expr, *diagonal_indices)
+         if isinstance(expr, (ZeroArray, ZeroMatrix)):
+@@ -886,9 +886,9 @@ def diagonal_indices(self):
+         return self.args[1:]
+ 
+     @staticmethod
+-    def _flatten(expr: ArrayDiagonal, *outer_diagonal_indices):
+-        inddown = ArrayDiagonal._push_indices_down(outer_diagonal_indices, list(range(get_rank(expr))), get_rank(expr))
+-        inddown = tuple(i for i in inddown if i)
++    def _flatten(expr: ArrayDiagonal, outer_dims, *outer_diagonal_indices):
++        inddown = ArrayDiagonal._push_indices_down(outer_diagonal_indices, list(range(outer_dims)), get_rank(expr))
++        inddown = tuple(i for i in inddown)
+         inddow2 = ArrayDiagonal._push_indices_down(expr.diagonal_indices, inddown, get_rank(expr.expr))
+         new_diag_indices = []
+         for i in inddow2:
+@@ -2031,6 +2031,8 @@ def nest_permutation(expr):
+ 
+ 
+ def _array_tensor_product(*args, **kwargs):
++    if all(not isinstance(i, (_ArrayExpr, _CodegenArrayAbstract)) and get_shape(i) == () for i in args):
++        return Mul.fromiter(args)
+     return ArrayTensorProduct(*args, canonicalize=True, **kwargs)
+ 
+ 
+diff --git a/sympy/tensor/array/expressions/arrayexpr_derivatives.py b/sympy/tensor/array/expressions/arrayexpr_derivatives.py
+--- a/sympy/tensor/array/expressions/arrayexpr_derivatives.py
++++ b/sympy/tensor/array/expressions/arrayexpr_derivatives.py
+@@ -2,7 +2,7 @@
+ from functools import reduce, singledispatch
+ 
+ from sympy.core.singleton import S
+-from sympy import MatrixBase, derive_by_array, Integer, Determinant, Function, MatPow, Dummy
++from sympy import MatrixBase, derive_by_array, Integer, Determinant, Function, MatPow, Dummy, Pow, Mul
+ from sympy.tensor.array import NDimArray
+ from sympy.core.expr import Expr
+ from sympy.matrices.expressions.hadamard import HadamardProduct
+@@ -37,6 +37,20 @@ def _(expr: Expr, x: _ArrayExpr):
+     return ZeroArray(*x.shape)
+ 
+ 
++@array_derive.register(Mul)
++def _(expr: Mul, x: _ArrayExpr):
++    args = expr.args
++    return ArrayAdd.fromiter([
++        _array_tensor_product(Mul.fromiter(args[:i]), array_derive(arg, x), Mul.fromiter(args[(i+1):]))
++        for i, arg in enumerate(args)
++    ])
++
++
++@array_derive.register(Pow)
++def _(expr: Pow, x: _ArrayExpr):
++    return Pow._eval_derivative(expr, x)
++
++
+ @array_derive.register(Function)
+ def _(expr: Function, x: _ArrayExpr):
+     if len(expr.args) != 1:
+diff --git a/sympy/tensor/array/expressions/from_array_to_matrix.py b/sympy/tensor/array/expressions/from_array_to_matrix.py
+--- a/sympy/tensor/array/expressions/from_array_to_matrix.py
++++ b/sympy/tensor/array/expressions/from_array_to_matrix.py
+@@ -570,7 +570,7 @@ def _(expr: ElementwiseApplyFunction):
+     subexpr, removed = _remove_trivial_dims(expr.expr)
+     if subexpr.shape == (1, 1) and isinstance(subexpr, MatrixExpr):
+         # TODO: move this to ElementwiseApplyFunction
+-        return expr.function(subexpr[0, 0]), removed + [0, 1]
++        return expr.function(MatrixElement(subexpr, 0, 0)), removed + [0, 1]
+     return ElementwiseApplyFunction(expr.function, subexpr), []
+ 
+ 
+diff --git a/sympy/tensor/array/expressions/from_matrix_to_array.py b/sympy/tensor/array/expressions/from_matrix_to_array.py
+--- a/sympy/tensor/array/expressions/from_matrix_to_array.py
++++ b/sympy/tensor/array/expressions/from_matrix_to_array.py
+@@ -15,7 +15,13 @@
+ from sympy.matrices.expressions.matexpr import MatrixExpr
+ from sympy.tensor.array.expressions.array_expressions import \
+     ArrayElementwiseApplyFunc, _array_tensor_product, _array_contraction, \
+-    _array_diagonal, _array_add, _permute_dims, Reshape, get_shape
++    _array_diagonal, _array_add, _permute_dims, Reshape, get_shape, _ArrayExpr, _CodegenArrayAbstract
++
++
++def _array_elementwise_apply_func(function, element):
++    if not isinstance(element, (MatrixExpr, _ArrayExpr, _CodegenArrayAbstract)):
++        return function(element)
++    return ArrayElementwiseApplyFunc(function, element)
+ 
+ 
+ def convert_matrix_to_array(expr: Basic) -> Basic:
+@@ -58,20 +64,20 @@ def convert_matrix_to_array(expr: Basic) -> Basic:
+         if (expr.exp > 0) == True:
+             base_conv = convert_matrix_to_array(base)
+             if get_shape(base_conv) == ():
+-                return ArrayElementwiseApplyFunc(lambda x: x**expr.exp, base_conv)
++                return _array_elementwise_apply_func(lambda x: x**expr.exp, base_conv)
+             else:
+                 return _array_tensor_product(*[base_conv for i in range(expr.exp)])
+         elif get_shape(base) == ():
+             d = Dummy("d")
+-            return ArrayElementwiseApplyFunc(Lambda(d, d**expr.exp), base)
++            return _array_elementwise_apply_func(Lambda(d, d**expr.exp), base)
+         else:
+             return expr
+     elif isinstance(expr, MatPow):
+         base = convert_matrix_to_array(expr.base)
+         if expr.exp.is_Integer != True:
+             if get_shape(expr) == (1, 1):
+                 b = symbols("b", cls=Dummy)
+-                return ArrayElementwiseApplyFunc(Lambda(b, b ** expr.exp), convert_matrix_to_array(base))
++                return _array_elementwise_apply_func(Lambda(b, b ** expr.exp), convert_matrix_to_array(base))
+             return expr
+         elif (expr.exp > 0) == True:
+             return convert_matrix_to_array(MatMul.fromiter(base for i in range(expr.exp)))
+@@ -87,7 +93,7 @@ def convert_matrix_to_array(expr: Basic) -> Basic:
+             return convert_matrix_to_array(HadamardProduct.fromiter(base for i in range(exp)))
+         else:
+             d = Dummy("d")
+-            return ArrayElementwiseApplyFunc(Lambda(d, d**exp), base)
++            return _array_elementwise_apply_func(Lambda(d, d**exp), base)
+     elif isinstance(expr, KroneckerProduct):
+         kp_args = [convert_matrix_to_array(arg) for arg in expr.args]
+         permutation = [2*i for i in range(len(kp_args))] + [2*i + 1 for i in range(len(kp_args))]

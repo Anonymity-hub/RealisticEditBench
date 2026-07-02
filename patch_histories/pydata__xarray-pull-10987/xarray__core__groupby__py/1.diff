@@ -1,0 +1,30 @@
+diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py
+--- a/xarray/core/groupby.py
++++ b/xarray/core/groupby.py
+@@ -1028,6 +1028,26 @@
+             obj = obj.drop_vars(to_drop)
+ 
+         return obj
++
++    def _parse_dim(self, dim: Dims) -> tuple[Hashable, ...]:
++        parsed_dim: tuple[Hashable, ...]
++        if isinstance(dim, str):
++            parsed_dim = (dim,)
++        elif dim is None:
++            parsed_dim_list = list()
++            # preserve order
++            for dim_ in itertools.chain(
++                *(grouper.codes.dims for grouper in self.groupers)
++            ):
++                if dim_ not in parsed_dim_list:
++                    parsed_dim_list.append(dim_)
++            parsed_dim = tuple(parsed_dim_list)
++        elif dim is ...:
++            parsed_dim = tuple(self._original_obj.dims)
++        else:
++            parsed_dim = tuple(dim)
++
++        return parsed_dim
+ 
+     def _flox_reduce(
+         self,

@@ -1,0 +1,27 @@
+diff --git a/lib/matplotlib/patches.py b/lib/matplotlib/patches.py
+--- a/lib/matplotlib/patches.py
++++ b/lib/matplotlib/patches.py
+@@ -57,6 +57,7 @@
+                  capstyle=None,
+                  joinstyle=None,
+                  hatchcolor=None,
++                 edgegapcolor=None,
+                  **kwargs):
+         """
+         The following kwarg properties are supported
+@@ -88,6 +89,7 @@
+         self._linewidth = 0
+         self._unscaled_dash_pattern = (0, None)  # offset, dash
+         self._dash_pattern = (0, None)  # offset, dash (scaled by linewidth)
++        self._gapcolor = None
+ 
+         self.set_linestyle(linestyle)
+         self.set_linewidth(linewidth)
+@@ -294,6 +296,7 @@
+         self._hatch_color = other._hatch_color
+         self._original_hatchcolor = other._original_hatchcolor
+         self._unscaled_dash_pattern = other._unscaled_dash_pattern
++        self._gapcolor = other._gapcolor
+         self.set_linewidth(other._linewidth)  # also sets scaled dashes
+         self.set_transform(other.get_data_transform())
+         # If the transform of other needs further initialization, then it will

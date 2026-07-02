@@ -1,0 +1,21 @@
+diff --git a/xarray/structure/combine.py b/xarray/structure/combine.py
+--- a/xarray/structure/combine.py
++++ b/xarray/structure/combine.py
+@@ -98,7 +98,7 @@
+ 
+ def _infer_concat_order_from_coords(datasets):
+     concat_dims = []
+-    tile_ids = [() for ds in datasets]
++    tile_ids: list[tuple[int, ...]] = [() for ds in datasets]
+ 
+     # All datasets have same variables because they've been grouped as such
+     ds0 = datasets[0]
+@@ -154,7 +154,7 @@
+                 rank = series.rank(
+                     method="dense", ascending=ascending, numeric_only=False
+                 )
+-                order = rank.astype(int).values - 1
++                order = (rank.astype(int).values - 1).tolist()
+ 
+                 # Append positions along extra dimension to structure which
+                 # encodes the multi-dimensional concatenation order

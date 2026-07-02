@@ -1,0 +1,30 @@
+diff --git a/sphinx/ext/autodoc/_documenters.py b/sphinx/ext/autodoc/_documenters.py
+--- a/sphinx/ext/autodoc/_documenters.py
++++ b/sphinx/ext/autodoc/_documenters.py
+@@ -1136,3 +1136,26 @@
+     ):
+         # priority must be higher than 'function'
+         filtered.append((1, 'method'))
++
++    if (
++        inspect.isfunction(member)
++        or inspect.isbuiltin(member)
++        or (
++            inspect.isroutine(member)
++            and isinstance(parent_documenter, ModuleDocumenter)
++        )
++    ):
++        # supports functions, builtins and bound methods exported
++        # at the module level
++        filtered.extend(((0, 'function'), (-1, 'decorator')))
++
++    if isinstance(member, AnyTypeAliasType):
++        filtered.append((0, 'type'))
++
++    if isinstance(parent_documenter, ModuleDocumenter) and is_attr:
++        filtered.append((-10, 'data'))
++
++    if filtered:
++        # return the highest priority object type
++        return max(filtered, key=operator.itemgetter(0))[1]
++    return None

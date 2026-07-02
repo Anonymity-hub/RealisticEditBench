@@ -1,0 +1,24 @@
+diff --git a/sklearn/metrics/_classification.py b/sklearn/metrics/_classification.py
+--- a/sklearn/metrics/_classification.py
++++ b/sklearn/metrics/_classification.py
+@@ -3323,14 +3323,12 @@
+     transformed_labels, y_pred = _validate_multiclass_probabilistic_prediction(
+         y_true, y_pred, sample_weight, labels
+     )
+-
+-    # Clipping
+-    eps = np.finfo(y_pred.dtype).eps
+-    y_pred = np.clip(y_pred, eps, 1 - eps)
+-
+-    loss = -xlogy(transformed_labels, y_pred).sum(axis=1)
+-
+-    return float(_average(loss, weights=sample_weight, normalize=normalize))
++    return _log_loss(
++        transformed_labels,
++        y_pred,
++        normalize=normalize,
++        sample_weight=sample_weight,
++    )
+ 
+ 
+ def _log_loss(transformed_labels, y_pred, *, normalize=True, sample_weight=None):

@@ -1,0 +1,12 @@
+diff --git a/sympy/vector/coordsysrect.py b/sympy/vector/coordsysrect.py
+--- a/sympy/vector/coordsysrect.py
++++ b/sympy/vector/coordsysrect.py
+@@ -131,7 +131,7 @@
+ 
+         if isinstance(transformation, Tuple):
+             lambda_transformation = CoordSys3D._compose_rotation_and_translation(
+-                transformation[0],
++                transformation[0].T,
+                 transformation[1],
+                 parent
+             )

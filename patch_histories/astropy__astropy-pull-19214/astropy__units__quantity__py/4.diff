@@ -1,0 +1,16 @@
+diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py
+--- a/astropy/units/quantity.py
++++ b/astropy/units/quantity.py
+@@ -281,7 +281,11 @@
+     Returns a tuple of value (float or array) and unit.
+     Raises if not possible.
+     """
+-    pass
++    v = re.match(NUMBER_PATTERN, string)
++    items = v.group().replace(",", " ").strip().strip("[]").split()
++    value = [float(a) for a in items] if "[" in string else float(items[0])
++    unit = Unit(unit_str) if (unit_str := v.string[v.end() :].strip()) else None
++    return value, unit
+ 
+ 
+ class Quantity(np.ndarray):

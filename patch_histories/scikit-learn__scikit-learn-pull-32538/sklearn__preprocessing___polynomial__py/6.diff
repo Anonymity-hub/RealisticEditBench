@@ -1,0 +1,17 @@
+diff --git a/sklearn/preprocessing/_polynomial.py b/sklearn/preprocessing/_polynomial.py
+--- a/sklearn/preprocessing/_polynomial.py
++++ b/sklearn/preprocessing/_polynomial.py
+@@ -791,12 +791,7 @@ def _get_base_knot_positions(X, n_knots=10, knots="uniform", sample_weight=None)
+             if sample_weight is None:
+                 knots = np.nanpercentile(X, percentile_ranks, axis=0)
+             else:
+-                knots = np.array(
+-                    [
+-                        _weighted_percentile(X, sample_weight, percentile_rank)
+-                        for percentile_rank in percentile_ranks
+-                    ]
+-                )
++                knots = _weighted_percentile(X, sample_weight, percentile_ranks).T
+ 
+         else:
+             # knots == 'uniform':

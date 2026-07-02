@@ -1,0 +1,11 @@
+diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py
+--- a/django/db/migrations/serializer.py
++++ b/django/db/migrations/serializer.py
+@@ -230,6 +230,7 @@
+         for item in self.value.__args__:
+             _, item_imports = serializer_factory(item).serialize()
+             imports.update(item_imports)
++        return repr(self.value), imports
+ 
+ 
+ class IterableSerializer(BaseSerializer):

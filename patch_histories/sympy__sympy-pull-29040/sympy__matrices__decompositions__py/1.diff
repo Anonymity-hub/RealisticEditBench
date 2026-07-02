@@ -1,0 +1,13 @@
+diff --git a/sympy/matrices/decompositions.py b/sympy/matrices/decompositions.py
+--- a/sympy/matrices/decompositions.py
++++ b/sympy/matrices/decompositions.py
+@@ -1363,7 +1363,8 @@
+ 
+     for j in range(A.cols):
+         for i in range(j):
+-            if Q[:, i].is_zero_matrix:
++            z = Q[:, i].is_zero_matrix
++            if z is True:
+                 continue
+ 
+             R[i, j] = dot(Q[:, i], Q[:, j]) / dot(Q[:, i], Q[:, i])

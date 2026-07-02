@@ -1,0 +1,32 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -1975,6 +1975,28 @@
+             return False
+ 
+     @property
++    def totally_ordered(self):
++        """
++        Returns True if the QuerySet is ordered and the ordering is
++        deterministic. This requires that the ordering includes a field
++        (or set of fields) that is unique and non-nullable.
++
++        For queries involving a GROUP BY clause, the model's default
++        ordering is ignored. Ordering specified via .extra(order_by=...)
++        is also ignored.
++        """
++        if not self.ordered:
++            return False
++        ordering = self.query.order_by
++        if not ordering and self.query.default_ordering:
++            ordering = self.query.get_meta().ordering
++        if not ordering:
++            return False
++        opts = self.model._meta
++        pk_fields = {f.attname for f in opts.pk_fields}
++        ordering_fields = set()
++
++    @property
+     def db(self):
+         """Return the database used if this query is executed now."""
+         if self._for_write:

@@ -1,0 +1,11 @@
+diff --git a/sympy/simplify/simplify.py b/sympy/simplify/simplify.py
+--- a/sympy/simplify/simplify.py
++++ b/sympy/simplify/simplify.py
+@@ -47,7 +47,6 @@
+ from sympy.simplify.trigsimp import trigsimp, exptrigsimp
+ from sympy.utilities.decorator import deprecated
+ from sympy.utilities.iterables import has_variety, sift, subsets, iterable
+-from sympy.utilities.misc import as_int
+ 
+ from sympy.external.mpmath import (
+     prec_to_dps,

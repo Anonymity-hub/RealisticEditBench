@@ -1,0 +1,13 @@
+diff --git a/sympy/integrals/rationaltools.py b/sympy/integrals/rationaltools.py
+--- a/sympy/integrals/rationaltools.py
++++ b/sympy/integrals/rationaltools.py
+@@ -346,7 +346,8 @@
+         r = remaining.pop()
+         r_c = r.conjugate()
+         if r != r_c and r_c in rs:
+-            assert rs.pop(r_c) == m
++            assert rs[r_c] == rs[r]
++            remaining.remove(r_c)
+             r_re, r_im = r.as_real_imag()
+             _, r_im = ordered([r_im, -r_im])
+             complexes[(r_re, r_im)] = m

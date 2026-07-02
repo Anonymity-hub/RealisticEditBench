@@ -1,0 +1,66 @@
+diff --git a/astropy/units/quantity_helper/function_helpers.py b/astropy/units/quantity_helper/function_helpers.py
+--- a/astropy/units/quantity_helper/function_helpers.py
++++ b/astropy/units/quantity_helper/function_helpers.py
+@@ -357,6 +357,7 @@
+     @function_helper
+     def putmask(a, /, mask, values):
+         return putmask_impl(a, mask=mask, values=values)
++
+ else:
+ 
+     @function_helper
+@@ -479,19 +480,18 @@
+         else ((_w := _as_quantity(weights)).value, _w.unit)
+     )
+     return (
+-        (a,),
++        (a_value,),
+         {
+             "axis": axis,
+-            "weights": weights.value if weights is not None else None,
++            "weights": w_value,
+             "returned": returned,
+             "keepdims": keepdims,
+         },
+-        (None, weights.unit) if weights is not None and returned else None,
++        ((a_unit, w_unit) if returned else a_unit),
+         None,
+     )
+ 
+ 
+-
+ def _iterable_helper(*args, out=None, **kwargs):
+     """Convert arguments to Quantity, and treat possible 'out'."""
+     if out is not None:
+@@ -511,6 +511,7 @@
+             *arrays, out=out, axis=axis, **kwargs
+         )
+         return (arrays,), kwargs, unit, out
++
+ else:
+ 
+     @function_helper
+@@ -652,6 +653,7 @@
+     @function_helper(helps={np.empty, np.ones, np.zeros})
+     def creation_helper(shape, dtype=None, order="C"):
+         return (shape, dtype, order), {}, UNIT_FROM_LIKE_ARG, None
++
+ else:
+ 
+     @function_helper(helps={np.empty, np.ones, np.zeros})
+@@ -664,6 +666,7 @@
+     @function_helper
+     def full(shape, fill_value, dtype=None, order="C"):
+         return full_impl(shape, fill_value, dtype, order)
++
+ else:
+ 
+     @function_helper
+@@ -701,6 +704,7 @@
+             ndmin=ndmin,
+             ndmax=ndmax,
+         )
++
+ else:
+ 
+     @function_helper

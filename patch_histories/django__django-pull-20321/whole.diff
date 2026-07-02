@@ -1,0 +1,18 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1629,9 +1629,12 @@ def execute_sql(
+             cursor = self.connection.cursor()
+         try:
+             cursor.execute(sql, params)
+-        except Exception:
++        except Exception as e:
+             # Might fail for server-side cursors (e.g. connection closed)
+-            cursor.close()
++            try:
++                cursor.close()
++            except DatabaseError:
++                raise e from None
+             raise
+ 
+         if result_type == ROW_COUNT:

@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/_cm.py b/lib/matplotlib/_cm.py
+--- a/lib/matplotlib/_cm.py
++++ b/lib/matplotlib/_cm.py
+@@ -1484,6 +1484,7 @@
+     'winter': _winter_data,
+     # Qualitative
+     'Accent': {'listed': _Accent_data},
++    'okabe_ito': {'listed': _okabe_ito_data},
+     'Dark2': {'listed': _Dark2_data},
+     'Paired': {'listed': _Paired_data},
+     'Pastel1': {'listed': _Pastel1_data},

@@ -1,0 +1,25 @@
+diff --git a/django/db/backends/base/creation.py b/django/db/backends/base/creation.py
+--- a/django/db/backends/base/creation.py
++++ b/django/db/backends/base/creation.py
+@@ -374,6 +374,21 @@
+                     test_method = getattr(test_case, test_method_name)
+                     setattr(test_case, test_method_name, skip(reason)(test_method))
+ 
++    def _mark_test(self, test_name, skip_reason=None):
++        # Only load unittest during testing.
++        from unittest import expectedFailure, skip
++
++        module_or_class_name, _, name_to_mark = test_name.rpartition(".")
++        test_app = test_name.split(".")[0]
++        # Importing a test app that isn't installed raises RuntimeError.
++        if test_app in settings.INSTALLED_APPS:
++            test_frame = import_string(module_or_class_name)
++            test_to_mark = getattr(test_frame, name_to_mark)
++            if skip_reason:
++                setattr(test_frame, name_to_mark, skip(skip_reason)(test_to_mark))
++            else:
++                setattr(test_frame, name_to_mark, expectedFailure(test_to_mark))
++
+     def sql_table_creation_suffix(self):
+         """
+         SQL to append to the end of the test table creation statements.

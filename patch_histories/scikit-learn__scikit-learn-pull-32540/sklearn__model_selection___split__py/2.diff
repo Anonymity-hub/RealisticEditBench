@@ -1,0 +1,11 @@
+diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py
+--- a/sklearn/model_selection/_split.py
++++ b/sklearn/model_selection/_split.py
+@@ -1054,6 +1054,7 @@
+         if self.shuffle:
+             perm = np.arange(len(groups_cnt))
+             rng.shuffle(perm)
++            y_counts_per_group = y_counts_per_group[perm]
+ 
+         # Stable sort to keep shuffled order for groups with the same
+         # class distribution variance

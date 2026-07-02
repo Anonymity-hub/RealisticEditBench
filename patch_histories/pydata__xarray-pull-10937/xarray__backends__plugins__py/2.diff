@@ -1,0 +1,13 @@
+diff --git a/xarray/backends/plugins.py b/xarray/backends/plugins.py
+--- a/xarray/backends/plugins.py
++++ b/xarray/backends/plugins.py
+@@ -217,7 +217,8 @@
+     if isinstance(engine, str):
+         if engine in BACKEND_ENTRYPOINTS:
+             # fast path for built-in engines
+-            backend = BACKEND_ENTRYPOINTS[engine][1]()
++            backend_cls = BACKEND_ENTRYPOINTS[engine][1]
++            backend = backend_cls()
+         else:
+             engines = list_engines()
+             if engine not in engines:

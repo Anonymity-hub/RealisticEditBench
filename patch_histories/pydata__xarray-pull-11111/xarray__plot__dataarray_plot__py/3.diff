@@ -1,0 +1,12 @@
+diff --git a/xarray/plot/dataarray_plot.py b/xarray/plot/dataarray_plot.py
+--- a/xarray/plot/dataarray_plot.py
++++ b/xarray/plot/dataarray_plot.py
+@@ -695,8 +695,6 @@
+         Additional keyword arguments to :py:func:`matplotlib:matplotlib.pyplot.hist`.
+ 
+     """
+-    assert len(args) == 0
+-
+     if darray.ndim == 0 or darray.size == 0:
+         # TypeError to be consistent with pandas
+         raise TypeError("No numeric data to plot.")

@@ -1,0 +1,10 @@
+diff --git a/astropy/utils/iers/iers.py b/astropy/utils/iers/iers.py
+--- a/astropy/utils/iers/iers.py
++++ b/astropy/utils/iers/iers.py
+@@ -41,6 +41,7 @@
+     get_readable_fileobj,
+     is_url_in_cache,
+ )
++from astropy.utils.decorators import deprecated
+ from astropy.utils.exceptions import AstropyDeprecationWarning, AstropyWarning
+ from astropy.utils.state import ScienceState

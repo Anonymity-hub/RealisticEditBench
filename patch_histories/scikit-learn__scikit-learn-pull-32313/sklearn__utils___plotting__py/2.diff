@@ -1,0 +1,22 @@
+diff --git a/sklearn/utils/_plotting.py b/sklearn/utils/_plotting.py
+--- a/sklearn/utils/_plotting.py
++++ b/sklearn/utils/_plotting.py
+@@ -127,6 +127,7 @@
+         legend_metric_name,
+         curve_kwargs,
+         default_curve_kwargs=None,
++        default_multi_curve_kwargs=None,
+         **kwargs,
+     ):
+         """Get validated line kwargs for each curve.
+@@ -155,6 +156,10 @@
+ 
+         default_curve_kwargs : dict, default=None
+             Default curve kwargs, to be added to all curves. Individual kwargs
++            are over-ridden by `curve_kwargs`, if kwarg also set in `curve_kwargs`.
++
++        default_multi_curve_kwargs : dict, default=None
++            Default curve kwargs for multi-curve plots. Individual kwargs
+             are over-ridden by `curve_kwargs`, if kwarg also set in `curve_kwargs`.
+ 
+         **kwargs : dict

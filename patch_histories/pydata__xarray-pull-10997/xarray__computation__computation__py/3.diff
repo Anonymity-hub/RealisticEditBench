@@ -1,0 +1,44 @@
+diff --git a/xarray/computation/computation.py b/xarray/computation/computation.py
+--- a/xarray/computation/computation.py
++++ b/xarray/computation/computation.py
+@@ -676,18 +676,40 @@
+     ...     dims=["lat"],
+     ...     coords={"lat": np.arange(10)},
+     ...     name="sst",
++    ...     attrs={"standard_name": "sea_surface_temperature"},
+     ... )
+     >>> x
+     <xarray.DataArray 'sst' (lat: 10)> Size: 80B
+     array([0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+     Coordinates:
+       * lat      (lat) int64 80B 0 1 2 3 4 5 6 7 8 9
++    Attributes:
++        standard_name:  sea_surface_temperature
+ 
+     >>> xr.where(x < 0.5, x, x * 100)
+     <xarray.DataArray 'sst' (lat: 10)> Size: 80B
+     array([ 0. ,  0.1,  0.2,  0.3,  0.4, 50. , 60. , 70. , 80. , 90. ])
+     Coordinates:
+       * lat      (lat) int64 80B 0 1 2 3 4 5 6 7 8 9
++    Attributes:
++        standard_name:  sea_surface_temperature
++
++    If `x` is a scalar then by default there are no attrs on the result
++    >>> xr.where(x < 0.5, 1, 0)
++    <xarray.DataArray 'sst' (lat: 10)> Size: 80B
++    array([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
++    Coordinates:
++      * lat      (lat) int64 80B 0 1 2 3 4 5 6 7 8 9
++
++    If `x` is a scalar (and therefore has no attrs), preserve the
++    attrs on `cond` by using `keep_attrs="drop_conflicts"`
++    >>> xr.where(x < 0.5, 1, 0, keep_attrs="drop_conflicts")
++    <xarray.DataArray 'sst' (lat: 10)> Size: 80B
++    array([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
++    Coordinates:
++      * lat      (lat) int64 80B 0 1 2 3 4 5 6 7 8 9
++    Attributes:
++        standard_name:  sea_surface_temperature
+ 
+     >>> y = xr.DataArray(
+     ...     0.1 * np.arange(9).reshape(3, 3),

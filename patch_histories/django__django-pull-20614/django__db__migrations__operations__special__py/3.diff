@@ -1,0 +1,12 @@
+diff --git a/django/db/migrations/operations/special.py b/django/db/migrations/operations/special.py
+--- a/django/db/migrations/operations/special.py
++++ b/django/db/migrations/operations/special.py
+@@ -175,6 +175,8 @@
+             kwargs["atomic"] = self.atomic
+         if self.hints:
+             kwargs["hints"] = self.hints
++        if self.elidable:
++            kwargs["elidable"] = self.elidable
+         return (self.__class__.__qualname__, [], kwargs)
+ 
+     @property

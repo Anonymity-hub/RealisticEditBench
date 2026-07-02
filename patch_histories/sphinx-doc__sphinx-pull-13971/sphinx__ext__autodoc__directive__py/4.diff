@@ -1,0 +1,14 @@
+diff --git a/sphinx/ext/autodoc/directive.py b/sphinx/ext/autodoc/directive.py
+--- a/sphinx/ext/autodoc/directive.py
++++ b/sphinx/ext/autodoc/directive.py
+@@ -140,8 +140,9 @@
+         documenter_options._tab_width = self.state.document.settings.tab_width
+ 
+         # generate the output
++        get_attr = _AutodocAttrGetter(self.env._registry.autodoc_attrgetters)
+         params = DocumenterBridge(
+-            self.env, reporter, documenter_options, lineno, self.state
++            self.env, reporter, documenter_options, lineno, self.state, get_attr
+         )
+         documenter = doccls(params, self.arguments[0])
+         documenter.generate(more_content=self.content)

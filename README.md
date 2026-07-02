@@ -9,7 +9,7 @@
     <a href="#dataset">
         <img src="https://img.shields.io/badge/📂_Datasets-F1CA42" alt="Datasets">
     </a>
-    <a href="https://realisticeditbench.github.io/">
+    <a href="https://realisticeditbench.github.io/leaderboard.html">
         <img alt="Leaderboard" src="https://img.shields.io/badge/🏆_Leaderboard-4285F4">
     </a>
     <a href="https://www.python.org/">

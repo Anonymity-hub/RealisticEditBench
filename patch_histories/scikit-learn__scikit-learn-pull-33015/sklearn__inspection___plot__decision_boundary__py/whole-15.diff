@@ -1,0 +1,12 @@
+diff --git a/sklearn/inspection/_plot/decision_boundary.py b/sklearn/inspection/_plot/decision_boundary.py
+--- a/sklearn/inspection/_plot/decision_boundary.py
++++ b/sklearn/inspection/_plot/decision_boundary.py
+@@ -306,7 +306,7 @@ def plot(self, plot_method="contourf", ax=None, xlabel=None, ylabel=None, **kwar
+                     else:  # predict_proba or decision_function
+                         response = np.ma.array(
+                             self.response[:, :, class_idx],
+-                            mask=~(self.response.argmax(axis=2) == class_idx),
++                            mask=(self.response.argmax(axis=2) != class_idx),
+                         )
+ 
+                     self.surface_.append(

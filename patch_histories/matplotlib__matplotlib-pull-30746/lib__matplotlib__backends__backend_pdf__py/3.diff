@@ -1,0 +1,31 @@
+diff --git a/lib/matplotlib/backends/backend_pdf.py b/lib/matplotlib/backends/backend_pdf.py
+--- a/lib/matplotlib/backends/backend_pdf.py
++++ b/lib/matplotlib/backends/backend_pdf.py
+@@ -2121,6 +2121,9 @@
+                 gc, path, transform, padding, filled, stroked)
+             path_codes.append(name)
+ 
++        # Add padding for stroke width.
++        max_marker_extent += padding
++
+         output = self.file.output
+         output(*self.gc.push())
+         lastx, lasty = 0, 0
+@@ -2129,10 +2132,13 @@
+                 facecolors, edgecolors, linewidths, linestyles,
+                 antialiaseds, urls, offset_position, hatchcolors=hatchcolors):
+ 
+-            # Skip markers outside visible canvas bounds to reduce PDF size
+-            # (same optimization as in draw_markers).
+-            if not (0 <= xo <= self.file.width * 72
+-                    and 0 <= yo <= self.file.height * 72):
++            # Skip markers outside visible canvas bounds to reduce PDF size.
++            # Add max_marker_extent margin to account for marker size - a marker
++            # may be partially visible even if its center is outside the canvas.
++            canvas_width = self.file.width * 72
++            canvas_height = self.file.height * 72
++            if not (-max_marker_extent <= xo <= canvas_width + max_marker_extent
++                    and -max_marker_extent <= yo <= canvas_height + max_marker_extent):
+                 continue
+ 
+             self.check_gc(gc0, rgbFace)

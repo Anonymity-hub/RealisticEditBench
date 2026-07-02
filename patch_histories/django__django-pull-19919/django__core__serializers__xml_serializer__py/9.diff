@@ -1,0 +1,35 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -150,19 +150,21 @@
+         """
+         if field.remote_field.through._meta.auto_created:
+             self._start_relational_field(field)
+-            if self.use_natural_foreign_keys and hasattr(
+-                field.remote_field.model, "natural_key"
++            if self.use_natural_foreign_keys and self._model_supports_natural_key(
++                field.remote_field.model
+             ):
+                 # If the objects in the m2m have a natural key, use it
+                 def handle_m2m(value):
+-                    natural = value.natural_key()
+-                    # Iterable natural keys are rolled out as subelements
+-                    self.xml.startElement("object", {})
+-                    for key_value in natural:
+-                        self.xml.startElement("natural", {})
+-                        self.xml.characters(str(key_value))
+-                        self.xml.endElement("natural")
+-                    self.xml.endElement("object")
++                    if natural := self._resolve_natural_key(value):
++                        # Iterable natural keys are rolled out as subelements
++                        self.xml.startElement("object", {})
++                        for key_value in natural:
++                            self.xml.startElement("natural", {})
++                            self.xml.characters(str(key_value))
++                            self.xml.endElement("natural")
++                        self.xml.endElement("object")
++                    else:
++                        self.xml.addQuickElement("object", attrs={"pk": str(value.pk)})
+ 
+                 def queryset_iterator(obj, field):
+                     attr = getattr(obj, field.name)

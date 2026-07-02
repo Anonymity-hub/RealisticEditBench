@@ -1,0 +1,27 @@
+diff --git a/django/dispatch/dispatcher.py b/django/dispatch/dispatcher.py
+--- a/django/dispatch/dispatcher.py
++++ b/django/dispatch/dispatcher.py
+@@ -382,7 +381,7 @@
+                 return response
+ 
+             async def asend():
+-                async_responses = await _gather(
++                async_responses = await _run_parallel(
+                     *(
+                         asend_and_wrap_exception(receiver)
+                         for receiver in async_receivers
+@@ -456,11 +455,9 @@
+                 return err
+             return response
+ 
+-        responses, async_responses = await _gather(
+-            sync_send(),
+-            _gather(
+-                *(asend_and_wrap_exception(receiver) for receiver in async_receivers),
+-            ),
++        responses = await sync_send()
++        async_responses = await _run_parallel(
++            *(asend_and_wrap_exception(receiver) for receiver in async_receivers),
+         )
+         responses.extend(zip(async_receivers, async_responses))
+         return responses

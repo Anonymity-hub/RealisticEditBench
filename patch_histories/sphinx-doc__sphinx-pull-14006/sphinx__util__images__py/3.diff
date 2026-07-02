@@ -1,0 +1,22 @@
+diff --git a/sphinx/util/images.py b/sphinx/util/images.py
+--- a/sphinx/util/images.py
++++ b/sphinx/util/images.py
+@@ -5,6 +5,7 @@
+ import base64
+ from pathlib import Path
+ from typing import TYPE_CHECKING, NamedTuple, overload
++from urllib.parse import unquote_to_bytes
+ 
+ import imagesize
+ 
+@@ -109,7 +110,9 @@
+         elif prop:
+             mimetype = prop.lower()
+ 
+-    image_data = base64.b64decode(data)
++    image_data = unquote_to_bytes(data)  # data might be percent-encoded
++    if properties.endswith(';base64'):
++        image_data = base64.decodebytes(image_data)
+     return DataURI(mimetype, charset, image_data)
+ 
+ 

@@ -1,0 +1,21 @@
+diff --git a/django/db/migrations/operations/special.py b/django/db/migrations/operations/special.py
+--- a/django/db/migrations/operations/special.py
++++ b/django/db/migrations/operations/special.py
+@@ -93,6 +93,8 @@ def deconstruct(self):
+             kwargs["state_operations"] = self.state_operations
+         if self.hints:
+             kwargs["hints"] = self.hints
++        if self.elidable:
++            kwargs["elidable"] = self.elidable
+         return (self.__class__.__qualname__, [], kwargs)
+ 
+     @property
+@@ -173,6 +175,8 @@ def deconstruct(self):
+             kwargs["atomic"] = self.atomic
+         if self.hints:
+             kwargs["hints"] = self.hints
++        if self.elidable:
++            kwargs["elidable"] = self.elidable
+         return (self.__class__.__qualname__, [], kwargs)
+ 
+     @property

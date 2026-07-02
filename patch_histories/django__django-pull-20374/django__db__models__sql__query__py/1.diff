@@ -1,0 +1,17 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -2338,6 +2338,13 @@
+         else:
+             self.default_ordering = False
+ 
++    @property
++    def orderby_issubset_groupby(self):
++        if self.extra_order_by:
++            # Raw SQL from extra(order_by=...) can't be reliably compared
++            # against resolved OrderBy/Col expressions. Treat as not a subset.
++            return False
++
+     def clear_ordering(self, force=False, clear_default=True):
+         """
+         Remove any ordering settings if the current query allows it without

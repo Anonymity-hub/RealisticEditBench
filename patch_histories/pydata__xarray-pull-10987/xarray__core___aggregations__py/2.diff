@@ -1,0 +1,21 @@
+diff --git a/xarray/core/_aggregations.py b/xarray/core/_aggregations.py
+--- a/xarray/core/_aggregations.py
++++ b/xarray/core/_aggregations.py
+@@ -32,6 +32,17 @@
+         keep_attrs: bool | None = None,
+         keepdims: bool = False,
+         **kwargs: Any,
++    ) -> Self:
++        raise NotImplementedError()
++
++    @property
++    def coords(self) -> DatasetCoordinates:
++        raise NotImplementedError()
++
++    def assign_coords(
++        self,
++        coords: Mapping | None = None,
++        **coords_kwargs: Any,
+     ) -> Self:
+         raise NotImplementedError()
+ 

@@ -1,0 +1,15 @@
+diff --git a/astropy/io/misc/ecsv.py b/astropy/io/misc/ecsv.py
+--- a/astropy/io/misc/ecsv.py
++++ b/astropy/io/misc/ecsv.py
+@@ -410,7 +410,10 @@ def get_data_kwargs(
+ 
+         kw["na_values"] = null_values
+         kw["keep_default_na"] = False
+-        kw["skiprows"] = header.n_header
++        kw["comment"] = "#"
++        # Would prefer `kw["skiprows"] = header.n_header` here, but there is a bug in
++        # pandas.read_csv where skiprows does not behave expectedly.
++        # https://github.com/pandas-dev/pandas/issues/62739
+         kw["dtype"] = converters
+         return kw
+ 

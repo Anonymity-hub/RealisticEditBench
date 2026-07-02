@@ -1,0 +1,19 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -5309,9 +5309,12 @@
+             s = (20 if mpl.rcParams['_internal.classic_mode'] else
+                  mpl.rcParams['lines.markersize'] ** 2.0)
+         s = np.ma.ravel(s)
+-        if (len(s) not in (1, x.size) or
+-                (not np.issubdtype(s.dtype, np.floating) and
+-                 not np.issubdtype(s.dtype, np.integer))):
++        if not (np.issubdtype(s.dtype, np.floating)
++                or np.issubdtype(s.dtype, np.integer)):
++            raise ValueError(
++                "s must be a scalar, "
++                "or float array-like with the same size as x and y")
++        if len(s) not in (1, x.size):
+             raise ValueError(
+                 "s must be a scalar, "
+                 "or float array-like with the same size as x and y")

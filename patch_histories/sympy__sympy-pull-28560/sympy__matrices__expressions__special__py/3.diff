@@ -1,0 +1,23 @@
+diff --git a/sympy/matrices/expressions/special.py b/sympy/matrices/expressions/special.py
+--- a/sympy/matrices/expressions/special.py
++++ b/sympy/matrices/expressions/special.py
+@@ -227,6 +227,19 @@
+     Also called "matrix of ones" or "all-ones matrix".
+ 
+     https://en.wikipedia.org/wiki/Matrix_of_ones
++
++    Examples
++    ========
++
++    >>> from sympy.matrices.expressions import OneMatrix
++    >>> O = OneMatrix(3, 4)
++    >>> O.shape
++    (3, 4)
++    >>> O.as_explicit()
++    Matrix([
++    [1, 1, 1, 1],
++    [1, 1, 1, 1],
++    [1, 1, 1, 1]])
+     """
+     def __new__(cls, m, n, evaluate=False):
+         m, n = _sympify(m), _sympify(n)

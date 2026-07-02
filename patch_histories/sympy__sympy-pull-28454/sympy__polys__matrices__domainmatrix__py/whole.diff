@@ -1,0 +1,12 @@
+diff --git a/sympy/polys/matrices/domainmatrix.py b/sympy/polys/matrices/domainmatrix.py
+--- a/sympy/polys/matrices/domainmatrix.py
++++ b/sympy/polys/matrices/domainmatrix.py
+@@ -1613,7 +1613,7 @@ def matmul(A, B):
+         return A.from_rep(A.rep.matmul(B.rep))
+ 
+     def _scalarmul(A, lamda, reverse):
+-        if lamda == A.domain.zero:
++        if lamda == A.domain.zero and (not (A.domain.is_EXRAW)):
+             return DomainMatrix.zeros(A.shape, A.domain)
+         elif lamda == A.domain.one:
+             return A.copy()

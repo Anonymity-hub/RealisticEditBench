@@ -1,0 +1,11 @@
+diff --git a/sympy/geometry/plane.py b/sympy/geometry/plane.py
+--- a/sympy/geometry/plane.py
++++ b/sympy/geometry/plane.py
+@@ -783,6 +783,7 @@
+             return rv
+         n = Point3D(self.normal_vector)
+         d = (rv - self.p1).dot(n) / n.dot(n)
++        return rv - d * n
+ 
+     def random_point(self, seed=None):
+         """ Returns a random point on the Plane.

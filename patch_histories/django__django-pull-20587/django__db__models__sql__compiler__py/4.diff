@@ -1,0 +1,61 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -439,9 +439,7 @@
+                 table, col = col.split(".", 1)
+                 yield (
+                     OrderBy(
+-                        RawSQL(
+-                            "%s.%s" % (self.quote_name_unless_alias(table), col), []
+-                        ),
++                        RawSQL("%s.%s" % (self.quote_name(table), col), []),
+                         descending=descending,
+                     ),
+                     False,
+@@ -1158,7 +1156,7 @@
+                 alias not in self.query.alias_map
+                 or self.query.alias_refcount[alias] == 1
+             ):
+-                result.append(", %s" % self.quote_name_unless_alias(alias))
++                result.append(", %s" % self.quote_name(alias))
+         return result, params
+ 
+     def get_related_selections(
+@@ -1487,7 +1485,7 @@
+                 if self.connection.features.select_for_update_of_column:
+                     result.append(self.compile(col)[0])
+                 else:
+-                    result.append(self.quote_name_unless_alias(col.alias))
++                    result.append(self.quote_name(col.alias))
+         if invalid_names:
+             raise FieldError(
+                 "Invalid field name(s) given in select_for_update(of=(...)): %s. "
+@@ -1788,9 +1786,7 @@
+         return placeholder_rows, param_rows
+ 
+     def as_sql(self):
+-        # We don't need quote_name_unless_alias() here, since these are all
+-        # going to be column names (so we can avoid the extra overhead).
+-        qn = self.connection.ops.quote_name
++        qn = self.quote_name
+         opts = self.query.get_meta()
+         insert_statement = self.connection.ops.insert_statement(
+             on_conflict=self.query.on_conflict,
+@@ -1989,7 +1985,7 @@
+         )
+ 
+     def _as_sql(self, query):
+-        delete = "DELETE FROM %s" % self.quote_name_unless_alias(query.base_table)
++        delete = "DELETE FROM %s" % self.quote_name(query.base_table)
+         try:
+             where, params = self.compile(query.where)
+         except FullResultSet:
+@@ -2033,7 +2029,7 @@
+         self.pre_sql_setup()
+         if not self.query.values:
+             return "", ()
+-        qn = self.quote_name_unless_alias
++        qn = self.quote_name
+         values, update_params = [], []
+         for field, model, val in self.query.values:
+             if hasattr(val, "resolve_expression"):

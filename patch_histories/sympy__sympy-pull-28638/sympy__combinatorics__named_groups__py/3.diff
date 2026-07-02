@@ -1,0 +1,43 @@
+diff --git a/sympy/combinatorics/named_groups.py b/sympy/combinatorics/named_groups.py
+--- a/sympy/combinatorics/named_groups.py
++++ b/sympy/combinatorics/named_groups.py
+@@ -96,22 +96,23 @@
+     elif n == 2:
+         G = PermutationGroup([Permutation([0,1])])
+ 
+-    a = list(range(n))
+-    a[0], a[1], a[2] = a[1], a[2], a[0]
+-    gen1 = a
+-    if n % 2:
+-        a = list(range(1, n))
+-        a.append(0)
+-        gen2 = a
+-    else:
+-        a = list(range(2, n))
+-        a.append(1)
+-        a.insert(0, 0)
+-        gen2 = a
+-    gens = [gen1, gen2]
+-    if gen1 == gen2:
+-        gens = gens[:1]
+-    G = PermutationGroup([_af_new(a) for a in gens], dups=False)
++    else:
++        a = list(range(n))
++        a[0], a[1], a[2] = a[1], a[2], a[0]
++        gen1 = a
++        if n % 2:
++            a = list(range(1, n))
++            a.append(0)
++            gen2 = a
++        else:
++            a = list(range(2, n))
++            a.append(1)
++            a.insert(0, 0)
++            gen2 = a
++        gens = [gen1, gen2]
++        if gen1 == gen2:
++            gens = gens[:1]
++        G = PermutationGroup([_af_new(a) for a in gens], dups=False)
+ 
+     set_alternating_group_properties(G, n, n)
+     G._is_alt = True

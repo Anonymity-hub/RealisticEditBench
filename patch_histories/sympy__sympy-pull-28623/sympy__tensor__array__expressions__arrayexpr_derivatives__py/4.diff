@@ -1,0 +1,14 @@
+diff --git a/sympy/tensor/array/expressions/arrayexpr_derivatives.py b/sympy/tensor/array/expressions/arrayexpr_derivatives.py
+--- a/sympy/tensor/array/expressions/arrayexpr_derivatives.py
++++ b/sympy/tensor/array/expressions/arrayexpr_derivatives.py
+@@ -100,6 +100,10 @@
+ def _(expr: Determinant, x: Expr):
+     arg = expr.arg
+     arg_inverse = arg.inv()
++    darg = array_derive(arg, x)
++    tp = _array_tensor_product(expr, arg_inverse, darg)
++    tc = _array_contraction(tp, (0, 5), (1, 4))
++    return tc
+ 
+ 
+ @array_derive.register(Identity)

@@ -1,0 +1,11 @@
+diff --git a/sympy/solvers/ode/single.py b/sympy/solvers/ode/single.py
+--- a/sympy/solvers/ode/single.py
++++ b/sympy/solvers/ode/single.py
+@@ -3053,6 +3053,7 @@
+     'Liouville': Liouville,
+     '2nd_linear_airy': SecondLinearAiry,
+     '2nd_linear_bessel': SecondLinearBessel,
++    '2nd_linear_bessel_transform': SecondLinearBesselTransform,
+     '2nd_hypergeometric': SecondHypergeometric,
+     'nth_order_reducible': NthOrderReducible,
+     '2nd_nonlinear_autonomous_conserved': SecondNonlinearAutonomousConserved,

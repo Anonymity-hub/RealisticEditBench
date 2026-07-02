@@ -1,0 +1,45 @@
+diff --git a/sklearn/ensemble/_bagging.py b/sklearn/ensemble/_bagging.py
+--- a/sklearn/ensemble/_bagging.py
++++ b/sklearn/ensemble/_bagging.py
+@@ -46,6 +46,41 @@
+ MAX_INT = np.iinfo(np.int32).max
+ 
+ 
++def _get_n_samples_bootstrap(n_samples, max_samples, sample_weight):
++    """
++    Get the number of samples in a bootstrap sample.
++
++    Parameters
++    ----------
++    n_samples : int
++        Number of samples in the dataset.
++
++    max_samples : None, int or float
++        The maximum number of samples to draw.
++
++        - If None, then draw `n_samples` samples.
++        - If int, then draw `max_samples` samples.
++        - If float, then draw `max_samples * n_samples` unweighted samples or
++          `max_samples * sample_weight.sum()` weighted samples.
++
++    sample_weight : array of shape (n_samples,) or None
++        Sample weights with frequency semantics when `max_samples` is explicitly
++        set to a float or integer value. When keeping the `max_samples=None` default
++        value, the equivalence between fitting with integer weighted data points or
++        integer repeated data points is no longer guaranteed because the effective
++        bootstrap size is no longer guaranteed to be equivalent.
++
++    Returns
++    -------
++    n_samples_bootstrap : int
++        The total number of samples to draw for the bootstrap sample.
++    """
++    if max_samples is None:
++        return n_samples
++    elif isinstance(max_samples, Integral):
++        return max_samples
++
++
+ def _generate_indices(random_state, bootstrap, n_population, n_samples):
+     """Draw randomly sampled indices."""
+     # Draw sample indices

@@ -1,0 +1,21 @@
+diff --git a/lib/matplotlib/patches.py b/lib/matplotlib/patches.py
+--- a/lib/matplotlib/patches.py
++++ b/lib/matplotlib/patches.py
+@@ -657,6 +657,17 @@
+     def get_hatch_linewidth(self):
+         """Return the hatch linewidth."""
+         return self._hatch_linewidth
++
++    def _has_dashed_edge(self):
++        """
++        Return whether the patch edge has a dashed linestyle.
++
++        A custom linestyle is assumed to be dashed, we do not inspect the
++        ``onoffseq`` directly.
++
++        See also `~.Patch.set_linestyle`.
++        """
++        return self._linestyle not in ('solid', '-')
+ 
+     def _draw_paths_with_artist_properties(
+             self, renderer, draw_path_args_list):

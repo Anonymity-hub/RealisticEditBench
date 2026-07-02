@@ -1,0 +1,14 @@
+diff --git a/sympy/polys/agca/extensions.py b/sympy/polys/agca/extensions.py
+--- a/sympy/polys/agca/extensions.py
++++ b/sympy/polys/agca/extensions.py
+@@ -341,7 +341,9 @@ def quo(self, f, g):
+         return self.exquo(f, g)
+ 
+     def exquo(self, f, g):
+-        rep = self.ring.exquo(f.rep, g.rep)
++        ring = self.ring
++        try:
++            rep = ring.exquo(f.rep, g.rep)
+         return ExtElem(rep % self.mod, self)
+ 
+     def is_negative(self, a):

@@ -1,0 +1,46 @@
+diff --git a/sklearn/preprocessing/_target_encoder.py b/sklearn/preprocessing/_target_encoder.py
+--- a/sklearn/preprocessing/_target_encoder.py
++++ b/sklearn/preprocessing/_target_encoder.py
+@@ -365,7 +365,7 @@
+         else:
+             X_out = np.empty_like(X_ordinal, dtype=np.float64)
+ 
+-        for train_idx, test_idx in cv.split(X, y):
++        for train_idx, test_idx in cv.split(X, y, **routed_params.splitter.split):
+             X_train, y_train = X_ordinal[train_idx, :], y_encoded[train_idx]
+             y_train_mean = np.mean(y_train, axis=0)
+ 
+@@ -616,6 +616,33 @@
+         else:
+             return feature_names
+ 
++    def get_metadata_routing(self):
++        """Get metadata routing of this object.
++
++        Please check :ref:`User Guide <metadata_routing>` on how the routing
++        mechanism works.
++
++        .. versionadded:: 1.9
++
++        Returns
++        -------
++        routing : MetadataRouter
++            A :class:`~sklearn.utils.metadata_routing.MetadataRouter` encapsulating
++            routing information.
++        """
++
++        router = MetadataRouter(owner=self)
++
++        router.add(
++            # This works, since none of {None, int, iterable} request any metadata
++            # and the machinery here would assign an empty MetadataRequest
++            # to it.
++            splitter=self.cv,
++            method_mapping=MethodMapping().add(caller="fit_transform", callee="split"),
++        )
++
++        return router
++
+     def __sklearn_tags__(self):
+         tags = super().__sklearn_tags__()
+         tags.target_tags.required = True

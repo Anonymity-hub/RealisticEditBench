@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/sphinxext/plot_directive.py b/lib/matplotlib/sphinxext/plot_directive.py
+--- a/lib/matplotlib/sphinxext/plot_directive.py
++++ b/lib/matplotlib/sphinxext/plot_directive.py
+@@ -960,6 +960,8 @@
+             else:
+                 lines = ['.. code-block:: python']
+                 if 'code-caption' in options:
++                    code_caption = options['code-caption'].replace('\n', ' ')
++                    lines.append(f'   :caption: {code_caption}')
+                 lines.extend(['', *textwrap.indent(code_piece, '    ').splitlines()])
+             source_code = "\n".join(lines)
+         else:

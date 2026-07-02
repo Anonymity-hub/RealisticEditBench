@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py
+--- a/lib/matplotlib/axis.py
++++ b/lib/matplotlib/axis.py
+@@ -1383,8 +1383,7 @@ def get_tightbbox(self, renderer=None, *, for_layout_only=False):
+                     bb.y0 = (bb.y0 + bb.y1) / 2 - 0.5
+                     bb.y1 = bb.y0 + 1.0
+             bboxes.append(bb)
+-        bboxes = [b for b in bboxes
+-                  if 0 < b.width < np.inf and 0 < b.height < np.inf]
++        bboxes = [b for b in bboxes if b._is_finite()]
+         if bboxes:
+             return mtransforms.Bbox.union(bboxes)
+         else:

@@ -1,0 +1,12 @@
+diff --git a/sklearn/linear_model/_logistic.py b/sklearn/linear_model/_logistic.py
+--- a/sklearn/linear_model/_logistic.py
++++ b/sklearn/linear_model/_logistic.py
+@@ -1166,7 +1166,7 @@ def fit(self, X, y, sample_weight=None):
+             raise ValueError("l1_ratio must be specified when penalty is elasticnet.")
+ 
+         if penalty is None:
+-            if self.C != 1.0:  # default values
++            if self.penalty is None and self.C != 1.0:
+                 warnings.warn(
+                     "Setting penalty=None will ignore the C and l1_ratio parameters"
+                 )

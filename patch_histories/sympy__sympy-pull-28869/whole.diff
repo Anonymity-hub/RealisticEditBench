@@ -1,0 +1,57 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -2865,6 +2865,14 @@ def _print_CoordSystem(self, coordsys):
+     def _print_CovarDerivativeOp(self, cvd):
+         return r'\mathbb{\nabla}_{%s}' % self._print(cvd._wrt)
+ 
++    def _print_BaseScalar(self, expr):
++        coord_sys_name, scalar_name = expr.name.split(".")
++        if scalar_name in greek_letters_set:
++            scalar_name = r"\%s" % scalar_name
++        elif scalar_name in tex_greek_dictionary:
++            scalar_name = tex_greek_dictionary[scalar_name]
++        return r"\boldsymbol{%s}_{\textbf{%s}}" % (scalar_name, coord_sys_name)
++
+     def _print_BaseScalarField(self, field):
+         string = field._coord_sys.symbols[field._index].name
+         return r'\mathbf{{{}}}'.format(self._print(Symbol(string)))
+diff --git a/sympy/printing/pretty/pretty.py b/sympy/printing/pretty/pretty.py
+--- a/sympy/printing/pretty/pretty.py
++++ b/sympy/printing/pretty/pretty.py
+@@ -2819,6 +2819,12 @@ def _print_Patch(self, patch):
+     def _print_CoordSystem(self, coords):
+         return self._print(coords.name)
+ 
++    def _print_BaseScalar(self, expr):
++        coord_sys_name, scalar_name = expr.name.split(".")
++        if scalar_name in greek_unicode:
++            scalar_name = greek_unicode[scalar_name]
++        return self._print(pretty_symbol(scalar_name + "_" + coord_sys_name))
++
+     def _print_BaseScalarField(self, field):
+         string = field._coord_sys.symbols[field._index].name
+         return self._print(pretty_symbol(string))
+diff --git a/sympy/vector/scalar.py b/sympy/vector/scalar.py
+--- a/sympy/vector/scalar.py
++++ b/sympy/vector/scalar.py
+@@ -1,6 +1,5 @@
+ from sympy.core import AtomicExpr, Symbol, S
+ from sympy.core.sympify import _sympify
+-from sympy.printing.pretty.stringpict import prettyForm
+ from sympy.printing.precedence import PRECEDENCE
+ from sympy.core.kind import NumberKind
+ 
+@@ -56,12 +55,6 @@ def _eval_derivative(self, s):
+             return S.One
+         return S.Zero
+ 
+-    def _latex(self, printer=None):
+-        return self._latex_form
+-
+-    def _pretty(self, printer=None):
+-        return prettyForm(self._pretty_form)
+-
+     precedence = PRECEDENCE['Atom']
+ 
+     @property

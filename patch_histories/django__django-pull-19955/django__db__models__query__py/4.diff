@@ -1,0 +1,12 @@
+diff --git a/django/db/models/query.py b/django/db/models/query.py
+--- a/django/db/models/query.py
++++ b/django/db/models/query.py
+@@ -2147,6 +2147,8 @@
+             and self.model._meta.pk
+             not in {col.output_field for col in self.query.group_by}
+             and set(self.model._meta.pk_fields).difference(
++                {col.target for col in self.query.group_by}
++            )
+         ):
+             raise TypeError(
+                 f"Cannot use QuerySet.{method}() on an unordered queryset performing "

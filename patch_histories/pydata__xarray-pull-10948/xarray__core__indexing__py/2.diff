@@ -1,0 +1,16 @@
+diff --git a/xarray/core/indexing.py b/xarray/core/indexing.py
+--- a/xarray/core/indexing.py
++++ b/xarray/core/indexing.py
+@@ -358,6 +358,12 @@
+ def normalize_indexer(indexer, size):
+     if isinstance(indexer, slice):
+         return normalize_slice(indexer, size)
++    elif isinstance(indexer, np.ndarray):
++        return normalize_array(indexer, size)
++    else:
++        if indexer < 0:
++            return size + indexer
++        return indexer
+ 
+ 
+ def _index_indexer_1d(

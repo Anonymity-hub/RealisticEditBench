@@ -1,0 +1,15 @@
+diff --git a/sklearn/metrics/_plot/precision_recall_curve.py b/sklearn/metrics/_plot/precision_recall_curve.py
+--- a/sklearn/metrics/_plot/precision_recall_curve.py
++++ b/sklearn/metrics/_plot/precision_recall_curve.py
+@@ -118,9 +118,10 @@
+         recall,
+         *,
+         average_precision=None,
+-        estimator_name=None,
++        name=None,
+         pos_label=None,
+         prevalence_pos_label=None,
++        estimator_name="deprecated",
+     ):
+         self.estimator_name = estimator_name
+         self.precision = precision

@@ -1,0 +1,22 @@
+diff --git a/sympy/solvers/ode/single.py b/sympy/solvers/ode/single.py
+--- a/sympy/solvers/ode/single.py
++++ b/sympy/solvers/ode/single.py
+@@ -2800,6 +2800,18 @@
+     has_integral = False
+     order = [2]
+ 
++    def _matches(self):
++        eq = self.ode_problem.eq_high_order_free
++        f = self.ode_problem.func
++        x = self.ode_problem.sym
++        order = self.ode_problem.order
++
++        if order != 2:
++            return False
++
++        # Get linear coefficients
++        match = self.ode_problem.get_linear_coefficients(eq, f, order)
++        if not match:
+ 
+ 
+ class SecondLinearAiry(SingleODESolver):

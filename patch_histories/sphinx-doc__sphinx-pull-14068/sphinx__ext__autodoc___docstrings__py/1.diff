@@ -1,0 +1,12 @@
+diff --git a/sphinx/ext/autodoc/_docstrings.py b/sphinx/ext/autodoc/_docstrings.py
+--- a/sphinx/ext/autodoc/_docstrings.py
++++ b/sphinx/ext/autodoc/_docstrings.py
+@@ -88,7 +88,7 @@
+ ) -> list[list[str]] | None:
+     """Add content from docstrings, attribute documentation and user."""
+     # add content from attribute documentation
+-    if props.obj_type not in {'data', 'attribute'} and props.parts:
++    if props.obj_type not in {'data', 'attribute', 'type'} and props.parts:
+         key = ('.'.join(props.parent_names), props.name)
+         try:
+             # make a copy of docstring for attributes to avoid cache

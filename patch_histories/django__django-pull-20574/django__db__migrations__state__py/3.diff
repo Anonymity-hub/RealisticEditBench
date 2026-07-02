@@ -1,0 +1,11 @@
+diff --git a/django/db/migrations/state.py b/django/db/migrations/state.py
+--- a/django/db/migrations/state.py
++++ b/django/db/migrations/state.py
+@@ -194,6 +194,7 @@
+         if objs := model_state.options.get(option_name):
+             new_value = [obj for obj in objs if tuple(obj) != tuple(value_to_remove)]
+             if option_name in {"index_together", "unique_together"}:
++                new_value = set(normalize_together(new_value))
+             model_state.options[option_name] = new_value
+         self.reload_model(app_label, model_name, delay=True)
+ 

@@ -1,0 +1,23 @@
+diff --git a/xarray/core/coordinates.py b/xarray/core/coordinates.py
+--- a/xarray/core/coordinates.py
++++ b/xarray/core/coordinates.py
+@@ -534,12 +534,17 @@
+                 if k not in self.xindexes
+             }
+             variables, indexes = merge_coordinates_without_align(
+-                [self, other], prioritized
++                [self, other], prioritized, compat=compat
+             )
+             yield
+             self._update_coords(variables, indexes)
+ 
+-    def merge(self, other: Mapping[Any, Any] | None) -> Dataset:
++    def merge(
++        self,
++        other: Mapping[Any, Any] | None,
++        *,
++        compat: CompatOptions | CombineKwargDefault = "minimal",
++    ) -> Dataset:
+         """Merge two sets of coordinates to create a new Dataset
+ 
+         The method implements the logic used for joining coordinates in the

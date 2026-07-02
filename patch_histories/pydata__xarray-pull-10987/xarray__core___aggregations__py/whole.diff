@@ -1,0 +1,1899 @@
+diff --git a/xarray/core/_aggregations.py b/xarray/core/_aggregations.py
+--- a/xarray/core/_aggregations.py
++++ b/xarray/core/_aggregations.py
+@@ -4,7 +4,7 @@
+ 
+ from __future__ import annotations
+ 
+-from collections.abc import Callable, Sequence
++from collections.abc import Callable, Mapping, Sequence
+ from typing import TYPE_CHECKING, Any
+ 
+ from xarray.core import duck_array_ops
+@@ -13,6 +13,7 @@
+ from xarray.core.utils import contains_only_chunked_or_numpy, module_available
+ 
+ if TYPE_CHECKING:
++    from xarray.core.coordinates import DatasetCoordinates
+     from xarray.core.dataarray import DataArray
+     from xarray.core.dataset import Dataset
+ 
+@@ -104,13 +105,14 @@ def count(
+             Data variables:
+                 foo      int64 8B 5
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.count,
+             dim=dim,
+             numeric_only=False,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def all(
+         self,
+@@ -187,13 +189,14 @@ def all(
+             Data variables:
+                 foo      bool 1B False
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.array_all,
+             dim=dim,
+             numeric_only=False,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def any(
+         self,
+@@ -270,13 +273,14 @@ def any(
+             Data variables:
+                 foo      bool 1B True
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.array_any,
+             dim=dim,
+             numeric_only=False,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def max(
+         self,
+@@ -363,14 +367,15 @@ def max(
+             Data variables:
+                 foo      float64 8B nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.max,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=False,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def min(
+         self,
+@@ -457,14 +462,15 @@ def min(
+             Data variables:
+                 foo      float64 8B nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.min,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=False,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def mean(
+         self,
+@@ -555,14 +561,15 @@ def mean(
+             Data variables:
+                 foo      float64 8B nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.mean,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def prod(
+         self,
+@@ -669,7 +676,7 @@ def prod(
+             Data variables:
+                 foo      float64 8B 0.0
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.prod,
+             dim=dim,
+             skipna=skipna,
+@@ -678,6 +685,7 @@ def prod(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def sum(
+         self,
+@@ -784,7 +792,7 @@ def sum(
+             Data variables:
+                 foo      float64 8B 8.0
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.sum,
+             dim=dim,
+             skipna=skipna,
+@@ -793,6 +801,7 @@ def sum(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def std(
+         self,
+@@ -896,7 +905,7 @@ def std(
+             Data variables:
+                 foo      float64 8B 1.14
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.std,
+             dim=dim,
+             skipna=skipna,
+@@ -905,6 +914,7 @@ def std(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def var(
+         self,
+@@ -1008,7 +1018,7 @@ def var(
+             Data variables:
+                 foo      float64 8B 1.3
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.var,
+             dim=dim,
+             skipna=skipna,
+@@ -1017,6 +1027,7 @@ def var(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def median(
+         self,
+@@ -1107,14 +1118,15 @@ def median(
+             Data variables:
+                 foo      float64 8B nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.median,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def cumsum(
+         self,
+@@ -1198,7 +1210,9 @@ def cumsum(
+         <xarray.DataTree>
+         Group: /
+             Dimensions:  (time: 6)
+-            Dimensions without coordinates: time
++            Coordinates:
++              * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++                labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+             Data variables:
+                 foo      (time) float64 48B 1.0 3.0 6.0 6.0 8.0 8.0
+ 
+@@ -1208,18 +1222,21 @@ def cumsum(
+         <xarray.DataTree>
+         Group: /
+             Dimensions:  (time: 6)
+-            Dimensions without coordinates: time
++            Coordinates:
++              * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++                labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+             Data variables:
+                 foo      (time) float64 48B 1.0 3.0 6.0 6.0 8.0 nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.cumsum,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def cumprod(
+         self,
+@@ -1303,7 +1320,9 @@ def cumprod(
+         <xarray.DataTree>
+         Group: /
+             Dimensions:  (time: 6)
+-            Dimensions without coordinates: time
++            Coordinates:
++              * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++                labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+             Data variables:
+                 foo      (time) float64 48B 1.0 2.0 6.0 0.0 0.0 0.0
+ 
+@@ -1313,18 +1332,21 @@ def cumprod(
+         <xarray.DataTree>
+         Group: /
+             Dimensions:  (time: 6)
+-            Dimensions without coordinates: time
++            Coordinates:
++              * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++                labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+             Data variables:
+                 foo      (time) float64 48B 1.0 2.0 6.0 0.0 0.0 nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.cumprod,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+ 
+ class DatasetAggregations:
+@@ -1342,6 +1364,17 @@ def reduce(
+     ) -> Self:
+         raise NotImplementedError()
+ 
++    @property
++    def coords(self) -> DatasetCoordinates:
++        raise NotImplementedError()
++
++    def assign_coords(
++        self,
++        coords: Mapping | None = None,
++        **coords_kwargs: Any,
++    ) -> Self:
++        raise NotImplementedError()
++
+     def count(
+         self,
+         dim: Dims = None,
+@@ -1406,13 +1439,14 @@ def count(
+         Data variables:
+             da       int64 8B 5
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.count,
+             dim=dim,
+             numeric_only=False,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def all(
+         self,
+@@ -1478,13 +1512,14 @@ def all(
+         Data variables:
+             da       bool 1B False
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.array_all,
+             dim=dim,
+             numeric_only=False,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def any(
+         self,
+@@ -1550,13 +1585,14 @@ def any(
+         Data variables:
+             da       bool 1B True
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.array_any,
+             dim=dim,
+             numeric_only=False,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def max(
+         self,
+@@ -1636,14 +1672,15 @@ def max(
+         Data variables:
+             da       float64 8B nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.max,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=False,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def min(
+         self,
+@@ -1723,14 +1760,15 @@ def min(
+         Data variables:
+             da       float64 8B nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.min,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=False,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def mean(
+         self,
+@@ -1810,14 +1848,15 @@ def mean(
+         Data variables:
+             da       float64 8B nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.mean,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def prod(
+         self,
+@@ -1916,7 +1955,7 @@ def prod(
+         Data variables:
+             da       float64 8B 0.0
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.prod,
+             dim=dim,
+             skipna=skipna,
+@@ -1925,6 +1964,7 @@ def prod(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def sum(
+         self,
+@@ -2023,7 +2063,7 @@ def sum(
+         Data variables:
+             da       float64 8B 8.0
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.sum,
+             dim=dim,
+             skipna=skipna,
+@@ -2032,6 +2072,7 @@ def sum(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def std(
+         self,
+@@ -2127,7 +2168,7 @@ def std(
+         Data variables:
+             da       float64 8B 1.14
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.std,
+             dim=dim,
+             skipna=skipna,
+@@ -2136,6 +2177,7 @@ def std(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def var(
+         self,
+@@ -2231,7 +2273,7 @@ def var(
+         Data variables:
+             da       float64 8B 1.3
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.var,
+             dim=dim,
+             skipna=skipna,
+@@ -2240,6 +2282,7 @@ def var(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def median(
+         self,
+@@ -2323,14 +2366,15 @@ def median(
+         Data variables:
+             da       float64 8B nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.median,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def cumsum(
+         self,
+@@ -2406,29 +2450,34 @@ def cumsum(
+             da       (time) float64 48B 1.0 2.0 3.0 0.0 2.0 nan
+ 
+         >>> ds.cumsum()
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 3.0 6.0 6.0 8.0 8.0
+ 
+         Use ``skipna`` to control whether NaNs are ignored.
+ 
+         >>> ds.cumsum(skipna=False)
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 3.0 6.0 6.0 8.0 nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.cumsum,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out.assign_coords(self.coords)
+ 
+     def cumprod(
+         self,
+@@ -2504,29 +2553,34 @@ def cumprod(
+             da       (time) float64 48B 1.0 2.0 3.0 0.0 2.0 nan
+ 
+         >>> ds.cumprod()
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 6.0 0.0 0.0 0.0
+ 
+         Use ``skipna`` to control whether NaNs are ignored.
+ 
+         >>> ds.cumprod(skipna=False)
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 6.0 0.0 0.0 nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.cumprod,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out.assign_coords(self.coords)
+ 
+ 
+ class DataArrayAggregations:
+@@ -2603,12 +2657,13 @@ def count(
+         <xarray.DataArray ()> Size: 8B
+         array(5)
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.count,
+             dim=dim,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def all(
+         self,
+@@ -2669,12 +2724,13 @@ def all(
+         <xarray.DataArray ()> Size: 1B
+         array(False)
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.array_all,
+             dim=dim,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def any(
+         self,
+@@ -2735,12 +2791,13 @@ def any(
+         <xarray.DataArray ()> Size: 1B
+         array(True)
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.array_any,
+             dim=dim,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def max(
+         self,
+@@ -2813,13 +2870,14 @@ def max(
+         <xarray.DataArray ()> Size: 8B
+         array(nan)
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.max,
+             dim=dim,
+             skipna=skipna,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def min(
+         self,
+@@ -2892,13 +2950,14 @@ def min(
+         <xarray.DataArray ()> Size: 8B
+         array(nan)
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.min,
+             dim=dim,
+             skipna=skipna,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def mean(
+         self,
+@@ -2971,13 +3030,14 @@ def mean(
+         <xarray.DataArray ()> Size: 8B
+         array(nan)
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.mean,
+             dim=dim,
+             skipna=skipna,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def prod(
+         self,
+@@ -3067,14 +3127,15 @@ def prod(
+         <xarray.DataArray ()> Size: 8B
+         array(0.)
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.prod,
+             dim=dim,
+             skipna=skipna,
+             min_count=min_count,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def sum(
+         self,
+@@ -3164,14 +3225,15 @@ def sum(
+         <xarray.DataArray ()> Size: 8B
+         array(8.)
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.sum,
+             dim=dim,
+             skipna=skipna,
+             min_count=min_count,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def std(
+         self,
+@@ -3258,14 +3320,15 @@ def std(
+         <xarray.DataArray ()> Size: 8B
+         array(1.14017543)
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.std,
+             dim=dim,
+             skipna=skipna,
+             ddof=ddof,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def var(
+         self,
+@@ -3352,14 +3415,15 @@ def var(
+         <xarray.DataArray ()> Size: 8B
+         array(1.3)
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.var,
+             dim=dim,
+             skipna=skipna,
+             ddof=ddof,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def median(
+         self,
+@@ -3436,13 +3500,14 @@ def median(
+         <xarray.DataArray ()> Size: 8B
+         array(nan)
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.median,
+             dim=dim,
+             skipna=skipna,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def cumsum(
+         self,
+@@ -3530,13 +3595,14 @@ def cumsum(
+           * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
+             labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.cumsum,
+             dim=dim,
+             skipna=skipna,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def cumprod(
+         self,
+@@ -3624,13 +3690,14 @@ def cumprod(
+           * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
+             labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.cumprod,
+             dim=dim,
+             skipna=skipna,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+ 
+ class DatasetGroupByAggregations:
+@@ -3655,6 +3722,17 @@ def _flox_reduce(
+     ) -> Dataset:
+         raise NotImplementedError()
+ 
++    def _flox_scan(
++        self,
++        dim: Dims,
++        *,
++        func: str,
++        skipna: bool | None = None,
++        keep_attrs: bool | None = None,
++        **kwargs: Any,
++    ) -> Dataset:
++        raise NotImplementedError()
++
+     def count(
+         self,
+         dim: Dims = None,
+@@ -3743,13 +3821,14 @@ def count(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.count,
+                 dim=dim,
+                 numeric_only=False,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def all(
+         self,
+@@ -3839,13 +3918,14 @@ def all(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.array_all,
+                 dim=dim,
+                 numeric_only=False,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def any(
+         self,
+@@ -3935,13 +4015,14 @@ def any(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.array_any,
+                 dim=dim,
+                 numeric_only=False,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def max(
+         self,
+@@ -4048,14 +4129,15 @@ def max(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.max,
+                 dim=dim,
+                 skipna=skipna,
+                 numeric_only=False,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def min(
+         self,
+@@ -4162,14 +4244,15 @@ def min(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.min,
+                 dim=dim,
+                 skipna=skipna,
+                 numeric_only=False,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def mean(
+         self,
+@@ -4276,14 +4359,15 @@ def mean(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.mean,
+                 dim=dim,
+                 skipna=skipna,
+                 numeric_only=True,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def prod(
+         self,
+@@ -4410,7 +4494,7 @@ def prod(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.prod,
+                 dim=dim,
+                 skipna=skipna,
+@@ -4419,6 +4503,7 @@ def prod(
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def sum(
+         self,
+@@ -4545,7 +4630,7 @@ def sum(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.sum,
+                 dim=dim,
+                 skipna=skipna,
+@@ -4554,6 +4639,7 @@ def sum(
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def std(
+         self,
+@@ -4677,7 +4763,7 @@ def std(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.std,
+                 dim=dim,
+                 skipna=skipna,
+@@ -4686,6 +4772,7 @@ def std(
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def var(
+         self,
+@@ -4809,7 +4896,7 @@ def var(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.var,
+                 dim=dim,
+                 skipna=skipna,
+@@ -4818,6 +4905,7 @@ def var(
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def median(
+         self,
+@@ -4911,14 +4999,15 @@ def median(
+         Data variables:
+             da       (labels) float64 24B nan 2.0 1.5
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.median,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def cumsum(
+         self,
+@@ -5000,29 +5089,50 @@ def cumsum(
+             da       (time) float64 48B 1.0 2.0 3.0 0.0 2.0 nan
+ 
+         >>> ds.groupby("labels").cumsum()
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 3.0 3.0 4.0 1.0
+ 
+         Use ``skipna`` to control whether NaNs are ignored.
+ 
+         >>> ds.groupby("labels").cumsum(skipna=False)
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 3.0 3.0 4.0 nan
+         """
+-        return self.reduce(
+-            duck_array_ops.cumsum,
+-            dim=dim,
+-            skipna=skipna,
+-            numeric_only=True,
+-            keep_attrs=keep_attrs,
+-            **kwargs,
+-        )
++        if (
++            flox_available
++            and OPTIONS["use_flox"]
++            and module_available("flox", minversion="0.10.5")
++            and contains_only_chunked_or_numpy(self._obj)
++        ):
++            return self._flox_scan(
++                func="cumsum",
++                dim=dim,
++                skipna=skipna,
++                numeric_only=True,
++                # fill_value=fill_value,
++                keep_attrs=keep_attrs,
++                **kwargs,
++            )
++        else:
++            out = self.reduce(
++                duck_array_ops.cumsum,
++                dim=dim,
++                skipna=skipna,
++                numeric_only=True,
++                keep_attrs=keep_attrs,
++                **kwargs,
++            )
++            return out.assign_coords(self._obj.coords)
+ 
+     def cumprod(
+         self,
+@@ -5104,29 +5214,34 @@ def cumprod(
+             da       (time) float64 48B 1.0 2.0 3.0 0.0 2.0 nan
+ 
+         >>> ds.groupby("labels").cumprod()
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 3.0 0.0 4.0 1.0
+ 
+         Use ``skipna`` to control whether NaNs are ignored.
+ 
+         >>> ds.groupby("labels").cumprod(skipna=False)
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 3.0 0.0 4.0 nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.cumprod,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out.assign_coords(self._obj.coords)
+ 
+ 
+ class DatasetResampleAggregations:
+@@ -5151,6 +5266,17 @@ def _flox_reduce(
+     ) -> Dataset:
+         raise NotImplementedError()
+ 
++    def _flox_scan(
++        self,
++        dim: Dims,
++        *,
++        func: str,
++        skipna: bool | None = None,
++        keep_attrs: bool | None = None,
++        **kwargs: Any,
++    ) -> Dataset:
++        raise NotImplementedError()
++
+     def count(
+         self,
+         dim: Dims = None,
+@@ -5239,13 +5365,14 @@ def count(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.count,
+                 dim=dim,
+                 numeric_only=False,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def all(
+         self,
+@@ -5335,13 +5462,14 @@ def all(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.array_all,
+                 dim=dim,
+                 numeric_only=False,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def any(
+         self,
+@@ -5431,13 +5559,14 @@ def any(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.array_any,
+                 dim=dim,
+                 numeric_only=False,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def max(
+         self,
+@@ -5544,14 +5673,15 @@ def max(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.max,
+                 dim=dim,
+                 skipna=skipna,
+                 numeric_only=False,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def min(
+         self,
+@@ -5658,14 +5788,15 @@ def min(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.min,
+                 dim=dim,
+                 skipna=skipna,
+                 numeric_only=False,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def mean(
+         self,
+@@ -5772,14 +5903,15 @@ def mean(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.mean,
+                 dim=dim,
+                 skipna=skipna,
+                 numeric_only=True,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def prod(
+         self,
+@@ -5906,7 +6038,7 @@ def prod(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.prod,
+                 dim=dim,
+                 skipna=skipna,
+@@ -5915,6 +6047,7 @@ def prod(
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def sum(
+         self,
+@@ -6041,7 +6174,7 @@ def sum(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.sum,
+                 dim=dim,
+                 skipna=skipna,
+@@ -6050,6 +6183,7 @@ def sum(
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def std(
+         self,
+@@ -6173,7 +6307,7 @@ def std(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.std,
+                 dim=dim,
+                 skipna=skipna,
+@@ -6182,6 +6316,7 @@ def std(
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def var(
+         self,
+@@ -6305,7 +6440,7 @@ def var(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.var,
+                 dim=dim,
+                 skipna=skipna,
+@@ -6314,6 +6449,7 @@ def var(
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def median(
+         self,
+@@ -6407,14 +6543,15 @@ def median(
+         Data variables:
+             da       (time) float64 24B 1.0 2.0 nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.median,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def cumsum(
+         self,
+@@ -6496,29 +6633,50 @@ def cumsum(
+             da       (time) float64 48B 1.0 2.0 3.0 0.0 2.0 nan
+ 
+         >>> ds.resample(time="3ME").cumsum()
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 5.0 5.0 2.0 2.0
+ 
+         Use ``skipna`` to control whether NaNs are ignored.
+ 
+         >>> ds.resample(time="3ME").cumsum(skipna=False)
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 5.0 5.0 2.0 nan
+         """
+-        return self.reduce(
+-            duck_array_ops.cumsum,
+-            dim=dim,
+-            skipna=skipna,
+-            numeric_only=True,
+-            keep_attrs=keep_attrs,
+-            **kwargs,
+-        )
++        if (
++            flox_available
++            and OPTIONS["use_flox"]
++            and module_available("flox", minversion="0.10.5")
++            and contains_only_chunked_or_numpy(self._obj)
++        ):
++            return self._flox_scan(
++                func="cumsum",
++                dim=dim,
++                skipna=skipna,
++                numeric_only=True,
++                # fill_value=fill_value,
++                keep_attrs=keep_attrs,
++                **kwargs,
++            )
++        else:
++            out = self.reduce(
++                duck_array_ops.cumsum,
++                dim=dim,
++                skipna=skipna,
++                numeric_only=True,
++                keep_attrs=keep_attrs,
++                **kwargs,
++            )
++            return out.assign_coords(self._obj.coords)
+ 
+     def cumprod(
+         self,
+@@ -6600,29 +6758,34 @@ def cumprod(
+             da       (time) float64 48B 1.0 2.0 3.0 0.0 2.0 nan
+ 
+         >>> ds.resample(time="3ME").cumprod()
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 6.0 0.0 2.0 2.0
+ 
+         Use ``skipna`` to control whether NaNs are ignored.
+ 
+         >>> ds.resample(time="3ME").cumprod(skipna=False)
+-        <xarray.Dataset> Size: 48B
++        <xarray.Dataset> Size: 120B
+         Dimensions:  (time: 6)
+-        Dimensions without coordinates: time
++        Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
++            labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         Data variables:
+             da       (time) float64 48B 1.0 2.0 6.0 0.0 2.0 nan
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.cumprod,
+             dim=dim,
+             skipna=skipna,
+             numeric_only=True,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out.assign_coords(self._obj.coords)
+ 
+ 
+ class DataArrayGroupByAggregations:
+@@ -6647,6 +6810,17 @@ def _flox_reduce(
+     ) -> DataArray:
+         raise NotImplementedError()
+ 
++    def _flox_scan(
++        self,
++        dim: Dims,
++        *,
++        func: str,
++        skipna: bool | None = None,
++        keep_attrs: bool | None = None,
++        **kwargs: Any,
++    ) -> DataArray:
++        raise NotImplementedError()
++
+     def count(
+         self,
+         dim: Dims = None,
+@@ -6729,12 +6903,13 @@ def count(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.count,
+                 dim=dim,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def all(
+         self,
+@@ -6818,12 +6993,13 @@ def all(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.array_all,
+                 dim=dim,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def any(
+         self,
+@@ -6907,12 +7083,13 @@ def any(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.array_any,
+                 dim=dim,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def max(
+         self,
+@@ -7011,13 +7188,14 @@ def max(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.max,
+                 dim=dim,
+                 skipna=skipna,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def min(
+         self,
+@@ -7116,13 +7294,14 @@ def min(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.min,
+                 dim=dim,
+                 skipna=skipna,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def mean(
+         self,
+@@ -7221,13 +7400,14 @@ def mean(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.mean,
+                 dim=dim,
+                 skipna=skipna,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def prod(
+         self,
+@@ -7344,14 +7524,15 @@ def prod(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.prod,
+                 dim=dim,
+                 skipna=skipna,
+                 min_count=min_count,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def sum(
+         self,
+@@ -7468,14 +7649,15 @@ def sum(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.sum,
+                 dim=dim,
+                 skipna=skipna,
+                 min_count=min_count,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def std(
+         self,
+@@ -7589,14 +7771,15 @@ def std(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.std,
+                 dim=dim,
+                 skipna=skipna,
+                 ddof=ddof,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def var(
+         self,
+@@ -7710,14 +7893,15 @@ def var(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.var,
+                 dim=dim,
+                 skipna=skipna,
+                 ddof=ddof,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def median(
+         self,
+@@ -7804,13 +7988,14 @@ def median(
+         Coordinates:
+           * labels   (labels) object 24B 'a' 'b' 'c'
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.median,
+             dim=dim,
+             skipna=skipna,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def cumsum(
+         self,
+@@ -7904,13 +8089,29 @@ def cumsum(
+           * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
+             labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         """
+-        return self.reduce(
+-            duck_array_ops.cumsum,
+-            dim=dim,
+-            skipna=skipna,
+-            keep_attrs=keep_attrs,
+-            **kwargs,
+-        )
++        if (
++            flox_available
++            and OPTIONS["use_flox"]
++            and module_available("flox", minversion="0.10.5")
++            and contains_only_chunked_or_numpy(self._obj)
++        ):
++            return self._flox_scan(
++                func="cumsum",
++                dim=dim,
++                skipna=skipna,
++                # fill_value=fill_value,
++                keep_attrs=keep_attrs,
++                **kwargs,
++            )
++        else:
++            out = self.reduce(
++                duck_array_ops.cumsum,
++                dim=dim,
++                skipna=skipna,
++                keep_attrs=keep_attrs,
++                **kwargs,
++            )
++            return out.assign_coords(self._obj.coords)
+ 
+     def cumprod(
+         self,
+@@ -8004,13 +8205,14 @@ def cumprod(
+           * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
+             labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.cumprod,
+             dim=dim,
+             skipna=skipna,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out.assign_coords(self._obj.coords)
+ 
+ 
+ class DataArrayResampleAggregations:
+@@ -8035,6 +8237,17 @@ def _flox_reduce(
+     ) -> DataArray:
+         raise NotImplementedError()
+ 
++    def _flox_scan(
++        self,
++        dim: Dims,
++        *,
++        func: str,
++        skipna: bool | None = None,
++        keep_attrs: bool | None = None,
++        **kwargs: Any,
++    ) -> DataArray:
++        raise NotImplementedError()
++
+     def count(
+         self,
+         dim: Dims = None,
+@@ -8117,12 +8330,13 @@ def count(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.count,
+                 dim=dim,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def all(
+         self,
+@@ -8206,12 +8420,13 @@ def all(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.array_all,
+                 dim=dim,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def any(
+         self,
+@@ -8295,12 +8510,13 @@ def any(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.array_any,
+                 dim=dim,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def max(
+         self,
+@@ -8399,13 +8615,14 @@ def max(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.max,
+                 dim=dim,
+                 skipna=skipna,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def min(
+         self,
+@@ -8504,13 +8721,14 @@ def min(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.min,
+                 dim=dim,
+                 skipna=skipna,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def mean(
+         self,
+@@ -8609,13 +8827,14 @@ def mean(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.mean,
+                 dim=dim,
+                 skipna=skipna,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def prod(
+         self,
+@@ -8732,14 +8951,15 @@ def prod(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.prod,
+                 dim=dim,
+                 skipna=skipna,
+                 min_count=min_count,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def sum(
+         self,
+@@ -8856,14 +9076,15 @@ def sum(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.sum,
+                 dim=dim,
+                 skipna=skipna,
+                 min_count=min_count,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def std(
+         self,
+@@ -8977,14 +9198,15 @@ def std(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.std,
+                 dim=dim,
+                 skipna=skipna,
+                 ddof=ddof,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def var(
+         self,
+@@ -9098,14 +9320,15 @@ def var(
+                 **kwargs,
+             )
+         else:
+-            return self.reduce(
++            out = self.reduce(
+                 duck_array_ops.var,
+                 dim=dim,
+                 skipna=skipna,
+                 ddof=ddof,
+                 keep_attrs=keep_attrs,
+                 **kwargs,
+             )
++            return out
+ 
+     def median(
+         self,
+@@ -9192,13 +9415,14 @@ def median(
+         Coordinates:
+           * time     (time) datetime64[us] 24B 2001-01-31 2001-04-30 2001-07-31
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.median,
+             dim=dim,
+             skipna=skipna,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out
+ 
+     def cumsum(
+         self,
+@@ -9280,25 +9504,41 @@ def cumsum(
+         <xarray.DataArray (time: 6)> Size: 48B
+         array([1., 2., 5., 5., 2., 2.])
+         Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
+             labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+-        Dimensions without coordinates: time
+ 
+         Use ``skipna`` to control whether NaNs are ignored.
+ 
+         >>> da.resample(time="3ME").cumsum(skipna=False)
+         <xarray.DataArray (time: 6)> Size: 48B
+         array([ 1.,  2.,  5.,  5.,  2., nan])
+         Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
+             labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+-        Dimensions without coordinates: time
+         """
+-        return self.reduce(
+-            duck_array_ops.cumsum,
+-            dim=dim,
+-            skipna=skipna,
+-            keep_attrs=keep_attrs,
+-            **kwargs,
+-        )
++        if (
++            flox_available
++            and OPTIONS["use_flox"]
++            and module_available("flox", minversion="0.10.5")
++            and contains_only_chunked_or_numpy(self._obj)
++        ):
++            return self._flox_scan(
++                func="cumsum",
++                dim=dim,
++                skipna=skipna,
++                # fill_value=fill_value,
++                keep_attrs=keep_attrs,
++                **kwargs,
++            )
++        else:
++            out = self.reduce(
++                duck_array_ops.cumsum,
++                dim=dim,
++                skipna=skipna,
++                keep_attrs=keep_attrs,
++                **kwargs,
++            )
++            return out.assign_coords(self._obj.coords)
+ 
+     def cumprod(
+         self,
+@@ -9380,22 +9620,23 @@ def cumprod(
+         <xarray.DataArray (time: 6)> Size: 48B
+         array([1., 2., 6., 0., 2., 2.])
+         Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
+             labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+-        Dimensions without coordinates: time
+ 
+         Use ``skipna`` to control whether NaNs are ignored.
+ 
+         >>> da.resample(time="3ME").cumprod(skipna=False)
+         <xarray.DataArray (time: 6)> Size: 48B
+         array([ 1.,  2.,  6.,  0.,  2., nan])
+         Coordinates:
++          * time     (time) datetime64[us] 48B 2001-01-31 2001-02-28 ... 2001-06-30
+             labels   (time) <U1 24B 'a' 'b' 'c' 'c' 'b' 'a'
+-        Dimensions without coordinates: time
+         """
+-        return self.reduce(
++        out = self.reduce(
+             duck_array_ops.cumprod,
+             dim=dim,
+             skipna=skipna,
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
++        return out.assign_coords(self._obj.coords)
+
+
+

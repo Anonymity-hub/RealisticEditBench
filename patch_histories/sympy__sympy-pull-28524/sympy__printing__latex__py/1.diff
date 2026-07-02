@@ -1,0 +1,11 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -824,6 +824,7 @@ def _print_Derivative(self, expr):
+         else:
+             tex = r"\frac{%s^{%s}}{%s}" % (diff_symbol, self._print(dim), tex)
+ 
++        precedence = PRECEDENCE["Mul"]
+         if any(i.could_extract_minus_sign() for i in expr.args):
+             return r"%s %s" % (tex, self.parenthesize(expr.expr,
+                                                   PRECEDENCE["Mul"],

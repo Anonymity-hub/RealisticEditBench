@@ -1,0 +1,29 @@
+diff --git a/django/dispatch/dispatcher.py b/django/dispatch/dispatcher.py
+--- a/django/dispatch/dispatcher.py
++++ b/django/dispatch/dispatcher.py
+@@ -1,4 +1,5 @@
+ import asyncio
++import contextvars
+ import logging
+ import threading
+ import weakref
+@@ -36,12 +37,15 @@
+             cvar.set(cvalue)
+ 
+ 
+-async def _gather(*coros):
++async def _run_parallel(*coros):
++    """
++    Execute multiple asynchronous coroutines in parallel,
++    sharing the current context between them.
++    """
++    context = contextvars.copy_context()
++
+     if len(coros) == 0:
+         return []
+-
+-    if len(coros) == 1:
+-        return [await coros[0]]
+ 
+     async def run(i, coro):
+         results[i] = await coro

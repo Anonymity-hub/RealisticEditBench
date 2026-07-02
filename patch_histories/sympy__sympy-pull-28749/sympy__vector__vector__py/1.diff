@@ -1,0 +1,18 @@
+diff --git a/sympy/vector/vector.py b/sympy/vector/vector.py
+--- a/sympy/vector/vector.py
++++ b/sympy/vector/vector.py
+@@ -419,13 +419,9 @@
+ def get_postprocessor(cls):
+     def _postprocessor(expr):
+         vec_class = {Add: VectorAdd}[cls]
+-        vectors = []
+-        for term in expr.args:
+-            if isinstance(term.kind, VectorKind):
+-                vectors.append(term)
+ 
+         if vec_class == VectorAdd:
+-            return VectorAdd(*vectors).doit(deep=False)
++            return VectorAdd(*expr.args).doit(deep=False)
+     return _postprocessor
+ 
+ 

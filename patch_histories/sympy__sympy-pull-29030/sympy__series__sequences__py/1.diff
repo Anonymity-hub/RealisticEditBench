@@ -1,0 +1,30 @@
+diff --git a/sympy/series/sequences.py b/sympy/series/sequences.py
+--- a/sympy/series/sequences.py
++++ b/sympy/series/sequences.py
+@@ -601,6 +601,26 @@
+             start, stop = self._intersect_interval(other)
+             return SeqPer(new_per, (self.variables[0], start, stop))
+ 
++    def _combine_periodic(self, other, op):
++        per1, lper1 = self.periodical, self.period
++        per2, lper2 = other.periodical, other.period
++
++        per_length = int(lcm(lper1, lper2))
++
++        start, stop = self._intersect_interval(other)
++        align_to_stop = start is S.NegativeInfinity
++
++        def _as_int(expr):
++            expr = sympify(expr)
++            if expr in (S.Infinity, S.NegativeInfinity):
++                return None
++            if expr.is_integer is not True:
++                return None
++            try:
++                return int(expr)
++            except (TypeError, ValueError):
++                return None
++
+     def coeff_mul(self, coeff):
+         """See docstring of SeqBase.coeff_mul"""
+         coeff = sympify(coeff)

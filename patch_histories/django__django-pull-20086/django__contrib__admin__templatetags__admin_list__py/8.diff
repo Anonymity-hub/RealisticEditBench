@@ -1,0 +1,28 @@
+diff --git a/django/contrib/admin/templatetags/admin_list.py b/django/contrib/admin/templatetags/admin_list.py
+--- a/django/contrib/admin/templatetags/admin_list.py
++++ b/django/contrib/admin/templatetags/admin_list.py
+@@ -503,6 +503,7 @@
+ @register.tag(name="search_form")
+ def search_form_tag(parser, token):
+     return InclusionAdminNode(
++        "search_form",
+         parser,
+         token,
+         func=search_form,
+@@ -535,7 +536,7 @@
+ @register.tag(name="admin_actions")
+ def admin_actions_tag(parser, token):
+     return InclusionAdminNode(
+-        parser, token, func=admin_actions, template_name="actions.html"
++        "admin_actions", parser, token, func=admin_actions, template_name="actions.html"
+     )
+ 
+ 
+@@ -543,6 +544,7 @@
+ def change_list_object_tools_tag(parser, token):
+     """Display the row of change list object tools."""
+     return InclusionAdminNode(
++        "change_list_object_tools",
+         parser,
+         token,
+         func=lambda context: context,

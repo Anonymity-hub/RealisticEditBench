@@ -1,0 +1,17 @@
+diff --git a/sphinx/ext/autodoc/_docstrings.py b/sphinx/ext/autodoc/_docstrings.py
+--- a/sphinx/ext/autodoc/_docstrings.py
++++ b/sphinx/ext/autodoc/_docstrings.py
+@@ -305,6 +305,13 @@
+         except PycodeError:
+             return None
+ 
++        key = ('', props.name)
++        if key in analyzer.attr_docs:
++            if comment := list(analyzer.attr_docs[key]):
++                return [comment]
++
++        return None
++
+     docstring = getdoc(
+         obj,
+         allow_inherited=inherit_docstrings,

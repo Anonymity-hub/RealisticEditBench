@@ -1,0 +1,14 @@
+diff --git a/sympy/vector/coordsysrect.py b/sympy/vector/coordsysrect.py
+--- a/sympy/vector/coordsysrect.py
++++ b/sympy/vector/coordsysrect.py
+@@ -621,8 +621,8 @@ def transformation_matrix(self, other):
+         >>> r_c, theta_c, z_c = C.base_scalars()
+         >>> C.transformation_matrix(S).subs(phi_s, theta_c).simplify()
+         Matrix([
+-        [sin(S.theta), cos(S.theta), 0],
+-        [0, 0, 1],
++        [sin(S.theta),  cos(S.theta), 0],
++        [           0,             0, 1],
+         [cos(S.theta), -sin(S.theta), 0]])
+ 
+         """

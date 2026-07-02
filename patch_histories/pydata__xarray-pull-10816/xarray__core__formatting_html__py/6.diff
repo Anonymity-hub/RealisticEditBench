@@ -1,0 +1,50 @@
+diff --git a/xarray/core/formatting_html.py b/xarray/core/formatting_html.py
+--- a/xarray/core/formatting_html.py
++++ b/xarray/core/formatting_html.py
+@@ -454,34 +454,18 @@
+     return sections, displayed_line_count
+ 
+ 
+-def summarize_datatree_children(children: Mapping[str, DataTree]) -> str:
+-    MAX_CHILDREN = OPTIONS["display_max_children"]
+-    n_children = len(children)
+-
+-    children_html = []
+-    for i, child in enumerate(children.values()):
+-        if i < ceil(MAX_CHILDREN / 2) or i >= ceil(n_children - MAX_CHILDREN / 2):
+-            is_last = i == (n_children - 1)
+-            children_html.append(datatree_child_repr(child, end=is_last))
+-        elif n_children > MAX_CHILDREN and i == ceil(MAX_CHILDREN / 2):
+-            children_html.append("<div>...</div>")
+-
+-    return "".join(
+-        [
+-            "<div style='display: inline-grid; grid-template-columns: 100%; grid-column: 1 / -1'>",
+-            "".join(children_html),
+-            "</div>",
+-        ]
+-    )
+-
+-
+-children_section = partial(
+-    _mapping_section,
+-    name="Groups",
+-    details_func=summarize_datatree_children,
+-    max_option_name="display_max_children",
+-    expand_option_name="display_expand_groups",
+-)
++def _tree_item_count(node: DataTree, cache: dict[int, int]) -> int:
++    if id(node) in cache:
++        return cache[id(node)]
++
++    node_ds = node.to_dataset(inherit=False)
++    node_count = len(node_ds.variables) + len(node_ds.attrs)
++    child_count = sum(
++        _tree_item_count(child, cache) for child in node.children.values()
++    )
++    total = node_count + child_count
++    cache[id(node)] = total
++    return total
+ 
+ def datatree_child_repr(node: DataTree, end: bool = False) -> str:
+     # Wrap DataTree HTML representation with a tee to the left of it.

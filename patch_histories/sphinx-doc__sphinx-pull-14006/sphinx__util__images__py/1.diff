@@ -1,0 +1,19 @@
+diff --git a/sphinx/util/images.py b/sphinx/util/images.py
+--- a/sphinx/util/images.py
++++ b/sphinx/util/images.py
+@@ -90,7 +90,6 @@
+ def parse_data_uri(uri: str) -> DataURI | None:
+     if not uri.startswith('data:'):
+         return None
+-    uri = uri[5:]
+ 
+     if ',' not in uri:
+         msg = 'malformed data URI'
+@@ -100,6 +99,7 @@
+     mimetype = 'text/plain'
+     charset = 'US-ASCII'
+ 
++    uri = uri[5:]
+     properties, _, data = uri.partition(',')
+     for prop in properties.split(';'):
+         if prop == 'base64':

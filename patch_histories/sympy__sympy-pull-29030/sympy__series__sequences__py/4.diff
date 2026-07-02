@@ -1,0 +1,42 @@
+diff --git a/sympy/series/sequences.py b/sympy/series/sequences.py
+--- a/sympy/series/sequences.py
++++ b/sympy/series/sequences.py
+@@ -570,36 +570,12 @@
+     def _add(self, other):
+         """See docstring of SeqBase._add"""
+         if isinstance(other, SeqPer):
+-            per1, lper1 = self.periodical, self.period
+-            per2, lper2 = other.periodical, other.period
+-
+-            per_length = lcm(lper1, lper2)
+-
+-            new_per = []
+-            for x in range(per_length):
+-                ele1 = per1[x % lper1]
+-                ele2 = per2[x % lper2]
+-                new_per.append(ele1 + ele2)
+-
+-            start, stop = self._intersect_interval(other)
+-            return SeqPer(new_per, (self.variables[0], start, stop))
++            return self._combine_periodic(other, lambda a, b: a + b)
+ 
+     def _mul(self, other):
+         """See docstring of SeqBase._mul"""
+         if isinstance(other, SeqPer):
+-            per1, lper1 = self.periodical, self.period
+-            per2, lper2 = other.periodical, other.period
+-
+-            per_length = lcm(lper1, lper2)
+-
+-            new_per = []
+-            for x in range(per_length):
+-                ele1 = per1[x % lper1]
+-                ele2 = per2[x % lper2]
+-                new_per.append(ele1 * ele2)
+-
+-            start, stop = self._intersect_interval(other)
+-            return SeqPer(new_per, (self.variables[0], start, stop))
++            return self._combine_periodic(other, lambda a, b: a * b)
+ 
+     def _combine_periodic(self, other, op):
+         per1, lper1 = self.periodical, self.period

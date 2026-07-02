@@ -1,0 +1,60 @@
+diff --git a/sympy/polys/rootoftools.py b/sympy/polys/rootoftools.py
+--- a/sympy/polys/rootoftools.py
++++ b/sympy/polys/rootoftools.py
+@@ -119,7 +119,7 @@ def __contains__(self, k):
+ 
+ def _pure_factors(poly):
+     _, factors = poly.factor_list()
+-    return [(Poly(f, expand=False), m) for f, m in factors]
++    return [(Poly(f, expand=False).retract(), m) for f, m in factors]
+ 
+ 
+ def _imag_count_of_factor(f):
+@@ -1139,6 +1139,7 @@ def __new__(cls, expr, func=None, x=None, auto=True, quadratic=False):
+         """Construct a new ``RootSum`` instance of roots of a polynomial."""
+         coeff, poly = cls._transform(expr, x)
+ 
++        poly = Poly(poly.replace(poly.gen, _rootof_dummy))
+         if not poly.is_univariate:
+             raise MultivariatePolynomialError(
+                 "only univariate polynomials are allowed")
+@@ -1151,6 +1152,9 @@ def __new__(cls, expr, func=None, x=None, auto=True, quadratic=False):
+             if is_func and 1 in func.nargs:
+                 if not isinstance(func, Lambda):
+                     func = Lambda(poly.gen, func(poly.gen))
++                else:
++                    old_var = func.variables[0]
++                    func = Lambda(poly.gen, func.expr.subs(old_var, poly.gen))
+             else:
+                 raise ValueError(
+                     "expected a univariate function, got %s" % func)
+@@ -1178,9 +1182,7 @@ def __new__(cls, expr, func=None, x=None, auto=True, quadratic=False):
+         func = Lambda(var, expr)
+ 
+         rational = cls._is_func_rational(poly, func)
+-        _, factors = poly.factor_list()
+-        factors = [(PurePoly(f, expand=False), m) for f, m in factors]
+-        terms = []
++        factors, terms = _pure_factors(poly), []
+ 
+         for poly, k in factors:
+             if poly.is_linear:
+@@ -1224,7 +1226,7 @@ def new(cls, poly, func, auto=True):
+     @classmethod
+     def _transform(cls, expr, x):
+         """Transform an expression to a polynomial. """
+-        poly = PurePoly(expr, x, greedy=False)
++        poly = Poly(expr, x, greedy=False)
+         return preprocess_roots(poly)
+ 
+     @classmethod
+@@ -1300,7 +1302,8 @@ def args(self):
+ 
+     @property
+     def free_symbols(self):
+-        return self.poly.free_symbols | self.fun.free_symbols
++        poly_syms = self.poly.free_symbols - {self.poly.gen}
++        return poly_syms | self.fun.free_symbols
+ 
+     @property
+     def is_commutative(self):

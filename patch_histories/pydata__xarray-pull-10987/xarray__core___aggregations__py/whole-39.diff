@@ -1,0 +1,57 @@
+diff --git a/xarray/core/_aggregations.py b/xarray/core/_aggregations.py
+--- a/xarray/core/_aggregations.py
++++ b/xarray/core/_aggregations.py
+@@ -1231,7 +1231,7 @@ def cumsum(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
+-        return out
++        return out.assign_coords(self._obj.coords)
+ 
+     def cumprod(
+         self,
+@@ -1337,7 +1337,7 @@ def cumprod(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
+-        return out
++        return out.assign_coords(self._obj.coords)
+ 
+ 
+ class DatasetAggregations:
+@@ -2453,7 +2453,7 @@ def cumsum(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
+-        return out
++        return out.assign_coords(self._obj.coords)
+ 
+     def cumprod(
+         self,
+@@ -2552,7 +2552,7 @@ def cumprod(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
+-        return out
++        return out.assign_coords(self._obj.coords)
+ 
+ 
+ class DataArrayAggregations:
+@@ -2929,7 +2929,7 @@ def min(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
+-        return out
++        return out.assign_coords(self._obj.coords)
+ 
+     def mean(
+         self,
+@@ -3009,7 +3009,7 @@ def mean(
+             keep_attrs=keep_attrs,
+             **kwargs,
+         )
+-        return out
++        return out.assign_coords(self._obj.coords)
+ 
+     def prod(
+         self,

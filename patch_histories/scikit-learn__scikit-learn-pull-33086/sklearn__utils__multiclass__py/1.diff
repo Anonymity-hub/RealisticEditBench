@@ -1,0 +1,31 @@
+diff --git a/sklearn/utils/multiclass.py b/sklearn/utils/multiclass.py
+--- a/sklearn/utils/multiclass.py
++++ b/sklearn/utils/multiclass.py
+@@ -38,13 +38,13 @@
+ }
+ 
+ 
+-def unique_labels(*ys):
++def unique_labels(*ys, ys_types=None):
+     """Extract an ordered array of unique labels.
+ 
+     We don't allow:
+         - mix of multilabel and multiclass (single label) targets
+-        - mix of label indicator matrix and anything else,
+-          because there are no explicit labels)
++        - mix of label indicator matrix and anything else
++          (because there are no explicit labels)
+         - mix of label indicator matrices of different sizes
+         - mix of string and integer labels
+ 
+@@ -54,6 +54,10 @@
+     ----------
+     *ys : array-likes
+         Label values.
++
++    ys_types : set, default=None
++        Set of target types of `ys` (as determined by `type_of_target`),
++        with `{"binary", "multiclass"}` being amended to `{"multiclass"}`.
+ 
+     Returns
+     -------

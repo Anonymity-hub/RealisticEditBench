@@ -1,0 +1,22 @@
+diff --git a/sympy/simplify/simplify.py b/sympy/simplify/simplify.py
+--- a/sympy/simplify/simplify.py
++++ b/sympy/simplify/simplify.py
+@@ -13,7 +13,7 @@
+ from sympy.core.parameters import global_parameters
+ from sympy.core.function import (expand_log, count_ops, _mexpand,
+     nfloat, expand_mul, expand)
+-from sympy.core.numbers import Float, I, pi, Rational, equal_valued
++from sympy.core.numbers import Float, I, Integer, pi, Rational, equal_valued
+ from sympy.core.relational import Relational
+ from sympy.core.rules import Transform
+ from sympy.core.sorting import ordered
+@@ -1455,7 +1455,9 @@
+ 
+     """
+     expr = sympify(expr)
++    if isinstance(expr, Integer):
++        return expr
+     expr = sympify(expr).xreplace({
+         Float('inf'): S.Infinity,
+         Float('-inf'): S.NegativeInfinity,
+         })

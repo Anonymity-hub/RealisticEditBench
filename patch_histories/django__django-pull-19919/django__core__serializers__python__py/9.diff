@@ -1,0 +1,22 @@
+diff --git a/django/core/serializers/python.py b/django/core/serializers/python.py
+--- a/django/core/serializers/python.py
++++ b/django/core/serializers/python.py
+@@ -62,12 +62,15 @@
+ 
+     def handle_m2m_field(self, obj, field):
+         if field.remote_field.through._meta.auto_created:
+-            if self.use_natural_foreign_keys and hasattr(
+-                field.remote_field.model, "natural_key"
++            if self.use_natural_foreign_keys and self._model_supports_natural_key(
++                field.remote_field.model
+             ):
+ 
+                 def m2m_value(value):
+-                    return value.natural_key()
++                    if natural := value.natural_key():
++                        return natural
++                    else:
++                        return self._value_from_field(value, value._meta.pk)
+ 
+                 def queryset_iterator(obj, field):
+                     attr = getattr(obj, field.name)

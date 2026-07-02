@@ -1,0 +1,13 @@
+diff --git a/sympy/tensor/array/expressions/arrayexpr_derivatives.py b/sympy/tensor/array/expressions/arrayexpr_derivatives.py
+--- a/sympy/tensor/array/expressions/arrayexpr_derivatives.py
++++ b/sympy/tensor/array/expressions/arrayexpr_derivatives.py
+@@ -168,6 +168,9 @@
+ @array_derive.register(MatrixExpr)
+ def _(expr: MatrixExpr, x: Expr):
+     cg = convert_matrix_to_array(expr)
++    if cg == expr:
++        # Avoid infinite looping:
++        raise NotImplementedError()
+     return array_derive(cg, x)
+ 
+ 

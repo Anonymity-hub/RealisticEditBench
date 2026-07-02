@@ -1,0 +1,18 @@
+diff --git a/django/utils/text.py b/django/utils/text.py
+--- a/django/utils/text.py
++++ b/django/utils/text.py
+@@ -394,7 +394,13 @@
+ 
+ 
+ async def acompress_sequence(sequence, *, max_random_bytes=None):
+-    pass
++    buf = StreamingBuffer()
++    filename = _get_random_filename(max_random_bytes) if max_random_bytes else None
++    with GzipFile(
++        filename=filename, mode="wb", compresslevel=6, fileobj=buf, mtime=0
++    ) as zfile:
++        # Output headers...
++        yield buf.read()
+ 
+ 
+ # Expression to match some_token and some_token="with spaces" (and similarly

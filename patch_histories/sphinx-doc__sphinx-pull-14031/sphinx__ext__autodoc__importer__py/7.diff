@@ -1,0 +1,26 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -1727,6 +1727,22 @@
+     return None
+ 
+ 
++
++def _get_object_for_signature(
++    props: _ItemProperties,
++    get_attr: _AttrGetter,
++    parent: Any,
++    type_aliases: Mapping[str, str] | None,
++) -> tuple[Any, bool]:
++    """Return the object from which we will obtain the signature."""
++    obj = props._obj
++    if props.obj_type in {'function', 'decorator'}:
++        return obj, False
++
++    return None, False
++
++
++
+ def _annotate_to_first_argument(
+     func: Callable[..., Any], typ: type, *, config: Config, props: _ItemProperties
+ ) -> Callable[..., Any] | None:

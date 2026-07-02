@@ -1,0 +1,12 @@
+diff --git a/sympy/algebras/quaternion.py b/sympy/algebras/quaternion.py
+--- a/sympy/algebras/quaternion.py
++++ b/sympy/algebras/quaternion.py
+@@ -1036,6 +1036,8 @@
+         q = self
+         vector_norm = sqrt(q.b**2 + q.c**2 + q.d**2)
+         q_norm = q.norm()
++        if q_norm.is_zero:
++            raise ValueError("Cannot compute logarithm for a zero quaternion")
+         a = ln(q_norm)
+         b = q.b * acos(q.a / q_norm) / vector_norm
+         c = q.c * acos(q.a / q_norm) / vector_norm

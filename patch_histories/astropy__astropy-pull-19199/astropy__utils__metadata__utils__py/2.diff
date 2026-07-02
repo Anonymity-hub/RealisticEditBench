@@ -1,0 +1,22 @@
+diff --git a/astropy/utils/metadata/utils.py b/astropy/utils/metadata/utils.py
+--- a/astropy/utils/metadata/utils.py
++++ b/astropy/utils/metadata/utils.py
+@@ -86,4 +86,16 @@ def result_type(arrs):
+     dtype : ~numpy.dtype
+         The common type.
+     """
+-    pass
++    dtypes = [dtype(arr) for arr in arrs]
++    np_types = (np.bool_, np.object_, np.number, np.character, np.void)
++    uniq_types = {
++        tuple(issubclass(dt.type, np_type) for np_type in np_types) for dt in dtypes
++    }
++    if len(uniq_types) > 1:
++        # Embed into the exception the actual list of incompatible types.
++        incompat_types = [dt.name for dt in dtypes]
++        tme = MergeConflictError(f"Arrays have incompatible types {incompat_types}")
++        tme._incompat_types = incompat_types
++        raise tme
++
++    return np.result_type(*dtypes)
+

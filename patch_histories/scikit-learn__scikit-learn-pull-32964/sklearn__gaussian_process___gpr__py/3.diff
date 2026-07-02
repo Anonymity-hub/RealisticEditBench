@@ -1,0 +1,15 @@
+diff --git a/sklearn/gaussian_process/_gpr.py b/sklearn/gaussian_process/_gpr.py
+--- a/sklearn/gaussian_process/_gpr.py
++++ b/sklearn/gaussian_process/_gpr.py
+@@ -246,10 +246,7 @@
+         self : object
+             GaussianProcessRegressor class instance.
+         """
+-        if self.kernel is None:  # Use an RBF kernel as default
+-            self.kernel_ = C() * RBF()
+-        else:
+-            self.kernel_ = clone(self.kernel)
++        self.kernel_ = C() * RBF() if self.kernel is None else clone(self.kernel)
+ 
+         self._rng = check_random_state(self.random_state)
+ 

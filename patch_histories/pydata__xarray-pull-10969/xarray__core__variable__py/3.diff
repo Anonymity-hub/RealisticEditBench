@@ -1,0 +1,12 @@
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -1304,7 +1304,7 @@
+ 
+         # workaround for bug in Dask's default value of stat_length https://github.com/dask/dask/issues/5303
+         if stat_length is None and mode in ["maximum", "mean", "median", "minimum"]:
+-            stat_length = [(n, n) for n in self.data.shape]  # type: ignore[assignment]
++            stat_length = [(n, n) for n in self.shape]  # type: ignore[assignment]
+ 
+         pad_width_by_index = self._pad_options_dim_to_index(pad_width)
+ 

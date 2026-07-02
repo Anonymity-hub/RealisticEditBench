@@ -1,0 +1,71 @@
+diff --git a/sympy/polys/rootoftools.py b/sympy/polys/rootoftools.py
+--- a/sympy/polys/rootoftools.py
++++ b/sympy/polys/rootoftools.py
+@@ -51,26 +51,33 @@
+ 
+     >>> P = _pure_key_dict()
+ 
+-    2) assignment for a PurePoly or univariate polynomial
++    2) assignment for a Poly or univariate polynomial
+ 
+     >>> P[x] = 1
+     >>> P[PurePoly(x - y, x)] = 2
+ 
+-    3) retrieval based on PurePoly key comparison (use this
+-       instead of the get method)
+-
+-    >>> P[y]
++    3) retrieval based on Poly key comparison
++
++    >>> P[x]
+     1
+ 
+-    4) KeyError when trying to retrieve a nonexisting key
+-
++    4) KeyError when trying to retrieve with different symbol or nonexisting key
++
++    >>> P[y]  # Different symbol, not found
++    Traceback (most recent call last):
++    ...
++    KeyError: Poly(y, y, domain='ZZ')
+     >>> P[y + 1]
+     Traceback (most recent call last):
+     ...
+-    KeyError: PurePoly(y + 1, y, domain='ZZ')
++    KeyError: Poly(y + 1, y, domain='ZZ')
+ 
+     5) ability to query with ``in``
+ 
++    >>> x in P
++    True
++    >>> y in P  # Different symbol
++    False
+     >>> x + 1 in P
+     False
+ 
+@@ -83,17 +90,19 @@
+         self._dict = {}
+ 
+     def __getitem__(self, k):
+-        if not isinstance(k, PurePoly):
+-            if not (isinstance(k, Expr) and len(k.free_symbols) == 1):
++        if not isinstance(k, Poly):
++            try:
++                k = Poly(k, expand=False)
++            except (GeneratorsNeeded, PolynomialError):
+                 raise KeyError
+-            k = PurePoly(k, expand=False)
+         return self._dict[k]
+ 
+     def __setitem__(self, k, v):
+-        if not isinstance(k, PurePoly):
+-            if not (isinstance(k, Expr) and len(k.free_symbols) == 1):
++        if not isinstance(k, Poly):
++            try:
++                k = Poly(k, expand=False)
++            except (GeneratorsNeeded, PolynomialError):
+                 raise ValueError('expecting univariate expression')
+-            k = PurePoly(k, expand=False)
+         self._dict[k] = v
+ 
+     def __contains__(self, k):

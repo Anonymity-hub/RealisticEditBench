@@ -1,0 +1,52 @@
+diff --git a/astropy/units/quantity_helper/function_helpers.py b/astropy/units/quantity_helper/function_helpers.py
+--- a/astropy/units/quantity_helper/function_helpers.py
++++ b/astropy/units/quantity_helper/function_helpers.py
+@@ -514,6 +514,7 @@
+ 
+ UNIT_FROM_LIKE_ARG = object()
+ 
++
+ if not NUMPY_LT_2_0:
+ 
+     @function_helper
+@@ -594,6 +595,13 @@
+     # to unwrap/wrap its complicated signature, we'll sprinkle a few
+     # sanity checks in the form of `assert` statements, which should help making
+     # heads or tails of what's happening in the event of an unexpected exception.
++    #
++    # also note that we intentionally choose to match numpy.arange's signature
++    # at typecheck time, as opposed to its actual runtime signature, which is
++    # even richer (as of numpy 2.4). For instance, this means we don't support
++    # `start` being passed as keyword, or `dtype` being passed as positional.
++    # This is done to improve the overall stability and maintainability of this
++    # complicated wrapper function.
+     start, stop, step = unwrap_arange_args(
+         start_or_stop=start_or_stop, stop_=stop, step_=step
+     )
+@@ -606,21 +614,15 @@
+             "stop without a unit cannot be combined with start or step with a unit."
+         )
+ 
+-    qty_kwargs = {
+-        k: v
+-        for k, v in (("stop", stop), ("start", start), ("step", step))
+-        if v is not None
+-    }
+-    if out_unit is UNIT_FROM_LIKE_ARG:
+-        kwargs.update(qty_kwargs)
+-    else:
+-        new_values, _ = _quantities2arrays(*qty_kwargs.values())
+-        kwargs.update(zip(qty_kwargs.keys(), new_values))
++    args, kwargs = wrap_arange_args(
++        start=start, stop=stop, step=step, expected_out_unit=out_unit
++    )
+ 
+     kwargs["dtype"] = dtype
+     if not NUMPY_LT_2_0:
+         kwargs["device"] = device
+-    return (), kwargs, out_unit, None
++
++    return args, kwargs, out_unit, None
+ 
+ 
+ if NUMPY_LT_2_0:

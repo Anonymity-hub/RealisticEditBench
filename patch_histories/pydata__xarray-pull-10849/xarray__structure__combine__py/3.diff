@@ -1,0 +1,67 @@
+diff --git a/xarray/structure/combine.py b/xarray/structure/combine.py
+--- a/xarray/structure/combine.py
++++ b/xarray/structure/combine.py
+@@ -2,13 +2,14 @@
+ 
+ from collections import Counter, defaultdict
+ from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
+-from typing import TYPE_CHECKING, Literal, TypeVar, Union, cast
++from typing import TYPE_CHECKING, Literal, TypeAlias, TypeVar, cast, overload
+ 
+ import pandas as pd
+ 
+ from xarray.core import dtypes
+ from xarray.core.dataarray import DataArray
+ from xarray.core.dataset import Dataset
++from xarray.core.datatree import DataTree
+ from xarray.core.utils import iterate_nested
+ from xarray.structure.alignment import AlignmentError
+ from xarray.structure.concat import concat
+@@ -96,7 +97,7 @@
+             raise TypeError(error_msg)
+ 
+ 
+-def _infer_concat_order_from_coords(datasets):
++def _infer_concat_order_from_coords(datasets: list[Dataset] | list[DataTree]):
+     concat_dims = []
+     tile_ids: list[tuple[int, ...]] = [() for ds in datasets]
+ 
+@@ -164,10 +165,16 @@
+                 ]
+ 
+     if len(datasets) > 1 and not concat_dims:
+-        raise ValueError(
+-            "Could not find any dimension coordinates to use to "
+-            "order the datasets for concatenation"
+-        )
++        if any(isinstance(data, DataTree) for data in datasets):
++            raise ValueError(
++                "Did not find any dimension coordinates at root nodes "
++                "to order the DataTree objects for concatenation"
++            )
++        else:
++            raise ValueError(
++                "Could not find any dimension coordinates to use to "
++                "order the Dataset objects for concatenation"
++            )
+ 
+     combined_ids = dict(zip(tile_ids, datasets, strict=True))
+ 
+@@ -225,7 +232,7 @@
+ 
+     Parameters
+     ----------
+-    combined_ids : Dict[Tuple[int, ...]], xarray.Dataset]
++    combined_ids : Dict[Tuple[int, ...]], xarray.Dataset | xarray.DataTree]
+         Structure containing all datasets to be concatenated with "tile_IDs" as
+         keys, which specify position within the desired final combined result.
+     concat_dims : sequence of str
+@@ -236,7 +243,7 @@
+ 
+     Returns
+     -------
+-    combined_ds : xarray.Dataset
++    combined_ds : xarray.Dataset | xarray.DataTree
+     """
+ 
+     example_tile_id = next(iter(combined_ids.keys()))

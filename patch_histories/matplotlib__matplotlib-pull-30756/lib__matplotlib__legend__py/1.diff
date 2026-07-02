@@ -1,0 +1,11 @@
+diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py
+--- a/lib/matplotlib/legend.py
++++ b/lib/matplotlib/legend.py
+@@ -787,6 +787,7 @@
+         BarContainer: legend_handler.HandlerPatch(
+             update_func=legend_handler.update_from_first_child),
+         tuple: legend_handler.HandlerTuple(),
++        PatchCollection: legend_handler.HandlerPatchCollection(),
+         PathCollection: legend_handler.HandlerPathCollection(),
+         PolyCollection: legend_handler.HandlerPolyCollection()
+         }

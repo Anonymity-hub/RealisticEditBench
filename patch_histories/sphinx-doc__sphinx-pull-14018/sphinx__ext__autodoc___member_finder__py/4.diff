@@ -1,0 +1,17 @@
+diff --git a/sphinx/ext/autodoc/_member_finder.py b/sphinx/ext/autodoc/_member_finder.py
+--- a/sphinx/ext/autodoc/_member_finder.py
++++ b/sphinx/ext/autodoc/_member_finder.py
+@@ -180,11 +180,12 @@
+             type_aliases=config.autodoc_type_aliases,
+             current_document=current_document,
+             config=config,
+-            env=env,
+             events=events,
+             get_attr=get_attr,
+             options=options,
+             parent_modname=parent_modname,
++            ref_context=ref_context,
++            reread_always=reread_always,
+         )
+         if member_props is None:
+             continue

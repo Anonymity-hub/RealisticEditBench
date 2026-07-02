@@ -1,0 +1,25 @@
+diff --git a/lib/matplotlib/axes/_axes.py b/lib/matplotlib/axes/_axes.py
+--- a/lib/matplotlib/axes/_axes.py
++++ b/lib/matplotlib/axes/_axes.py
+@@ -2,6 +2,7 @@
+ import itertools
+ import logging
+ import math
++import datetime
+ from numbers import Integral, Number, Real
+ 
+ import re
+@@ -9057,7 +9058,12 @@
+         elif len(widths) != N:
+             raise ValueError(datashape_message.format("widths"))
+ 
+-        # Validate side
++        # For usability / better error message:
++        # Validate that datetime-like positions have timedelta-like widths.
++        # Checking only the first element is good enough for standard misuse cases
++        pos0 = positions[0]
++        width0 = widths[0]
++        if (isinstance(pos0, (datetime.datetime, datetime.date))
+         _api.check_in_list(["both", "low", "high"], side=side)
+ 
+         # Calculate ranges for statistics lines (shape (2, N)).

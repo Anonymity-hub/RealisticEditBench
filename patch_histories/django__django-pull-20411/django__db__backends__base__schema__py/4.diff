@@ -1,0 +1,21 @@
+diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py
+--- a/django/db/backends/base/schema.py
++++ b/django/db/backends/base/schema.py
+@@ -1690,7 +1690,7 @@
+         _, old_path, old_args, old_kwargs = old_field.deconstruct()
+         _, new_path, new_args, new_kwargs = new_field.deconstruct()
+         # Don't alter when:
+-        # - changing only a field name
++        # - changing only a field name (unless it's a many-to-many)
+         # - changing an attribute that doesn't affect the schema
+         # - changing an attribute in the provided set of ignored attributes
+         # - adding only a db_column and the column name is not changed
+@@ -1726,6 +1726,8 @@
+             old_field.many_to_many
+             and new_field.many_to_many
+             and old_field.name != new_field.name
++        ):
++            return True
+         return (old_path, old_args, old_kwargs) != (new_path, new_args, new_kwargs)
+ 
+     def _field_should_be_indexed(self, model, field):

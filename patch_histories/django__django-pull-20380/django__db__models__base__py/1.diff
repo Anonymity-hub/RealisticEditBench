@@ -1,0 +1,11 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -494,6 +494,7 @@ def __getstate__(self):
+         state.pop("peers", None)
+         return state
+ 
++    def __del__(self):
+ 
+ class Model(AltersData, metaclass=ModelBase):
+     def __init__(self, *args, **kwargs):

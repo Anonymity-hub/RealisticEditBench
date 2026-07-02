@@ -1,0 +1,36 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1690,11 +1690,12 @@
+     returning_fields = None
+     returning_params = ()
+ 
+-    def field_as_sql(self, field, get_placeholder, val):
++    def field_as_sql(self, field, get_placeholder_sql, val):
+         """
+         Take a field and a value intended to be saved on that field, and
+         return placeholder SQL and accompanying params. Check for raw values,
+-        expressions, and fields with get_placeholder() defined in that order.
++        fields with get_placeholder_sql(), and compilable defined in that
++        order.
+ 
+         When field is None, consider the value raw and use it as the
+         placeholder, with no corresponding parameters returned.
+@@ -1702,13 +1703,13 @@
+         if field is None:
+             # A field value of None means the value is raw.
+             sql, params = val, []
++        elif get_placeholder_sql is not None:
++            # Some fields (e.g. geo fields) need special munging before
++            # they can be inserted.
++            sql, params = get_placeholder_sql(val, self, self.connection)
+         elif hasattr(val, "as_sql"):
+             # This is an expression, let's compile it.
+             sql, params = self.compile(val)
+-        elif get_placeholder is not None:
+-            # Some fields (e.g. geo fields) need special munging before
+-            # they can be inserted.
+-            sql, params = get_placeholder(val, self, self.connection), [val]
+         else:
+             # Return the common case for the placeholder
+             sql, params = "%s", [val]

@@ -1,0 +1,11 @@
+diff --git a/django/template/library.py b/django/template/library.py
+--- a/django/template/library.py
++++ b/django/template/library.py
+@@ -148,7 +148,6 @@
+                     defaults,
+                     kwonly,
+                     kwonly_defaults,
+-                    takes_context,
+                     function_name,
+                 )
+                 return SimpleNode(func, takes_context, args, kwargs, target_var)
