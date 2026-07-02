@@ -15,59 +15,30 @@ from editbench.collection.instance.activity import Activity
 from editbench.config import GITHUB_RAW_PROXY, GITHUB_RAW, SRC_INF_BENCHMARK_DATA
 from editbench.evaluation.constants import MAP_REPO_TO_REQS_PATHS, MAP_REPO_TO_ENV_YML_PATHS, NON_TEST_EXTS
 
-# get proxy configuration: prioritize environment variables, otherwise use OrbStack default gateway's proxy port
 def _get_proxy_config():
     """
-    get proxy configuration
-    
-    priority:
-    1. environment variables HTTP_PROXY/HTTPS_PROXY
-    2. environment variables http_proxy/https_proxy
-    
-    note: if using OrbStack, need to allow LAN connection in Mac proxy software
+    Optional HTTP proxy for fetching GitHub files during evaluation image builds.
+
+    Priority: HTTP_PROXY/HTTPS_PROXY (or lowercase variants), then GITHUB_RAW_PROXY
+    from .env. If none are set, returns None and requests go directly to GitHub.
     """
-    # prioritize environment variables
-    http_proxy = os.getenv('HTTP_PROXY') or os.getenv('http_proxy')
-    https_proxy = os.getenv('HTTPS_PROXY') or os.getenv('https_proxy')
-    
-    # if environment variables are not set, try to use OrbStack to access Mac host's proxy
-    if not http_proxy and not https_proxy:
-        # in OrbStack, can access Mac host via host.docker.internal or host.orb.internal
-        # prioritize host.docker.internal, this is the standard way for Docker/OrbStack
-        proxy_hosts = ['host.docker.internal', 'host.orb.internal']
-        
-        # also try to get gateway IP as a backup
-        gateway_ip = None
-        try:
-            import subprocess
-            result = subprocess.run(['ip', 'route', 'show', 'default'], 
-                                  capture_output=True, text=True, timeout=2)
-            if result.returncode == 0:
-                parts = result.stdout.split()
-                if len(parts) >= 3:
-                    gateway_ip = parts[2]
-        except Exception:
-            pass
-        
-        # build possible proxy address list
-        proxy_candidates = []
-        for host in proxy_hosts:
-            proxy_candidates.append(f"http://{host}:7890")
-        if gateway_ip:
-            proxy_candidates.append(f"http://{gateway_ip}:7890")
-        
-        # use first candidate address (usually host.docker.internal is the most reliable)
-        if proxy_candidates:
-            proxy_url = proxy_candidates[0]
-            http_proxy = proxy_url
-            https_proxy = proxy_url
-    
+    http_proxy = (
+        os.getenv('HTTP_PROXY')
+        or os.getenv('http_proxy')
+        or GITHUB_RAW_PROXY
+    )
+    https_proxy = (
+        os.getenv('HTTPS_PROXY')
+        or os.getenv('https_proxy')
+        or GITHUB_RAW_PROXY
+    )
+
     proxies = {}
     if http_proxy:
         proxies['http'] = http_proxy
     if https_proxy:
         proxies['https'] = https_proxy
-    
+
     return proxies if proxies else None
 
 
@@ -266,3 +237,92 @@ def get_test_directives(instance: Activity) -> list:
         directives = directives_transformed
 
     return directives
+
+
+def remove_docker_images_by_sampled_ids(
+    client,
+    sampled_ids_file_1: Path = None,
+    sampled_ids_file_2: Path = None,
+    sampled_ids_file_3: Path = None,
+    logger=None,
+) -> dict:
+    """
+    Delete Docker eval images for instance IDs listed in sampled JSON files.
+
+    Image name format: editb.eval.x86_64.{instance_id}:latest
+    """
+    if logger:
+        log_info = logger.info
+        log_error = logger.error
+    else:
+        log_info = print
+        log_error = print
+
+    if sampled_ids_file_1 is None:
+        sampled_ids_file_1 = SRC_INF_BENCHMARK_DATA / "sampled_instance_ids_0.2.json"
+    if sampled_ids_file_2 is None:
+        sampled_ids_file_2 = SRC_INF_BENCHMARK_DATA / "union_gpt-5-codex_claude_0.05_0.05.json"
+    if sampled_ids_file_3 is None:
+        sampled_ids_file_3 = SRC_INF_BENCHMARK_DATA / "union_gpt-5-codex_claude_0.1_0.1.json"
+
+    all_instance_ids: Set[str] = set()
+    file_stats = {}
+
+    for file_path, file_name in [
+        (sampled_ids_file_1, sampled_ids_file_1.name),
+        (sampled_ids_file_2, sampled_ids_file_2.name),
+        (sampled_ids_file_3, sampled_ids_file_3.name),
+    ]:
+        if file_path and file_path.exists():
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    instance_ids = data.get("sampled_instance_ids", [])
+                    if instance_ids:
+                        all_instance_ids.update(instance_ids)
+                        file_stats[file_name] = len(instance_ids)
+                        log_info(f"read {len(instance_ids)} instance_ids from {file_name}")
+                    else:
+                        log_info(f"warning: {file_name} does not have sampled_instance_ids field")
+            except Exception as e:
+                log_error(f"failed to read file {file_path}: {e}")
+        else:
+            log_info(f"file not found, skip: {file_path}")
+
+    log_info(f"\ntotal {len(all_instance_ids)} unique instance_ids (union)")
+
+    removed_count = 0
+    not_found_count = 0
+    error_count = 0
+
+    for instance_id in all_instance_ids:
+        image_name = f"editb.eval.x86_64.{instance_id}:latest"
+        try:
+            from editbench.evaluation.docker_utils import remove_image
+
+            remove_image(client, image_name, logger=logger if logger else "quiet")
+            removed_count += 1
+            if logger:
+                log_info(f"deleted image: {image_name}")
+        except Exception as e:
+            if "not found" in str(e).lower() or "ImageNotFound" in str(type(e).__name__):
+                not_found_count += 1
+            else:
+                error_count += 1
+                log_error(f"failed to delete image {image_name}: {e}")
+
+    result = {
+        "total_instance_ids": len(all_instance_ids),
+        "removed_count": removed_count,
+        "not_found_count": not_found_count,
+        "error_count": error_count,
+        "file_stats": file_stats,
+    }
+
+    log_info("\ndeletion statistics:")
+    log_info(f"  - total instance_ids: {result['total_instance_ids']}")
+    log_info(f"  - successfully deleted: {result['removed_count']}")
+    log_info(f"  - not found: {result['not_found_count']}")
+    log_info(f"  - error: {result['error_count']}")
+
+    return result

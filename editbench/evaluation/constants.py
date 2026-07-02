@@ -16,6 +16,7 @@ TEST_DJANGO = "./tests/runtests.py --verbosity 2 --settings=test_sqlite --parall
 TEST_DJANGO_NO_PARALLEL = "./tests/runtests.py --verbosity 2"
 TEST_SPHINX = "tox --current-env -epy39 -v --"
 TEST_SPHINX_311 = "tox --current-env -epy311 -v --"
+TEST_SPHINX_312 = "tox --current-env -epy312 -v --"
 
 # Constants - Evaluation Log Directories
 BASE_IMAGE_BUILD_DIR = root_path_obj / "logs/build_images/base"
@@ -303,7 +304,7 @@ SPECS_ASTROPY.update(
             ],
             "test_cmd": TEST_PYTEST
         }
-        for k in ["7.1", "7.0", "6.1"]
+        for k in ["8.0", "7.1", "7.0", "6.1"]
     }
 )
 
@@ -388,12 +389,12 @@ SPECS_ASTROPY.update(
     }
 )
 
-for k in ["4.1", "4.2", "4.3", "5.0", "5.1", "5.2", "5.3", "6.0", "6.1", "7.0", "7.1", "default"]:
+for k in ["4.1", "4.2", "4.3", "5.0", "5.1", "5.2", "5.3", "6.0", "6.1", "7.0", "7.1", "8.0", "default"]:
     SPECS_ASTROPY[k]["pre_install"] = [
         'sed -i \'s/requires = \\["setuptools",/requires = \\["setuptools==68.0.0",/\' pyproject.toml'
     ]
 
-for k in ["6.0", "6.1", "default", "7.0", "7.1"]:
+for k in ["6.0", "6.1", "default", "7.0", "7.1", "8.0"]:
     SPECS_ASTROPY[k]["pre_install"] = [
         """
     if grep -rlq "relative_to(Path.cwd())" /testbed/astropy/; then
@@ -440,6 +441,20 @@ SPECS_SYMPY.update(
         for k in ["1.13", "1.14"]
     }
 )
+
+SPECS_SYMPY.update(
+    {
+        k: {
+            "python": "3.11",
+            "packages": "requirements.txt",
+            "install": "python -m pip install -e .",
+            "pip_packages": ["mpmath==1.3.0"],
+            "test_cmd": TEST_SYMPY,
+        }
+        for k in ["1.14-20251001"]
+    }
+)
+
 
 SPECS_MATPLOTLIB = {
     k: {
@@ -628,13 +643,17 @@ SPECS_XARRAY.update(
                 "numpy==1.26.0",
                 "packaging==24.1",
                 "pandas==2.2",
-                "pytest==7.4.0",
+                "pytest==9.0.3",
+                "pytest-asyncio==1.4.0",
                 "python-dateutil==2.8.2",
                 "pytz==2023.3",
                 "six==1.16.0",
                 "scipy==1.13",
                 "setuptools==77.0.3",
                 "dask==2022.8.1",
+            ],
+            "pre_install": [
+                "sed -i '/--mypy-only-local-stub/d' pyproject.toml"
             ],
             "no_use_env": True,
             "test_cmd": TEST_PYTEST,
@@ -670,7 +689,7 @@ SPECS_SPHINX = {
     for k in ["1.5", "1.6", "1.7", "1.8", "2.0", "2.1", "2.2", "2.3", "2.4", "3.0"]
              + ["3.1", "3.2", "3.3", "3.4", "3.5", "4.0", "4.1", "4.2", "4.3", "4.4"]
              + ["4.5", "5.0", "5.1", "5.2", "5.3", "6.0", "6.2", "7.0", "7.1", "7.2"]
-             + ["7.3", "7.4", "8.0", "8.1", "8.2", "default"]
+             + ["7.3", "7.4", "8.0", "8.1", "8.2", "9.0", "default"]
 }
 for k in ["3.0", "3.1", "3.2", "3.3", "3.4", "3.5", "4.0", "4.1", "4.2", "4.3", "4.4"]:
     SPECS_SPHINX[k]["pre_install"].extend(
@@ -712,7 +731,7 @@ for k in ["3.0", "3.1", "3.2", "3.3", "3.4", "3.5", "4.0", "4.1", "4.2", "4.3", 
                 "sed -i 's/sphinxcontrib-serializinghtml/sphinxcontrib-serializinghtml<=1.1.9/' setup.py",
             ]
         )
-for k in ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "default"]:
+for k in ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "9.0", "default"]:
     SPECS_SPHINX[k]["pre_install"] += ["apt-get update && apt-get install -y graphviz"]
 # for k in ["8.0"]:
 #     SPECS_SPHINX[k]["python"] = "3.10"
@@ -720,6 +739,45 @@ for k in ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "default"]:
 for k in ["8.0", "8.1", "8.2", "default"]:
     SPECS_SPHINX[k]["python"] = "3.11"
     SPECS_SPHINX[k]["test_cmd"] = TEST_SPHINX_311
+
+for k in ["9.0"]:
+    SPECS_SPHINX[k]["python"] = "3.12"
+    SPECS_SPHINX[k]["test_cmd"] = TEST_SPHINX_312
+    # 9.0 uses pyproject [dependency-groups] instead of [project.optional-dependencies];
+    # convert test group so `pip install -e .[test]` works. Jinja2>=3.1 from project deps.
+    SPECS_SPHINX[k]["pip_packages"] = [
+        "tox==4.16.0",
+        "tox-current-env==0.0.11",
+        "pytest>=8.0",
+        "pytest-xdist[psutil]>=3.4",
+        "cython>=3.0",
+        "defusedxml>=0.7.1",
+        "setuptools>=70.0",
+        "typing_extensions>=4.9",
+    ]
+    # 9.0: test deps live in [dependency-groups]; mirror into optional-dependencies for .[test].
+    # Extract full test = [ ... ] block (range must not end on opening line; do not match ] inside strings).
+    # Use double quotes in sed so the outer bash -c '...' is not broken by inner quotes.
+    _sphinx_extract_test_group = (
+        'sed -n "/^\\[dependency-groups\\]/,/^\\[tool\\./ { /^test = \\[/,/^]/p; }" pyproject.toml'
+    )
+    SPECS_SPHINX[k]["pre_install"].extend(
+        [
+            (
+                "bash -c '"
+                "if grep -A500 \"^\\[project.optional-dependencies\\]\" pyproject.toml 2>/dev/null "
+                "| grep -q \"^test = \"; then :; "
+                "elif grep -q \"^\\[project.optional-dependencies\\]\" pyproject.toml; then "
+                f"{_sphinx_extract_test_group} "
+                "| sed -i \"/^\\[project.optional-dependencies\\]/r /dev/stdin\" pyproject.toml; "
+                "else "
+                f"{{ printf \"\\n[project.optional-dependencies]\\n\"; {_sphinx_extract_test_group}; }} >> pyproject.toml; "
+                "fi'"
+            ),
+        ]
+    )
+
+
 
 
 SPECS_PYLINT = {
@@ -744,6 +802,7 @@ SPECS_PYLINT = {
         "3.2",
         "3.3",
         "4.0",
+        "default",
     ]
 }
 SPECS_PYLINT["2.8"]["pip_packages"] = ["pyenchant==3.2"]
@@ -757,16 +816,16 @@ SPECS_PYLINT.update(
             "pip_packages": ["astroid==3.0.0a6", "setuptools"],
             # "pip_packages": ["setuptools"],
         }
-        for k in ["3.0", "3.1", "3.2", "3.3", "4.0"]
+        for k in ["3.0", "3.1", "3.2", "3.3", "4.0", "default"]
     }
 )
 
-for v in ["2.14", "2.15", "2.17", "3.0", "3.1", "3.2", "3.3", "4.0"]:
+for v in ["2.14", "2.15", "2.17", "3.0", "3.1", "3.2", "3.3", "4.0", "default"]:
     SPECS_PYLINT[v]["nano_cpus"] = int(2e9)
 
-for v in ["3.0", "3.1", "3.2", "3.3", "4.0"]:
+for v in ["3.0", "3.1", "3.2", "3.3", "4.0", "default"]:
     SPECS_PYLINT[v]["after_install"] = ["pip install astroid==3.3.8"]
-    SPECS_PYLINT[v][""] = ["pip install astroid==3.3.8"]
+    # SPECS_PYLINT[v][""] = ["pip install astroid==3.3.8"]
     SPECS_PYLINT[v]["eval_with_install"] = False
 
 
@@ -868,6 +927,25 @@ PIP_ASTROPY = {
 
 MAP_SPECS_ENV_INSTANCE_PIP = {
     "astropy/astropy": PIP_ASTROPY,
+}
+
+# Per-instance pip installs applied in the instance image (setup_repo.sh), not env image.
+# Use when optional test deps differ per task; env image stays shared across instances.
+PIP_ASTROPY_INSTANCE = {
+    "astropy__astropy-pull-19745": ["fitsio"],
+    "astropy__astropy-pull-19744": ["fitsio"],
+    "astropy__astropy-pull-19738": ["fitsio"],
+    "astropy__astropy-pull-18994": ["matplotlib"],
+    "astropy__astropy-pull-19245": ["matplotlib"],
+    "astropy__astropy-pull-19251": ["matplotlib"],
+    "astropy__astropy-pull-19539": ["matplotlib"],
+    "astropy__astropy-pull-19600": ["pandas"],
+    "astropy__astropy-pull-19658": ["pyarrow"],
+
+}
+
+MAP_SPECS_INSTANCE_PIP = {
+    "astropy/astropy": PIP_ASTROPY_INSTANCE,
 }
 
 PRE_INSTALL_ASTROPY = {

@@ -2,15 +2,18 @@
 
 Data collection pipeline for building RealisticEditBench from GitHub: collect PR/commit activity, filter by execution (Docker + pass/fail), optionally verify manually, then gather split tasks into bench and merge across repos.
 
-## Overview
+> [!NOTE]
+> **Repository contents** — This repository includes `crawled_data/bench/`, `crawled_data/infbench/` (Git LFS), and `patch_histories/`. Directories such as `crawled_data/activity/`, `crawled_data/activity_execution/`, and `crawled_data/raw/` are produced when you run the collection pipeline locally.
+
+## Pipeline overview
 
 The collection flow is **per-repository**; you typically run each step for one or more repos, then merge all repo results at the end.
 
 1. **run_collection** — Fetch PRs and build activity-format JSONL per repo.
-2. **execute_filter** — Run Docker for each activity instance; keep only those that run and have **pass_to_fail** (and related) test outcomes.
-3. **Manual verification (optional)** — Follow the paper’s criteria to manually verify/curate instances (e.g. using `report_valid.json` from execution filter).
-4. **editing_split** — For each execution-filtered instance, run split pipeline (see [Editing Split](../editing_split/README.md)) so that `work_patch_list` is available.
-5. **gather_bench** — From execution-filtered JSONL + split results, collect bench instances (with `work_patch_list`) into a bench file per repo.
+2. **execute_filter** — Run Docker for each activity instance; keep only those that run and have **pass_to_fail** (and related) test outcomes. Writes filtered JSONL to `crawled_data/activity_execution/`.
+3. **Manual verification (optional)** — Apply benchmark curation criteria to verify instances (e.g. using `report_valid.json` from execution filter).
+4. **editing_split** — For each activity-execution instance, run split pipeline (see [Editing Split](../editing_split/README.md)) so that `work_patch_list` is available.
+5. **gather_bench** — From activity-execution JSONL + split results, collect bench instances (with `work_patch_list`) into a bench file per repo.
 6. **merge_utils** — Merge all per-repo bench (and optionally infbench) into `all-task-instances.jsonl`.
 
 ---
@@ -46,6 +49,13 @@ python -m editbench.collection.run_collection \
   --path-prs ./crawled_data/raw \
   --path-tasks ./crawled_data/activity \
   --no-override
+
+# Exclude PRs before a date (does not change output filenames)
+python -m editbench.collection.run_collection \
+  --repos astropy/astropy \
+  --path-prs ./crawled_data/raw \
+  --path-tasks ./crawled_data/activity \
+  --min-date 2025-10-01
 ```
 
 **Output**
@@ -53,16 +63,21 @@ python -m editbench.collection.run_collection \
 - `path-prs`: `{owner-repo}-prs.jsonl` (and optionally `-{cutoff_date}.jsonl`).
 - `path-tasks`: `{owner-repo}-task-instances.jsonl` (activity format, one JSON object per line).
 
+**Options (selected)**
+
+- `--max-tasks`, `--cutoff-date`, `--min-date`, `--no-override` — see `python -m editbench.collection.run_collection --help`.
+
 ---
 
 ## 2. Execution filter (`execute_filter`)
 
-Reads **activity** JSONL (from step 1), runs each instance in Docker (build env, apply patch, run tests before/after), and produces pass/fail reports. Only instances that execute successfully and have the desired test outcome (e.g. **pass_to_fail**) should be kept for the benchmark; the rest are filtered out at the “gather” step or after manual verification.
+Reads **activity** JSONL (from step 1), runs each instance in Docker (build env, apply patch, run tests before/after), and produces pass/fail reports. Instances that execute successfully and have the desired test outcome (e.g. **pass_to_fail**) are written to **activity-execution** JSONL under `crawled_data/activity_execution/`.
 
 **Input:** Path(s) to activity task-instance JSONL (e.g. `./crawled_data/activity/{repo}-task-instances.jsonl`).
 
 **Output**
 
+- Filtered task JSONL: `crawled_data/activity_execution/{repo}-task-instances.jsonl`.
 - Per-instance logs under `logs/execution_filter/{instance_id}/` (e.g. `report.json`, test output before/after).
 - Aggregated: `logs/execution_filter/report.json` and `report_valid.json` (instances with `f2p` non-empty).
 
@@ -77,7 +92,7 @@ python -m editbench.collection.execute_filter \
 
 # Multiple repo files (run in sequence)
 python -m editbench.collection.execute_filter \
-  --dataset-name ./crawled_data/activity/django-django-task-instances.jsonl ./crawled_data/activity/scikit-learn-task-instances.jsonl \
+  --dataset-name ./crawled_data/activity/django-django-task-instances.jsonl ./crawled_data/activity/scikit-learn-scikit-learn-task-instances.jsonl \
   --max-workers 4
 
 # Optional: force rebuild images, stricter cache, cleanup
@@ -93,59 +108,67 @@ python -m editbench.collection.execute_filter \
 
 - `--dataset-name`: One or more paths to activity JSONL.
 - `--instance-ids`: Optional; restrict to listed instance IDs.
+- `--min-date`: Only run instances with `created_at` on or after this date (e.g. `2025-10-01`).
 - `--max-workers`: Parallel workers (default: 4).
 - `--timeout`: Per-instance timeout in seconds (default: 1800).
 - `--cache-level`: `none` | `base` | `env` | `eval` (default: `env`).
 - `--clean`: Remove images above cache level after run.
 - `--open-file-limit`: RLIMIT_NOFILE (default: 4096).
+- `--force-rebuild`: Force rebuild Docker images.
 
 ---
 
-## 3. Manual verification (paper-aligned)
+## 3. Manual verification (optional)
 
-After execution filter, refer to the paper for exact criteria (e.g. which test outcomes to require, quality checks). Use:
+After execution filter, apply your curation criteria (e.g. which test outcomes to require, quality checks). Use:
 
 - `logs/execution_filter/report.json` — All instances and their p2p, p2f, f2f, f2p.
 - `logs/execution_filter/report_valid.json` — Subset with non-empty `f2p`.
 
-You can maintain an “approved” list of instance IDs or filtered JSONL and pass that into **gather_bench** (e.g. via a curated execution-filtered file that only contains verified instances).
+You can maintain an “approved” list of instance IDs or filtered JSONL and pass that into **gather_bench** (e.g. via a curated activity-execution file that only contains verified instances).
 
 ---
 
 ## 4. Editing split (prerequisite for gather_bench)
 
-Before **gather_bench**, the **editing_split** module must be run so that each instance has split patch history on disk (see [Editing Split](../editing_split/README.md)). Input for editing_split is the **execution-filtered** activity JSONL (or your verified subset). After splitting and validation, `gather_bench` can collect instances that have valid `work_patch_list`.
+Before **gather_bench**, the **editing_split** module must be run so that each instance has split patch history on disk (see [Editing Split](../editing_split/README.md)). Input for editing_split is the **activity-execution** JSONL (or your verified subset). After splitting and validation, `gather_bench` can collect instances that have valid `work_patch_list`.
 
 ---
 
 ## 5. Gather bench (`gather_bench`)
 
-Reads **execution-filtered** (and optionally manually verified) activity JSONL and, for each instance, loads the split result from `patch_histories/{instance_id}`. Writes bench instances (with `work_patch_list`) to a single bench JSONL file.
+Reads **activity-execution** (and optionally manually verified) JSONL and, for each instance, loads the split result from `patch_histories/{instance_id}`. Writes bench instances (with `work_patch_list`) to a single bench JSONL file.
 
 **Input**
 
-- **ref-path**: Path to execution-filtered (and optionally verified) task-instances JSONL.
+- **ref-path**: Path to activity-execution (and optionally verified) task-instances JSONL.
 - **tar-path**: Output bench JSONL path (e.g. `./crawled_data/bench/owner-repo-task-instances.jsonl`).
 
 **Commands**
 
 ```bash
-# Collect all split instances from one execution-filtered file into one bench file
+# Collect all split instances from one activity-execution file into one bench file
 python -m editbench.collection.gather_bench \
-  --ref-path ./crawled_data/execution_filter/owner-repo-task-instances.jsonl \
+  --ref-path ./crawled_data/activity_execution/owner-repo-task-instances.jsonl \
   --tar-path ./crawled_data/bench/owner-repo-task-instances.jsonl
 
 # Overwrite target file
 python -m editbench.collection.gather_bench \
-  --ref-path ./crawled_data/execution_filter/owner-repo-task-instances.jsonl \
+  --ref-path ./crawled_data/activity_execution/owner-repo-task-instances.jsonl \
   --tar-path ./crawled_data/bench/owner-repo-task-instances.jsonl \
   --overwrite
 
 # Restrict to specific instance IDs
 python -m editbench.collection.gather_bench \
-  --ref-path ./crawled_data/execution_filter/owner-repo-task-instances.jsonl \
+  --ref-path ./crawled_data/activity_execution/owner-repo-task-instances.jsonl \
   --tar-path ./crawled_data/bench/owner-repo-task-instances.jsonl \
   --instance-ids id1 id2 id3
+
+# Filter by instance created_at (optional)
+python -m editbench.collection.gather_bench \
+  --ref-path ./crawled_data/activity_execution/owner-repo-task-instances.jsonl \
+  --tar-path ./crawled_data/bench/owner-repo-task-instances.jsonl \
+  --min_date 20250101
 ```
 
 Run this **per repository**; each repo produces one bench JSONL under `crawled_data/bench/`.
@@ -184,9 +207,9 @@ python -m editbench.utils.merge_utils merge-all-infbench
 ## End-to-end flow (summary)
 
 1. **run_collection** → `path-tasks` = activity JSONL per repo.
-2. **execute_filter** on each repo’s activity JSONL → Docker runs, `report.json` / `report_valid.json`.
-3. **Manual verification** (paper criteria) → optional curated list or filtered JSONL.
-4. **editing_split** on execution-filtered (or verified) JSONL → split + validate → `patch_histories/` populated.
+2. **execute_filter** on each repo’s activity JSONL → Docker runs, filtered JSONL in `activity_execution/`, `report.json` / `report_valid.json` under `logs/execution_filter/`.
+3. **Manual verification** (optional curation) → optional curated list or filtered JSONL.
+4. **editing_split** on activity-execution (or verified) JSONL → split + validate → `patch_histories/` populated.
 5. **gather_bench** per repo → `crawled_data/bench/{repo}-task-instances.jsonl`.
 6. **merge_utils merge-bench** → `crawled_data/bench/all-task-instances.jsonl`.
 

@@ -4,6 +4,7 @@ import os
 import re
 from dataclasses import dataclass, field, asdict, fields, is_dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Callable, Optional, Iterator
 
 from dotenv import load_dotenv
@@ -88,11 +89,15 @@ class Activity:
         """get processed version number (extract x.xx format)"""
         if not self.version:
             return "default"
-        four_two_match = re.search(r'\d{4}\.\d{2}', self.version)
+        version = self.version.strip()
+        # e.g. 1.14-20251001: keep full key for dated spec entries in MAP_REPO_VERSION_TO_SPECS
+        if re.fullmatch(r"\d+\.\d+-\d{8}", version):
+            return version
+        four_two_match = re.search(r'\d{4}\.\d{2}', version)
         if four_two_match:
             return four_two_match.group()
-        match = re.search(r'\d+\.\d+', self.version)
-        return match.group() if match else self.version
+        match = re.search(r'\d+\.\d+', version)
+        return match.group() if match else version
 
     @classmethod
     def parse_instance_id(cls, data: dict):
@@ -229,25 +234,39 @@ def write_json_line(activity, file, is_instance=False, is_prompt=False) -> None:
 
 
 def load_datasets_from_jsonl(file_path: str) -> Iterator[Activity]:
+    from editbench.utils.lfs_utils import ensure_jsonl_materialized, is_git_lfs_pointer, lfs_pull_help
+
+    path = Path(file_path)
+    if not path.exists():
+        print(f"Error: file {file_path} has not found.")
+        return
+
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        ensure_jsonl_materialized(path, auto_pull=True)
+    except FileNotFoundError as e:
+        raise FileNotFoundError(str(e)) from e
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
             seen_ids = set()
+            loaded = 0
             for i, ins in enumerate(f):
                 line_number = i + 1
                 try:
                     act_json = json.loads(ins)
                     act = Activity(**act_json)
                     if act.instance_id in seen_ids:
-                        # print(f"⚠️ the {line_number}-th line has duplicate id: {act.instance_id}")
                         continue
                     seen_ids.add(act.instance_id)
+                    loaded += 1
                     yield act
-                except json.JSONDecodeError as e:
+                except json.JSONDecodeError:
                     pass
-                except Exception as e:
-                    # print(f"⚠️ the {line_number}-th line has unknown error: {str(e)}")
+                except Exception:
                     pass
+        if loaded == 0 and is_git_lfs_pointer(path):
+            raise FileNotFoundError(lfs_pull_help(path))
     except FileNotFoundError:
-        print(f"Error: file {file_path} has not found.")
+        raise
     except Exception as e:
         print(f"The process of reading file {file_path} has unknown error: {str(e)}")

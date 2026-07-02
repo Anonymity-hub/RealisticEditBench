@@ -7,7 +7,7 @@ from typing import Union, cast, Optional
 from editbench.collection.instance.activity import Activity
 from editbench.config import GITHUB_ORI_PROXY, GITHUB_ORI
 from editbench.evaluation.constants import MAP_REPO_VERSION_TO_SPECS, MAP_REPO_TO_INSTALL, USE_X86, UTF8, \
-    MAP_INSTALLED_REPO, MAP_SPECS_ENV_INSTANCE_PIP, MAP_SPECS_INSTANCE_PRE_INSTALL, MAP_SPECS_INSTANCE_AFTER_INSTALL
+    MAP_INSTALLED_REPO, MAP_SPECS_ENV_INSTANCE_PIP, MAP_SPECS_INSTANCE_PIP, MAP_SPECS_INSTANCE_PRE_INSTALL, MAP_SPECS_INSTANCE_AFTER_INSTALL
 from editbench.evaluation.utils import get_requirements, get_environment_yml, get_test_directives
 from editbench.evaluation.dockerfiles import get_dockerfile_base, get_dockerfile_env, get_dockerfile_instance, \
     get_dockerfile_instance_on_install
@@ -315,6 +315,11 @@ def make_repo_script_list(specs: dict, repo: str, repo_directory: str, base_comm
 
     if "install" in specs:
         setup_commands.append(specs["install"])
+
+    if instance is not None:
+        instance_pip = MAP_SPECS_INSTANCE_PIP.get(repo, {}).get(instance.instance_id, [])
+        if instance_pip:
+            setup_commands.append(f"python -m pip install {' '.join(instance_pip)}")
 
     if "after_install" in specs:
         for after_install in specs["after_install"]:

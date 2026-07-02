@@ -42,8 +42,11 @@ def merge_bench(output_path: Optional[Path] = None,
     # get all jsonl files
     jsonl_files = list(bench_dir.glob("*.jsonl"))
 
-    # filter self
-    jsonl_files = [f for f in jsonl_files if f.name != "all-task-instances.jsonl"]
+    # filter out merged output and non-task jsonl files
+    jsonl_files = [
+        f for f in jsonl_files
+        if f.name != "all-task-instances.jsonl" and f.name.endswith("task-instances.jsonl")
+    ]
 
     if repos is not None:
         # filter specified repositories

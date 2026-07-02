@@ -51,12 +51,13 @@ def construct_data_files(data: dict):
             path_tasks (str): Path to save task instance data files to
             token (str): GitHub token to use for API requests
     """
-    repos, path_prs_, path_tasks_, max_tasks, cutoff_date, token, is_override = (
+    repos, path_prs_, path_tasks_, max_tasks, cutoff_date, min_date, token, is_override = (
         data["repos"],
         data["path_prs"],
         data["path_tasks"],
         data["max_tasks"],
         data["cutoff_date"],
+        data["min_date"],
         data["token"],
         data["is_override"],
     )
@@ -69,22 +70,29 @@ def construct_data_files(data: dict):
                 path_prs = path_prs.replace('.jsonl', f'-{cutoff_date}.jsonl')
                 path_tasks = path_tasks.replace('.jsonl', f'-{cutoff_date}.jsonl')
             if not os.path.exists(path_prs) or is_override:
-                print(f"Pull request data for {repo} not found, creating...")
+                print(f"Adding new Pull request data for {repo} to {path_prs}")
                 fetch_repo_activity(
                     repo,
                     path_prs,
                     token,
                     max_tasks=max_tasks,
-                    cutoff_date=cutoff_date
+                    cutoff_date=cutoff_date,
+                    min_date=min_date,
                 )
                 print(f"✅ Successfully saved Activity data for {repo} to {path_prs}")
             else:
                 print(f"📁 Activity data for {repo} already exists at {path_prs}, skipping...")
 
             if not os.path.exists(path_tasks) or is_override:
-                print(f"Task instance data for {repo} not found, creating...")
-                run_build_datasets(path_prs, path_tasks, ft_filters=[filter_by_ft_valid()],
-                                   active_filters=[filter_by_test_valid()], token=token)
+                print(f"Adding new Task instance data for {repo} to {path_tasks}")
+                run_build_datasets(
+                    path_prs,
+                    path_tasks,
+                    ft_filters=[filter_by_ft_valid()],
+                    active_filters=[filter_by_test_valid()],
+                    token=token,
+                    min_date=min_date,
+                )
                 print(f"✅ Successfully saved task instance data for {repo} to {path_tasks}")
             else:
                 print(f"📁 Task instance data for {repo} already exists at {path_tasks}, skipping...")
@@ -102,6 +110,7 @@ def main(
         path_tasks: str,
         max_tasks: int = None,
         cutoff_date: str = None,
+        min_date: str = None,
         is_override: bool = True,
 ):
     """
@@ -128,6 +137,7 @@ def main(
             "path_tasks": path_tasks,
             "max_tasks": max_tasks,
             "cutoff_date": cutoff_date,
+            "min_date": min_date,
             "token": token,
             "is_override": is_override,
         }
@@ -147,7 +157,7 @@ if __name__ == "__main__":
     #     --path-tasks ./crawled_data/activity
     #   python -m editbench.collection.run_collection \
     #     --repos astropy/astropy --path-prs ./crawled_data/raw --path-tasks ./crawled_data/activity \
-    #     --max-tasks 100 --cutoff-date 2024-06-01 --no-override
+    #     --max-tasks 100 --cutoff-date 2024-06-01 --min-date 2025-10-01 --no-override
     parser = argparse.ArgumentParser(description="Collect PRs and build task instance datasets.")
     parser.add_argument(
         "--repos",
@@ -181,6 +191,15 @@ if __name__ == "__main__":
         help="Cutoff date suffix for output filenames (e.g. 2024-01-01).",
     )
     parser.add_argument(
+        "--min-date",
+        type=str,
+        default=None,
+        help=(
+            "Exclude activity before this date (e.g. 2025-10-01). "
+            "Does not change output filenames."
+        ),
+    )
+    parser.add_argument(
         "--no-override",
         action="store_true",
         help="Do not overwrite existing PR/task files (default: override).",
@@ -192,6 +211,7 @@ if __name__ == "__main__":
         path_tasks=args.path_tasks,
         max_tasks=args.max_tasks,
         cutoff_date=args.cutoff_date,
+        min_date=args.min_date,
         is_override=not args.no_override,
     )
 

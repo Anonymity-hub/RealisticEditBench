@@ -1,17 +1,22 @@
 # Evaluation Module
 
-Docker-based evaluation harness for RealisticEditBench: apply model (or gold) patches, run project tests, and compute pass/fail and code-similarity metrics. Supports single-run, batch (multiple models/datasets), and summary/analysis with optional filtering.
+Docker-based evaluation harness for RealisticEditBench: apply model (or gold) patches, run project tests, and compute pass/fail and code-similarity metrics.
 
-## Overview
+## Subcommands
 
-- **run** — For each (dataset, predictions, run_id): build Docker env, apply patch, run eval script, collect report and metrics (applied/resolved, CodeBLEU, edit distance, Jaccard, TF-IDF cosine, file hit rate).
-- **summary** — Print human-readable summary from an existing output JSON; optional filter by instance IDs or cutoff date.
-- **batch** — Convenience to run evaluation for multiple (dataset, model, run_id) combinations using default prediction paths under `experiment_results`.
+| Command | Purpose |
+|---------|---------|
+| **`run`** | Evaluate one or more (dataset, model, run_id) combinations — pass multiple `--model` / `--run_id` values for a multi-run batch in a single invocation |
+| **`summary`** | Print metrics from an existing `{name}-{run_id}-output.json` without re-running Docker |
 
-**Requirements**
+There is no separate `batch` subcommand; use **`run`** with multiple `--model` and/or `--run_id` arguments (see [Scenario 3](#3-scenario-evaluate-multiple-models-andor-run_ids)).
 
-- Docker installed and running (see main [README](../../README.md)); evaluation is **not supported on Windows**; ARM64 (e.g. Mac M-series) may have compatibility issues.
-- Sufficient resources: recommended ≥120GB free storage, 16GB RAM, 8 CPU cores; increase `--open_file_limit` if you hit “too many open files”.
+## Requirements
+
+- Docker installed and running ([main README](../../README.md)).
+- Infbench JSONL present (run `git lfs pull` after clone if files are ~130 bytes).
+- Evaluation is **not supported on Windows**; ARM64 Mac may have Docker issues.
+- Recommended: ≥120 GB disk, 16 GB RAM, 8 CPU cores; raise `--open_file_limit` if needed.
 
 ---
 
@@ -52,9 +57,9 @@ python -m editbench.evaluation.run_evaluation run \
 
 ---
 
-## 3. Scenario: Batch evaluate multiple models and/or run_ids
+## 3. Scenario: Evaluate multiple models and/or run_ids
 
-Let the harness infer prediction paths from `--dataset_name`, `--model`, and `--run_id` (paths under `experiment_results/{model}/T=.../n=.../`).
+Use a **single `run` invocation** with multiple `--model` and/or `--run_id` values. The harness infers prediction paths under `experiment_results/{model}/T=.../n=.../`.
 
 ```bash
 python -m editbench.evaluation.run_evaluation run \
@@ -97,7 +102,7 @@ Print a concise summary from an existing output JSON. Optionally filter by insta
 python -m editbench.evaluation.run_evaluation summary \
   --report_path ./experiment_results/deepseek-v3.2/T=0/n=1/all-0.2-output.json
 
-# Exclude instances from a filter list (e.g. paper’s union of filtered IDs)
+# Exclude instances from a filter list (JSON with `union_filter_instance_ids`)
 python -m editbench.evaluation.run_evaluation summary \
   --report_path ./experiment_results/deepseek-v3.2/T=0/n=1/all-0.2-output.json \
   --filter_ids_file ./union-all.json

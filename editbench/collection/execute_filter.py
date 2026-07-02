@@ -11,8 +11,8 @@ from typing import Optional
 import docker
 from tqdm import tqdm
 
-from editbench.collection.instance.activity import Activity, write_json_line
-from editbench.config.constants import LOG_EXECUTION_FILTER, GITHUB_TOKEN
+from editbench.collection.instance.activity import Activity, write_json_line, filter_by_timestamp
+from editbench.config.constants import LOG_EXECUTION_FILTER, GITHUB_TOKEN, SRC_EXECUTION_FILTER_DATA
 from editbench.evaluation.constants import EXECUTION_FILTER_LOG_DIR, INSTANCE_IMAGE_BUILD_DIR, \
     LOG_INSTANCE, LOG_REPORT, DOCKER_PATCH, DOCKER_WORKDIR, DOCKER_USER, APPLY_PATCH_FAIL, UTF8, APPLY_PATCH_PASS, \
     LOG_TEST_OUTPUT_BEFORE, LOG_TEST_OUTPUT_AFTER, TestStatus
@@ -342,8 +342,8 @@ def collect_json_results():
     res_file_valid = Path(path) / "report_valid.json"
     res_json = dict()
     valid_json = dict()
-    for root, dirs, files in os.walk(path):
-        if root == LOG_EXECUTION_FILTER:
+    for root, dirs, _ in os.walk(path):
+        if root == str(LOG_EXECUTION_FILTER):
             for dir in dirs:
                 instance_id = dir
                 json_path = Path(root) / instance_id / "report.json"
@@ -366,8 +366,9 @@ def collect_json_results():
 def gather_all_viable_activity(origin_jsonl, save_path, assure_jsonls: Optional[list[str]] = None):
     """
     Gather all viable activity to form executed version.
-    :param origin_jsonl: collect activity based on report.json
-    :param assure_jsonls: valid activities
+    :param origin_jsonl: original crawled_data/activity/xxx.jsonl
+    :param save_path: save path of the gathered verified instances
+    :param assure_jsonls: valid activities, if None, then use the original crawled_data/activity/xxx.jsonl
     :return: None
     """
     all_activities = []
@@ -432,6 +433,16 @@ def reset_base_commit(dataset_path, new_path):
             write_json_line(dataset_, fw)
 
 
+def _normalize_min_date_key(min_date: str) -> str:
+    """Convert YYYY-MM-DD / YYYYMMDD to YYYYMMDD for filter_by_timestamp."""
+    key = min_date.strip().replace("-", "").replace("/", "")
+    if len(key) != 8 or not key.isdigit():
+        raise ValueError(
+            f"Invalid min_date {min_date!r}, use YYYY-MM-DD or YYYYMMDD (e.g. 2025-10-01)"
+        )
+    return key
+
+
 def main(
         dataset_name: str,
         instance_ids: list,
@@ -441,6 +452,8 @@ def main(
         clean: bool,
         open_file_limit: int,
         timeout: int,
+        min_date: Optional[str] = None,
+        exclude_instances: Optional[list] = None,
 ):
     """
     Run execution filter harness for the given dataset.
@@ -451,14 +464,29 @@ def main(
     client = docker.from_env()
     dataset = get_inf_datasets(dataset_name, instance_ids=instance_ids)
 
-    # Only run instances that do not have a result yet
+    exclude_set = set(exclude_instances) if exclude_instances else set()
+    if exclude_set:
+        dataset = [d for d in dataset if d.instance_id not in exclude_set]
+
+    min_date_filter = (
+        filter_by_timestamp(start_time_str=_normalize_min_date_key(min_date))
+        if min_date
+        else None
+    )
+    # Only run instances on/after min_date that do not have a result yet
     to_run = [
         d for d in dataset
-        if not (LOG_EXECUTION_FILTER / d.instance_id).exists()
+        if (min_date_filter(d) if min_date_filter else True)
+        and not (EXECUTION_FILTER_LOG_DIR / d.instance_id / LOG_REPORT).exists()
     ]
     existing_images = list_images(client)
 
-    print(f"Running {len(to_run)} unevaluated instances (skipping {len(dataset) - len(to_run)} already done)...")
+    min_date_note = f", min_date>={min_date}" if min_date else ""
+    exclude_note = f", excluded {len(exclude_set)}" if exclude_set else ""
+    print(
+        f"Running {len(to_run)} instances "
+        f"(dataset {len(dataset)}, skipped {len(dataset) - len(to_run)}{min_date_note}{exclude_note})..."
+    )
     if not to_run:
         print("No instance to run.")
     else:
@@ -474,14 +502,15 @@ def main(
             timeout=timeout,
         )
         clean_images(client, existing_images, cache_level, clean)
-        collect_json_results()
+        # collect_json_results()
+    gather_all_viable_activity(origin_jsonl=dataset_name, save_path=SRC_EXECUTION_FILTER_DATA / f"{dataset_name.split('/')[-1]}")
 
 
 if __name__ == "__main__":
     # Example:
     #   python -m editbench.collection.execute_filter \
     #     --dataset-name ./crawled_data/activity/astropy-astropy-task-instances.jsonl \
-    #     --max-workers 4 --timeout 1800
+    #     --max-workers 4 --timeout 1800 --min-date 2025-10-01
     #   python -m editbench.collection.execute_filter \
     #     --dataset-name ./activity/django-django.jsonl ./activity/scikit-learn.jsonl --max-workers 4
     parser = argparse.ArgumentParser(description="Run execution filter harness (Docker run + pass/fail report).")
@@ -498,6 +527,13 @@ if __name__ == "__main__":
         nargs="*",
         default=None,
         help="Optional list of instance_ids to run; if omitted, run all.",
+    )
+    parser.add_argument(
+        "--exclude-instances",
+        type=str,
+        nargs="*",
+        default=None,
+        help="Optional list of instance_ids to skip.",
     )
     parser.add_argument(
         "--max-workers",
@@ -534,6 +570,15 @@ if __name__ == "__main__":
         default=1800,
         help="Timeout per instance in seconds (default: 1800).",
     )
+    parser.add_argument(
+        "--min-date",
+        type=str,
+        default=None,
+        help=(
+            "Only run instances with created_at on or after this date "
+            "(e.g. 2025-10-01 or 20251001)."
+        ),
+    )
     args = parser.parse_args()
     for dataset_name in args.dataset_name:
         print(f"\n>>> Running execution filter for: {dataset_name}")
@@ -546,4 +591,6 @@ if __name__ == "__main__":
             clean=args.clean,
             open_file_limit=args.open_file_limit,
             timeout=args.timeout,
+            min_date=args.min_date,
+            exclude_instances=args.exclude_instances or [],
         )

@@ -1,6 +1,9 @@
 # Inference Module
 
-Build **inference (infbench)** datasets from the final **bench** and run model inference. Predictions are written under a fixed directory layout and can be consumed by the evaluation harness.
+Build **infbench** datasets from **bench** and run model inference. Predictions are written under `experiment_results/` and consumed by the evaluation harness.
+
+> [!TIP]
+> Standard infbench files for common `run_id` values are under `crawled_data/infbench/` (Git LFS). Run `prompt_builder` only if you need custom variants or are rebuilding from bench JSONL.
 
 ## Overview
 
@@ -18,8 +21,10 @@ Create a `.env` file in the project root and set the following variables as need
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `OPENAI_KEYS` or `OPENAI_KEY` | **Yes** (for inference) | API key(s) for inference. Use `OPENAI_KEYS` for comma-separated multiple keys (load balancing). Used by `run_api` for OpenAI-compatible endpoints (OpenAI, Claude, Qwen, Gemini, DeepSeek, etc.). |
-| `BASE_URL` | No | Override API base URL for the inference client (e.g. proxy or custom endpoint). |
+| `OPENAI_KEYS` or `OPENAI_KEY` | **Yes** (for inference) | API key(s); comma-separated for load balancing |
+| `BASE_URL` | No | Override API base URL (proxy or custom endpoint) |
+
+For **evaluation only** (gold patches), API keys are not required. For **collection** (`run_collection`, GitHub API), set `GITHUB_TOKENS` in `.env` — see [Collection README](../collection/README.md).
 
 **Minimal `.env` for inference:**
 
@@ -67,8 +72,9 @@ python -m editbench.inference.prompt_builder \
 - `--save-path`: Output infbench JSONL path. Naming convention for later use: e.g. `all-task-instances_0.2.jsonl`, `all-task-instances_0.2_bm25_5.jsonl`, `all-task-instances_0.2_body_issue.jsonl` so that **run_id** can be derived (e.g. `0.2`, `0.2_bm25_5`, `0.2_body_issue`).
 - `--info-pct`: Fraction of edit steps used as history (e.g. `0.2`, `0.4`, `0.6`, `0.8`). Drives split into `pre_edits` vs `ground_truth`.
 - `--no-pr-mes` / `--no-issue-mes`: Omit PR title/body or issue message from the requirement text.
-- `--use-bm25`: Use BM25 retrieval for code context (requires repo in evaluation’s `MAP_INSTALLED_REPO` and `base_commit`).
+- `--use-bm25`: Use BM25 retrieval for code context (requires cloned repos under `tmp/beds/` per `MAP_INSTALLED_REPO`; BM25 infbench variants are also provided under `crawled_data/infbench/`)
 - `--topn`: Number of files for BM25 (default: 10).
+- `--override`: Overwrite existing output file and reprocess all tasks (default: append and skip already-written instances).
 
 **Usage note:** Run this **per variant** you need; then either merge per-repo infbench files with `merge_utils merge-infbench` (see [Collection](../collection/README.md)) or place single-repo files under `crawled_data/infbench/` with names like `{name}-task-instances_{run_id}.jsonl` so that `run_api` and evaluation can resolve paths by `dataset_name` and `run_id`.
 

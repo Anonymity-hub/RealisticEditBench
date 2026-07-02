@@ -5,12 +5,13 @@ import os
 
 load_dotenv()
 
-GITHUB_RAW = os.getenv('GITHUB_RAW')
+GITHUB_RAW = os.getenv('GITHUB_RAW', 'raw.githubusercontent.com')
 GITHUB_RAW_PROXY = os.getenv('GITHUB_RAW_PROXY')
-GITHUB_ORI = os.getenv('GITHUB_ORI')
+GITHUB_ORI = os.getenv('GITHUB_ORI', 'github.com')
 GITHUB_ORI_PROXY = os.getenv('GITHUB_ORI_PROXY')
-API_GITHUB = os.getenv('API_GITHUB')
-GITHUB_TOKEN = os.getenv('GITHUB_TOKENS').split(',')[0]
+API_GITHUB = os.getenv('API_GITHUB', 'api.github.com')
+_tokens = os.getenv('GITHUB_TOKENS', '')
+GITHUB_TOKEN = _tokens.split(',')[0].strip() if _tokens else ''
 
 
 
@@ -23,7 +24,7 @@ root_path_obj = Path(current_absolute_path).parent.parent.parent
 # Constants - DATA
 SRC_DATA = root_path_obj / "crawled_data"
 SRC_DATA.mkdir(parents=True, exist_ok=True)
-SRC_EXECUTION_FILTER_DATA = SRC_DATA / "execution_filter"
+SRC_EXECUTION_FILTER_DATA = SRC_DATA / "activity_execution"
 SRC_EXECUTION_FILTER_DATA.mkdir(parents=True, exist_ok=True)
 SRC_ACTIVITY_DATA = SRC_DATA / "activity"
 SRC_ACTIVITY_DATA.mkdir(parents=True, exist_ok=True)
@@ -46,5 +47,3 @@ LOG_EXECUTION_FILTER.mkdir(parents=True, exist_ok=True)
 SRC_EXPERIMENTS = root_path_obj / "experiment_results"
 SRC_EXPERIMENTS.mkdir(parents=True, exist_ok=True)
 
-if __name__ == "__main__":
-    print(GITHUB_TOKEN)

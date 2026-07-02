@@ -290,12 +290,12 @@ def get_prompt(prompt_style, requirement="", file_context=None, patch_list=None)
 
 
 def make_inf_bench(dataset_name, save_path, info_pct: Optional[float] = None, include_pr_mes: bool = True,
-                include_issue_mes: bool = True, use_bm25: bool = False, topn: int = 10):
+                include_issue_mes: bool = True, use_bm25: bool = False, topn: int = 10, override: bool = False):
     dataset = get_inf_datasets(dataset_name)
 
     seen_ids = set()
-    save_path = save_path.replace(".jsonl", f"_{str(info_pct)}{'_body' if include_pr_mes else ''}{'_issue' if include_pr_mes else ''}{'_bm25' if use_bm25 else ''}{f'_{topn}' if topn else ''}.jsonl")
-    mode = "a" if Path(save_path).exists() else "w"
+    save_path = save_path.replace(".jsonl", f"_{str(info_pct)}{'_body' if include_pr_mes else ''}{'_issue' if include_pr_mes else ''}{'_bm25' if use_bm25 else ''}{f'_{topn}' if use_bm25 and topn else ''}.jsonl")
+    mode = "w" if override else ("a" if Path(save_path).exists() else "w")
 
     # print task information
     print(f"================================================================================")
@@ -303,6 +303,7 @@ def make_inf_bench(dataset_name, save_path, info_pct: Optional[float] = None, in
     print(f"   - Input dataset: {dataset_name}")
     print(f"   - Output file: {save_path}")
     print(f"   - Total number of tasks: {len(dataset)}")
+    print(f"   - Override existing output: {override}")
     print(f"================================================================================")
 
     if mode == "a":
@@ -397,6 +398,11 @@ if __name__ == "__main__":
         default=10,
         help="Top-N files for BM25 retrieval (default: 10).",
     )
+    parser.add_argument(
+        "--override",
+        action="store_true",
+        help="Overwrite existing output file and reprocess all tasks (default: append and skip existing).",
+    )
     args = parser.parse_args()
     make_inf_bench(
         args.dataset_name,
@@ -406,4 +412,5 @@ if __name__ == "__main__":
         include_issue_mes=not args.no_issue_mes,
         use_bm25=args.use_bm25,
         topn=args.topn,
+        override=args.override,
     )

@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import ssl
+import subprocess
 import time
 import urllib.error
 from datetime import datetime
@@ -12,13 +13,20 @@ from http.client import IncompleteRead, RemoteDisconnected
 import requests
 from bs4 import BeautifulSoup
 from ghapi.core import GhApi
-from tenacity import retry, wait_fixed, retry_if_exception_type
+from tenacity import (
+    retry,
+    wait_fixed,
+    wait_exponential,
+    stop_after_attempt,
+    retry_if_exception_type,
+    retry_if_exception,
+)
 from fastcore.net import HTTP404NotFoundError, HTTP403ForbiddenError
 from unidiff import PatchSet
 from editbench.collection.instance.activity import write_json_line
-from editbench.config.constants import GITHUB_TOKEN
+# from editbench.config.constants import GITHUB_TOKEN
 from editbench.config.constants import TAG_VERSION
-from editbench.utils.dataset_utils import get_inf_datasets
+# from editbench.utils.dataset_utils import get_inf_datasets
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -31,6 +39,46 @@ PR_KEYWORDS = {
     "fix", "fixes", "fixed",
     "resolve", "resolves", "resolved", "related"
 }
+
+_MERGE_COMMIT_MESSAGE_PATTERNS = (
+    re.compile(r"^Merge pull request #\d+", re.IGNORECASE),
+    re.compile(r"^Merge branch ", re.IGNORECASE),
+    re.compile(r"^Merge remote-tracking branch ", re.IGNORECASE),
+)
+
+_COMBINE_HUNK_HEADER = re.compile(
+    r"^@{3} (?P<p1>[+-]\d+(?:,\d+)?) (?P<p2>[+-]\d+(?:,\d+)?) (?P<result>[+-]\d+(?:,\d+)?) @@@(?P<context>.*)$"
+)
+
+_GIT_CACHE_ROOT = Path(os.getenv("EDITBENCH_GIT_CACHE", "/tmp/editbench-git-cache"))
+
+
+def _activity_text(val) -> str:
+    """Coerce ghapi activity fields to str (body/title may be AttrDict when null)."""
+    return val if isinstance(val, str) else ""
+
+
+def _is_valid_issue_number(issue_num: str) -> bool:
+    """Ignore template placeholders like closes #0000."""
+    try:
+        return int(issue_num) > 0
+    except (TypeError, ValueError):
+        return False
+
+
+def _is_retryable_network_error(exc: BaseException) -> bool:
+    """Retry true network failures, not HTTP 4xx/5xx from the GitHub API."""
+    if isinstance(exc, urllib.error.HTTPError):
+        return False
+    return isinstance(
+        exc,
+        (
+            ssl.SSLError,
+            IncompleteRead,
+            RemoteDisconnected,
+            urllib.error.URLError,
+        ),
+    )
 
 
 class Repo:
@@ -51,17 +99,23 @@ class Repo:
         return cls(full_name.split("/")[0], full_name.split("/")[1], token)
 
     @retry(
+        wait=wait_exponential(multiplier=1, min=2, max=60),
+        stop=stop_after_attempt(15),
+        retry=retry_if_exception(_is_retryable_network_error),
+    )
+    def _call_api_with_network_retry(self, func: Callable, **kwargs):
+        return func(**kwargs)
+
+    @retry(
         wait=wait_fixed(5 * 60),
-        retry=retry_if_exception_type((HTTP403ForbiddenError, ssl.SSLError, urllib.error.URLError, IncompleteRead,
-                                       RemoteDisconnected))
+        retry=retry_if_exception_type((HTTP403ForbiddenError,))
     )
     def call_api(self, func: Callable, **kwargs):
         """
         API call wrapper with rate limit handling (checks every 5 minutes if rate limit is reset)
         """
         try:
-            values = func(**kwargs)
-            return values
+            return self._call_api_with_network_retry(func, **kwargs)
         except HTTP403ForbiddenError as e:
             rl = self.api.rate_limit.get()
             print(
@@ -70,7 +124,12 @@ class Repo:
             )
             raise
         except HTTP404NotFoundError:
-            print(f"[{self.owner}/{self.name}] Resource not found {kwargs}")
+            logger.warning(
+                "[%s/%s] Resource not found (skipping): %s",
+                self.owner,
+                self.name,
+                kwargs,
+            )
             return None
 
     def get_all_pulls(
@@ -196,21 +255,26 @@ class Repo:
             **kwargs: keyword arguments to pass to API function
         """
         page = 1
+        errors_on_page = 0
+        max_errors_on_page = 10
         args = {
             "owner": self.owner,
             "repo": self.name,
             "per_page": per_page,
             **kwargs,
         }
+        values = []
         while True:
             try:
-                # Get values from API call
-                values = func(**args, page=page)
+                values = self.call_api(func, **args, page=page)
+                if values is None:
+                    break
+                errors_on_page = 0
                 yield from values
                 if len(values) == 0:
                     break
                 if not quiet:
-                    rl = self.api.rate_limit.get()
+                    rl = self.call_api(self.api.rate_limit.get)
                     logger.info(
                         f"[{self.owner}/{self.name}] Processed page {page} ({per_page} values per page). "
                         f"Remaining calls: {rl.resources.core.remaining}"
@@ -219,20 +283,18 @@ class Repo:
                     break
                 page += 1
             except Exception as e:
-                # Rate limit handling
-                logger.error(
-                    f"[{self.owner}/{self.name}] Error processing page {page} "
-                    f"w/ token {self.token[:10]} - {e}"
-                )
-                while True:
-                    rl = self.api.rate_limit.get()
-                    if rl.resources.core.remaining > 0:
-                        break
-                    logger.info(
-                        f"[{self.owner}/{self.name}] Waiting for rate limit reset "
-                        f"for token {self.token[:10]}, checking again in 5 minutes"
+                errors_on_page += 1
+                if errors_on_page >= max_errors_on_page:
+                    logger.error(
+                        f"[{self.owner}/{self.name}] Giving up on page {page} "
+                        f"after {max_errors_on_page} errors: {e}"
                     )
-                    time.sleep(60 * 5)
+                    raise
+                logger.warning(
+                    f"[{self.owner}/{self.name}] Error processing page {page} "
+                    f"({errors_on_page}/{max_errors_on_page}): {e}. Retrying..."
+                )
+                time.sleep(min(30 * errors_on_page, 120))
         if not quiet:
             logger.info(
                 f"[{self.owner}/{self.name}] Processed {(page - 1) * per_page + len(values)} values"
@@ -250,10 +312,10 @@ class Repo:
         # Construct text to search over for issue numbers from PR body and commit messages
         text = ""
         if activity["src_type"] == "commit":
-            text = activity["commit"]["message"]
+            text = _activity_text(activity["commit"]["message"])
         elif activity["src_type"] == "pull":
-            text = activity.get("title_mes") or activity.get("title")
-            text += "\n" + (activity.get("body_mes") or activity.get("body"))
+            text = _activity_text(activity.get("title_mes") or activity.get("title"))
+            text += "\n" + _activity_text(activity.get("body_mes") or activity.get("body"))
             commits = self.get_all_loop(
                 self.api.pulls.list_commits, pull_number=activity["number"], quiet=True
             )
@@ -267,8 +329,9 @@ class Repo:
         resolved_issues_set = set()
         if references:
             for word, issue_num in references:
+                if not _is_valid_issue_number(issue_num):
+                    continue
                 if any(keyword in word.lower() for keyword in PR_KEYWORDS):
-                    # if word.lower() in PR_KEYWORDS:
                     resolved_issues_set.add(issue_num)
         return list(resolved_issues_set)
 
@@ -339,6 +402,10 @@ def get_version_and_commit(repo, commit):
     return tag, commit_version
 
 
+def resolve_version_for_commit(repo: "Repo", base_commit: str) -> tuple[str, str]:
+    """Return (version, version_commit) for a repository commit."""
+    return get_version_and_commit(repo, base_commit)
+
 
 def find_nearest_release(
         repo,
@@ -383,12 +450,14 @@ def extract_problem_statement_and_hints(pull: dict, repo: Repo) -> tuple[str, li
         return extract_problem_statement_and_hints_django(pull, repo)
     text = ""
     all_hint_texts = list()
-    for issue_number in pull["resolved_issues"]:
+    for issue_number in pull.get("resolved_issues", []):
+        if not _is_valid_issue_number(str(issue_number)):
+            continue
         issue = repo.call_api(
             repo.api.issues.get,
             owner=repo.owner,
             repo=repo.name,
-            issue_number=issue_number,
+            issue_number=int(issue_number),
         )
         if issue is None:
             continue
@@ -591,29 +660,272 @@ def classify_files(file_list: list[dict]):
     return files, files_work, files_test, files_no_edit, files_gt, files_config, files_other
 
 
-def get_patches(file_list, related_commits_info, files_work, files_test):
+def _commit_info_message(commit_info) -> str:
+    try:
+        if isinstance(commit_info, dict):
+            return (commit_info.get("commit") or {}).get("message", "") or ""
+        return commit_info.commit.message or ""
+    except Exception:
+        return ""
+
+
+def _commit_has_nonempty_file_patch(commit_info) -> bool:
+    for file in _commit_info_files(commit_info):
+        if _file_patch_text(file):
+            return True
+    return False
+
+
+def is_redundant_merge_commit(commit_info) -> bool:
+    """
+    Return True for merge commits that should not become work_patch_list steps,
+    e.g. "Merge pull request #10 from user/branch".
+
+    Merge commits with non-empty file patches (e.g. conflict resolution) are kept.
+    """
+    message = _commit_info_message(commit_info).strip()
+    if not message:
+        return False
+    first_line = message.splitlines()[0].strip()
+    if not any(pattern.match(first_line) for pattern in _MERGE_COMMIT_MESSAGE_PATTERNS):
+        return False
+    return not _commit_has_nonempty_file_patch(commit_info)
+
+
+def _file_patch_text(file) -> str:
+    if isinstance(file, dict):
+        return file.get("patch") or ""
+    return getattr(file, "patch", None) or ""
+
+
+def _format_file_patch(filename: str, patch_body: str) -> str:
+    return (
+        f"diff --git a/{filename} b/{filename}\n"
+        f"--- a/{filename}\n+++ b/{filename}\n{patch_body}"
+    )
+
+
+def _commit_info_files(commit_info) -> list:
+    try:
+        if isinstance(commit_info, dict):
+            return commit_info.get("files") or []
+        return getattr(commit_info, "files", None) or []
+    except Exception:
+        return []
+
+
+def _file_entry_filename(file) -> str:
+    if isinstance(file, dict):
+        return file["filename"]
+    return file.filename
+
+
+def _file_entry_status(file) -> str:
+    if isinstance(file, dict):
+        return file.get("status", "")
+    return getattr(file, "status", "") or ""
+
+
+def _commit_sha(commit_info) -> str:
+    if isinstance(commit_info, dict):
+        return commit_info.get("sha") or ""
+    return getattr(commit_info, "sha", "") or ""
+
+
+def _commit_parents(commit_info) -> list:
+    if isinstance(commit_info, dict):
+        parents = commit_info.get("parents") or []
+        return [p.get("sha", "") for p in parents if p.get("sha")]
+    parents = getattr(commit_info, "parents", None) or []
+    return [getattr(p, "sha", "") for p in parents if getattr(p, "sha", None)]
+
+
+def _is_merge_commit(commit_info) -> bool:
+    return len(_commit_parents(commit_info)) >= 2
+
+
+def _git_cache_dir(repo: "Repo") -> Path:
+    return _GIT_CACHE_ROOT / f"{repo.owner}__{repo.name}.git"
+
+
+def _ensure_bare_git_repo(repo: "Repo") -> Path:
+    git_dir = _git_cache_dir(repo)
+    git_dir.parent.mkdir(parents=True, exist_ok=True)
+    if not git_dir.exists():
+        clone_url = f"https://github.com/{repo.owner}/{repo.name}.git"
+        subprocess.run(
+            ["git", "clone", "--bare", "--quiet", clone_url, str(git_dir)],
+            check=True,
+        )
+    else:
+        subprocess.run(["git", "fetch", "--quiet"], cwd=str(git_dir), check=True)
+    return git_dir
+
+
+def _combine_hunk_line_to_unified(hline: str) -> Optional[str]:
+    """Map one ``diff --cc`` hunk line to unified-diff form (first parent → merge)."""
+    if len(hline) < 2:
+        return None
+    col1, col2 = hline[0], hline[1]
+    content = hline[2:]
+    if col1 == "+" and col2 == "+":
+        return "+" + content
+    if col1 == "-" and col2 == " ":
+        return "-" + content
+    if col1 == " " and col2 == "-":
+        return None
+    if col1 == " " and col2 == " ":
+        return " " + content
+    return None
+
+
+def _combine_diff_to_unified(filename: str, combine_patch: str) -> str:
+    """
+    Convert ``git show`` combine diff (``diff --cc``) to a unified diff against
+    the first parent, matching the per-commit view on GitHub.
+    """
+    if not combine_patch.strip().startswith("diff --cc"):
+        return ""
+
+    lines = combine_patch.splitlines()
+    body_lines: list[str] = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith("diff --git") or line.startswith("index ") or line.startswith("---") or line.startswith("+++"):
+            i += 1
+            continue
+        match = _COMBINE_HUNK_HEADER.match(line)
+        if not match:
+            i += 1
+            continue
+        body_lines.append(
+            f"@@ {match.group('p1')} {match.group('result')} @@{match.group('context')}"
+        )
+        i += 1
+        while i < len(lines) and not lines[i].startswith("@@"):
+            unified_line = _combine_hunk_line_to_unified(lines[i])
+            if unified_line is not None:
+                body_lines.append(unified_line)
+            i += 1
+    if not body_lines:
+        return ""
+    return _format_file_patch(filename, "\n".join(body_lines) + "\n")
+
+
+def _get_merge_file_patch(repo: "Repo", commit_sha: str, filename: str) -> str:
+    if not commit_sha:
+        return ""
+    try:
+        git_dir = _ensure_bare_git_repo(repo)
+        combine_patch = subprocess.check_output(
+            [
+                "git",
+                "--git-dir",
+                str(git_dir),
+                "show",
+                "--format=",
+                "--no-renames",
+                "-p",
+                commit_sha,
+                "--",
+                filename,
+            ],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        logger.warning(
+            "Failed to read combine diff for %s/%s@%s (%s): %s",
+            repo.owner,
+            repo.name,
+            commit_sha[:7],
+            filename,
+            exc,
+        )
+        return ""
+    return _combine_diff_to_unified(filename, combine_patch)
+
+
+def get_patches(file_list, related_commits_info, files_work, files_test, repo: Optional["Repo"] = None):
     whole_patch = []
     work_patch_list = [[] for _ in range(len(files_work))]
     test_patch = []
     for file in file_list:
-        if file["status"] == "modified":
-            if file["filename"] in files_work:
-                patch = (f"diff --git a/{file['filename']} b/{file['filename']}\n"
-                         f"--- a/{file['filename']}\n+++ b/{file['filename']}\n{file['patch']}")
+        if _file_entry_status(file) == "modified":
+            filename = _file_entry_filename(file)
+            patch_body = _file_patch_text(file)
+            if not patch_body:
+                continue
+            patch = _format_file_patch(filename, patch_body)
+            if filename in files_work:
                 whole_patch.append(patch)
-            if file["filename"] in files_test:
-                patch = (f"diff --git a/{file['filename']} b/{file['filename']}\n"
-                         f"--- a/{file['filename']}\n+++ b/{file['filename']}\n{file['patch']}")
+            if filename in files_test:
                 test_patch.append(patch)
     whole_patch = "\n".join(whole_patch)
     test_patch = "\n".join(test_patch)
 
     for commit_info in related_commits_info:
-        for file in commit_info["files"]:
-            if file["filename"] in files_work:
-                index = files_work.index(file["filename"])
-                patch = (f"diff --git a/{file['filename']} b/{file['filename']}\n"
-                         f"--- a/{file['filename']}\n+++ b/{file['filename']}\n{file['patch']}")
+        if is_redundant_merge_commit(commit_info):
+            continue
+        commit_sha = _commit_sha(commit_info)
+        for file in _commit_info_files(commit_info):
+            filename = _file_entry_filename(file)
+            if filename not in files_work:
+                continue
+            if _is_merge_commit(commit_info) and repo is not None:
+                patch = _get_merge_file_patch(repo, commit_sha, filename)
+                if not patch:
+                    continue
+                index = files_work.index(filename)
                 work_patch_list[index].append(patch)
+                continue
+            patch_body = _file_patch_text(file)
+            if not patch_body:
+                continue
+            index = files_work.index(filename)
+            work_patch_list[index].append(_format_file_patch(filename, patch_body))
 
     return whole_patch, work_patch_list, test_patch
+
+
+def rebuild_work_patch_list(activity, repo) -> list:
+    """
+    Re-fetch PR/commit patches and rebuild work_patch_list with current rules.
+    """
+    files_work = activity.files_work
+    files_test = activity.files_test
+
+    if activity.src_type == "pull":
+        pull_number = int(activity.instance_num)
+        related_files = list(
+            repo.get_all_loop(repo.api.pulls.list_files, pull_number=pull_number)
+        )
+        related_commits = list(
+            repo.get_all_loop(repo.api.pulls.list_commits, pull_number=pull_number)
+        )
+        related_commits_info = [
+            repo.call_api(
+                repo.api.repos.get_commit,
+                owner=repo.owner,
+                repo=repo.name,
+                ref=related_commit["sha"],
+            )
+            for related_commit in related_commits
+        ]
+    elif activity.src_type == "commit":
+        commit_info = repo.call_api(
+            repo.api.repos.get_commit,
+            owner=repo.owner,
+            repo=repo.name,
+            ref=activity.instance_num,
+        )
+        related_files = _commit_info_files(commit_info)
+        related_commits_info = [commit_info]
+    else:
+        raise ValueError(f"Unsupported src_type: {activity.src_type}")
+
+    _, work_patch_list, _ = get_patches(
+        related_files, related_commits_info, files_work, files_test, repo=repo
+    )
+    return work_patch_list

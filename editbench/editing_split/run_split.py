@@ -8,6 +8,10 @@ from editbench.collection.instance.activity import load_datasets_from_jsonl, Act
 from editbench.config import SRC_EXECUTION_FILTER_DATA
 from editbench.editing_split.constants import EDITING_SPLIT_DIR, REPO_AND_LOG_DIR
 from editbench.utils.github_api_utils import get_github_file_content
+from editbench.editing_split.diff_utils import (
+    ensure_diff_trailing_padding,
+    split_patch_by_file,
+)
 from editbench.editing_split.validation import execute_script, validation_instance
 
 
@@ -94,7 +98,7 @@ def get_original_file(repo: str, commit: str, file_path: str, instance_id: str):
         save_file_path.write_text(read_file_path.read_text())
 
 
-def split_instance(instance: Activity):
+def split_instance(instance: Activity, warn_only: bool = False):
     """
     Splits an original Activity instance's patch history into individual files and subdirectories.
 
@@ -123,23 +127,34 @@ def split_instance(instance: Activity):
     patch_histories_path.mkdir(exist_ok=True, parents=True)
 
     whole_diff_path = patch_histories_path / "whole.diff"
-    # Write to work_file_path / whole.diff
-    whole_diff_path.write_text(instance.work_patch)
+    whole_diff_path.write_text(instance.work_patch or "")
+    file_diffs_by_path = split_patch_by_file(instance.work_patch or "")
 
     for idx, work_file in enumerate(instance.files_work):
         work_file_str = work_file.replace("/", "__").replace("\\", "__").replace(".", "__")
         work_file_path = patch_histories_path / work_file_str
         work_file_path.mkdir(exist_ok=True, parents=True)
 
+        file_whole_diff = file_diffs_by_path.get(work_file, "")
+        if file_whole_diff:
+            (work_file_path / "whole.diff").write_text(
+                ensure_diff_trailing_padding(file_whole_diff)
+            )
+
         # Write to sub diff
         diff_list = instance.work_patch_list[idx]
         for i_sub, diff in enumerate(diff_list):
             sub_diff_path = work_file_path / f"whole-{i_sub + 1}.diff"
-            sub_diff_path.write_text(diff)
+            sub_diff_path.write_text(ensure_diff_trailing_padding(diff))
         # Get Original file
         get_original_file(instance.repo, instance.base_commit, work_file, instance_id)
 
-    validation_instance(instance, instance.work_patch_list, is_output_changed_file=True)
+    validation_instance(
+        instance,
+        instance.work_patch_list,
+        is_output_changed_file=True,
+        warn_only=warn_only,
+    )
     print(f"[{datetime.now()}]: End instance {instance.instance_id}")
 
 
@@ -161,7 +176,7 @@ def main(dataset_name: str,
     dataset = [ins for ins in dataset if datetime.fromisoformat(ins.created_at.rstrip('Z')).date() >= start_date]
 
     for instance in tqdm(dataset, desc="Splitting instances"):
-        # if instance.instance_id != "scikit-learn__scikit-learn-pull-31556":
+        # if instance.instance_id != "astropy__astropy-pull-19404":
         #     continue
         # if instance.instance_id != "matplotlib__matplotlib-pull-29879":
         #     continue
@@ -169,20 +184,44 @@ def main(dataset_name: str,
             # print(f"Skipp instance: {instance.instance_id}")
             continue
 
-        split_instance(instance)
+        split_instance(instance, warn_only=True)
     print(">>>>>>>>>>>>>>>>>>>>>> End: init instances. >>>>>>>>>>>>>>>>>>>>>>>>>")
 
 
+def resolve_dataset_path(name: str) -> str:
+    if name.endswith(".jsonl") or os.path.isfile(name):
+        return name
+    return f"{SRC_EXECUTION_FILTER_DATA}/{name.replace('/', '-')}-task-instances.jsonl"
+
+
 if __name__ == "__main__":
-    """
-    extract merged commits
-    """
-    # dataset_names = ["matplotlib/matplotlib"]
-    # dataset_names = ["scikit-learn/scikit-learn"]
-    # dataset_names = ["sphinx-doc/sphinx"]
-    # dataset_names = ["pydata/xarray"]
-    dataset_names = ["pylint-dev/pylint"]
-    for name in dataset_names:
-        path = f"{SRC_EXECUTION_FILTER_DATA}/{name.replace('/', '-')}-task-instances.jsonl"
-        main(path)
+    parser = ArgumentParser(description="Split activity instances into per-file patch histories.")
+    parser.add_argument(
+        "--dataset-name",
+        type=str,
+        nargs="+",
+        required=True,
+        help=(
+            "Repo name(s) (e.g. pylint-dev/pylint) or path(s) to task-instances jsonl; "
+            "runs over each in turn."
+        ),
+    )
+    parser.add_argument(
+        "--instance-ids",
+        type=str,
+        nargs="*",
+        default=None,
+        help="Optional instance_ids to run; if omitted, run all in the dataset.",
+    )
+    parser.add_argument(
+        "--time-window",
+        type=str,
+        default="20241201",
+        help="Only split instances with created_at on or after this date (YYYYMMDD, default: 20241201).",
+    )
+    args = parser.parse_args()
+    for name in args.dataset_name:
+        path = resolve_dataset_path(name)
+        print(f"\n>>> Running split for: {path}")
+        main(path, instance_ids=args.instance_ids, time_window=args.time_window)
 

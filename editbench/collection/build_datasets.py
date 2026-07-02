@@ -2,11 +2,13 @@ import json
 import logging
 import os
 import re
+from datetime import datetime, timezone
 from typing import Optional, Callable, List, Dict, TextIO
 
 from dotenv import load_dotenv
 from tqdm import tqdm
 
+from editbench.collection.fetch_activity import _parse_date_boundary
 from editbench.collection.instance.activity import Activity, filter_by_ft_valid, filter_by_test_valid, \
     write_json_line
 from editbench.collection.utils import Repo, extract_problem_statement_and_hints, classify_files, get_patches, \
@@ -67,7 +69,8 @@ def _process_activities(
         seen_activity: set[str],
         f_all: TextIO,
         f_output: TextIO,
-        stats: dict
+        stats: dict,
+        min_date: Optional[str] = None,
 ) -> dict:
     """
     Generic activity processing function (supports commits/PRs)
@@ -94,6 +97,7 @@ def _process_activities(
         return item.get("created_at", "")
 
     all_data.sort(key=sort_key, reverse=True)
+    min_date_utc = _parse_date_boundary(min_date) if min_date else None
 
     for i, data in tqdm(
             enumerate(all_data),
@@ -101,6 +105,28 @@ def _process_activities(
             total=total_lines,
             unit="instance"
     ):
+        if min_date_utc is not None:
+            created_at_str = data.get("created_at", "")
+            if created_at_str:
+                try:
+                    if created_at_str.endswith("Z"):
+                        activity_created = datetime.strptime(
+                            created_at_str, "%Y-%m-%dT%H:%M:%SZ"
+                        ).replace(tzinfo=timezone.utc)
+                    else:
+                        activity_created = datetime.fromisoformat(
+                            created_at_str.replace("Z", "+00:00")
+                        ).astimezone(timezone.utc)
+                    if activity_created < min_date_utc:
+                        logger.info(
+                            f"Reached {activity_type} data before min_date {min_date}, stopping."
+                        )
+                        break
+                except ValueError:
+                    logger.warning(
+                        f"Skipping unparseable created_at {created_at_str!r} for min_date check"
+                    )
+
         stats["total_instances"] += 1
         try:
             # Resume and deduplication check
@@ -170,7 +196,8 @@ def run_build_datasets(
         ft_filters: Optional[List[Callable[[Activity], bool]]] = None,
         active_filters: Optional[List[Callable[[Activity], bool]]] = None,
         token: Optional[str] = None,
-        idx_pull: int = 0
+        idx_pull: int = 0,
+        min_date: Optional[str] = None,
 ):
     """
     Filter Criteria:
@@ -186,6 +213,7 @@ def run_build_datasets(
     :param active_filters: self-designed filters func
     :param token: GitHub API token
     :param idx_pull: start index of prs data
+    :param min_date: exclude activity before this date (YYYY-MM-DD or YYYYMMDD)
     """
     if ft_filters is None:
         ft_filters = [filter_by_ft_valid()]
@@ -229,7 +257,8 @@ def run_build_datasets(
             seen_activity=seen_activity,
             f_all=f_all,
             f_output=f_output,
-            stats=stats
+            stats=stats,
+            min_date=min_date,
         )
 
         repo_names = ", ".join(repos.keys()) or "None"

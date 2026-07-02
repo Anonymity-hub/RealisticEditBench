@@ -804,7 +804,6 @@ def main(
     if is_gold:
         print("Using gold predictions - ignoring predictions_path")
         predictions = get_gold_predictions(dataset_name, split)
-        # For gold, construct the output path for display
     else:
         if predictions_path.endswith(".json"):
             with open(predictions_path, "r") as f:
@@ -814,6 +813,13 @@ def main(
                 predictions = [json.loads(line) for line in f]
         else:
             raise ValueError("Predictions path must be \"gold\", .json, or .jsonl")
+
+    if not predictions:
+        raise ValueError(
+            f"No predictions loaded for dataset '{dataset_name}' (run_id={run_id}).\n"
+            "If you use infbench JSONL from this repo, the file may be a Git LFS pointer.\n"
+            "Run: git lfs install && git lfs pull --include=\"crawled_data/infbench/*.jsonl\""
+        )
 
     model_name = get_model_name_path(predictions[0])
 

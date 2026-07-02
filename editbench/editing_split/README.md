@@ -1,6 +1,9 @@
 # Editing Split Module
 
-Tools to split an activity’s full patch into step-wise sub-diffs, validate that they apply correctly, and expose structured patch history for the benchmark. The **editing_split** step is required before **gather_bench**: it consumes **execution-filter** JSONL and produces per-instance split data under `patch_histories/`.
+Split an activity’s full patch into step-wise sub-diffs, validate apply chains, and produce structured patch history for **gather_bench**. Consumes **activity-execution** JSONL (`crawled_data/activity_execution/`) and writes to `patch_histories/`.
+
+> [!NOTE]
+> This repository includes `patch_histories/` for all 712 instances. Use this module to regenerate splits from activity-execution JSONL or to refine individual instances.
 
 ## Overview
 
@@ -17,27 +20,31 @@ Tools to split an activity’s full patch into step-wise sub-diffs, validate tha
 
 ## 1. Initial run: `run_split`
 
-Reads **execution-filter** activity JSONL and, for each instance, writes the full patch and per-file sub-diffs under `patch_histories/{instance_id}/`, fetches original files at `base_commit`, and runs one validation pass.
+Reads **activity-execution** JSONL and, for each instance, writes the full patch and per-file sub-diffs under `patch_histories/{instance_id}/`, fetches original files at `base_commit`, and runs one validation pass.
 
-**Input:** Path to execution-filtered task-instances JSONL (e.g. `./crawled_data/execution_filter/owner-repo-task-instances.jsonl`).
+**Input:** Path to activity-execution task-instances JSONL (e.g. `./crawled_data/activity_execution/owner-repo-task-instances.jsonl`), or a repo name resolved under that directory.
 
 **Commands**
 
 ```bash
-# Run on one repo’s execution-filter output (default time_window = 20241201)
+# Run on one repo (resolved to crawled_data/activity_execution/astropy-astropy-task-instances.jsonl)
 python -m editbench.editing_split.run_split \
-  ./crawled_data/execution_filter/astropy-astropy-task-instances.jsonl
+  --dataset-name astropy/astropy
+
+# Or pass a JSONL path directly
+python -m editbench.editing_split.run_split \
+  --dataset-name ./crawled_data/activity_execution/astropy-astropy-task-instances.jsonl
 
 # With custom time window (YYYYMMDD): only instances with created_at >= that date
 python -m editbench.editing_split.run_split \
-  ./crawled_data/execution_filter/owner-repo-task-instances.jsonl \
+  --dataset-name astropy/astropy \
   --time-window 20240101
 
-# Restrict to specific instance IDs (when run as script, you can pass instance_ids via main())
-# From CLI you may need to patch run_split to accept --instance-ids; otherwise run on full dataset.
+# Restrict to specific instance IDs
+python -m editbench.editing_split.run_split \
+  --dataset-name astropy/astropy \
+  --instance-ids astropy__astropy-pull-123 astropy__astropy-pull-456
 ```
-
-**Note:** `run_split`’s `main()` in the script block uses a hardcoded list of `dataset_names` and `SRC_EXECUTION_FILTER_DATA` paths. For a single file, call the module with that file path as the first argument, or adjust the `if __name__ == "__main__"` block to accept a path and optional `--instance-ids`.
 
 **Output under `patch_histories/{instance_id}/`**
 
@@ -119,18 +126,18 @@ python -m editbench.editing_split.diff_utils trim \
 
 Re-runs the apply pipeline for each instance: clone (if needed), checkout `base_commit` for work files, apply each step’s patches in order, and check for apply errors. Results are summarized per repo.
 
-**Input:** Same execution-filtered (or split-ready) task-instances JSONL path.
+**Input:** Same activity-execution (or split-ready) task-instances JSONL path.
 
 **Commands**
 
 ```bash
 # Validate all instances in the dataset
 python -m editbench.editing_split.validation \
-  --dataset_name ./crawled_data/execution_filter/owner-repo-task-instances.jsonl
+  --dataset_name ./crawled_data/activity_execution/owner-repo-task-instances.jsonl
 
 # Restrict to specific instance IDs
 python -m editbench.editing_split.validation \
-  --dataset_name ./crawled_data/execution_filter/owner-repo-task-instances.jsonl \
+  --dataset_name ./crawled_data/activity_execution/owner-repo-task-instances.jsonl \
   --instance_ids astropy__astropy-pull-123 astropy__astropy-pull-456
 ```
 
@@ -145,11 +152,40 @@ python -m editbench.editing_split.validation \
 
 ---
 
+## 4. PR sub-edit helper (`scripts/pr_subedit_instance.py`)
+
+For manual or agent-assisted refinement of step-wise splits, use the helper script at the repo root. It supports status checks, strict validation (global `git apply` on the testbed), per-file validation, prompt printing, and optional `cursor agent` batch runs.
+
+**Skills:** Splitting principles and workflow live under `skills/pr-subedit-principles/` and `skills/pr-subedit-workflow/`.
+
+**Commands**
+
+```bash
+# Instance status (strict validate when activity_execution jsonl is available)
+python scripts/pr_subedit_instance.py status astropy__astropy-pull-19055
+
+# Strict validation (default): global step order + git apply on testbed
+python scripts/pr_subedit_instance.py validate astropy__astropy-pull-19055
+
+# Per-file apply_patch_batch only (fast, no cross-file step conflicts)
+python scripts/pr_subedit_instance.py validate astropy__astropy-pull-19055 --per-file
+
+# Print the standard Cursor Agent prompt
+python scripts/pr_subedit_instance.py prompt astropy__astropy-pull-19055
+
+# Run cursor agent for one instance (then validate)
+python scripts/pr_subedit_instance.py agent astropy__astropy-pull-19055
+```
+
+By default, strict validation scans `crawled_data/activity_execution/*-task-instances.jsonl` for the instance. Pass `--dataset path/to.jsonl` to override.
+
+---
+
 ## Recommended workflow
 
-1. **run_split** on execution-filter JSONL → initial `patch_histories/` and one validation pass.
-2. Use **diff_utils** subcommands as needed to adjust or add steps (e.g. `quick_diff` for step 2, 3, …; `gene`/`apply`/`diff_minus` for custom splits).
-3. **validation** on the same JSONL → confirm all instances apply cleanly; fix any that fail.
+1. **run_split** on activity-execution JSONL → initial `patch_histories/` and one validation pass.
+2. Use **diff_utils** subcommands and/or **pr_subedit_instance** (with skills) to adjust or add steps (e.g. `quick_diff` for step 2, 3, …; `gene`/`apply`/`diff_minus` for custom splits).
+3. **validation** or `scripts/pr_subedit_instance.py validate` on the same JSONL → confirm all instances apply cleanly; fix any that fail.
 4. Run **gather_bench** (see [Collection](../collection/README.md)) so that only instances with valid `work_patch_list` are written to bench JSONL.
 
 After that, you can build infbench and run inference/evaluation (see [Inference](../inference/README.md) and [Evaluation](../evaluation/README.md)).

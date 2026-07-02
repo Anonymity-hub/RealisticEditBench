@@ -6,6 +6,9 @@
     <a href="https://github.com/Anonymity-hub/RealisticEditBench">
         <img alt="GitHub" src="https://img.shields.io/badge/GitHub-000?logo=github&color=181717">
     </a>
+    <a href="https://realisticeditbench.github.io">
+        <img alt="Homepage" src="https://img.shields.io/badge/🌐_Homepage-2ea44f">
+    </a>
     <a href="#dataset">
         <img src="https://img.shields.io/badge/📂_Datasets-F1CA42" alt="Datasets">
     </a>
@@ -13,7 +16,7 @@
         <img alt="Leaderboard" src="https://img.shields.io/badge/🏆_Leaderboard-4285F4">
     </a>
     <a href="https://www.python.org/">
-    <img alt="Python" src="https://img.shields.io/badge/Python-3.9+-1f425f.svg?color=blue">
+    <img alt="Python" src="https://img.shields.io/badge/Python-3.10--3.12-1f425f.svg?color=blue">
   </a>
   <a href="LICENSE">
     <img alt="License" src="https://img.shields.io/badge/License-MIT-blue">
@@ -21,163 +24,200 @@
     <hr>
 </div>
 
-## 🆕 News
+## News
 
-- **[2026-02-03]**: We have launched the **RealisticEditBench Leaderboard**. You can access the leaderboard [here](https://realisticeditbench.github.io/). We welcome everyone to evaluate your models and submit PRs to update the leaderboard!
+- **[2026-06-30]** — Released an updated benchmark with **712** instances. See [Dataset](#dataset) and the module guides below.
+- **[2026-02-03]** — [Leaderboard](https://realisticeditbench.github.io/) is live. Submit PRs to add your model results.
+- **[2026-01-30]** — Initial release.
 
-- **[2026-01-30]**: **RealisticEditBench** is now available. You can access the dataset on [here](#dataset) and start evaluating your models.
+---
 
+## Overview
 
-## 🎯 Overview
-
-**RealisticEditBench** is a benchmark for evaluating large language models on **real-world incremental code editing tasks** collected from GitHub pull requests. Unlike traditional benchmarks that focus on isolated code generation or bug fixing, RealisticEditBench challenges models to perform **incremental code edits** that reflect how developers actually modify code in production environments.
-
-Given a **codebase**, <span style="color: #888;">a task description (optional, from PR/issue)</span>, and **previous edit history**, a language model is tasked with generating a *patch* that correctly implements the required changes in the context of existing code modifications.
+**RealisticEditBench** evaluates LLMs on **incremental code editing** from real GitHub pull requests. Each task provides a codebase, optional PR/issue context, and prior edit history; the model must produce the next patch in sequence.
 
 <p align="center">
   <img src="./assets/process.png" style="width:80%; margin-left:auto; margin-right:auto;">
 </p>
 
-### Key Features
+| | |
+|---|---|
+| **712 instances** | Curated PRs across astropy, django, matplotlib, sympy, xarray, scikit-learn, sphinx, pylint, … |
+| **Incremental edits** | Step-wise `work_patch_list`; infbench splits history vs. `ground_truth` |
+| **Docker evaluation** | Apply patch → run project tests → resolved / similarity metrics |
+| **Variants** | Info ratios 0.2–0.8, BM25 context, with/without issue body |
 
-- **Incremental Editing**: Tasks require models to understand and build upon previous code changes, simulating real-world development workflows
-- **Project-Level Context**: Each task includes relevant codebase context, requiring models to reason about project structure and dependencies
-- **Real-World Tasks**: All instances are collected from actual GitHub pull requests across diverse open-source projects
-- **Comprehensive Evaluation**: Supports both execution-based testing and code similarity metrics
-- **Docker-Based Evaluation**: Reproducible evaluation harness using Docker containers
+---
 
-## ⚡ Quick Start
+## Quick Start (run evaluation)
 
-### 1. Installation
+Most users only need this path: clone → install → pull LFS data → run gold or model evaluation.
+
+### 1. Clone and fetch dataset (Git LFS)
+
+Large JSONL files are stored with **Git LFS**. After cloning, pull them before running evaluation or inference:
 
 ```bash
 git clone https://github.com/Anonymity-hub/RealisticEditBench.git
 cd RealisticEditBench
+git lfs install
+git lfs pull
+```
+
+> [!IMPORTANT]
+> Without LFS, `crawled_data/bench/` and `crawled_data/infbench/` files are tiny pointer stubs (~130 bytes), not real JSONL. The loader will try `git lfs pull` automatically when possible, but **`git-lfs` must be installed**.
+
+Verify a file is real data (expect tens or hundreds of MB, not ~130 bytes):
+
+```bash
+ls -lh crawled_data/infbench/all-task-instances_0.2.jsonl
+```
+
+### 2. Install the package
+
+Use **Python 3.10, 3.11, or 3.12** (3.13 is not supported).
+
+```bash
 pip install -e .
 ```
 
-### 2. Environment Setup
+If `pip install` fails building `tree-sitter` or `editdistance`, install a C/C++ toolchain first (e.g. on Ubuntu: `sudo apt install build-essential`).
 
-RealisticEditBench uses Docker for reproducible evaluations. Follow the [Docker setup guide](https://docs.docker.com/engine/install/) to install Docker on your machine.
+### 3. Docker
+
+Evaluation requires Docker. See the [Docker install guide](https://docs.docker.com/engine/install/).
 
 > [!WARNING]
-> **System Requirements**
-> 
-> - RealisticEditBench evaluation currently **does not support Windows**.
-> - Some Docker environments may not work properly on Mac M-series (ARM64) architectures.
-> - To ensure all environments can be set up successfully, we **recommend using Ubuntu 22.04 on x86_64 architecture**.
+> **Platform**
+> - Windows is **not** supported for evaluation.
+> - Mac ARM (M-series) may have Docker compatibility issues.
+> - Recommended: **Ubuntu 22.04 x86_64**, ≥120 GB disk, 16 GB RAM, 8 CPU cores.
 
-### 3. Access the Dataset
+### 4. Gold evaluation (oracle upper bound)
 
-To access RealisticEditBench, you can load the dataset from the local files:
+Uses `ground_truth` from infbench — no API keys required:
+
+```bash
+python -m editbench.evaluation.run_evaluation run \
+    --dataset_name all \
+    --predictions_path gold \
+    --run_id 0.2 \
+    --max_workers 2
+```
+
+Details: [Evaluation guide](editbench/evaluation/README.md).
+
+### 5. Model inference + evaluation (optional)
+
+Create `.env` in the repo root (see [Inference guide](editbench/inference/README.md)):
+
+```bash
+OPENAI_KEYS=your-api-key
+```
+
+```bash
+# Generate predictions
+python -m editbench.inference.run_api \
+    --model your-model-name \
+    --dataset_name all \
+    --run_id 0.2
+
+# Evaluate predictions
+python -m editbench.evaluation.run_evaluation run \
+    --dataset_name all \
+    --model your-model-name \
+    --run_id 0.2 \
+    --max_workers 2
+```
+
+---
+
+## Reproducing workflows
+
+| Goal | Path | Guide |
+|------|------|--------|
+| **Run models on the 712-instance benchmark** | Quick Start above | This README + [Inference](editbench/inference/README.md) + [Evaluation](editbench/evaluation/README.md) |
+| **Inspect or rebuild data from GitHub PRs** | collection → editing_split → gather_bench → … | [Collection](editbench/collection/README.md) → [Editing Split](editbench/editing_split/README.md) |
+| **Refine step-wise patch splits** | `scripts/pr_subedit_instance.py` + `skills/` | [Editing Split](editbench/editing_split/README.md) |
+
+---
+
+## Load data in Python
+
+**Bench** (`crawled_data/bench/`) holds full task metadata and `work_patch_list`.  
+**Infbench** (`crawled_data/infbench/`) adds `prompt`, `pre_edits`, and `ground_truth` for inference/evaluation.
 
 ```python
 from editbench.utils.dataset_utils import get_inf_datasets
 
-# Load the benchmark dataset
-dataset = get_inf_datasets("crawled_data/bench/all-task-instances.jsonl")
+# For evaluation / inference (has ground_truth)
+instances = get_inf_datasets("crawled_data/infbench/all-task-instances_0.2.jsonl")
+print(len(instances), instances[0].instance_id)
+
+# Bench only (metadata + patch history, no ground_truth split)
+bench = get_inf_datasets("crawled_data/bench/all-task-instances.jsonl")
 ```
 
-### 4. Run Evaluation
-
-Evaluate patch predictions on RealisticEditBench with the following command:
-
-```bash
-python -m editbench.evaluation.run_evaluation run \
-    --dataset_name "all" \
-    --predictions_path 'gold' \
-    --max_workers 2 \
-    --run_id "0.2"
-```
-
-> [!NOTE]
-> For detailed usage instructions, see the [Evaluation Guide](editbench/evaluation/README.md).
-
-## 📖 Documentation
-
-RealisticEditBench is organized into several modules, each with its own documentation:
-
-- **[Collection](editbench/collection/README.md)**: Data collection pipeline for gathering real-world code editing tasks from GitHub
-- **[Editing Split](editbench/editing_split/README.md)**: Tools for splitting and validating incremental code edits
-- **[Inference](editbench/inference/README.md)**: Run inference with various language models and generate predictions
-- **[Evaluation](editbench/evaluation/README.md)**: Comprehensive evaluation harness with Docker-based testing
-
-## 💻 Usage
-
-### Running Inference
-
-Generate predictions for your model:
-
-```bash
-python -m editbench.inference.run_api \
-    --model gpt-5-codex \
-    --dataset_name all \
-    --run_id "0.2"
-```
-
-### Evaluating Predictions
-
-Evaluate your model's predictions:
-
-```bash
-python -m editbench.evaluation.run_evaluation run \
-    --dataset_name "all" \
-    --model gpt-5-codex \
-    --max_workers 2 \
-    --run_id "0.2"
-```
-
-> [!WARNING]
-> RealisticEditBench evaluation can be resource intensive. We recommend running on a machine with at least 120GB of free storage, 16GB of RAM, and 8 CPU cores.
+---
 
 <a id="dataset"></a>
-## 📦 Dataset
+## Dataset
 
-The benchmark includes:
+**712** task instances:
 
-- **Main Benchmark**: [`crawled_data/bench/all-task-instances.jsonl`](./crawled_data/bench/all-task-instances.jsonl) - Full benchmark dataset
-- **Inference Variants**: Multiple variants in [`crawled_data/infbench/`](./crawled_data/infbench) with different context configurations:
-  - Different information percentages (0.2, 0.4, 0.6, 0.8)
-  - BM25 retrieval variants
-  - With/without issue body
+| Asset | Path | In repo | Notes |
+|-------|------|---------|--------|
+| Bench | `crawled_data/bench/all-task-instances.jsonl` | Yes (LFS) | Full `work_patch_list` per instance |
+| Infbench | `crawled_data/infbench/all-task-instances_{run_id}.jsonl` | Yes (LFS) | `run_id`: `0.2`, `0.4`, `0.6`, `0.8`, `0.2_bm25_*`, `0.2_body_issue`, … |
+| Patch histories | `patch_histories/{instance_id}/` | Yes | Step-wise diffs used to build bench |
+| Activity / execution-filter intermediates | `crawled_data/activity/`, `activity_execution/` | No | Produced locally if you run the [collection pipeline](editbench/collection/README.md) |
 
 > [!NOTE]
-> **Dataset hosting**: The dataset will be uploaded to Hugging Face soon. We will update the dataset access instructions (e.g. download from Hugging Face Hub) once it is available.
+> Dataset files are hosted in this repository via Git LFS. A Hugging Face mirror may be added later.
 
-## 🏗️ Project Structure
+---
+
+## Documentation
+
+| Module | Description |
+|--------|-------------|
+| [Collection](editbench/collection/README.md) | Collect PRs, execution-filter, gather bench, merge |
+| [Editing Split](editbench/editing_split/README.md) | Split patches, validate, `pr_subedit_instance.py`, `skills/` |
+| [Inference](editbench/inference/README.md) | `prompt_builder`, `run_api`, prediction layout |
+| [Evaluation](editbench/evaluation/README.md) | Docker harness, gold/model eval, summary |
+
+---
+
+## Project structure
 
 ```
 RealisticEditBench/
-├── editbench/              # Main package
-│   ├── collection/         # Data collection tools
-│   ├── editing_split/      # Edit splitting and validation
-│   ├── inference/          # Model inference
-│   ├── evaluation/         # Evaluation harness
-│   └── utils/              # Utility functions
-├── crawled_data/           # Benchmark datasets
-│   ├── bench/              # Main benchmark
-│   └── infbench/           # Inference variants
-├── patch_histories/        # Historical patch data
-└── assets/                 # Project assets
+├── editbench/                 # Python package
+│   ├── collection/            # Data collection
+│   ├── editing_split/         # Patch splitting & validation
+│   ├── inference/             # Model inference
+│   ├── evaluation/            # Docker evaluation
+│   └── utils/                 # Shared utilities (incl. merge_utils, LFS helpers)
+├── crawled_data/
+│   ├── bench/                 # ★ In repo (LFS): 712-instance benchmark
+│   ├── infbench/              # ★ In repo (LFS): inference/eval variants
+│   ├── activity/              # Generated locally: from run_collection
+│   └── activity_execution/    # Generated locally: from execute_filter
+├── patch_histories/           # ★ In repo: per-instance step-wise splits
+├── scripts/                   # pr_subedit_instance.py (agent-assisted splitting)
+├── skills/                    # PR sub-edit principles & workflow
+├── experiment_results/        # Local: eval/inference outputs (gitignored)
+└── assets/
 ```
 
-## 🤝 Contributions
+★ = included when you clone + `git lfs pull`.
 
-We welcome contributions from the research community! Please feel free to file issues or submit pull requests.
+---
 
-<!-- ## 📑 Citation
+## Contributions
 
-If you find RealisticEditBench helpful for your research, please cite:
+Issues and pull requests are welcome.
 
-```bibtex
-@article{realisticeditbench2025,
-  title={RealisticEditBench: Towards Real-World Project-Level Incremental Code Editing Evaluation},
-  author={Anonymous},
-  journal={arXiv preprint},
-  year={2025}
-}
-``` -->
+## License
 
-## ⚖️ License
-
-MIT License. See [LICENSE](LICENSE) for details.
+MIT — see [LICENSE](LICENSE).

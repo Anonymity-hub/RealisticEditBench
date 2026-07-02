@@ -5,7 +5,7 @@ from dataclasses import asdict
 
 from editbench.collection.utils import Repo, extract_problem_statement_and_hints
 
-from editbench.collection.instance.activity import write_json_line, Activity
+from editbench.collection.instance.activity import write_json_line, Activity, filter_by_timestamp
 from pathlib import Path
 
 from editbench.editing_split.constants import EDITING_SPLIT_DIR
@@ -19,7 +19,8 @@ from typing import Optional, List
 load_dotenv()
 
 def collect_bench_instance(ref_path: Union[Path, str], tar_path: Union[Path, str], 
-                          instance_ids: Optional[List[str]] = None, overwrite: bool = False):
+                          instance_ids: Optional[List[str]] = None, overwrite: bool = False,
+                          min_date: Optional[str] = None, max_date: Optional[str] = None):
     """
     collect bench instances from tasks that have been split
     
@@ -29,12 +30,19 @@ def collect_bench_instance(ref_path: Union[Path, str], tar_path: Union[Path, str
     :param overwrite: whether to overwrite the original file, if True then overwrite, if False then append (but will replace the existing instance_ids)
     """
     ref_instances = get_inf_datasets(ref_path)
-    
+
     # if specified instance_ids, only process these
     if instance_ids is not None:
         instance_ids_set = set(instance_ids)
         ref_instances = [ins for ins in ref_instances if ins.instance_id in instance_ids_set]
-    
+
+    # if specified min_date, only process instances created on/after that date
+    if min_date is not None or max_date is not None:
+        ref_instances = list(filter(
+            filter_by_timestamp(start_time_str=min_date, end_time_str=max_date),
+            ref_instances,
+        ))
+
     tar_path = Path(tar_path)
     
     # process new instances
@@ -97,6 +105,7 @@ def collect_bench_instance(ref_path: Union[Path, str], tar_path: Union[Path, str
             # if not specified instance_ids and overwrite=False, skip the existing
             if target_instance_ids is not None or overwrite or instance_id not in seen_ids:
                 write_json_line(ref_ins, fo, is_instance=True)
+    print(f"Collected {len(new_instances)} instances from {ref_path} to {tar_path}")
 
 
 # TODO: check the function of check_issues, improve the issues information
@@ -118,8 +127,8 @@ def check_issues(instance: Activity, token=None):
 if __name__ == "__main__":
     # Example:
     #   python -m editbench.collection.gather_bench \
-    #     --ref-path ./crawled_data/execution_filter/all-task-instances.jsonl \
-    #     --tar-path ./crawled_data/bench/all-task-instances.jsonl
+    #     --ref-path ./crawled_data/activity_execution/astropy-astropy-task-instances.jsonl \
+    #     --tar-path ./crawled_data/bench/astropy-astropy-task-instances.jsonl
     parser = argparse.ArgumentParser(description="Gather bench instances from split task data.")
     parser.add_argument(
         "--ref-path",
@@ -145,12 +154,26 @@ if __name__ == "__main__":
         action="store_true",
         help="Overwrite target file; if False, append (and replace specified instance_ids).",
     )
+    parser.add_argument(
+        "--min_date",
+        type=str,
+        default=None,
+        help="Only collect instances created on/after this date (YYYYMMDD).",
+    )
+    parser.add_argument(
+        "--max_date",
+        type=str,
+        default=None,
+        help="Only collect instances created on/before this date (YYYYMMDD).",
+    )
     args = parser.parse_args()
     collect_bench_instance(
         ref_path=args.ref_path,
         tar_path=args.tar_path,
         instance_ids=args.instance_ids,
         overwrite=args.overwrite,
+        min_date=args.min_date,
+        max_date=args.max_date,
     )
 
 

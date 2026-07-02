@@ -4,7 +4,6 @@ import re
 import subprocess
 import sys
 import traceback
-import warnings
 from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path
@@ -12,12 +11,11 @@ from typing import Dict, Union, List, Optional
 import tempfile
 from tqdm import tqdm
 
-# Suppress RuntimeWarning when running as module
-warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*found in sys.modules.*")
-
 from editbench.collection.instance.activity import Activity, load_datasets_from_jsonl
 from editbench.editing_split.constants import REPO_AND_LOG_DIR, EDITING_SPLIT_DIR
-from editbench.editing_split.diff_utils import generate_diff_with_file
+
+ACTIVITY_EXECUTION_DIR = EDITING_SPLIT_DIR.parent / "crawled_data" / "activity_execution"
+from editbench.editing_split.diff_utils import ensure_diff_trailing_padding, generate_diff_with_file
 from editbench.evaluation.docker_build import setup_logger, close_logger
 
 
@@ -60,11 +58,80 @@ def make_valid_script(instance: Activity, patch_lists: list[list[str]]):
         valid_commands.append(f'echo "Start apply step patch-{idx + 1}..."')
         for patch in patch_list:
             valid_commands.append(f'echo "Start apply patch-{idx + 1} of file: {re.findall(r"--- a/(.*)", patch)}..."')
-            apply_patch_command = f"git apply -v - <<'{HEREDOC_DELIMITER}'\n{patch}\n{HEREDOC_DELIMITER}"
+            apply_patch_command = f"git apply -v - <<'{HEREDOC_DELIMITER}'\n{ensure_diff_trailing_padding(diff=patch)}\n{HEREDOC_DELIMITER}"
             valid_commands.append(apply_patch_command)
 
     return valid_commands, "\n".join(valid_commands)
 
+
+# def execute_script(script: str, logger: Optional[logging.Logger] = None) -> Dict[str, str]:
+#     """
+#     Execute a shell script and log execution results (with optional logging)
+#
+#     Args:
+#         script (str): Shell script content to execute
+#         logger (Optional[logging.Logger]): Optional logger instance for result logging.
+#             If None, logging will be skipped.
+#
+#     Returns:
+#         Dict[str, str]: Dictionary containing execution results with keys:
+#             - "output": Standard output from script execution
+#             - "error": Standard error from script execution (merged into output stream)
+#             - "returncode": Numeric return code from the process
+#     """
+#     try:
+#         # Shell configuration (same cross-platform logic)
+#         shell = sys.platform != "win32"
+#         if sys.platform == "win32":
+#             git_bash_path = "C:\\Program Files\\Git\\bin\\bash.exe"
+#             if Path(git_bash_path).exists():
+#                 shell = git_bash_path
+#             else:
+#                 shell = True
+#
+#         # Use Popen for streaming output
+#         process = subprocess.Popen(
+#             script,
+#             shell=shell,
+#             text=True,
+#             stdout=subprocess.PIPE,
+#             stderr=subprocess.STDOUT,  # Merge stderr into stdout for unified streaming
+#             bufsize=1,  # Line-buffered for real-time updates
+#             universal_newlines=True
+#         )
+#
+#         # Capture and stream output in real-time
+#         output_lines = []
+#         for line in process.stdout:  # Read line-by-line
+#             line = line.rstrip()
+#             print(f"Script execution message: {line}")  # Show real-time output in console
+#             output_lines.append(line)
+#             if logger:  # Only log if logger is provided
+#                 logger.info(line)  # Log each line immediately
+#
+#         # Wait for process completion and get return code
+#         process.wait()
+#         return_code = process.returncode
+#
+#         # Structure results
+#         output = {
+#             "output": "\n".join(output_lines),
+#             "error": "",  # Merged into stdout, so error stream is empty
+#             "returncode": str(return_code)
+#         }
+#
+#         # Log final summary if logger exists
+#         if logger:
+#             logger.info(f"Script execution completed with return code: {return_code}")
+#         return output
+#
+#     except Exception as e:
+#         traceback.print_exc()
+#         error_msg = f"Exception occurred during execution: {str(e)}"
+#         print(error_msg)
+#         if logger:  # Only log error if logger is provided
+#             logger.error(error_msg)
+#         return {"output": "", "error": error_msg, "returncode": "-1"}
 
 
 def execute_script(script: str, logger: Optional[logging.Logger] = None) -> Dict[str, str]:
@@ -161,15 +228,121 @@ def execute_script(script: str, logger: Optional[logging.Logger] = None) -> Dict
                 pass  # ignore errors during cleanup
 
 
-def check_apply_output(logger_path: str, instance_id: str):
+def find_activity_instance(
+    instance_id: str,
+    dataset_paths: Optional[List[Union[str, Path]]] = None,
+) -> Optional[Activity]:
+    """Load one Activity from jsonl by instance_id (scans activity_execution by default)."""
+    if dataset_paths is None:
+        candidates = sorted(ACTIVITY_EXECUTION_DIR.glob("*-task-instances.jsonl"))
+    else:
+        candidates = [Path(p) for p in dataset_paths]
+
+    for path in candidates:
+        if not path.is_file():
+            continue
+        for activity in load_datasets_from_jsonl(str(path)):
+            if activity.instance_id == instance_id:
+                return activity
+    return None
+
+
+def compare_patch_history_finals(instance: Activity) -> List[str]:
+    """Compare testbed work files to patch_histories final.* after apply. Returns error lines."""
+    errors: List[str] = []
+    testbed = REPO_AND_LOG_DIR / instance.repo.replace("/", "__") / "testbed"
+    for file in instance.files_work:
+        read_path = testbed / file
+        ext = file.rsplit(".", 1)[-1]
+        save_path = (
+            EDITING_SPLIT_DIR
+            / instance.instance_id
+            / file.replace("/", "__").replace(".", "__")
+            / f"final.{ext}"
+        )
+        if not save_path.exists():
+            errors.append(f"missing final snapshot: {save_path}")
+            continue
+        if not read_path.exists():
+            errors.append(f"missing testbed file after apply: {file}")
+            continue
+        diff_content = generate_diff_with_file(read_path, save_path, file)
+        if len(diff_content.split("\n")) > 2:
+            errors.append(f"final mismatch: {file}")
+    return errors
+
+
+def validate_patch_history_strict(
+    instance: Activity,
+    *,
+    quiet: bool = False,
+) -> tuple[bool, str]:
+    """
+    Strict validation: git checkout base_commit, apply global step patches via git apply,
+    compare testbed files to patch_histories final.* (same as editing_split.validation batch).
+    """
+    patch_lists = load_patch_list_instance(instance)
+    if not patch_lists or all(not step for step in patch_lists):
+        return False, "no numbered step diffs under patch_histories"
+
+    test_path = REPO_AND_LOG_DIR / instance.repo.replace("/", "__") / f"{instance.src_type}-{instance.instance_num}"
+    logger_path = test_path / "validation.log"
+    script_sh = test_path / "apply.sh"
+    logger = setup_logger(instance.instance_id, logger_path)
+
+    logger.info(f"=======Start validation: {instance.instance_id}=========")
+    if not quiet:
+        print(f"=======Start strict validation: {instance.instance_id}=========")
+
+    ok = True
+    detail = ""
+    try:
+        valid_script_list, valid_script = make_valid_script(instance, patch_lists)
+        script_sh.write_text(valid_script)
+        execute_script(valid_script, logger)
+        final_errors = compare_patch_history_finals(instance)
+        for err in final_errors:
+            logger.error(f"Version Error: {err}")
+        if final_errors:
+            ok = False
+            detail = "; ".join(final_errors)
+        if not check_apply_output(str(logger_path), instance.instance_id, warn_only=False):
+            ok = False
+            if not detail:
+                detail = f"apply failed (see {logger_path})"
+    except Exception as exc:
+        ok = False
+        detail = str(exc)
+        logger.error(f"Error: {exc}")
+    finally:
+        close_logger(logger)
+
+    if ok:
+        msg = f"strict ok ({len(patch_lists)} global steps)"
+    else:
+        msg = detail or f"strict failed (see {logger_path})"
+    if not quiet:
+        mark = "✅" if ok else "❌"
+        print(f"{mark} {instance.instance_id}: {msg}")
+    return ok, msg
+
+
+def check_apply_output(
+    logger_path: str,
+    instance_id: str,
+    *,
+    warn_only: bool = False,
+) -> bool:
     """
     Check the output result of patch apply.
     """
-    # failed_keywords = ["patch failed", "error:", "version error"]
     failed_keywords = ["patch failed", "version error"]
     output = Path(logger_path).read_text()
     if any(keyword in output.lower() for keyword in failed_keywords):
-        print(f"❌❌❌Apply error: {instance_id}, the detailed error see {logger_path}.❌❌❌")
+        if warn_only:
+            print(f"⚠️⚠️⚠️Apply warning: {instance_id}, see {logger_path} for details.⚠️⚠️⚠️")
+        else:
+            print(f"❌❌❌Apply error: {instance_id}, the detailed error see {logger_path}.❌❌❌")
         return False
     return True
 
@@ -203,20 +376,14 @@ def gather_all_res(repos: list[str], instance_ids=None):
                     continue
                 else:
                     logger_path = dir_path / "validation.log"
-                    res = check_apply_output(logger_path, instance_id)
+                    res = check_apply_output(logger_path, instance_id, warn_only=False)
                     if res:
                         pass_res["success"].add(instance_id)
                     else:
                         pass_res["fail"].add(instance_id)
 
-    success_list = sorted(pass_res['success']) if pass_res['success'] else []
-    fail_list = sorted(pass_res['fail']) if pass_res['fail'] else []
-    
-    success_display = success_list if len(success_list) <= 10 else success_list[:10] + [f"... and {len(success_list) - 10} more"]
-    fail_display = fail_list if len(fail_list) <= 10 else fail_list[:10] + [f"... and {len(fail_list) - 10} more"]
-    
-    print(f"✅ [{datetime.now()}] success applied instance ({len(success_list)}): {success_display if success_list else 'None'}\n"
-          f"❌ [{datetime.now()}] fail applied instance ({len(fail_list)}): {fail_display if fail_list else 'None'}")
+    print(f"✅ [{datetime.now()}] success applied instance: {pass_res['success']}\n"
+          f"❌ [{datetime.now()}] fail applied instance: {pass_res['fail']}")
 
     return pass_res
 
@@ -323,7 +490,12 @@ def extract_numeric_prefix(filename: str) -> int:
     return int(match.group(1))
 
 
-def validation_instance(instance: Activity, patch_list: list[list[str]], is_output_changed_file=False):
+def validation_instance(
+    instance: Activity,
+    patch_list: list[list[str]],
+    is_output_changed_file=False,
+    warn_only: bool = False,
+):
     """
     Validate the application of patch lists to a repository instance, including:
 
@@ -344,7 +516,7 @@ def validation_instance(instance: Activity, patch_list: list[list[str]], is_outp
         4.Optionally saves modified files to a standardized location
         5.Checks validation results and cleans up logging resources
     """
-    test_path = REPO_AND_LOG_DIR / instance.repo.replace("/", "__") / f"pull-{instance.instance_num}"
+    test_path = REPO_AND_LOG_DIR / instance.repo.replace("/", "__") / f"{instance.src_type}-{instance.instance_num}"
     logger_path = test_path / "validation.log"
     script_sh = test_path / "apply.sh"
     logger = setup_logger(instance.instance_id, logger_path)
@@ -372,7 +544,11 @@ def validation_instance(instance: Activity, patch_list: list[list[str]], is_outp
         logger.error(f"Error: {e}")
     finally:
         output_path = logger.log_file
-        check_apply_output(output_path, instance.instance_id)
+        if not check_apply_output(output_path, instance.instance_id, warn_only=warn_only):
+            if warn_only:
+                logger.warning(
+                    f"Apply warning: {instance.instance_id}, the detailed error see {output_path}."
+                )
         logger.info(f"=======End validation: {instance.instance_id}=========")
         print(f"=======End validation: {instance.instance_id}=========")
         close_logger(logger)
@@ -403,15 +579,26 @@ def execute_validation_instance(instance: Activity):
     print(f"[{datetime.now()}]: End instance {instance.instance_id}")
 
 
-def main(dataset_name: str,
-         instance_ids: Optional[list] = None):
+def main(
+    dataset_name: str,
+    instance_ids: Optional[list] = None,
+    min_date: str = "20251001",
+):
     """
     Execution validation
     :param dataset_name: dataset_name | path
     :param instance_ids: target ids
+    :param min_date: only validate instances created on/after this YYYYMMDD date
     """
     print("\n>>>>>>>>>>>>>>>>>>>>>> Start executing patch feasibility validation. >>>>>>>>>>>>>>>>>>>>>>")
     dataset = list(load_datasets_from_jsonl(dataset_name))
+    try:
+        start_date = datetime.strptime(min_date, "%Y%m%d").date()
+    except ValueError:
+        raise ValueError(
+            f"min_date format error! please input YYYYMMDD format (e.g. 20241201), current value: {min_date}"
+        )
+    dataset = [ins for ins in dataset if datetime.fromisoformat(ins.created_at.rstrip('Z')).date() >= start_date]
     repos = set()
     for instance in tqdm(dataset, desc="Validating instances"):
         if instance_ids and instance.instance_id not in instance_ids:
@@ -426,7 +613,7 @@ def main(dataset_name: str,
 
 
 def validation_inf(instance: Activity):
-    valid_commands, scripts = make_valid_script_inf(instance)
+    _, scripts = make_valid_script_inf(instance)
     sh_dir = REPO_AND_LOG_DIR / "validation" / instance.repo.replace("/", "__")/instance.instance_id
     sh_dir.mkdir(exist_ok=True, parents=True)
     sh_path = sh_dir / "apply.sh"
@@ -516,12 +703,12 @@ def make_valid_script_inf(instance:Activity):
     return valid_commands, "\n".join(valid_commands)
 
 if __name__ == "__main__":
-    # sys.argv = ["validation.py", "--dataset_name", "crawled_data/bench/all-task-instances.jsonl", "--instance_ids", "astropy__astropy-pull-18627"]
     parser = ArgumentParser()
     parser.add_argument("--dataset_name",
-                            default="crawled_data/bench/all-task-instances.jsonl", type=str,
-                            help="Name of dataset or path to JSON file.")
+                        required=True, type=str,
+                        help="Name of dataset or path to JSON file.")
     parser.add_argument("--instance_ids", nargs="+", type=str, help="Instance IDs to run (space separated)")
+    parser.add_argument("--min_date", type=str, help="Only validate instances created on/after this YYYYMMDD date")
     args = parser.parse_args()
 
     main(**vars(args))
