@@ -43,6 +43,7 @@
 | | |
 |---|---|
 | **712 instances** | Curated PRs across astropy, django, matplotlib, sympy, xarray, scikit-learn, sphinx, pylint, … |
+| **Manual decomposition** | Each PR's `work_patch_list` was created by expert human annotators, not by automated agents |
 | **Incremental edits** | Step-wise `work_patch_list`; infbench splits history vs. `ground_truth` |
 | **Docker evaluation** | Apply patch → run project tests → resolved / similarity metrics |
 | **Variants** | Info ratios 0.2–0.8, BM25 context, with/without issue body |
@@ -138,7 +139,10 @@ python -m editbench.evaluation.run_evaluation run \
 |------|------|--------|
 | **Run models on the 712-instance benchmark** | Quick Start above | This README + [Inference](editbench/inference/README.md) + [Evaluation](editbench/evaluation/README.md) |
 | **Inspect or rebuild data from GitHub PRs** | collection → editing_split → gather_bench → … | [Collection](editbench/collection/README.md) → [Editing Split](editbench/editing_split/README.md) |
-| **Refine step-wise patch splits** | `scripts/pr_subedit_instance.py` + `skills/` | [Editing Split](editbench/editing_split/README.md) |
+| **Refine or explore step-wise splits** | `scripts/pr_subedit_instance.py` + `skills/` (reference only; see note below) | [Editing Split](editbench/editing_split/README.md) |
+
+> [!NOTE]
+> **About `skills/`** — The released `patch_histories/` and `work_patch_list` fields were produced through **manual expert decomposition**. We provide `skills/` and `scripts/pr_subedit_instance.py` as **reference tooling** to help others split PRs or refine individual instances; they were **not** used to generate the benchmark dataset itself.
 
 ---
 
@@ -169,7 +173,7 @@ bench = get_inf_datasets("crawled_data/bench/all-task-instances.jsonl")
 |-------|------|---------|--------|
 | Bench | `crawled_data/bench/all-task-instances.jsonl` | Yes (LFS) | Full `work_patch_list` per instance |
 | Infbench | `crawled_data/infbench/all-task-instances_{run_id}.jsonl` | Yes (LFS) | `run_id`: `0.2`, `0.4`, `0.6`, `0.8`, `0.2_bm25_*`, `0.2_body_issue`, … |
-| Patch histories | `patch_histories/{instance_id}/` | Yes | Step-wise diffs used to build bench |
+| Patch histories | `patch_histories/{instance_id}/` | Yes | Expert manual step-wise diffs (not agent-generated) |
 | Activity / execution-filter intermediates | `crawled_data/activity/`, `activity_execution/` | No | Produced locally if you run the [collection pipeline](editbench/collection/README.md) |
 
 > [!NOTE]
@@ -182,7 +186,7 @@ bench = get_inf_datasets("crawled_data/bench/all-task-instances.jsonl")
 | Module | Description |
 |--------|-------------|
 | [Collection](editbench/collection/README.md) | Collect PRs, execution-filter, gather bench, merge |
-| [Editing Split](editbench/editing_split/README.md) | Split patches, validate, `pr_subedit_instance.py`, `skills/` |
+| [Editing Split](editbench/editing_split/README.md) | Validate splits; optional `pr_subedit_instance.py` + reference `skills/` |
 | [Inference](editbench/inference/README.md) | `prompt_builder`, `run_api`, prediction layout |
 | [Evaluation](editbench/evaluation/README.md) | Docker harness, gold/model eval, summary |
 
@@ -204,8 +208,8 @@ RealisticEditBench/
 │   ├── activity/              # Generated locally: from run_collection
 │   └── activity_execution/    # Generated locally: from execute_filter
 ├── patch_histories/           # ★ In repo: per-instance step-wise splits
-├── scripts/                   # pr_subedit_instance.py (agent-assisted splitting)
-├── skills/                    # PR sub-edit principles & workflow
+├── scripts/                   # pr_subedit_instance.py (optional split helper)
+├── skills/                    # Reference principles for PR sub-edit splitting (not used to build the benchmark)
 ├── experiment_results/        # Local: eval/inference outputs (gitignored)
 └── assets/
 ```

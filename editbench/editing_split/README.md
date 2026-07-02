@@ -3,7 +3,7 @@
 Split an activity’s full patch into step-wise sub-diffs, validate apply chains, and produce structured patch history for **gather_bench**. Consumes **activity-execution** JSONL (`crawled_data/activity_execution/`) and writes to `patch_histories/`.
 
 > [!NOTE]
-> This repository includes `patch_histories/` for all 712 instances. Use this module to regenerate splits from activity-execution JSONL or to refine individual instances.
+> This repository includes `patch_histories/` for all 712 instances. Those step-wise splits were produced by **manual expert annotation**. Use this module to validate existing splits, regenerate from activity-execution JSONL, or refine individual instances.
 
 ## Overview
 
@@ -154,9 +154,12 @@ python -m editbench.editing_split.validation \
 
 ## 4. PR sub-edit helper (`scripts/pr_subedit_instance.py`)
 
-For manual or agent-assisted refinement of step-wise splits, use the helper script at the repo root. It supports status checks, strict validation (global `git apply` on the testbed), per-file validation, prompt printing, and optional `cursor agent` batch runs.
+> [!IMPORTANT]
+> The benchmark's `patch_histories/` were **manually decomposed by experts**. The `skills/` directory and this script are **reference tooling** for splitting or validating PR sub-edits—they document principles we found useful, but they **did not produce** the released 712-instance dataset. Use them when exploring splits, curating new data, or checking apply chains—not as a description of how RealisticEditBench was built.
 
-**Skills:** Splitting principles and workflow live under `skills/pr-subedit-principles/` and `skills/pr-subedit-workflow/`.
+For optional manual or agent-assisted refinement of step-wise splits, the helper script at the repo root supports status checks, strict validation (global `git apply` on the testbed), per-file validation, prompt printing, and optional `cursor agent` batch runs.
+
+**Reference skills** (for agents or human annotators): `skills/pr-subedit-principles/` and `skills/pr-subedit-workflow/`.
 
 **Commands**
 
@@ -184,7 +187,7 @@ By default, strict validation scans `crawled_data/activity_execution/*-task-inst
 ## Recommended workflow
 
 1. **run_split** on activity-execution JSONL → initial `patch_histories/` and one validation pass.
-2. Use **diff_utils** subcommands and/or **pr_subedit_instance** (with skills) to adjust or add steps (e.g. `quick_diff` for step 2, 3, …; `gene`/`apply`/`diff_minus` for custom splits).
+2. Use **diff_utils** subcommands and/or **pr_subedit_instance** (with reference `skills/`) to adjust or add steps when building new data—not required for using the released benchmark.
 3. **validation** or `scripts/pr_subedit_instance.py validate` on the same JSONL → confirm all instances apply cleanly; fix any that fail.
 4. Run **gather_bench** (see [Collection](../collection/README.md)) so that only instances with valid `work_patch_list` are written to bench JSONL.
 
